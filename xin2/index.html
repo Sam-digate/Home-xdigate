@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>XDIGATE v13 · Agent OS · 拆分版</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/01-foundation-shell.css">
+<link rel="stylesheet" href="css/02-work-thread-artifacts.css">
+<link rel="stylesheet" href="css/03-drawer-knowledge-source.css">
+<link rel="stylesheet" href="css/04-analytics-proposals-campaigns.css">
+<link rel="stylesheet" href="css/05-today-subthreads-modal.css">
+<link rel="stylesheet" href="css/06-listing-csa.css">
+</head>
+<body>
+<div id="app">
+  <nav id="sb">
+    <div class="brand">
+      <div class="brand-m"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></div>
+      <div><div class="brand-n">XDIGATE</div><div class="brand-s">AGENT OS</div></div>
+    </div>
+    <div id="nav"></div>
+    <button class="livecount" onclick="go('agent',null,{nav:true})">
+      <span class="odot on"></span>
+      <span style="flex:1;text-align:left"><span class="n" id="lcn">0</span> 个 Agent 在跑</span>
+      <span style="color:var(--sb-tm)" id="lco">0 在线</span></button>
+    <div class="account-wrap" id="acct"></div>
+  </nav>
+  <div id="main">
+    <header id="top">
+      <button class="hb" onclick="toggleSb()" aria-label="菜单">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <button class="btn ghost" onclick="openRecipeDrawer()" style="margin-right:var(--sp-2)">用配方开始</button>
+    <button class="compose" onclick="openNew()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l1.9 5.8L20 10l-6.1 1.2L12 17l-1.9-5.8L4 10l6.1-1.2z"/></svg>
+        帮我… 或搜索
+        <span class="k">⌘K</span>
+      </button>
+      <div class="tb-r">
+        <button class="appr" id="apprb" onclick="go('today',null,{nav:true})">审批 <span class="c num">5</span></button>
+        <div class="seg" style="padding:var(--sp-1)">
+          <button id="lz" style="padding:var(--sp-1) 10px;font-size:var(--fs-xs)" onclick="setLang('zh')">中文</button>
+          <button id="le" style="padding:var(--sp-1) 10px;font-size:var(--fs-xs)" onclick="setLang('en')">EN</button></div>
+        <div class="proj"><span class="l">项目</span><span class="v">A8OPARIS</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="av" id="topav" style="width:31px;height:31px">DU</div>
+      </div>
+    </header>
+    <main id="view" onclick="if(S.fopen){S.fopen=null;render();}"></main>
+  </div>
+</div>
+<div id="scrim" onclick="closeDw()"></div>
+<div id="sbscrim" class="sbscrim" onclick="toggleSb()"></div>
+<aside id="dw"></aside>
+<div id="mod" onclick="if(event.target===this)closeMod()"></div>
+<div id="toast"></div>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="js/01-helpers-data.js"></script>
+<script src="js/02-core-nav-today-comments.js"></script>
+<script src="js/03-agents-recipes-proposals.js"></script>
+<script src="js/04-campaigns-analytics-i18n.js"></script>
+<script src="js/05-knowledge-work.js"></script>
+<script src="js/06-thread-artifacts-drawer.js"></script>
+<script src="js/07-listing-promotion-pdp-drawers.js"></script>
+<script src="js/08-subthreads-newthread-init.js"></script>
+</body>
+</html>
