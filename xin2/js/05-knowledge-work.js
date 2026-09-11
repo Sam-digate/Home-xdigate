@@ -48,7 +48,128 @@ const SAVED_OUTPUTS=[
  {n:'敏感肌精华怎么选：成分、浓度与耐受',dom:'B2B',cat:'SEO 文章',v:'v2',summary:'从敏感肌选购决策切入，梳理耐受判断、成分浓度与四周建立耐受节奏，并提供按预算选择的清单。',tags:['敏感肌','成分科普','SEO','选购指南'],related:'A8O 修护精华 30ml',agent:'B2B SEO Agent',owner:'so',saved:'昨天',from:'9 月 SEO 第 3 批',reads:42,using:3,last:'4小时前',tid:'t13',aid:'a8'},
  {n:'蓄水期预算分配建议',dom:'电商',cat:'分析结论',v:'v1',summary:'基于近 90 天四个计划的数据对比，建议提高老客召回预算占比，并控制相似人群拓展的成本波动。',tags:['预算分配','蓄水期','数据分析','A80PARIS'],related:'11.11 大促',agent:'数据分析 Agent',owner:'du',saved:'昨天 17:02',from:'数据分析 · A80PARIS',reads:11,using:2,last:'昨天',tid:'t19',aid:'a14'}];
 
-const KGRP={src:{n:'来源',d:'Agent 读的东西',tabs:['品牌','产品','素材','品牌文件','达人','热点']},
+/* ============ 数据源 · Base Data Capability ============ */
+const DSTAT={fresh:{n:'正常',c:'done'},stale:{n:'已过期',c:'review'},error:{n:'异常',c:'hold'},off:{n:'已停用',c:'todo'}};
+const DSRC=[
+ {id:'d1',n:'淘宝_店铺数据',brand:'EVO1.1',plat:'天猫国际',updatedAt:'2026-09-10 18:00:32',cad:'1d',st:'fresh',
+  desc:'数据按预期节奏正常同步',reads:1840,ags:['insp','ana','ad','list'],owner:'Brooks',base:['p2','p3']},
+ {id:'d2',n:'淘客',brand:'EVO1.1',plat:'天猫国际',updatedAt:'2026-09-10 17:59:03',cad:'1d',st:'stale',
+  desc:'最近一次同步已超过更新周期',reads:620,ags:['ad','ana','rep'],owner:'Brooks',base:['p2'],why:'最近一次同步已超过更新周期，请检查同步任务。'},
+ {id:'d3',n:'淘宝直播',brand:'EVO1.1',plat:'天猫国际',updatedAt:'2026-09-10 18:00:56',cad:'1d',st:'off',
+  desc:'店铺没有数据产生',reads:0,ags:[],owner:'Ariel',base:[],why:'当前数据源已停用，需要时可以重新启用。'},
+ {id:'d4',n:'淘宝_万象台',brand:'EVO1.1',plat:'天猫国际',updatedAt:'2026-09-10 18:03:12',cad:'1d',st:'error',
+  desc:'最近一次同步失败，请检查授权',reads:410,ags:['ad','ana'],owner:'Sophie',base:['p5'],why:'最近一次同步失败，当前授权或接口连接可能已失效。'},
+ {id:'d5',n:'天猫流量',brand:'EVO1.1',plat:'天猫国际',updatedAt:'2026-09-10 18:01:16',cad:'1d',st:'fresh',
+  desc:'数据按预期节奏正常同步',reads:2260,ags:['ana','rep','listen'],owner:'Ariel',base:[]}
+];
+
+function dsCount(k){return DSRC.filter(d=>d.st===k).length;}
+function kDataSources(){
+ if(S.dsFilter===undefined)S.dsFilter='all';
+ const err=DSRC.filter(d=>d.st==='error'),stale=DSRC.filter(d=>d.st==='stale');
+ const blocked=[...new Set([...err,...stale].flatMap(d=>d.base))];
+ const rows=S.dsFilter==='all'?DSRC:DSRC.filter(d=>d.st===S.dsFilter);
+ const filters=[['all','数据源',DSRC.length],['fresh','正常',dsCount('fresh')],['stale','已过期',dsCount('stale')],['error','异常',dsCount('error')],['off','已停用',dsCount('off')]];
+ return `<div class="bar" style="margin:0 0 var(--sp-3);gap:var(--sp-2);flex-wrap:wrap">
+   <div class="seg">${filters.map(([key,label,count])=>`<button class="${S.dsFilter===key?'on':''}" onclick="S.dsFilter='${key}';render()">${key==='all'?count+' 个'+label:label+' '+count}</button>`).join('')}</div>
+   <span class="spacer"></span>
+   <span style="font-size:var(--fs-xs);color:var(--t3)">上次刷新：2026-09-11 18:29:13</span></div>
+
+ ${err.length||stale.length?`<div class="kcomp" style="margin:0 0 var(--sp-3);background:var(--danger-bg);border-color:var(--danger-bd)">
+   <div style="flex:1;min-width:240px">
+     <div style="display:flex;align-items:baseline;gap:var(--sp-2);margin-bottom:5px">
+       <span class="num" style="font-size:22px;font-weight:800;color:var(--danger-fg)">${err.length+stale.length}</span>
+       <span style="font-size:var(--fs-sm);color:var(--danger-fg-strong)">个数据源不健康</span></div>
+     <div style="font-size:var(--fs-xs);color:var(--danger-fg-strong);line-height:1.7">
+       ${blocked.length?`<b>连带影响：${blocked.length} 个发射器取不到基准，已经停止发提案。</b><br>
+        这是静默失败——提案不会报错，它只是不再出现。`:'暂无连带影响。'}</div></div>
+   <button class="btn sm" onclick="dsToToday()">把异常建成今日的待处理</button></div>`:''}
+
+ ${[...rows].sort((a,b)=>({error:0,stale:1,fresh:2,off:3})[a.st]-({error:0,stale:1,fresh:2,off:3})[b.st])
+  .map(d=>`<button class="row" onclick="openDS('${d.id}')" style="align-items:flex-start;padding:13px 14px;${
+    d.st==='error'?'border-left:3px solid var(--red);':d.st==='stale'?'border-left:3px solid var(--gold);':''}">
+   <span style="flex:1;min-width:0">
+     <span style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+       <b style="font-size:13.5px">${esc(d.n)}</b>
+       <span class="chip lv">${d.brand}</span>
+       <span class="chip dom">${d.plat}</span>
+       <span class="st ${DSTAT[d.st].c}">${DSTAT[d.st].n}</span>
+       ${d.base.length&&(d.st==='error'||d.st==='stale')?`<span class="chip" style="background:var(--danger-bg);color:var(--danger-fg);border:1px solid var(--danger-bd)">挡住 ${d.base.length} 个发射器</span>`:''}</span>
+     <span style="display:block;font-size:var(--fs-sm);color:var(--t2);margin-top:5px">${esc(d.desc)}</span>
+     <span style="display:block;font-size:var(--fs-xs);color:var(--t3);margin-top:4px">
+       更新周期 ${d.cad} · 最后更新 ${d.updatedAt} · 负责人 ${d.owner} · 被读 ${d.reads.toLocaleString()} 次 · ${d.ags.length} 个 Agent 在用</span></span>
+   </button>`).join('')||'<div class="allclear">当前筛选下没有数据源。</div>'}`;
+}
+
+function openDS(id){
+ const d=DSRC.find(x=>x.id===id);S.ds=id;
+ const bad=d.st==='error'||d.st==='stale';
+ $('dw').innerHTML=`<div class="dw-h">
+   <button class="ib" onclick="closeDw()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+   <div style="flex:1;min-width:0"><div class="ty">数据源 · ${d.plat}</div><h3>${esc(d.n)}</h3></div>
+   <span class="st ${DSTAT[d.st].c}">${DSTAT[d.st].n}</span></div>
+  <div class="dw-b">
+   ${bad?`<div class="note" style="background:var(--danger-bg);border-color:var(--danger-bd);color:var(--danger-fg-strong);margin-bottom:var(--sp-3)">
+     ${esc(d.why||'')}${d.base.length?`<br><br><b>连带影响：${d.base.length} 个发射器依赖这个源取基准。</b>
+     没有基准就不发提案——所以它们现在<b>静默地停了</b>，不会报错。`:''}</div>`:''}
+   <div style="font-size:var(--fs-xs);font-weight:600;color:var(--t2);margin-bottom:var(--sp-2)">接入</div>
+   <div class="ctx" style="margin-bottom:var(--sp-3)">
+     <div class="ctxr"><span class="k">品牌</span><span class="v">${d.brand}</span></div>
+     <div class="ctxr"><span class="k">平台</span><span class="v">${d.plat}</span></div>
+     <div class="ctxr"><span class="k">更新周期</span><span class="v">${d.cad}</span></div>
+     <div class="ctxr"><span class="k">最后更新</span><span class="v" style="${bad?'color:var(--danger-fg)':''}">${d.updatedAt}</span></div>
+     <div class="ctxr"><span class="k">说明</span><span class="v">${esc(d.desc)}</span></div>
+     <div class="ctxr"><span class="k">负责人</span><span class="v">${d.owner}</span></div></div>
+   <div style="font-size:var(--fs-xs);font-weight:600;color:var(--t2);margin-bottom:var(--sp-2)">谁在读</div>
+   <div class="ctx" style="margin-bottom:var(--sp-3)">
+     <div class="ctxr"><span class="k">被读次数</span><span class="v num">${d.reads.toLocaleString()}</span></div>
+     <div class="ctxr"><span class="k">在用的 agent</span><span class="v">${d.ags.length?d.ags.map(a=>nick(a)).join(' · '):'没有 agent 在用'}</span></div>
+     <div class="ctxr"><span class="k">作为基准供给</span><span class="v" style="${d.base.length&&bad?'color:var(--danger-fg)':''}">${d.base.length?d.base.length+' 个发射器':'不供给基准'}</span></div></div>
+   <div class="note">这个源是 <b>Base Data</b> 提供的。Base Data 给每个发射器供 <code>baseline.lookup</code>——
+     <b>没有基准就不发提案</b>。所以数据源一挂，提案系统是<b>静默停摆</b>，不是报错。</div>
+  </div>
+  <div class="dw-f">
+   ${d.st==='off'?`<button class="btn" onclick="enableDS('${d.id}')">重新启用</button>`:bad?`<button class="btn" onclick="dsToToday('${d.id}')">建单去修</button>
+     <button class="btn ghost" onclick="toast('已重试 · 仍然失败')">立即重试</button>`
+    :`<button class="btn ghost" onclick="toast('已触发一次同步')">立即同步</button>`}
+   <span style="margin-left:auto;font-size:var(--fs-xs);color:var(--t3)">${d.reads.toLocaleString()} 次被读</span>
+  </div>`;
+ $('dw').classList.add('on');$('scrim').classList.add('on');
+}
+
+function enableDS(id){
+ const d=DSRC.find(x=>x.id===id);
+ if(!d)return;
+ d.st='fresh';d.desc='数据源已重新启用，等待下次同步';
+ closeDw();render();toast('数据源已重新启用');
+}
+
+function dsToToday(id){
+ const bad=id?[DSRC.find(d=>d.id===id)]:DSRC.filter(d=>d.st==='error'||d.st==='stale');
+ let made=0;
+ bad.forEach(d=>{
+  if(T.some(t=>t.dsrc===d.id))return;
+  const tid='ds'+d.id;
+  T.unshift({cr:{s:'a',w:'ana'},id:tid,trig:'event',new:1,dsrc:d.id,
+   t:'数据源异常 · '+d.n,camp:null,dom:'平台',ag:'ana',own:({Brooks:'br',Ariel:'ar',Sophie:'so',Gil:'gi',dudu:'du'})[d.owner]||'du',
+   st:'review',up:'刚刚',day:0,lv:'M1',cost:'¥0.10',
+   intent:{who:'系统',tx:'Base Data 检测到「'+d.n+'」'+(d.st==='error'?'异常':'已过期')+'。'+(d.why||''),at:'刚刚'},
+   plan:{v:1,tx:'只读检测。确认后建单，由人去修接入。',steps:[
+    {l:'检测数据源健康度',m:d.cad+' · 最后更新 '+d.updatedAt,s:'ok',r:'即时'},
+    {l:'评估连带影响',m:d.base.length?d.base.length+' 个发射器取不到基准':'无发射器依赖',s:'ok',r:'2秒'},
+    {l:'等人来修接入',m:'负责人 '+d.owner,s:'act',r:'—'}]},
+   arts:[{id:'a'+tid,ty:'巡检发现',ttl:'数据源 '+d.n+' '+(d.st==='error'?'异常':'已过期'),by:'ana',v:1,st:'review',pv:'sq',
+     g:['#FCA5A5','#DC2626'],ex:(d.why||'')+(d.base.length?' 连带 '+d.base.length+' 个发射器停止发提案。':''),
+     vals:[{l:'最后更新',v:d.updatedAt,s:'bad'},{l:'连带发射器',v:d.base.length+' 个',s:d.base.length?'bad':'ok'},
+       {l:'在用 agent',v:d.ags.length+' 个',s:d.ags.length?'warn':'ok'}],
+     nxt:['建单去修','暂时忽略'],sub:[]}],cmts:[]});
+  made++;
+ });
+ closeDw();go('today');
+ toast(made?made+' 条已进「今日」· 归属各自的负责人':'这些异常已经在今日里了');
+}
+
+const KGRP={src:{n:'来源',d:'Agent 读的东西',tabs:['品牌','产品','素材','品牌文件','达人','热点','数据源']},
  out:{n:'产出',d:'Agent 写的东西',tabs:['已保存产出','模板']}};
 function kComplete(){const f=KB.filter(x=>x.filled).length;return {f,t:KB.length,p:Math.round(f/KB.length*100)};}
 function vKnow(){
@@ -90,6 +211,7 @@ function kBody(){
  if(t==='品牌文件')return kBrandFiles();
  if(t==='达人')return kCreators(T.find(x=>x.id==='t5').arts[0].rows);
  if(t==='热点')return kHots();
+ if(t==='数据源')return kDataSources();
  if(t==='已保存产出')return kSavedOutputs();
  if(t==='模板')return kTpl();
  return `<div class="allclear">「${t}」不在本次原型范围内。</div>`;
