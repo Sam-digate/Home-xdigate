@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>工作 Tab · Agent 抽屉与基础组件盘点</title>
+<link rel="stylesheet" href="css/drawer-inventory.css"></head><body><div class="language-switch" role="group" aria-label="语言切换 / Language switch"><button type="button" data-lang="zh" aria-pressed="true">中文</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div><main class="page">
+<header class="hero"><div class="eyebrow">CURRENT INDEX AUDIT</div><h1>工作 Tab · Agent 右侧抽屉盘点</h1><p>依据当前 index 中实际可见的工作任务、产出类型和 drawDw 分支统计；不凭 Agent 名称推测不存在的抽屉。</p><div class="scope"><span class="pill rule">统计口径：工作 Tab 当前非 devHidden 任务</span><span class="pill out">排除：视频生成</span><span class="pill out">排除：报告生成</span><span class="pill">包含：无产出抽屉的 Agent 标记</span></div></header>
+
+<section><div class="st"><i>1</i><h2>统一抽屉外壳</h2><span>不属于任何 Agent，所有抽屉共享</span></div><div class="card shell"><div class="tree">WorkDrawer
+├─ DrawerHeader
+├─ DrawerTabs
+├─ DrawerBody
+└─ DrawerFooter</div><div class="slots"><div class="slot"><b>DrawerHeader</b><small>关闭、类型、标题、状态、上一项/下一项、加宽</small></div><div class="slot"><b>DrawerTabs</b><small>Tab 文案、数量、激活态、动态显隐</small></div><div class="slot"><b>DrawerBody</b><small>基础组件组合、独立滚动、空状态</small></div><div class="slot"><b>DrawerFooter</b><small>批准、退回、评论、下载、生成等操作</small></div></div></div></section>
+
+<section><div class="st"><i>2</i><h2>逐 Agent 抽屉 Tab 清单</h2><span>精确到当前原型中的 Tab 名称</span></div><div class="kol-note"><b>单独整理</b><span>达人（KOL）Agent 的抽屉内容将作为独立模块梳理，不纳入本清单。</span></div><div class="card table-wrap"><table class="agent-tab-matrix"><thead><tr><th>Agent</th><th>右侧抽屉 Tab</th><th>Agent</th><th>右侧抽屉 Tab</th></tr></thead><tbody>
+<tr><td><span class="agent">内容生成 Agent</span></td><td><div class="tabs"><span class="tab">文档</span><span class="tab">图片</span><span class="tab">版本</span></div></td><td><span class="agent">数据分析 Agent</span></td><td><div class="tabs"><span class="tab">文档</span></div></td></tr>
+<tr><td><span class="agent">活动策划 Agent</span></td><td><div class="tabs"><span class="tab">创意方向</span><span class="tab">当前活动策划</span><span class="tab">版本</span></div></td><td><span class="agent">舆情监控 Agent</span></td><td><div class="tabs"><span class="tab">发现详情</span><span class="tab">相关提及</span></div></td></tr>
+<tr><td><span class="agent">详情页 Agent</span></td><td><div class="tabs"><span class="tab">图片</span><span class="tab">当前规划表</span><span class="tab">创意方向</span><span class="tab">版本</span></div></td><td><span class="agent">店铺巡检 Agent</span></td><td><div class="tabs"><span class="tab">文档</span></div></td></tr>
+<tr><td><span class="agent">推广计划 Agent</span></td><td><div class="tabs"><span class="tab">图片</span><span class="tab">推广计划表</span><span class="tab">版本</span></div></td><td><span class="agent">B2B SEO Agent</span></td><td><div class="tabs"><span class="tab">正文</span><span class="tab">图片</span><span class="tab">结构与关键词</span><span class="tab">FAQ</span><span class="tab">版本</span></div></td></tr>
+<tr><td><span class="agent">客户成功 Agent</span></td><td><div class="tabs"><span class="tab">文档</span><span class="tab">邮件</span></div></td><td><span class="agent">商品上架 Agent</span></td><td><div class="tabs"><span class="tab">商品上架</span><span class="tab">版本</span></div></td></tr>
+</tbody></table></div></section>
+
+<section><div class="st"><i>3</i><h2>建议整合的基础组件</h2><span>建议复用内容结构与交互逻辑，共 11 个</span></div><div class="dev-style-note"><b>开发提示</b><span><strong>CSS 样式请按照对应原始设计图开发，此文档仅仅做展示</strong></span></div><div class="component-grid">
+<article class="card component component-trigger" role="button" tabindex="0" aria-controls="document-demo-drawer" aria-label="查看文档内容组件样式" onclick="openDocumentDemo()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDocumentDemo()}"><h3>文档内容（DocumentPanel）</h3><p>文档、正文等文本内容</p><ul><li>标题与正文</li><li>查看与编辑</li><li>自动保存</li></ul></article>
+<article class="card component image-gallery-component"><button class="image-gallery-main" type="button" onclick="openImageGalleryDemo()" aria-label="打开原图片画廊"><h3>图片画廊（ImageGalleryPanel）</h3><p>点击查看原图片画廊 · 包含 3 种图片预览样式</p></button><div class="image-preview-options"><div><button type="button" onclick="openImagePreviewDemo('content')">内容图片预览</button><small>内容生成、B2B SEO</small></div><div><button type="button" onclick="openImagePreviewDemo('pdp')">详情页图片预览</button><small>详情页</small></div><div><button type="button" onclick="openImagePreviewDemo('promotion')">推广图片预览</button><small>推广计划</small></div></div></article>
+<article class="card component component-trigger" role="button" tabindex="0" aria-controls="creative-direction-demo-drawer" aria-label="查看创意方向样式" onclick="openCreativeDirectionDemo()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCreativeDirectionDemo()}"><h3>创意方向（CreativeDirectionPanel）</h3><p>创意方向的编辑与参考图</p><ul><li>方向标题</li><li>创意说明</li><li>参考产品图</li></ul></article>
+<article class="card component component-trigger" role="button" tabindex="0" aria-controls="plan-demo-drawer" aria-label="查看规划表样式" onclick="openPlanDemo()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPlanDemo()}"><h3>规划表（PlanPanel）</h3><p>活动策划、详情页、推广计划共用</p><ul><li>可展开计划</li><li>计划字段详情</li><li>批量展开与收起</li></ul></article>
+<article class="card component component-trigger" role="button" tabindex="0" aria-controls="version-history-demo-drawer" aria-label="查看版本记录样式" onclick="openVersionHistoryDemo()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openVersionHistoryDemo()}"><h3>版本记录（VersionHistoryPanel）</h3><p>版本 Tab 的统一实现</p><ul><li>版本号</li><li>更新时间</li><li>变更说明</li></ul></article>
+<article class="card component status-variant-card"><h3>状态结果（StatusResultPanel）</h3><p>一个基础组件，包含 2 种内容样式</p><div class="status-variant-actions"><button type="button" onclick="openStatusMetricDemo()"><b>指标结果样式</b><span>数据分析、店铺巡检</span></button><button type="button" onclick="openStatusSentimentDemo()"><b>舆情发现样式</b><span>舆情监控</span></button></div></article>
+<article class="card component component-trigger" role="button" tabindex="0" aria-controls="mention-list-demo-drawer" aria-label="查看相关提及样式" onclick="openMentionListDemo()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMentionListDemo()}"><h3>相关提及（MentionListPanel）</h3><p>舆情相关提及</p><ul><li>提及卡片</li><li>原文评论</li><li>查看原文</li></ul></article>
+<article class="card component component-trigger" role="button" tabindex="0" aria-controls="email-demo-drawer" aria-label="查看邮件样式" onclick="openEmailDemo()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openEmailDemo()}"><h3>邮件（EmailPanel）</h3><p>客户成功的邮件编辑与发送</p><ul><li>邮件列表</li><li>收件人、主题与正文</li><li>草稿与发送状态</li></ul></article>
+<article class="card component component-trigger" role="button" tabindex="0" aria-controls="seo-structure-demo-drawer" aria-label="查看 SEO 结构样式" onclick="openSeoStructureDemo()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSeoStructureDemo()}"><h3>SEO 结构（SeoStructurePanel）</h3><p>SEO 结构与关键词</p><ul><li>关键词</li><li>标题结构</li><li>SEO 校验</li></ul></article>
+<article class="card component component-trigger" role="button" tabindex="0" aria-controls="faq-demo-drawer" aria-label="查看常见问题样式" onclick="openFaqDemo()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openFaqDemo()}"><h3>常见问题（FaqPanel）</h3><p>FAQ 编辑与排序</p><ul><li>问答条目</li><li>增删排序</li><li>保存状态</li></ul></article>
+<article class="card component component-trigger" role="button" tabindex="0" aria-controls="product-listing-demo-drawer" aria-label="查看商品上架样式" onclick="openProductListingDemo()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProductListingDemo()}"><h3>商品上架（ProductListingPanel）</h3><p>商品上架的完整连续流程</p><ul><li>商品资料与 SKU</li><li>字段校验</li><li>平台回执与上架结果</li></ul></article>
+</div></section>
+
+<section><div class="st"><i>4</i><h2>Agent × 基础组件复用矩阵</h2><span>从 Agent 视角查看 11 个基础组件的复用关系</span></div><div class="matrix-legend"><button class="matrix-check" type="button" tabindex="-1" aria-hidden="true">✓</button><span>点击 Agent 名称查看完整组件组合；点击勾选查看单个组件样式</span></div><div class="card reuse-matrix-wrap"><table class="reuse-matrix"><thead><tr>
+<th>Agent</th><th><span class="reuse-matrix-head">文档内容<small>DocumentPanel</small></span></th><th><span class="reuse-matrix-head">图片画廊<small>ImageGalleryPanel</small></span></th><th><span class="reuse-matrix-head">创意方向<small>CreativeDirectionPanel</small></span></th><th><span class="reuse-matrix-head">规划表<small>PlanPanel</small></span></th><th><span class="reuse-matrix-head">版本记录<small>VersionHistoryPanel</small></span></th><th><span class="reuse-matrix-head">状态结果<small>StatusResultPanel</small></span></th><th><span class="reuse-matrix-head">相关提及<small>MentionListPanel</small></span></th><th><span class="reuse-matrix-head">邮件<small>EmailPanel</small></span></th><th><span class="reuse-matrix-head">SEO 结构<small>SeoStructurePanel</small></span></th><th><span class="reuse-matrix-head">常见问题<small>FaqPanel</small></span></th><th><span class="reuse-matrix-head">商品上架<small>ProductListingPanel</small></span></th>
+</tr></thead><tbody>
+<tr><td>内容生成 Agent</td><td><button class="matrix-check" type="button" onclick="openDocumentDemo()" aria-label="查看内容生成 Agent 的文档内容样式">✓</button></td><td><button class="matrix-check" type="button" onclick="openImageGalleryDemo()" aria-label="查看内容生成 Agent 的图片画廊样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><button class="matrix-check" type="button" onclick="openVersionHistoryDemo()" aria-label="查看内容生成 Agent 的版本记录样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td></tr>
+<tr><td>活动策划 Agent</td><td><button class="matrix-check" type="button" onclick="openDocumentDemo()" aria-label="查看活动策划 Agent 的文档内容样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><button class="matrix-check" type="button" onclick="openPlanDemo()" aria-label="查看活动策划 Agent 的规划表样式">✓</button></td><td><button class="matrix-check" type="button" onclick="openVersionHistoryDemo()" aria-label="查看活动策划 Agent 的版本记录样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td></tr>
+<tr><td>详情页 Agent</td><td><span class="matrix-empty">—</span></td><td><button class="matrix-check" type="button" onclick="openImageGalleryDemo()" aria-label="查看详情页 Agent 的图片画廊样式">✓</button></td><td><button class="matrix-check" type="button" onclick="openCreativeDirectionDemo()" aria-label="查看详情页 Agent 的创意方向样式">✓</button></td><td><button class="matrix-check" type="button" onclick="openPlanDemo()" aria-label="查看详情页 Agent 的规划表样式">✓</button></td><td><button class="matrix-check" type="button" onclick="openVersionHistoryDemo()" aria-label="查看详情页 Agent 的版本记录样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td></tr>
+<tr><td>推广计划 Agent</td><td><span class="matrix-empty">—</span></td><td><button class="matrix-check" type="button" onclick="openImageGalleryDemo()" aria-label="查看推广计划 Agent 的图片画廊样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><button class="matrix-check" type="button" onclick="openPlanDemo()" aria-label="查看推广计划 Agent 的规划表样式">✓</button></td><td><button class="matrix-check" type="button" onclick="openVersionHistoryDemo()" aria-label="查看推广计划 Agent 的版本记录样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td></tr>
+<tr><td>客户成功 Agent</td><td><button class="matrix-check" type="button" onclick="openDocumentDemo()" aria-label="查看客户成功 Agent 的文档内容样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><button class="matrix-check" type="button" onclick="openEmailDemo()" aria-label="查看客户成功 Agent 的邮件样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td></tr>
+<tr><td>数据分析 Agent</td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><button class="matrix-check" type="button" onclick="openStatusMetricDemo()" aria-label="查看数据分析 Agent 的指标结果样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td></tr>
+<tr><td>舆情监控 Agent</td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><button class="matrix-check" type="button" onclick="openStatusSentimentDemo()" aria-label="查看舆情监控 Agent 的舆情发现样式">✓</button></td><td><button class="matrix-check" type="button" onclick="openMentionListDemo()" aria-label="查看舆情监控 Agent 的相关提及样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td></tr>
+<tr><td>店铺巡检 Agent</td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><button class="matrix-check" type="button" onclick="openStatusMetricDemo()" aria-label="查看店铺巡检 Agent 的指标结果样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td></tr>
+<tr><td>B2B SEO Agent</td><td><button class="matrix-check" type="button" onclick="openDocumentDemo()" aria-label="查看 B2B SEO Agent 的文档内容样式">✓</button></td><td><button class="matrix-check" type="button" onclick="openImageGalleryDemo()" aria-label="查看 B2B SEO Agent 的图片画廊样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><button class="matrix-check" type="button" onclick="openVersionHistoryDemo()" aria-label="查看 B2B SEO Agent 的版本记录样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><button class="matrix-check" type="button" onclick="openSeoStructureDemo()" aria-label="查看 B2B SEO Agent 的 SEO 结构样式">✓</button></td><td><button class="matrix-check" type="button" onclick="openFaqDemo()" aria-label="查看 B2B SEO Agent 的常见问题样式">✓</button></td><td><span class="matrix-empty">—</span></td></tr>
+<tr><td>商品上架 Agent</td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><button class="matrix-check" type="button" onclick="openVersionHistoryDemo()" aria-label="查看商品上架 Agent 的版本记录样式">✓</button></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><span class="matrix-empty">—</span></td><td><button class="matrix-check" type="button" onclick="openProductListingDemo()" aria-label="查看商品上架 Agent 的商品上架样式">✓</button></td></tr>
+</tbody></table></div></section>
+
+</main>
+<div class="demo-scrim" id="component-demo-scrim" onclick="closeComponentDemo()"></div>
+<aside class="component-demo-drawer" id="agent-combo-drawer" aria-hidden="true" aria-label="Agent 基础组件组合预览">
+ <div class="demo-drawer-head"><button class="demo-icon-btn" type="button" onclick="closeComponentDemo()" aria-label="关闭抽屉">×</button><div class="demo-drawer-title"><div class="demo-drawer-type" id="agent-combo-type">内容产出组合</div><h3 id="agent-combo-title">Agent</h3></div><button class="demo-expand" type="button" onclick="toggleComponentDemoWidth()">↗ 加宽</button></div>
+ <div class="demo-drawer-tabs agent-combo-tabs" id="agent-combo-tabs" role="tablist"></div>
+ <div class="demo-drawer-body" id="agent-combo-body"><div class="agent-combo-empty">请选择一个 Agent 查看组件组合</div></div>
+ <div class="demo-drawer-footer"><span class="demo-operation-label">操作按钮</span></div>
+</aside>
+<aside class="component-demo-drawer" id="document-demo-drawer" aria-hidden="true" aria-label="文档内容组件样式">
+ <div class="demo-drawer-head">
+  <button class="demo-icon-btn" type="button" onclick="closeComponentDemo()" aria-label="关闭抽屉">×</button>
+  <div class="demo-drawer-title"><div class="demo-drawer-type">社媒内容</div><h3>预算不多时，我反而更在意这 3 个护肤细节</h3></div>
+  <button class="demo-expand" type="button" onclick="toggleComponentDemoWidth()">↗ 加宽</button>
+  <button class="demo-icon-btn" type="button" disabled aria-label="上一篇">‹</button>
+  <button class="demo-icon-btn" type="button" aria-label="下一篇">›</button>
+ </div>
+ <div class="demo-drawer-tabs"><button class="on" type="button">文档</button></div>
+ <div class="demo-drawer-body">
+  <div class="demo-field"><label for="document-demo-title">标题</label><input id="document-demo-title" value="预算不多时，我反而更在意这 3 个护肤细节"></div>
+  <div class="demo-field"><label for="document-demo-body">正文</label><textarea id="document-demo-body" rows="12">预算不多的时候，我反而不会急着追新品，而是先看这 3 个真正影响使用体验的细节。
+
+一、使用频率够不够高
+买回去偶尔才用一次的产品，再便宜也是浪费。比起复杂的叠涂步骤，我更愿意留下每天都能稳定使用、早晚护肤都不费力的那一瓶。
+
+二、肤感能不能让我坚持
+吸收速度、黏腻感和后续上妆是否打架，都会决定一款产品能不能被用完。对我来说，舒服、稳定，比第一次使用时的惊艳更重要。
+
+三、它是不是解决了真实需求
+我会优先选择功能清楚、使用场景明确的产品，而不是为了凑满减堆一套暂时用不到的组合。真正适合自己的，才有长期价值。
+
+这次双十一我把预算集中在会持续使用的产品上。活动期有组合权益，但我的选择标准没有变：使用频率高、肤感舒服，也确实能坚持用完。</textarea></div>
+ </div>
+ <div class="demo-drawer-footer"><span class="demo-operation-label">操作按钮</span></div>
+</aside>
+<aside class="component-demo-drawer" id="image-gallery-demo-drawer" aria-hidden="true" aria-label="图片画廊组件样式">
+ <div class="demo-drawer-head">
+  <button class="demo-icon-btn" type="button" onclick="closeComponentDemo()" aria-label="关闭抽屉">×</button>
+  <div class="demo-drawer-title"><div class="demo-drawer-type">详情页生成 · 天猫</div><h3>方向一：成分证据先行</h3></div>
+  <button class="demo-expand" type="button" onclick="toggleComponentDemoWidth()">↗ 加宽</button>
+  <button class="demo-icon-btn" type="button" disabled aria-label="上一个方向">‹</button>
+  <button class="demo-icon-btn" type="button" aria-label="下一个方向">›</button>
+ </div>
+ <div class="demo-drawer-tabs"><button class="on" type="button">图片</button></div>
+ <div class="demo-drawer-body">
+  <div class="demo-gallery-head"><span>详情图 · 9 张 · 上下拼起来就是整张详情页</span><button type="button" onclick="openWholePageDemo()">看整页 ↗</button></div>
+  <div class="demo-image-grid" onclick="if(event.target.closest('.demo-image-card'))openImagePreviewDemo('pdp')">
+   <button class="demo-image-card" type="button" style="background-image:url('https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=1200&q=85')"><span>第一屏 · 首屏 KV</span></button>
+   <button class="demo-image-card" type="button" style="background-image:url('https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=85')"><span>第二屏 · 痛点引入</span></button>
+   <button class="demo-image-card" type="button" style="background-image:url('https://images.unsplash.com/photo-1611080541599-8c6dbde6ed28?auto=format&fit=crop&w=1200&q=85')"><span>第三屏 · 核心卖点</span></button>
+   <button class="demo-image-card" type="button" style="background-image:url('https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=1200&q=85')"><span>第四屏 · 技术机制</span></button>
+   <button class="demo-image-card" type="button" style="background-image:url('https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=1200&q=85')"><span>第五屏 · 使用场景</span></button>
+   <button class="demo-image-card" type="button" style="background-image:url('https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=1200&q=85')"><span>第六屏 · 成分解析</span></button>
+   <button class="demo-image-card" type="button" style="background-image:url('https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=1200&q=85')"><span>第七屏 · 实测对比</span></button>
+   <button class="demo-image-card" type="button" style="background-image:url('https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=1200&q=85')"><span>第八屏 · 使用方法</span></button>
+   <button class="demo-image-card" type="button" style="background-image:url('https://images.unsplash.com/photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=1200&q=85')"><span>第九屏 · 规格与购买</span></button>
+  </div>
+ </div>
+ <div class="demo-drawer-footer"><span class="demo-operation-label">操作按钮</span></div>
+</aside>
+<aside class="component-demo-drawer" id="creative-direction-demo-drawer" aria-hidden="true" aria-label="创意方向组件样式">
+ <div class="demo-drawer-head">
+  <button class="demo-icon-btn" type="button" onclick="closeComponentDemo()" aria-label="关闭抽屉">×</button>
+  <div class="demo-drawer-title"><div class="demo-drawer-type">详情页生成 · 天猫</div><h3>方向一：成分证据先行</h3></div>
+  <button class="demo-expand" type="button" onclick="toggleComponentDemoWidth()">↗ 加宽</button>
+  <button class="demo-icon-btn" type="button" disabled aria-label="上一个方向">‹</button>
+  <button class="demo-icon-btn" type="button" aria-label="下一个方向">›</button>
+ </div>
+ <div class="demo-drawer-tabs"><button class="on" type="button">创意方向</button></div>
+ <div class="demo-drawer-body demo-direction-body">
+  <div class="demo-field"><label for="creative-direction-title">标题</label><textarea class="demo-direction-title" id="creative-direction-title" rows="2">方向一：成分证据先行</textarea></div>
+  <div class="demo-field"><label for="creative-direction-body">内容</label><textarea class="demo-direction-copy" id="creative-direction-body" rows="14">首屏以产品与核心成分作为视觉中心，用一句明确的修护主张快速建立认知。
+
+第二至第四屏依次解释敏感肌常见问题、核心成分作用与技术机制，并用实验数据支撑产品功效。
+
+后续补充适用人群、使用方法、规格信息与购买利益点，让页面从专业证据自然过渡到购买决策。</textarea></div>
+  <div class="demo-reference"><span class="demo-reference-label">参考产品图（仅限 1 张）</span><div class="demo-reference-box"><div class="demo-reference-thumb" style="background-image:url('https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=500&q=85')"></div><button class="demo-reference-add" type="button" aria-label="添加参考图">＋</button></div><div class="demo-reference-help">后续详情图生成会使用这里的产品图。此处仅限 1 张清晰参考图，以提升生成稳定性。</div></div>
+ </div>
+<div class="demo-drawer-footer"><span class="demo-operation-label">操作按钮</span></div>
+</aside>
+<aside class="component-demo-drawer" id="version-history-demo-drawer" aria-hidden="true" aria-label="版本记录组件样式">
+ <div class="demo-drawer-head"><button class="demo-icon-btn" type="button" onclick="closeComponentDemo()" aria-label="关闭抽屉">×</button><div class="demo-drawer-title"><div class="demo-drawer-type">SEO 文章</div><h3>敏感肌精华怎么选：成分、浓度与耐受</h3></div><button class="demo-expand" type="button" onclick="toggleComponentDemoWidth()">↗ 加宽</button></div>
+ <div class="demo-drawer-tabs"><button class="on" type="button">版本</button></div>
+ <div class="demo-drawer-body"><div class="demo-version-row"><span class="demo-version-badge">v2</span><span class="demo-version-text">当前版本 · 采纳方向二后重写</span><span class="demo-version-date">2小时前</span></div><div class="demo-version-row"><span class="demo-version-badge">v1</span><span class="demo-version-text">首轮生成 · 3 个方向</span><span class="demo-version-date">今天 09:13</span></div></div>
+ <div class="demo-drawer-footer"><span class="demo-operation-label">操作按钮</span></div>
+</aside>
+<aside class="component-demo-drawer" id="status-metric-demo-drawer" aria-hidden="true" aria-label="状态结果指标样式">
+ <div class="demo-drawer-head"><button class="demo-icon-btn" type="button" onclick="closeComponentDemo()" aria-label="关闭抽屉">×</button><div class="demo-drawer-title"><div class="demo-drawer-type">分析结论</div><h3>净销售额异常偏低</h3></div><button class="demo-expand" type="button" onclick="toggleComponentDemoWidth()">↗ 加宽</button></div>
+ <div class="demo-drawer-tabs"><button class="on" type="button">文档</button></div>
+ <div class="demo-drawer-body">
+  <div class="demo-status-heading"><strong>净销售额异常偏低</strong><span class="demo-status-pill">中风险</span><span class="demo-status-source">来源：Digate</span><span class="demo-status-category">价格</span></div>
+  <div class="demo-status-explanation"><b>为何标记：</b>净销售额明显低于预期正常水平，显示出销售异常。</div>
+  <div class="demo-status-metrics">
+   <div class="demo-status-metric actual"><span>实际净销售额</span><strong>378.16</strong><span class="demo-status-hint">数据日期：2026-08-24</span></div>
+   <div class="demo-status-metric"><span>预期范围</span><strong>583.02～1,749.07</strong><span class="demo-status-hint">预期依据：以近 14 天数据的中位数 1,166.05 为基准，容差 ±50%。</span></div>
+  </div>
+ </div>
+ <div class="demo-drawer-footer"><span class="demo-operation-label">操作按钮</span></div>
+</aside>
+<aside class="component-demo-drawer" id="status-sentiment-demo-drawer" aria-hidden="true" aria-label="状态结果舆情样式">
+ <div class="demo-drawer-head"><button class="demo-icon-btn" type="button" onclick="closeComponentDemo()" aria-label="关闭抽屉">×</button><div class="demo-drawer-title"><div class="demo-drawer-type">舆情发现</div><h3>服务跟进</h3></div><button class="demo-expand" type="button" onclick="toggleComponentDemoWidth()">↗ 加宽</button></div>
+ <div class="demo-drawer-tabs"><button class="on" type="button">发现详情</button></div>
+ <div class="demo-drawer-body">
+  <div class="demo-status-heading"><strong>服务跟进</strong><span class="demo-sentiment-topic">· EVO 1.1 个性化营养体验：服务跟进仍需优化</span><span class="demo-status-pill muted">苗头</span><span class="demo-sentiment-overdue">已超时 3 天 6 小时</span></div>
+  <div class="demo-sentiment-feedback">我先完成了 EVO 1.1 的 AI 测评，再按作息、目标和身体感受收到每日配方。能量补剂与月度优化的思路很省心，但服务跟进仍有明显落差，希望下一版配方和服务跟进能更快响应反馈。</div>
+  <div class="demo-sentiment-analysis"><b>智能分析</b>客服负责人为相关工单设置明确的首次响应、进度更新和关闭标准，并在社交平台私信与客服系统之间建立转交记录；每周复盘未及时跟进的案例。</div>
+ </div>
+ <div class="demo-drawer-footer"><span class="demo-operation-label">操作按钮</span></div>
+</aside>
+<aside class="component-demo-drawer" id="mention-list-demo-drawer" aria-hidden="true" aria-label="相关提及组件样式">
+ <div class="demo-drawer-head"><button class="demo-icon-btn" type="button" onclick="closeComponentDemo()" aria-label="关闭抽屉">×</button><div class="demo-drawer-title"><div class="demo-drawer-type">舆情发现</div><h3>服务跟进</h3></div><button class="demo-expand" type="button" onclick="toggleComponentDemoWidth()">↗ 加宽</button></div>
+ <div class="demo-drawer-tabs"><button class="on" type="button">相关提及</button></div>
+ <div class="demo-drawer-body">
+  <article class="demo-mention"><div class="demo-mention-head"><b>高压打工人小周</b><time>2026-08-20 07:15</time><button type="button" onclick="showComponentDemoToast('这条提及的原文链接待补充')">查看原文 ↗</button></div><div class="demo-mention-title">EVO 1.1 个性化营养体验：服务跟进仍需优化</div><div class="demo-mention-body">我先完成了 EVO 1.1 的 AI 测评，再按作息、目标和身体感受收到每日配方。AI 营养与月度优化的思路很省心，但服务跟进仍有明显落差，希望下一版配方和服务跟进能更快响应反馈。</div><div class="demo-mention-tags"><span class="demo-mention-tag">自然提及</span><span class="demo-mention-tag negative">负面</span><span>互动 278</span><span>#服务跟进</span></div><div class="demo-source-comments"><span>原文用户评论</span><div class="demo-source-comment"><b>用户17：</b>我也注意到服务跟进这个问题。</div><div class="demo-source-comment"><b>用户35：</b>想看后续一周的变化。</div></div></article>
+  <article class="demo-mention"><div class="demo-mention-head"><b>力量训练阿杰</b><time>2026-08-19 06:15</time><button type="button" onclick="showComponentDemoToast('这条提及的原文链接待补充')">查看原文 ↗</button></div><div class="demo-mention-title">EVO 1.1 个性化营养体验：服务跟进仍需优化</div><div class="demo-mention-body">我先完成了 EVO 1.1 的 AI 测评，再按作息、目标和身体感受收到每日配方。能量补剂与月度优化的思路很省心，但服务跟进仍有明显落差，希望下一版配方和服务跟进能更快响应反馈。</div><div class="demo-mention-tags"><span class="demo-mention-tag">自然提及</span><span class="demo-mention-tag negative">负面</span><span>互动 289</span><span>#服务跟进</span></div><div class="demo-source-comments"><span>原文用户评论</span><div class="demo-source-comment"><b>用户18：</b>我也注意到服务跟进这个问题。</div><div class="demo-source-comment"><b>用户36：</b>想看后续一周的变化。</div></div></article>
+ </div>
+ <div class="demo-drawer-footer"><span class="demo-operation-label">操作按钮</span></div>
+</aside>
+<aside class="component-demo-drawer" id="seo-structure-demo-drawer" aria-hidden="true" aria-label="SEO 结构组件样式">
+ <div class="demo-drawer-head"><button class="demo-icon-btn" type="button" onclick="closeComponentDemo()" aria-label="关闭抽屉">×</button><div class="demo-drawer-title"><div class="demo-drawer-type">SEO 文章</div><h3>敏感肌精华怎么选：成分、浓度与耐受</h3></div><button class="demo-expand" type="button" onclick="toggleComponentDemoWidth()">↗ 加宽</button></div>
+ <div class="demo-drawer-tabs"><button class="on" type="button">结构与关键词</button></div>
+ <div class="demo-drawer-body">
+  <div class="demo-seo-metrics"><div class="demo-seo-metric"><span>SEO 评分</span><b>85</b></div><div class="demo-seo-metric"><span>关键词密度</span><b>1.4%</b></div><div class="demo-seo-metric"><span>内链</span><b>3篇</b></div><div class="demo-seo-metric"><span>字数</span><b>1320</b></div><div class="demo-seo-metric"><span>语言</span><b>en</b></div></div>
+  <section class="demo-seo-section"><div class="demo-seo-section-title">关键词 <span>· 5 个</span></div><div class="demo-keyword-grid"><div class="demo-keyword-item"><span class="demo-keyword-type">主词</span><span class="demo-keyword-text">敏感肌精华怎么选</span></div><div class="demo-keyword-item"><span class="demo-keyword-type">长尾</span><span class="demo-keyword-text">敏感肌精华推荐</span></div><div class="demo-keyword-item"><span class="demo-keyword-type">长尾</span><span class="demo-keyword-text">精华浓度怎么看</span></div><div class="demo-keyword-item"><span class="demo-keyword-type">长尾</span><span class="demo-keyword-text">烟酰胺 敏感肌</span></div><div class="demo-keyword-item"><span class="demo-keyword-type">长尾</span><span class="demo-keyword-text">精华建立耐受</span></div></div></section>
+  <section class="demo-seo-section"><div class="demo-seo-section-title">文章结构 <span>· 5 个 H2</span></div><div class="demo-structure-list"><div class="demo-structure-row"><span class="demo-structure-level">H1</span><span class="demo-structure-text">敏感肌精华怎么选：成分、浓度与耐受</span></div><div class="demo-structure-row"><span class="demo-structure-level">H2 1</span><span class="demo-structure-text">先判断你是“敏感”还是“敏感肌”</span></div><div class="demo-structure-row"><span class="demo-structure-level">H2 2</span><span class="demo-structure-text">三个最常见的踩坑成分</span></div><div class="demo-structure-row"><span class="demo-structure-level">H2 3</span><span class="demo-structure-text">浓度不是越高越好</span></div><div class="demo-structure-row"><span class="demo-structure-level">H2 4</span><span class="demo-structure-text">建立耐受的 4 周节奏</span></div><div class="demo-structure-row"><span class="demo-structure-level">H2 5</span><span class="demo-structure-text">按预算给的选购清单</span></div></div></section>
+  <div class="demo-inline-note">结构在正文之前单独确认过一次——改结构比改正文便宜得多。</div>
+ </div>
+ <div class="demo-drawer-footer"><span class="demo-operation-label">操作按钮</span></div>
+</aside>
+<aside class="component-demo-drawer" id="faq-demo-drawer" aria-hidden="true" aria-label="常见问题组件样式">
+ <div class="demo-drawer-head"><button class="demo-icon-btn" type="button" onclick="closeComponentDemo()" aria-label="关闭抽屉">×</button><div class="demo-drawer-title"><div class="demo-drawer-type">SEO 文章</div><h3>敏感肌精华怎么选：成分、浓度与耐受</h3></div><button class="demo-expand" type="button" onclick="toggleComponentDemoWidth()">↗ 加宽</button></div>
+ <div class="demo-drawer-tabs"><button class="on" type="button">FAQ</button></div>
+ <div class="demo-drawer-body"><div class="demo-faq-count">常见问题 · 5 条</div>
+  <div class="demo-faq-item"><div class="demo-faq-line"><span class="demo-faq-mark">Q:</span><b>敏感肌应该如何选择精华？</b></div><div class="demo-faq-line"><span class="demo-faq-mark">A:</span><span>先看配方是否精简、功效是否聚焦，再从低频率开始试用，优先选择能长期稳定使用的产品。</span></div></div>
+  <div class="demo-faq-item"><div class="demo-faq-line"><span class="demo-faq-mark">Q:</span><b>精华浓度越高，修护效果越好吗？</b></div><div class="demo-faq-line"><span class="demo-faq-mark">A:</span><span>不一定。敏感肌更需要关注成分耐受与配方协同，浓度过高反而可能增加刺激风险。</span></div></div>
+  <div class="demo-faq-item"><div class="demo-faq-line"><span class="demo-faq-mark">Q:</span><b>烟酰胺适合敏感肌使用吗？</b></div><div class="demo-faq-line"><span class="demo-faq-mark">A:</span><span>可以，但需要结合浓度与自身耐受情况。建议先局部测试，再逐步增加使用频率。</span></div></div>
+  <div class="demo-faq-item"><div class="demo-faq-line"><span class="demo-faq-mark">Q:</span><b>敏感肌建立耐受需要多久？</b></div><div class="demo-faq-line"><span class="demo-faq-mark">A:</span><span>通常建议用 3–4 周逐步观察，从隔天使用开始，根据肤感和稳定程度调整。</span></div></div>
+  <div class="demo-faq-item"><div class="demo-faq-line"><span class="demo-faq-mark">Q:</span><b>敏感肌精华可以和其他功效产品叠加吗？</b></div><div class="demo-faq-line"><span class="demo-faq-mark">A:</span><span>肌肤稳定后可以逐步叠加，但一次只增加一种产品，更容易判断耐受情况。</span></div></div>
+  <div class="demo-inline-note">发布时会作为独立小节追加到正文末尾（标题按站点语言取“常见问题”或“FAQ”），所以正文预览里看不到它。</div>
+ </div>
+<div class="demo-drawer-footer"><span class="demo-operation-label">操作按钮</span></div>
+</aside>
+<aside class="component-demo-drawer" id="email-demo-drawer" aria-hidden="true" aria-label="邮件样式">
+ <div class="demo-drawer-head"><button class="demo-icon-btn" type="button" onclick="closeComponentDemo()" aria-label="关闭抽屉">×</button><div class="demo-drawer-title"><div class="demo-drawer-type">客户数据咨询</div><h3>A80PARIS · 最近 7 天转化率分析</h3></div><button class="demo-expand" type="button" onclick="toggleComponentDemoWidth()">↗ 加宽</button></div>
+ <div class="demo-drawer-tabs"><button class="on" type="button">邮件</button></div>
+ <div class="demo-drawer-body">
+  <div class="demo-email-list" id="demo-email-list">
+   <div class="demo-email-toolbar"><span>邮件</span><span>1 封</span></div>
+   <button class="demo-email-card" type="button" onclick="openDemoEmailDetail()"><span class="demo-email-card-head"><span class="demo-email-dot"></span><strong>A80PARIS 最近 7 天转化率变化说明与建议</strong><span class="demo-email-version">v1</span></span><span class="demo-email-card-meta"><span>收件人 client@a80paris.com</span><span class="spacer"></span><span class="demo-email-status">• 草稿</span><span class="demo-email-time">今天 10:24</span></span></button>
+  </div>
+  <div class="demo-email-detail" id="demo-email-detail" hidden>
+   <button class="demo-email-back" type="button" onclick="backDemoEmailList()">← 返回邮件列表</button>
+   <div class="demo-email-form">
+    <div class="demo-email-field"><label for="demo-email-to">收件人</label><input id="demo-email-to" value="client@a80paris.com"></div>
+    <div class="demo-email-field"><label for="demo-email-cc">抄送</label><input id="demo-email-cc" placeholder="可选"></div>
+    <div class="demo-email-field"><label for="demo-email-subject">主题</label><input id="demo-email-subject" value="A80PARIS 最近 7 天转化率变化说明与建议"></div>
+    <div class="demo-email-field"><label for="demo-email-body">正文</label><textarea id="demo-email-body">您好，
+
+我们复核了 A80PARIS 最近 7 天的经营数据。访客数增长 12%，但支付转化率由目标 2.1% 降至 1.4%。目前更明显的信号来自移动端详情页承接：老客与自然流量的加购率也出现下降；广告新增流量意向偏弱，进一步放大了波动。
+
+建议优先检查移动端首屏加载与权益表达，并按渠道拆分做一次对照验证。我们会继续跟进变化，并在有新结论时同步。
+
+谢谢。</textarea></div>
+    <div class="demo-email-basis">起草规则：向客户说明转化率变化、判断依据和下一步建议。</div>
+   </div>
+  </div>
+ </div>
+ <div class="demo-drawer-footer"><span class="demo-operation-label">操作按钮</span></div>
+</aside>
+<aside class="component-demo-drawer" id="plan-demo-drawer" aria-hidden="true" aria-label="规划表样式">
+ <div class="demo-drawer-head"><button class="demo-icon-btn" type="button" onclick="closeComponentDemo()" aria-label="关闭抽屉">×</button><div class="demo-drawer-title"><div class="demo-drawer-type">推广图片 · 天猫</div><h3>LiveSpo Colon · 电商推广图片</h3></div><button class="demo-expand" type="button" onclick="toggleComponentDemoWidth()">↗ 加宽</button></div>
+ <div class="demo-drawer-tabs"><button class="on" type="button">推广计划表</button></div>
+ <div class="demo-drawer-body">
+  <div class="demo-plan-toolbar"><span>共 5 条计划</span><button type="button" onclick="setAllDemoPlans(true)">全部展开</button><button type="button" onclick="setAllDemoPlans(false)">全部收起</button></div>
+  <div class="demo-plan-list">
+   <div class="demo-plan-card"><button class="demo-plan-head" type="button" aria-expanded="false" onclick="toggleDemoPlan(this)"><span class="demo-plan-number">计划一</span><span class="demo-plan-name">外卖嗜辣一族拉新计划</span><span class="demo-plan-stage">新客拉新阶段</span><span class="demo-plan-chevron">⌄</span></button><div class="demo-plan-body" hidden>
+    <div class="demo-plan-field slogan"><b>广告标语</b><span>火辣外卖后，直接喝的肠盾</span></div><div class="demo-plan-field"><b>投放阶段</b><span>新客拉新阶段</span></div><div class="demo-plan-field"><b>阶段目的</b><span>触达核心生活节奏快、高频点外卖及好辣好酒的中青年职场男女，确立液态孢子益生菌30分钟起效、95%胃酸存活率的初次认知。</span></div><div class="demo-plan-field"><b>投放地域</b><span>北京、上海、广州、深圳、杭州、成都等一二线及准一线核心城市</span></div><div class="demo-plan-field"><b>投放时段</b><span>11:00-13:00及17:00-20:00中晚餐点餐前后，以及22:00-01:00深夜加班与夜宵黄金时段。</span></div><div class="demo-plan-field budget"><b>初始预算</b><span>300</span></div><div class="demo-plan-field"><b>平台精选人群</b><span>职场肠胃调理族；本行业精选人群包</span></div><div class="demo-plan-field"><b>其他人群</b><span>职场肠胃调理族；本行业精选人群包</span></div><div class="demo-plan-field"><b>自定义人群摘要</b><span>重点触达18-35岁、经常点外卖、喜爱嗜辣、生活节奏快的中青年职场男女，消费偏中高层。</span></div><div class="demo-plan-field"><b>广告创意方向</b><span>现代简约的清新蓝绿调，画面中心为外卖快餐与红辣椒视觉元素，配以流动的蓝色液滴水波，体现科技感、液体孢子的超强耐酸与速效保护感。</span></div>
+   </div></div>
+   <div class="demo-plan-card"><button class="demo-plan-head" type="button" aria-expanded="false" onclick="toggleDemoPlan(this)"><span class="demo-plan-number">计划二</span><span class="demo-plan-name">社交饮酒一族拉新计划</span><span class="demo-plan-stage">新客拉新阶段</span><span class="demo-plan-chevron">⌄</span></button><div class="demo-plan-body" hidden>
+    <div class="demo-plan-field slogan"><b>广告标语</b><span>喝酒聚餐前，来支液体孢子。</span></div><div class="demo-plan-field"><b>投放阶段</b><span>新客拉新阶段</span></div><div class="demo-plan-field"><b>阶段目的</b><span>触达核心生活节奏快、高频点外卖及好辣好酒的中青年职场男女，确立液态孢子益生菌30分钟起效、95%胃酸存活率的初次认知。</span></div><div class="demo-plan-field"><b>投放地域</b><span>北京、上海、广州、深圳、杭州、成都等一二线及准一线核心城市</span></div><div class="demo-plan-field"><b>投放时段</b><span>11:00-13:00及17:00-20:00中晚餐点餐前后，以及22:00-01:00深夜加班与夜宵黄金时段。</span></div><div class="demo-plan-field budget"><b>初始预算</b><span>300</span></div><div class="demo-plan-field"><b>平台精选人群</b><span>淘天行业年度King消费者；内容易感人群</span></div><div class="demo-plan-field"><b>其他人群</b><span>淘天行业年度King消费者；内容易感人群</span></div><div class="demo-plan-field"><b>自定义人群摘要</b><span>18-40岁、有社交应酬、商务出差、饮酒熬夜等行为的高价值年轻主力人群。</span></div><div class="demo-plan-field"><b>广告创意方向</b><span>现代科技感医药视觉风格，深蓝色调为主，画面右侧为举杯社交场景，左侧特写高能蓝色液滴击穿胃酸屏障、修复粘膜的过程。</span></div>
+   </div></div>
+   <div class="demo-plan-card"><button class="demo-plan-head" type="button" aria-expanded="false" onclick="toggleDemoPlan(this)"><span class="demo-plan-number">计划三</span><span class="demo-plan-name">液体孢子功效理解提速计划</span><span class="demo-plan-stage">浅度兴趣阶段</span><span class="demo-plan-chevron">⌄</span></button><div class="demo-plan-body" hidden>
+    <div class="demo-plan-field slogan"><b>广告标语</b><span>液体孢子，30分钟给肠胃上道盾</span></div><div class="demo-plan-field"><b>投放阶段</b><span>浅度兴趣阶段</span></div><div class="demo-plan-field"><b>阶段目的</b><span>承接已被外食、嗜辣和饮酒场景内容触达的人群，强化液态孢子、30分钟起效及95%胃酸存活率等核心利益点，推动用户从场景共鸣进入功效理解。</span></div><div class="demo-plan-field"><b>投放地域</b><span>北京、上海、广州、深圳、杭州、成都等一二线及准一线核心城市</span></div><div class="demo-plan-field"><b>投放时段</b><span>07:30-09:30通勤早餐时段、12:00-14:00午休浏览时段及20:00-23:00晚间内容消费高峰。</span></div><div class="demo-plan-field budget"><b>初始预算</b><span>500</span></div><div class="demo-plan-field"><b>平台精选人群</b><span>肠道健康养护人群；保健食品内容易感人群</span></div><div class="demo-plan-field"><b>其他人群</b><span>保健食品类目行为品牌偏好人群；外食高频人群</span></div><div class="demo-plan-field"><b>自定义人群摘要</b><span>重点覆盖25-40岁、关注肠道健康、浏览过益生菌内容但尚未形成明确品牌偏好的中高消费人群。</span></div><div class="demo-plan-field"><b>广告创意方向</b><span>蓝绿科技渐变背景，以液体孢子穿越胃酸环境的动态路径为视觉中心，结合30分钟起效与95%胃酸存活率的数据卡片，画面清晰、可信、易理解。</span></div>
+   </div></div>
+   <div class="demo-plan-card"><button class="demo-plan-head" type="button" aria-expanded="false" onclick="toggleDemoPlan(this)"><span class="demo-plan-number">计划四</span><span class="demo-plan-name">液体孢子品质加购催化计划</span><span class="demo-plan-stage">深度兴趣阶段</span><span class="demo-plan-chevron">⌄</span></button><div class="demo-plan-body" hidden>
+    <div class="demo-plan-field slogan"><b>广告标语</b><span>看得懂的品质，随手喝的肠道守护</span></div><div class="demo-plan-field"><b>投放阶段</b><span>深度兴趣阶段</span></div><div class="demo-plan-field"><b>阶段目的</b><span>面向多次浏览、搜索或收藏益生菌产品的高意向人群，强化产品品质、液态剂型和便携体验，推动收藏加购并进入购买比较。</span></div><div class="demo-plan-field"><b>投放地域</b><span>北京、上海、广州、深圳、杭州、成都、南京、武汉等高消费核心城市</span></div><div class="demo-plan-field"><b>投放时段</b><span>09:00-11:00、14:00-17:00理性决策时段，以及20:00-24:00居家浏览与加购高峰。</span></div><div class="demo-plan-field budget"><b>初始预算</b><span>800</span></div><div class="demo-plan-field"><b>平台精选人群</b><span>保健食品类目高潜待转化人群；高价值品质消费者</span></div><div class="demo-plan-field"><b>其他人群</b><span>近15天浏览未购人群；收藏加购相似商品人群</span></div><div class="demo-plan-field"><b>自定义人群摘要</b><span>重点覆盖28-45岁、近期主动搜索益生菌、关注成分与品质、具备中高购买力且已有浏览收藏行为的人群。</span></div><div class="demo-plan-field"><b>广告创意方向</b><span>高端白底与深海蓝组合，产品小支装居中陈列，周围以液态流光、耐酸盾牌和便携场景构成品质证据链，突出专业、安心与随身即饮。</span></div>
+   </div></div>
+   <div class="demo-plan-card"><button class="demo-plan-head" type="button" aria-expanded="false" onclick="toggleDemoPlan(this)"><span class="demo-plan-number">计划五</span><span class="demo-plan-name">高意向人群决策加速计划</span><span class="demo-plan-stage">购买人群阶段</span><span class="demo-plan-chevron">⌄</span></button><div class="demo-plan-body" hidden>
+    <div class="demo-plan-field slogan"><b>广告标语</b><span>肠胃不等人，现在下单现在守护</span></div><div class="demo-plan-field"><b>投放阶段</b><span>购买人群阶段</span></div><div class="demo-plan-field"><b>阶段目的</b><span>锁定已收藏、加购或多次访问详情页的高意向人群，通过限时权益、核心功效回顾与使用场景提醒，缩短决策路径并促成最终成交。</span></div><div class="demo-plan-field"><b>投放地域</b><span>全国重点一二线及准一线城市，优先覆盖近30天高转化区域</span></div><div class="demo-plan-field"><b>投放时段</b><span>10:00-12:00、18:00-22:00下单高峰，活动结束前4小时提高投放强度。</span></div><div class="demo-plan-field budget"><b>初始预算</b><span>1200</span></div><div class="demo-plan-field"><b>平台精选人群</b><span>类目近三天收藏加购未购人群；高价值活跃消费者</span></div><div class="demo-plan-field"><b>其他人群</b><span>店铺深度浏览人群；近7天加购未购人群</span></div><div class="demo-plan-field"><b>自定义人群摘要</b><span>重点覆盖25-45岁、近7天浏览详情页2次以上或已收藏加购、购买力L3-L5、对即时肠胃养护需求明确的高意向人群。</span></div><div class="demo-plan-field"><b>广告创意方向</b><span>以产品正装、小支装和限时权益组成强转化画面，加入外卖、聚餐、加班三个使用场景缩略图，搭配醒目的购买按钮与倒计时元素，突出现在下单的理由。</span></div>
+   </div></div>
+  </div>
+ </div>
+ <div class="demo-drawer-footer"><span class="demo-operation-label">操作按钮</span></div>
+</aside>
+<aside class="component-demo-drawer" id="product-listing-demo-drawer" aria-hidden="true" aria-label="商品上架组件样式">
+ <div class="demo-drawer-head"><button class="demo-icon-btn" type="button" onclick="closeComponentDemo()" aria-label="关闭抽屉">×</button><div class="demo-drawer-title"><div class="demo-drawer-type">商品上架</div><h3 id="demo-listing-title">天猫上架回执 · A8O 修护安瓶精华 15ml</h3></div><button class="demo-expand" type="button" onclick="toggleComponentDemoWidth()">↗ 加宽</button></div>
+ <div class="demo-drawer-tabs"><button class="on" type="button">上架流程</button><button type="button">版本</button></div>
+ <div class="demo-drawer-body">
+  <div class="demo-listing-flow">
+   <section class="demo-listing-step"><button class="demo-listing-step-head" type="button" aria-expanded="false" onclick="toggleDemoListingStep(this)"><span class="demo-listing-dot"></span><strong>选择上架产品</strong><span class="demo-listing-meta"><span class="demo-listing-confirmed">已确认</span><span class="demo-listing-who">dudu</span><span class="demo-listing-time">17:17</span></span><span class="demo-listing-toggle">⌄</span></button><div class="demo-listing-step-body" hidden><div class="demo-listing-products" role="group" aria-label="已确认的上架商品">
+    <button class="demo-listing-product selected" type="button" disabled aria-pressed="true"><img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=720&q=84" alt="A8O 修护安瓶精华 15ml"><span class="demo-listing-product-info"><span class="demo-listing-product-name">A8O 修护安瓶精华 15ml</span><span class="demo-listing-product-spec">规格：15ml</span><span class="demo-listing-product-pick">✓ 已选择</span></span></button>
+    <button class="demo-listing-product" type="button" disabled aria-pressed="false"><img src="https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=720&q=84" alt="A8O 修护精华 30ml"><span class="demo-listing-product-info"><span class="demo-listing-product-name">A8O 修护精华 30ml</span><span class="demo-listing-product-spec">规格：30ml</span><span class="demo-listing-product-pick">选择</span></span></button>
+    <button class="demo-listing-product" type="button" disabled aria-pressed="false"><img src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=720&q=84" alt="A8O 舒缓面霜 50ml"><span class="demo-listing-product-info"><span class="demo-listing-product-name">A8O 舒缓面霜 50ml</span><span class="demo-listing-product-spec">规格：50ml</span><span class="demo-listing-product-pick">选择</span></span></button>
+   </div></div></section>
+   <section class="demo-listing-step"><button class="demo-listing-step-head" type="button" aria-expanded="false" onclick="toggleDemoListingStep(this)"><span class="demo-listing-dot"></span><strong>商品字段验证</strong><span class="demo-listing-meta"><span class="demo-listing-confirmed">已确认</span><span class="demo-listing-who">dudu</span><span class="demo-listing-time">17:17</span></span><span class="demo-listing-toggle">⌄</span></button><div class="demo-listing-step-body" hidden>
+    <div class="demo-listing-fields">
+     <div class="demo-listing-field"><label>发布商品的所在类目<span class="demo-listing-required">*</span></label><input type="text" value="美容护肤 / 精华" readonly></div>
+     <div class="demo-listing-field"><label>商品品类<span class="demo-listing-required">*</span></label><select disabled><option selected>精华</option></select></div>
+     <div class="demo-listing-field"><label>规格类型<span class="demo-listing-required">*</span></label><select disabled><option selected>正常规格</option></select></div>
+     <div class="demo-listing-field"><label>品牌<span class="demo-listing-required">*</span></label><input type="text" value="A8OPARIS" readonly></div>
+     <div class="demo-listing-field"><label>商品系列<span class="demo-listing-required">*</span></label><input type="text" value="A8O 修护系列" readonly></div>
+    </div>
+    <div class="demo-listing-main-image"><label>1:1 主图<span class="demo-listing-required">*</span></label><div class="demo-listing-image-row"><div class="demo-listing-image-preview"><img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=720&q=84" alt="A8O 修护安瓶精华商品主图"></div><button class="demo-listing-library" type="button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"></rect><circle cx="9" cy="9" r="1.5"></circle><path d="m4 18 5-5 4 3 3-4 5 6"></path></svg>素材库</button></div></div>
+   </div></section>
+   <section class="demo-listing-step"><button class="demo-listing-step-head" type="button" aria-expanded="false" onclick="toggleDemoListingStep(this)"><span class="demo-listing-dot"></span><strong>平台回执截图</strong><span class="demo-listing-meta"><span class="demo-listing-confirmed">已确认</span><span class="demo-listing-who">dudu</span><span class="demo-listing-time">17:17</span></span><span class="demo-listing-toggle">⌄</span></button><div class="demo-listing-step-body" hidden><button class="demo-listing-shot" type="button" onclick="showComponentDemoToast('平台回执截图预览')" title="点击查看完整回执截图"><img src="https://testagent.xdigate.cn/api/projects/6967392b8a886457cfc0346b/storage/?relativePath=resources%2F1785299934923-testagent-xdigate-cn-app-agent-task-center--07-29-2026_12_37_PM.jpg" alt="平台回执截图"></button><div class="demo-listing-shot-hint">点击查看大图</div></div></section>
+   <section class="demo-listing-step"><button class="demo-listing-step-head" type="button" aria-expanded="false" onclick="toggleDemoListingStep(this)"><span class="demo-listing-dot"></span><strong>商品上架结果</strong><span class="demo-listing-meta"><span class="demo-listing-confirmed">已确认</span><span class="demo-listing-who">dudu</span><span class="demo-listing-time">17:18</span></span><span class="demo-listing-toggle">⌄</span></button><div class="demo-listing-step-body" hidden><button class="demo-listing-shot" type="button" onclick="showComponentDemoToast('商品上架结果预览')" title="点击查看完整上架结果"><img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=1200&q=88" alt="商品上架结果截图"></button><div class="demo-listing-shot-hint">商品已上架 · 点击查看大图</div></div></section>
+  </div>
+ </div>
+ <div class="demo-drawer-footer"><span class="demo-operation-label">操作按钮</span></div>
+</aside>
+<div class="image-preview-layer" id="image-preview-demo" role="dialog" aria-modal="true" aria-hidden="true" aria-label="图片预览样式" onclick="if(event.target===this)closeImagePreviewDemo()">
+ <div class="image-preview-dialog">
+  <div class="image-preview-stage"><span class="image-preview-counter" id="image-preview-counter">1/3</span><img id="image-preview-image" src="" alt="图片预览"></div>
+  <section class="image-preview-panel"><div class="image-preview-head"><h3 id="image-preview-title">调整素材</h3><span class="image-preview-badge" id="image-preview-badge" hidden></span><button class="image-preview-close" type="button" onclick="closeImagePreviewDemo()" aria-label="关闭图片预览">×</button></div><div class="image-preview-body" id="image-preview-body"></div><div class="image-preview-foot" id="image-preview-foot"></div></section>
+ </div>
+</div>
+<div class="whole-page-demo-layer" id="whole-page-demo" role="dialog" aria-modal="true" aria-hidden="true" aria-label="整页预览" onclick="if(event.target===this)closeWholePageDemo()">
+ <div class="whole-page-demo-dialog">
+  <div class="whole-page-demo-head"><h3>A8O 修护精华 30ml · 天猫详情页 · 整页</h3><span class="whole-page-demo-count">9 屏 · 从上到下</span><button class="demo-icon-btn" type="button" onclick="closeWholePageDemo()" aria-label="关闭整页预览">×</button></div>
+  <div class="whole-page-demo-stage">
+   <div class="whole-page-demo-screen"><img src="https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=1200&q=85" alt="第一屏 · 首屏 KV"><span class="whole-page-demo-label">第一屏 · 首屏 KV</span></div>
+   <div class="whole-page-demo-screen"><img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=85" alt="第二屏 · 痛点引入"><span class="whole-page-demo-label">第二屏 · 痛点引入</span></div>
+   <div class="whole-page-demo-screen"><img src="https://images.unsplash.com/photo-1611080541599-8c6dbde6ed28?auto=format&fit=crop&w=1200&q=85" alt="第三屏 · 核心卖点"><span class="whole-page-demo-label">第三屏 · 核心卖点</span></div>
+   <div class="whole-page-demo-screen"><img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=1200&q=85" alt="第四屏 · 技术机制"><span class="whole-page-demo-label">第四屏 · 技术机制</span></div>
+   <div class="whole-page-demo-screen"><img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=1200&q=85" alt="第五屏 · 使用场景"><span class="whole-page-demo-label">第五屏 · 使用场景</span></div>
+   <div class="whole-page-demo-screen"><img src="https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=1200&q=85" alt="第六屏 · 成分解析"><span class="whole-page-demo-label">第六屏 · 成分解析</span></div>
+   <div class="whole-page-demo-screen"><img src="https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=1200&q=85" alt="第七屏 · 实测对比"><span class="whole-page-demo-label">第七屏 · 实测对比</span></div>
+   <div class="whole-page-demo-screen"><img src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=1200&q=85" alt="第八屏 · 使用方法"><span class="whole-page-demo-label">第八屏 · 使用方法</span></div>
+   <div class="whole-page-demo-screen"><img src="https://images.unsplash.com/photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=1200&q=85" alt="第九屏 · 规格与购买"><span class="whole-page-demo-label">第九屏 · 规格与购买</span></div>
+  </div>
+  <div class="whole-page-demo-foot"><span>这是买家实际滚动看到的顺序</span><button type="button" onclick="closeWholePageDemo()">回到分屏</button></div>
+ </div>
+</div>
+<div class="component-demo-toast" id="component-demo-toast" role="status" aria-live="polite"></div>
+<script src="js/drawer-components.js"></script>
+<script src="js/i18n.js"></script>
+</body></html>
