@@ -41,6 +41,10 @@ input,textarea,select{font:inherit;color:inherit}
 .nv:hover{background:rgba(255,255,255,.06);color:#fff}
 .nv.on{background:var(--sb-active);color:#fff;font-weight:500}
 .nv svg{flex:0 0 16px;opacity:.85}
+.drawer-link{margin:var(--sp-2) 0 0;text-decoration:none}
+.drawer-link .external-mark{margin-left:auto;flex-basis:14px;opacity:.55;transition:opacity .12s,transform .12s}
+.drawer-link:hover .external-mark{opacity:1;transform:translate(1px,-1px)}
+.drawer-link:focus-visible{outline:2px solid var(--primary-lt);outline-offset:2px;color:#fff;background:rgba(255,255,255,.06)}
 .nv .bdg{margin-left:auto;font-family:'Sora';font-size:var(--fs-xs);font-weight:600;background:rgba(255,255,255,.14);padding:var(--sp-1) 6px;border-radius:20px;color:#fff}
 .nv.on .bdg{background:var(--primary)}
 .nv-div{height:1px;background:rgba(255,255,255,.09);margin:var(--sp-2) 10px}
