@@ -92,15 +92,26 @@ const DSRUNS={
   {at:'2026-09-07 18:01:12',st:'success',dur:'49 秒',rows:'2,170 条',note:'数据按预期节奏完成同步'}]}
 };
 
-function dsCount(k){return DSRC.filter(d=>d.st===k).length;}
+function dsCount(k,rows=DSRC){return rows.filter(d=>d.st===k).length;}
+function dsPlatformKey(d){
+ if(d.plat.includes('天猫')||d.plat.includes('淘宝'))return 'tmall';
+ if(d.plat.includes('抖音'))return 'douyin';
+ if(d.plat.includes('京东'))return 'jd';
+ return 'other';
+}
+function dsAttentionCount(){return DSRC.filter(d=>(d.st==='error'||d.st==='stale')&&!d.handled).length;}
 function kDataSources(){
  if(S.dsFilter===undefined)S.dsFilter='all';
- const err=DSRC.filter(d=>d.st==='error'),stale=DSRC.filter(d=>d.st==='stale');
+ if(S.dsPlatform===undefined)S.dsPlatform='all';
+ const platforms=[['all','全部来源'],['tmall','天猫'],['douyin','抖音'],['jd','京东']];
+ const platformRows=S.dsPlatform==='all'?DSRC:DSRC.filter(d=>dsPlatformKey(d)===S.dsPlatform);
+ const err=platformRows.filter(d=>d.st==='error'),stale=platformRows.filter(d=>d.st==='stale');
  const blocked=[...new Set([...err,...stale].flatMap(d=>d.base))];
- const rows=S.dsFilter==='all'?DSRC:DSRC.filter(d=>d.st===S.dsFilter);
- const filters=[['all','数据源',DSRC.length],['fresh','正常',dsCount('fresh')],['stale','已过期',dsCount('stale')],['error','异常',dsCount('error')],['off','检测已暂停',dsCount('off')]];
+ const rows=S.dsFilter==='all'?platformRows:platformRows.filter(d=>d.st===S.dsFilter);
+ const filters=[['all','数据源',platformRows.length],['fresh','正常',dsCount('fresh',platformRows)],['stale','已过期',dsCount('stale',platformRows)],['error','异常',dsCount('error',platformRows)],['off','检测已暂停',dsCount('off',platformRows)]];
  return `<div class="bar" style="margin:0 0 var(--sp-3);gap:var(--sp-2);flex-wrap:wrap">
    <div class="seg">${filters.map(([key,label,count])=>`<button class="${S.dsFilter===key?'on':''}" onclick="S.dsFilter='${key}';render()">${key==='all'?count+' 个'+label:label+' '+count}</button>`).join('')}</div>
+   <div class="seg" aria-label="按平台筛选数据源">${platforms.map(([key,label])=>`<button class="${S.dsPlatform===key?'on':''}" onclick="S.dsPlatform='${key}';render()">${label}</button>`).join('')}</div>
    <span class="spacer"></span>
    <span style="font-size:var(--fs-xs);color:var(--t3)">上次刷新：2026-09-11 18:29:13</span></div>
 
@@ -127,7 +138,7 @@ function kDataSources(){
      <span style="display:block;font-size:var(--fs-sm);color:var(--t2);margin-top:5px">${esc(d.desc)}</span>
      <span style="display:block;font-size:var(--fs-xs);color:var(--t3);margin-top:4px">
        更新周期 ${d.cad} · 最后更新 ${d.updatedAt} · 成功率 ${DSRUNS[d.id].month.rate} · 被读 ${d.reads.toLocaleString()} 次 · ${d.ags.length} 个 Agent 在用</span></span></button>
-   <div class="ds-source-actions">${d.st==='error'||d.st==='stale'?`<button class="btn sm" onclick="openDSTaskForm('${d.id}')">建单去修</button>${d.handled?'<span class="ds-handled-note">已处理 · 明日继续检测</span>':`<button class="btn ghost sm" onclick="markDSHandled('${d.id}')">标记为已处理</button>`}`:''}${d.st==='off'?`<button class="btn sm" onclick="enableDS('${d.id}')">恢复检测</button>`:`<button class="btn ghost sm" onclick="pauseDSDetection('${d.id}')">暂停检测</button>`}<button class="btn ghost sm" onclick="openDSRun('${d.id}')">查看运行记录</button>${d.handledAt?`<span class="ds-handled-time">处理时间：${formatDSHandledAt(d.handledAt)}</span>`:''}</div>
+   <div class="ds-source-actions">${d.st==='error'||d.st==='stale'?`<button class="btn sm" onclick="openDSTaskForm('${d.id}')">建单去修</button>${d.handled?'<span class="ds-handled-note">已处理 · 明日继续检测</span>':`<button class="btn ghost sm" onclick="markDSHandled('${d.id}')">标记为已处理</button>`}`:''}${d.st==='off'?`<button class="btn sm" onclick="enableDS('${d.id}')">恢复检测</button>`:`<button class="btn ghost sm" onclick="pauseDSDetection('${d.id}')">暂停检测</button>`}<button class="btn ghost sm" onclick="openDSRun('${d.id}')">查看运行记录</button>${d.handledAt?`<span class="ds-handled-time">处理人：${esc(dsHandledBy(d))} · 处理时间：${formatDSHandledAt(d.handledAt)}</span>`:''}</div>
    </div>`).join('')||'<div class="allclear">当前筛选下没有数据源。</div>'}`;
 }
 
@@ -141,7 +152,7 @@ function openDSRun(id){openDS(id);S.dsTab=1;drawDSDrawer();}
 
 function markDSHandled(id){
  const d=DSRC.find(x=>x.id===id);if(!d)return;
- d.handled=true;d.handledAt=new Date().toISOString();render();
+ d.handled=true;d.handledBy=currentUser();d.handledAt=new Date().toISOString();renderNav();render();
  if(S.ds===id&&$('dw').classList.contains('on'))drawDSDrawer();
  toast('已标记为已处理 · 明天仍会按计划继续检测');
 }
@@ -150,6 +161,8 @@ function formatDSHandledAt(value){
  const date=new Date(value);if(Number.isNaN(date.getTime()))return value;
  return `今天 ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
 }
+
+function dsHandledBy(d){return U[d.handledBy]?.n||d.handledBy||'—';}
 
 function setDSTab(tab){S.dsTab=tab;drawDSDrawer();}
 
@@ -167,7 +180,7 @@ function drawDSDrawer(){
   <div class="dw-f">
    ${d.st==='off'?`<button class="btn" onclick="enableDS('${d.id}')">恢复检测</button>`:bad?`<button class="btn" onclick="openDSTaskForm('${d.id}')">建单去修</button>${d.handled?'<span class="ds-handled-note">已处理 · 明日继续检测</span>':`<button class="btn ghost" onclick="markDSHandled('${d.id}')">标记为已处理</button>`}<button class="btn ghost" onclick="pauseDSDetection('${d.id}')">暂停检测</button>`
     :`<button class="btn ghost" onclick="toast('已触发一次同步')">立即同步</button><button class="btn ghost" onclick="pauseDSDetection('${d.id}')">暂停检测</button>`}
-   <span style="margin-left:auto;font-size:var(--fs-xs);color:var(--t3)">${d.handledAt?`处理时间：${formatDSHandledAt(d.handledAt)} · `:''}${d.reads.toLocaleString()} 次被读</span>
+   <span style="margin-left:auto;font-size:var(--fs-xs);color:var(--t3)">${d.handledAt?`处理人：${esc(dsHandledBy(d))} · 处理时间：${formatDSHandledAt(d.handledAt)} · `:''}${d.reads.toLocaleString()} 次被读</span>
   </div>`;
 }
 
@@ -217,13 +230,13 @@ function enableDS(id){
  if(!d)return;
  d.st=d.healthBeforePause||'fresh';d.desc=d.descBeforePause||'检测已恢复，等待下一次检测结果';
  delete d.healthBeforePause;delete d.descBeforePause;
- closeDw();render();toast('更新状态检测已恢复 · 数据同步未受影响');
+ closeDw();renderNav();render();toast('更新状态检测已恢复 · 数据同步未受影响');
 }
 
 function pauseDSDetection(id){
  const d=DSRC.find(x=>x.id===id);if(!d||d.st==='off')return;
  $('mod').classList.remove('asset-mode','plan-mode');
- $('mod').innerHTML=`<div class="mbox" style="max-width:480px" role="dialog" aria-modal="true" aria-labelledby="pause-ds-title">
+ $('mod').innerHTML=`<div class="mbox ds-pause-confirm" style="max-width:480px" role="dialog" aria-modal="true" aria-labelledby="pause-ds-title">
   <div class="mhd"><h3 id="pause-ds-title">暂停更新状态检测？</h3></div>
   <div class="mbd"><div style="font-size:var(--fs-sm);color:var(--t2);line-height:1.7">
    暂停「${esc(d.n)}」后，数据仍会正常同步，但系统不会检测更新状态，也不会生成异常提醒。你可以随时恢复检测。</div></div>
@@ -236,7 +249,7 @@ function confirmPauseDSDetection(id){
  const d=DSRC.find(x=>x.id===id);if(!d||d.st==='off'){closeMod();return;}
  d.healthBeforePause=d.st;d.descBeforePause=d.desc;d.st='off';
  d.desc='更新状态检测已暂停，数据仍按原接入方式更新';
- closeMod();closeDw();render();toast('检测已暂停 · 数据仍会继续更新');
+ closeMod();closeDw();renderNav();render();toast('检测已暂停 · 数据仍会继续更新');
 }
 
 function openDSBulkTaskForm(){
@@ -254,7 +267,7 @@ function vKnow(){
  if(S.kgrp===undefined)S.kgrp='src';
  if(S.ktab===undefined)S.ktab=0;
  if(S.kdom===undefined)S.kdom='全部';
- const G=KGRP[S.kgrp],c=kComplete(),stale=KB.filter(x=>x.stale).length;
+ const G=KGRP[S.kgrp],c=kComplete(),stale=KB.filter(x=>x.stale).length,dsAlerts=dsAttentionCount();
  return `<div class="wrap">
   <div class="eyebrow">平台 · 知识库</div><h1>知识库</h1>
   <div class="sub">Agent 读的（来源）和 Agent 写的（产出）分开放。保存后的产出可以在这里查看、检索和复用。</div>
@@ -275,7 +288,7 @@ function vKnow(){
       ${KB.filter(x=>x.stale).map(x=>`<button class="gapchip warn" onclick="openKB('${x.id}')">${x.n} 已过期 ↗</button>`).join('')}
     </div></div>`:''}
   <div class="bar" style="margin:var(--sp-4) 0 14px;gap:var(--sp-2);flex-wrap:wrap">
-    <div class="seg">${G.tabs.map((t,i)=>`<button class="${S.ktab===i?'on':''}" onclick="S.ktab=${i};render()">${t}</button>`).join('')}</div>
+    <div class="seg">${G.tabs.map((t,i)=>`<button class="${S.ktab===i?'on':''}" onclick="S.ktab=${i};render()">${t}${t==='数据源'&&dsAlerts?`<span class="kb-tab-alert num">${dsAlerts}</span>`:''}</button>`).join('')}</div>
     ${S.kgrp==='out'?`<div class="seg">${KDOMS.map(d=>`<button class="${S.kdom===d?'on':''}" onclick="S.kdom='${d}';render()">${d}</button>`).join('')}</div>`:''}
   </div>
   ${kBody()}

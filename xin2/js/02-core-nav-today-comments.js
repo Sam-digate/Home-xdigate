@@ -1,9 +1,10 @@
 /* ============ nav ============ */
 function renderNav(){
- $('nav').innerHTML=NAV.map(x=>x.d?'<div class="nv-div"></div>':
-  `<button class="nv ${S.view===x.id?'on':''}" onclick="go('${x.id}',null,{nav:true})">
+ $('nav').innerHTML=NAV.map(x=>{if(x.d)return '<div class="nv-div"></div>';
+  const badge=x.id==='know'?dsAttentionCount():(x.b?(x.b==='live'?T.filter(t=>t.st!=='done').length:x.b):0);
+  return `<button class="nv ${S.view===x.id?'on':''}" onclick="go('${x.id}',null,{nav:true})">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICON[x.i]}</svg>
-    ${x.n}${x.b?`<span class="bdg num">${x.b==='live'?T.filter(t=>t.st!=='done').length:x.b}</span>`:''}</button>`).join('');
+    ${x.n}${badge?`<span class="bdg num">${badge}</span>`:''}</button>`}).join('');
  renderAccount();
 }
 function currentUser(){return S.currentUser||'du';}

@@ -485,6 +485,8 @@
 .ds-source-main{display:block;width:100%;padding:13px 14px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
 .ds-source-main:hover{background:var(--surface-tint)}
 .ds-source-actions{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;padding:10px 14px;border-top:1px solid var(--hairline);background:#fff}
+.mbox.ds-pause-confirm{align-self:center}
+.kb-tab-alert{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:5px;padding:0 5px;border-radius:9px;background:var(--gold);color:#fff;font-size:10px;font-weight:700;line-height:1}
 .ds-handled-note{display:inline-flex;align-items:center;min-height:30px;padding:0 10px;border-radius:8px;background:#ECFDF5;color:#047857;font-size:var(--fs-xs);font-weight:600}
 .ds-handled-time{margin-left:auto;color:var(--t3);font-size:var(--fs-xs);font-variant-numeric:tabular-nums;white-space:nowrap}
 .gapchip{display:inline-flex;align-items:center;padding:var(--sp-1) 11px;border:1px solid var(--danger-bd);background:var(--danger-bg);color:var(--danger-fg);border-radius:16px;font-size:var(--fs-xs);font-weight:500;white-space:nowrap;transition:.13s}
