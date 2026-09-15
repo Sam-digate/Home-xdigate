@@ -109,10 +109,11 @@ function subSend(kind,id,oi){
 
 /* ============ new thread ============ */
 function newTaskCampaignLabelHTML(c){return c?`<span class="new-task-campaign-name">${esc(c.n)}</span><span class="new-task-campaign-date">（${esc(c.from||'—')}–${esc(c.to||'—')}）</span>`:'<span class="new-task-campaign-name">日常（不归属活动）</span>';}
-function openNew(agid,prefill){
+function openNew(agid,prefill,campaignId){
  S.newAgent=agid||null;
  const a=S.newAgent?REG.find(x=>x.id===S.newAgent):null;
- const currentCampaign=CAMPS.some(c=>c.id===S.cid)?S.cid:'';S.newCampaignId=currentCampaign;
+ const requestedCampaign=campaignId===undefined?S.cid:campaignId;
+ const currentCampaign=CAMPS.some(c=>c.id===requestedCampaign)?requestedCampaign:'';S.newCampaignId=currentCampaign;
  $('mod').innerHTML=`<div class="mbox new-task-modal">
   <div class="mhd"><div class="e">新建任务</div><h3>你想让什么发生？</h3></div>
   <div class="mbd">

@@ -354,6 +354,29 @@
 .ctxr:first-of-type{border-top:0}
 .ctxr .k{color:var(--t3)}
 .ctxr .v{font-weight:500}
+
+/* Data source · daily run history */
+.ds-run-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+.ds-run-head>div{display:flex;flex-direction:column;gap:3px}.ds-run-head b{font-size:var(--fs-md);color:var(--t1)}
+.ds-run-head span{font-size:var(--fs-xs);color:var(--t3)}
+.ds-run-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:var(--sp-5);border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-tint);overflow:hidden}
+.ds-run-stat{display:flex;min-width:0;flex-direction:column;gap:6px;padding:var(--sp-3);border-left:1px solid var(--hairline)}
+.ds-run-stat:first-child{border-left:0}.ds-run-stat span{font-size:var(--fs-xs);color:var(--t3)}
+.ds-run-stat b{font-family:'Sora','Noto Sans SC',sans-serif;font-size:20px;line-height:1;color:var(--t1)}
+.ds-run-stat.primary b{color:var(--primary)}
+.ds-run-section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-2);font-size:var(--fs-sm);font-weight:700;color:var(--t1)}
+.ds-run-section-title span{font-size:var(--fs-xs);font-weight:500;color:var(--t3)}
+.ds-run-list{border:1px solid var(--border);border-radius:var(--r-sm);background:#fff;overflow:hidden}
+.ds-run-item{display:grid;grid-template-columns:10px minmax(0,1fr);gap:var(--sp-3);padding:var(--sp-3);border-top:1px solid var(--hairline)}
+.ds-run-item:first-child{border-top:0}.ds-run-dot{width:8px;height:8px;margin-top:5px;border-radius:50%;background:var(--t3)}
+.ds-run-dot.success{background:var(--green)}.ds-run-dot.failed{background:var(--red)}.ds-run-dot.retried{background:var(--blue)}
+.ds-run-dot.skipped{background:#A8A1BB}.ds-run-main{min-width:0}.ds-run-line{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
+.ds-run-line b{font-family:'Sora','Noto Sans SC',sans-serif;font-size:var(--fs-xs);font-weight:600;color:var(--t1)}
+.ds-run-status{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:600}
+.ds-run-status.success{background:#ECFDF5;color:#047857}.ds-run-status.failed{background:var(--danger-bg);color:var(--danger-fg)}
+.ds-run-status.skipped{background:#F3F1F8;color:#716987}.ds-run-status.retried{background:#EFF6FF;color:#1D4ED8}
+.ds-run-note{margin-top:5px;font-size:var(--fs-sm);line-height:1.55;color:var(--t2)}
+@media(max-width:620px){.ds-run-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.ds-run-stat:nth-child(3){border-left:0;border-top:1px solid var(--hairline)}.ds-run-stat:nth-child(4){border-top:1px solid var(--hairline)}}
 .hot-analysis{margin-top:var(--sp-4);padding:var(--sp-4);border:1px solid var(--border);border-radius:var(--r);background:#fff}
 .hot-analysis h4{margin:0 0 10px;font-size:var(--fs-md);font-weight:700;color:var(--t1)}
 .hot-analysis p{margin:0;font-size:var(--fs-sm);line-height:1.8;color:var(--t2)}
@@ -457,6 +480,12 @@
 
 /* knowledge */
 .kcomp{display:flex;gap:var(--sp-4);align-items:center;flex-wrap:wrap;background:linear-gradient(135deg,#F5F3FF,#FFF7ED);border:1px solid #E9E3FE;border-radius:var(--r);padding:var(--sp-4) 18px;margin-top:var(--sp-4)}
+.ds-source-card{display:block;padding:0;overflow:hidden;cursor:default}
+.ds-source-card:hover{transform:none}
+.ds-source-main{display:block;width:100%;padding:13px 14px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.ds-source-main:hover{background:var(--surface-tint)}
+.ds-source-actions{display:flex;align-items:center;gap:var(--sp-2);padding:10px 14px;border-top:1px solid var(--hairline);background:#fff}
+.ds-handled-note{display:inline-flex;align-items:center;min-height:30px;padding:0 10px;border-radius:8px;background:#ECFDF5;color:#047857;font-size:var(--fs-xs);font-weight:600}
 .gapchip{display:inline-flex;align-items:center;padding:var(--sp-1) 11px;border:1px solid var(--danger-bd);background:var(--danger-bg);color:var(--danger-fg);border-radius:16px;font-size:var(--fs-xs);font-weight:500;white-space:nowrap;transition:.13s}
 .gapchip:hover{background:#FEE2E2}
 .gapchip.warn{border-color:var(--warn-bd);background:var(--warn-bg);color:var(--warn-fg)}

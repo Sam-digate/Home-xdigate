@@ -179,7 +179,7 @@ function vThread(){
       </div></div>`:''}
 
     ${t.arts&&t.arts.length?`<div class="node ${t.st==='review'?'wait':'ok'}"><div class="nlab">产出 · ARTIFACT</div>
-      ${t.arts.filter(a=>!((t.id==='t3'&&a.id==='a4')||(t.id==='t1'&&a.id==='a2'))).map(peek).join('')}</div>`:''}
+      ${t.arts.filter(a=>!a.deferred&&!(t.id==='t1'&&a.id==='a2')).map(peek).join('')}</div>`:''}
 
     ${pptGeneratingNode(t)}
 
@@ -189,8 +189,8 @@ function vThread(){
          :t.standing?'常驻线程没有"最终交付物"——它按排期一直跑。每次产出单独审批，批完就归档，线程继续。'
          :t.prestartDemo&&!t.arts.length?(t.plan?.status==='rejected'?'计划未通过，未开始执行。':canAdjustPrestartPlan(t)?'计划待确认，尚未开始执行。':'执行中，尚未生成产出。')
          :!t.arts||!t.arts.length?'还没有产出。指定人员和产出模板后，将在当前线程中生成交付模板。'
-         :t.st==='done'?'✓ 已交付：<b style="color:var(--t1)">'+esc(t.arts[t.arts.length-1].ttl)+'</b>，已沉淀到知识库作为可信来源。'
-         :'本线程的交付物为 <b style="color:var(--t1)">'+esc(t.arts[t.arts.length-1].ttl)+'</b>。上方产出全部批准后自动收口。'}
+         :t.st==='done'?'✓ 已交付：<b style="color:var(--t1)">'+esc((t.arts.filter(a=>!a.deferred).slice(-1)[0]||{}).ttl)+'</b>，已沉淀到知识库作为可信来源。'
+         :'本线程的交付物为 <b style="color:var(--t1)">'+esc((t.arts.filter(a=>!a.deferred).slice(-1)[0]||{}).ttl)+'</b>。上方产出全部批准后自动收口。'}
       </div>`}</div>`}
   </div>
 
@@ -652,7 +652,7 @@ function peek(a){
      </div>`).join('')}</div></div>
    ${a.id==='a2-label-copy'?`<div class="pk-a">${a.socialReturning?`<div class="listing-reject-inline"><input id="social-return-${a.id}" type="text" aria-label="退回原因" placeholder="填写退回原因" value="${esc(a.socialReturnDraft||'')}" oninput="setSocialReturnDraft('${a.id}',this.value)"><button class="btn sm" onclick="confirmSocialReturn('${a.id}')">确认</button><button class="btn ghost sm" onclick="cancelSocialReturn('${a.id}')">取消</button></div>`:`${a.plans.some(p=>p.s==='review')?`<button class="btn sm" onclick="openSocialApproval('${a.id}')">批准</button><button class="btn ghost sm" onclick="startSocialReturn('${a.id}')">退回</button>`:''}<span class="v">v${a.v} · 2小时前</span>`}</div>`:`<div class="vals">${a.vals.map(v=>`<span class="val ${v.s}">${v.s==='ok'?'✓':v.s==='warn'?'!':'✕'} ${v.l} <span class="m">${v.v}</span></span>`).join('')}</div>
     <div class="pk-a"${a.hideMeta?' style="display:none"':''}><button class="btn ghost sm" onclick="openDw('${a.id}')">编辑 ↗</button>
-     ${subCount(a)?`<button class="rvb" onclick="openReview('${a.id}')">评论 <span class="n">${subCount(a)}</span></button>`:''}
+     ${a.id==='a4-direction'||subCount(a)?`<button class="rvb" onclick="openReview('${a.id}')">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''}</button>`:''}
      <span class="v">v${a.v} · 2小时前</span></div>`}
     ${a.nxt&&(a.id!=='a2-label-copy'||a.plans.every(p=>p.s==='done'))?`<div class="nxt"><span class="lb">接下来</span>${a.nxt.map(n=>n==='下载活动策划'
       ?`<span class="plan-download"><button class="na" onclick="event.stopPropagation();S.planDownloadOpen=!S.planDownloadOpen;render()">${n} →</button>${S.planDownloadOpen?`<span class="plan-download-menu"><button onclick="downloadActivityPlan('HTML')">HTML 格式</button><button onclick="downloadActivityPlan('Word')">Word 格式</button></span>`:''}</span>`
@@ -673,11 +673,12 @@ function peek(a){
        ${subCount(a)?`<span class="chip mut">评论 ${subCount(a)}</span>`:''}</div></div>
     </button>
    </div></div>
-   ${a.vals?.length?`<div class="vals">${a.vals.map(v=>`<span class="val ${v.s}">${v.s==='ok'?'✓':v.s==='warn'?'!':'✕'} ${v.l} <span class="m">${v.v}</span></span>`).join('')}</div>`:''}
+    ${a.id!=='a4-direction'&&a.vals?.length?`<div class="vals">${a.vals.map(v=>`<span class="val ${v.s}">${v.s==='ok'?'✓':v.s==='warn'?'!':'✕'} ${v.l} <span class="m">${v.v}</span></span>`).join('')}</div>`:''}
    <div class="pk-a">
     ${m1?m1InlineActions(a):a.st==='review'?`<button class="btn sm" onclick="act('${a.id}','批准')">批准</button>`:''}
-    ${m1?'':`<button class="btn ghost sm" onclick="openDw('${a.id}')">查看规划表</button>
-    <button class="btn ghost sm" onclick="openDw('${a.id}');dtab(1)">查看图片</button>`}
+     ${m1?'':a.id==='a4-direction'?`<button class="btn ghost sm" onclick="openDw('${a.id}');dtab(1)">查看规划表</button>
+     <button class="btn ghost sm" onclick="openDw('${a.id}')">查看图片</button>`:`<button class="btn ghost sm" onclick="openDw('${a.id}')">查看规划表</button>
+     <button class="btn ghost sm" onclick="openDw('${a.id}');dtab(1)">查看图片</button>`}
     ${subCount(a)?`<button class="rvb" onclick="openReview('${a.id}')">评论 <span class="n">${subCount(a)}</span></button>`:''}
     <span class="v">v${a.v} · ${a.st==='run'?'渲染中':'2小时前'}</span></div>
    ${a.nxt&&a.st==='done'?`<div class="nxt"><span class="lb">接下来</span>
@@ -688,12 +689,12 @@ function peek(a){
   const allOptionsDone=a.opts.every(o=>o.s==='done'||o.s==='archived');
   return `<div class="pk ${a.seoFlow?'seo-flow':''}">
    <div class="pk-h"><span class="ty">产出 · ${a.id==='a1'?'活动策划':a.ty}</span>${a.plat?`<span class="chip plat">${a.plat}</span>`:''}
-    ${a.hideChoice||a.independent?'':'<span class="chip mut">3 选 1</span>'}${artifactRunLink(a.by)}</div>
-   <div style="padding:var(--sp-3)"><div class="opts">${a.opts.map((o,i)=>`
+     ${a.hideChoice||a.independent||(a.id==='a4-direction'&&a.flowStage!=='direction-review')?'':'<span class="chip mut">3 选 1</span>'}${artifactRunLink(a.by)}</div>
+    <div style="padding:var(--sp-3)"><div class="opts">${a.opts.map((o,i)=>`
      <div class="optwrap"><button class="opt ${o.s==='done'?'win':''}" onclick="openDw('${a.id}',${i})" style="width:100%">
        <div class="im" style="${o.imagesGenerated?`background-image:url('${directionGeneratedCover(i)}');background-size:cover;background-position:center`:`${grad(o.g[0],o.g[1])}`}"></div>
       <div class="bd"><div class="ot">${esc(o.t).replace(/\n/g,'<br>')}</div><div class="oe">${esc(o.e)}</div>
-         <div class="of"><span class="st ${o.s}">${o.s==='done'?'已批准':o.s==='archived'?(a.seoFlow?'未采用':'已归档'):'待审批'}</span>
+          <div class="of"><span class="st ${a.id==='a4-direction'&&a.flowStage==='plan-generating'?'run':o.s}">${a.id==='a4-direction'&&a.flowStage==='plan-generating'?'规划表生成中':a.id==='a4-direction'&&a.flowStage==='plan-review'?'规划表待审批':o.s==='done'?'已批准':o.s==='archived'?(a.seoFlow?'未采用':'已归档'):'待审批'}</span>
            ${subCount(o)?`<span class="chip mut">评论 ${subCount(o)}</span>`:''}</div></div>
      </button>
     ${a.id==='a1'||a.id==='a4-direction'||a.seoFlow?'':a.hideChoice||a.independent?`<div class="optact"><span style="font-size:var(--fs-xs);color:var(--t3);padding:var(--sp-1) 0">打开编辑 ↗</span></div>`:o.s==='review'?`<div class="optact">
@@ -701,11 +702,13 @@ function peek(a){
        <button class="btn ghost sm" onclick="event.stopPropagation();optAct('${a.id}',${i},0)">淘汰</button></div>`
       :`<div class="optact"><span style="font-size:var(--fs-xs);color:var(--t3);padding:var(--sp-1) 0">${o.s==='done'?'✓ 已选为交付':'已归档'}</span></div>`}
      </div>`).join('')}</div></div>
-    <div class="pk-a">${a.id==='a1'||a.id==='a4-direction'
+     <div class="pk-a">${a.id==='a1'||a.id==='a4-direction'
       ?a.drawerReturning
        ?drawerReturnEditor(a)
-       :allOptionsDone?`<span class="st done">已批准</span><span class="v num">v${a.v} · 2小时前</span>`
-       :`<button class="btn sm" onclick="openDirectionApproval('${a.id}')">批准</button>${drawerReturnButton(a)}<span class="v num">v${a.v} · 2小时前</span>`
+        :allOptionsDone?`<span class="st done">已批准</span><span class="v num">v${a.v} · 刚刚</span>`
+        :a.id==='a4-direction'&&a.flowStage==='plan-generating'?`<span class="v num">v${a.v} · 刚刚</span>`
+         :a.id==='a4-direction'&&a.flowStage==='plan-review'?`<button class="btn sm" onclick="openDw('${a.id}',0)">批准</button><button class="btn ghost sm" onclick="openDw('${a.id}',0)">查看规划表</button>${drawerReturnButton(a)}<button class="rvb" onclick="openDirectionComments('${a.id}')">评论 ${subCount(a.opts[0])?`<span class="n">${subCount(a.opts[0])}</span>`:''}</button><span class="v num">v${a.v} · 刚刚</span>`
+        :`<button class="btn sm" onclick="openDirectionApproval('${a.id}')">批准</button>${drawerReturnButton(a)}<span class="v num">v${a.v} · 2小时前</span>`
       :a.seoFlow&&allOptionsDone?`<span class="v num">v${a.v} · 2小时前</span>`
       :a.seoFlow&&a.drawerReturning?drawerReturnEditor(a)
       :`<button class="btn ghost sm" onclick="${a.seoFlow?`startDrawerReturn('${a.id}')`:a.returnLabel==='退回'?`openArtifactReturn('${a.id}')`:`toast('已让 '+nick('${a.by}')+' 换一批方向')`}">${a.seoFlow?'退回':a.returnLabel||'换一批'}</button>
@@ -808,6 +811,9 @@ function openDirectionApproval(aid){
  const [,a]=findArt(aid);if(!a?.opts?.length)return;
  const pending=a.opts.findIndex(o=>o.s==='review');
  openDw(aid,pending<0?0:pending);
+}
+function openDirectionComments(aid){
+ openDw(aid,0);S.pc=true;drawDw();scrollDrawerToBottom();
 }
 function startSocialReturn(id){
  const [,a]=findArt(id);if(!a)return;
@@ -1062,6 +1068,7 @@ function openReview(id){
  const [,a]=findArt(id);
  if(a?.listing){openDw(id);toggleListingComment();return;}
  if(a?.inspection||a?.sentiment){openDw(id);S.pc=true;drawDw();scrollDrawerToBottom();return;}
+ if(a?.mode==='pdpseq'&&a.id==='a4-direction'){openDw(id);S.pc=true;drawDw();scrollDrawerToBottom();return;}
  const tab=a.mode==='pdpseq'?2:a.ty==='视频'?3:a.ty==='详情页'?3:a.ty==='客服回复'?2:2;
  openDw(id);S.dtab=tab;drawDw();
  scrollDrawerToBottom();
@@ -1099,7 +1106,7 @@ function openHistoryArtifact(tid,index){
 document.addEventListener('click',e=>{
  const drawer=$('dw'),button=e.target.closest('button');
  if(!drawer?.classList.contains('on')||!button||!drawer.contains(button)||button.disabled)return;
- if(button.textContent.replace(/\s+/g,'').trim()!=='批准')return;
+ if(button.hasAttribute('data-keep-drawer')||button.textContent.replace(/\s+/g,'').trim()!=='批准')return;
  setTimeout(()=>{if(drawer.classList.contains('on'))closeDw();},0);
 });
 function toggleFocus(){S.focus=!S.focus;$('dw').classList.toggle('focus',S.focus);drawDw();}
@@ -1155,7 +1162,7 @@ function drawDw(){
  const t2=T.find(x=>x.id===S.tid);const idx=t2.arts.findIndex(x=>x.id===S.aid);
  const planIndex=a.mode==='plans'?Math.max(0,Math.min((a.plans||[]).length-1,S.oi===null?1:S.oi)):null;
  const plan=planIndex===null?null:(a.plans||[])[planIndex];
- const isDetailDirection=a.id==='a4-direction';
+  const isDetailDirection=a.id==='a4-direction'&&a.mode==='options';
  const isActivityDirection=a.id==='a1';
  const isSocialDirection=a.mode==='options'&&a.independent&&!isActivityDirection;
  const isSeoDirection=a.mode==='options'&&a.seoFlow;
@@ -1209,7 +1216,7 @@ else if(a.mode==='csa'){
    tabs=['内容方向','版本'];body=[dSeoDirection(a,directionIndex),dVer(a)][S.dtab];
   }else if(isActivityDirection&&direction.activityPlanReady){
    tabs=['当前活动策划','创意方向','版本'];body=[dActivityPlanPreview(),dDetailDirection(a,directionIndex),dVer(a)][S.dtab];
-  }else if(isDetailDirection&&direction.planReady&&direction.imagesGenerated){
+  }else if(isDetailDirection&&direction.planReady&&(direction.imagesGenerated||direction.imagesGenerating)){
    tabs=['图片','当前规划表','创意方向','版本'];body=[dDirectionImages(a,directionIndex),dDirectionPlanPreview(a,directionIndex),dDetailDirection(a,directionIndex),dVer(a)][S.dtab];
   }else if(isDetailDirection&&direction.planReady){
    tabs=['当前规划表','创意方向','版本'];body=[dDirectionPlanPreview(a,directionIndex),dDetailDirection(a,directionIndex),dVer(a)][S.dtab];
@@ -1247,9 +1254,13 @@ else if(a.mode==='csa'){
   tabs=['图片','推广计划表','版本'];
   body=[dPromotionImages(a),dPromotionPlan(a),dPromotionVersions(a)][S.dtab]+(S.pc&&S.dtab<2?`<div style="margin-top:var(--sp-4)">${subPane(a)}</div>`:'');
  }
- else if(a.mode==='pdpseq'){
-  if(a.m1){tabs=['图片','当前规划表','创意方向','版本'];body=[dDirectionImages(a),dM1PdpPlan(a),dM1PdpDirection(a),dVer(a)][S.dtab]+(S.pc&&S.dtab<3?`<div style="margin-top:var(--sp-4)">${subPane(a)}</div>`:'');}
-  else {tabs=['规划详情表','图片',R,'版本'];body=[dPdpTable(a),dImgs(a),subPane(a),dVer(a)][S.dtab];}
+  else if(a.mode==='pdpseq'){
+   if(a.m1){tabs=['图片','当前规划表','创意方向','版本'];body=[dDirectionImages(a),dM1PdpPlan(a),dM1PdpDirection(a),dVer(a)][S.dtab]+(S.pc&&S.dtab<3?`<div style="margin-top:var(--sp-4)">${subPane(a)}</div>`:'');}
+   else if(a.id==='a4-direction'){
+    tabs=['图片','当前规划表','创意方向','版本'];
+    body=[dImgs(a),dPdpTable(a),dDetailDirection(a,0),dVer(a)][S.dtab]+(S.pc&&S.dtab<3?`<div style="margin-top:var(--sp-4)">${subPane(a)}</div>`:'');
+   }
+   else {tabs=['规划详情表','图片',R,'版本'];body=[dPdpTable(a),dImgs(a),subPane(a),dVer(a)][S.dtab];}
  }
  else if(a.ty==='详情页'){tabs=['字段','图片','A+ 模块','版本'];body=[dFlds(a),dImgs(a),dAplus(a),dVer(a)][S.dtab];}
  else if(a.ty==='客服回复'){tabs=['回复','客户上下文','模板'];body=[dReply(a),dCtx(a),dTpl(a)][S.dtab];}
@@ -1282,6 +1293,12 @@ else if(a.mode==='csa'){
      :a.mode==='roster'&&S.dtab===2?`<button class="btn" onclick="openContentData()">＋ 录入内容数据</button>`
      :a.mode==='roster'&&S.dtab===1?globalAuditFooter(a)
      :a.mode==='promoseq'?promotionFooter(a)
+       :a.mode==='pdpseq'&&a.id==='a4-direction'&&S.dtab===0?`${a.st==='review'?`<button class="btn" onclick="act('${a.id}','批准');closeDw()">批准</button>`:''}
+        <button class="btn ghost" onclick="downloadAllDetailImages()">批量下载</button>${pdpArtifactCommentButton(a)}`
+       :a.mode==='pdpseq'&&a.id==='a4-direction'&&S.dtab===1?`${a.st==='review'?`<button class="btn" onclick="act('${a.id}','批准');closeDw()">批准</button>`:''}
+        <button class="btn ghost" onclick="downloadDirectionPlan('${a.id}',0)"><i data-lucide="download"></i>下载规划表</button>${pdpArtifactCommentButton(a)}`
+      :a.mode==='pdpseq'&&a.id==='a4-direction'&&S.dtab===2?pdpArtifactCommentButton(a)
+      :a.mode==='pdpseq'&&a.id==='a4-direction'?''
      :a.mode==='pdpseq'&&S.dtab===1?`${a.st==='review'?`<button class="btn" onclick="act('${a.id}','批准');closeDw()">批准</button>`:''}
       <button class="btn ghost" onclick="downloadAllDetailImages()">批量下载</button>`
      :a.mode==='pdpseq'&&S.dtab===0?`${a.st==='review'?`<button class="btn" onclick="act('${a.id}','批准');closeDw()">批准</button>`:''}
@@ -1303,10 +1320,7 @@ else if(a.mode==='csa'){
          <span class="plan-download"><button class="btn ghost" onclick="event.stopPropagation();S.planDownloadOpen=!S.planDownloadOpen;drawDw()"><i data-lucide="download"></i>下载活动策划</button>${S.planDownloadOpen?`<span class="plan-download-menu"><button onclick="event.stopPropagation();downloadActivityPlan('HTML')">HTML 格式</button><button onclick="event.stopPropagation();downloadActivityPlan('Word')">Word 格式</button></span>`:''}</span>`
        :`<button class="btn" onclick="startActivityPlanGeneration('${a.id}',${directionIndex})" ${S.activityPlanGenerating===a.id+':'+directionIndex?'disabled':''}>${S.activityPlanGenerating===a.id+':'+directionIndex?'<span class="spin"></span>活动策划生成中…':'生成活动策划'}</button>`}
       <button class="rvb ${S.pc?'on':''}" onclick="toggleDirectionComment()">评论 ${subCount(direction)?`<span class="n">${subCount(direction)}</span>`:''} ${S.pc?'▴':'▾'}</button>`
-     :isDetailDirection?`${direction.planReady||direction.imagesGenerated?'':`<button class="btn ghost" onclick="startDirectionPlanGeneration('${a.id}',${directionIndex})" ${S.directionPlanGenerating===a.id+':'+directionIndex?'disabled':''}>${S.directionPlanGenerating===a.id+':'+directionIndex?'<span class="spin"></span>规划表生成中…':'生成规划表'}</button>`}
-      ${direction.imagesGenerated?(direction.s==='done'?'<span class="st done">已批准</span>':`<button class="btn" onclick="approveDirection('${a.id}',${directionIndex})">批准</button>`):`<button class="btn" onclick="generateDirectionImages('${a.id}',${directionIndex})" ${S.directionImagesGenerating===a.id+':'+directionIndex?'disabled':''}>${S.directionImagesGenerating===a.id+':'+directionIndex?'<span class="spin"></span>详情图生成中…':direction.planReady?'生成详情图':'直接生成详情图'}</button>`}
-      ${tabs[S.dtab]==='当前规划表'?`<button class="btn ghost" onclick="downloadDirectionPlan('${a.id}',${directionIndex})"><i data-lucide="download"></i>下载规划表</button>`:''}${tabs[S.dtab]==='图片'?`<button class="btn ghost" onclick="downloadAllDetailImages()"><i data-lucide="download"></i>批量下载</button>`:''}
-      <button class="rvb ${S.pc?'on':''}" onclick="toggleDirectionComment()">评论 ${subCount(direction)?`<span class="n">${subCount(direction)}</span>`:''} ${S.pc?'▴':'▾'}</button>`
+     :isDetailDirection?pdpDirectionFooter(a,directionIndex,tabs)
      :isSocialDirection?`${direction.s!=='done'?`<button class="btn" onclick="approveDirection('${a.id}',${directionIndex})">批准</button>`:''}
       <button class="rvb ${S.pc?'on':''}" onclick="toggleDirectionComment()">评论 ${subCount(direction)?`<span class="n">${subCount(direction)}</span>`:''} ${S.pc?'▴':'▾'}</button>`
      :a.seoFlow?''
@@ -1485,6 +1499,60 @@ function removeDirectionReference(id,i){
  a.opts[i].referenceImage=null;drawDw();toast('已移除参考产品图');
 }
 function toggleDirectionComment(){const opening=!S.pc;S.pc=!S.pc;drawDw();if(opening)scrollDrawerToBottom();}
+function togglePdpArtifactComment(){const opening=!S.pc;S.pc=!S.pc;drawDw();if(opening)scrollDrawerToBottom();}
+function pdpArtifactCommentButton(a){return `<button class="rvb ${S.pc?'on':''}" onclick="togglePdpArtifactComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;}
+function pdpDirectionFooter(a,i,tabs){
+ const o=a.opts[i],comments=`<button class="rvb ${S.pc?'on':''}" onclick="toggleDirectionComment()">评论 ${subCount(o)?`<span class="n">${subCount(o)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;
+ if(a.drawerReturning)return drawerReturnEditor(a);
+ if(a.flowStage==='plan-generating')return comments;
+ if(a.flowStage==='plan-review'){
+  if(tabs[S.dtab]==='当前规划表')return `<button class="btn" data-keep-drawer onclick="approvePdpPlan('${a.id}')">批准</button><button class="btn ghost" onclick="downloadDirectionPlan('${a.id}',${i})"><i data-lucide="download"></i>下载规划表</button>${drawerReturnButton(a)}${comments}`;
+  return tabs[S.dtab]==='创意方向'?comments:'';
+ }
+ if(a.flowStage==='detail-generating')return `<button class="btn" disabled><span class="spin"></span>详情页生成中…</button>${comments}`;
+ if(a.flowStage==='complete')return `<span class="st done">规划表已批准</span>${comments}`;
+ return `<button class="btn" onclick="approvePdpDirection('${a.id}',${i})">批准</button>${drawerReturnButton(a)}${comments}`;
+}
+function approvePdpDirection(id,i){
+ const [t,a]=findArt(id),chosen=a?.opts?.[i];if(!t||id!=='a4-direction'||!chosen||a.flowStage!=='direction-review')return;
+ a.discardedOptions=a.opts.filter((_,j)=>j!==i).map(o=>({...o,s:'archived'}));
+ a.selectedOriginalIndex=i;chosen.originalIndex=i;chosen.s='review';chosen.planReady=false;chosen.planApproved=false;
+ a.opts=[chosen];a.selected=0;a.flowStage='plan-generating';a.st='run';a.sum='已批准'+chosen.t.split('：')[0]+' · 规划表生成中';
+ t.st='run';t.up='刚刚';t.live={t:'详情页生成正在整理完整规划表',el:'刚刚',sub:['正在根据已批准方向生成屏次、卖点顺序与画面要求'],p:46,tk:620};
+ if(t.plan?.steps?.[3])t.plan.steps[3]={l:'批准一个创意方向',m:chosen.t.replace(/^方向[一二三]：/,''),s:'ok',r:'刚刚'};
+ if(t.plan?.steps?.[4])t.plan.steps[4]={l:'生成并批准规划表',m:'正在一次性生成完整规划表',s:'act',r:'进行中'};
+ S.oi=0;closeDw();render();toast('方向已批准 · 其他两个方向已作废');
+ setTimeout(()=>{
+  const [currentTask,current]=findArt(id),selected=current?.opts?.[0];if(!currentTask||!selected)return;
+  ensureDirectionPlan(current,0);selected.planApproved=false;current.flowStage='plan-review';current.st='review';current.sum='完整规划表已生成 · 待审批';
+  currentTask.live=null;currentTask.st='review';currentTask.up='刚刚';
+  if(currentTask.plan?.steps?.[4])currentTask.plan.steps[4]={l:'生成并批准规划表',m:`完整规划表 · ${selected.plan.length} 屏`,s:'act',r:'待审批'};
+  render();syncAppr();toast('完整规划表已生成 · 等待批准');
+ },1600);
+}
+function approvePdpPlan(id){
+ const [t,a]=findArt(id),o=a?.opts?.[0];if(!t||id!=='a4-direction'||a.flowStage!=='plan-review'||!o?.planReady)return;
+ o.planApproved=true;o.s='done';o.imagesGenerating=true;a.st='done';a.flowStage='detail-generating';a.sum='规划表已批准 · 详情页生成中';S.detailImagesComplete=false;S.dtab=0;
+ t.st='run';t.up='刚刚';t.live={t:'详情页生成正在生成页面内容',el:'刚刚',sub:['正在根据已批准规划表生成详情页图片与内容模块'],p:52,tk:980};
+ if(t.plan?.steps?.[4])t.plan.steps[4]={l:'生成并批准规划表',m:`完整规划表 · ${o.plan.length} 屏 · 已批准`,s:'ok',r:'刚刚'};
+ if(t.plan?.steps?.[5])t.plan.steps[5]={l:'生成详情页',m:'正在生成图片与内容模块',s:'act',r:'进行中'};
+ render();if(S.aid===id&&$('dw')?.classList.contains('on'))drawDw();toast('规划表已批准 · 开始生成详情页');
+ setTimeout(()=>{
+  const current=T.find(x=>x.id===t.id),directions=current?.arts?.find(x=>x.id===id),detail=current?.arts?.find(x=>x.id==='a4'),selected=directions?.opts?.[0];
+  if(!current||!directions||!detail||!selected)return;
+  selected.imagesGenerating=false;selected.imagesGenerated=true;S.detailImagesComplete=true;
+  const sourceDirection=directions.selectedOriginalIndex??0,directionHistory={selected:{...selected},discarded:[...(directions.discardedOptions||[])]};
+  Object.assign(directions,{mode:'pdpseq',stage:1,sourceDirection,ty:'详情页',plat:detail.plat,ttl:detail.ttl,by:detail.by,v:detail.v,st:'review',pv:detail.pv,g:selected.g||detail.g,img:directionGeneratedCover(sourceDirection),
+   ex:`已按「${selected.t.replace(/^方向[一二三]：/,'')}」完成详情页内容与图片生成，完整规划表共 ${selected.plan.length} 屏。`,
+   vals:[{l:'规划表',v:selected.plan.length+' 屏',s:'ok'},{l:'图片规格',v:'8/'+selected.plan.length+' 张',s:'warn'}],flds:detail.flds,nxt:detail.nxt,
+   sub:[...(selected.sub||[]),...(detail.sub||[])],directionOption:{...selected},directionHistory,planRows:selected.plan,flowStage:'complete'});
+  current.arts=current.arts.filter(x=>x.id!=='a4');current.live=null;current.st='review';current.up='刚刚';current.outputCount=1;
+  if(current.plan?.steps?.[5])current.plan.steps[5]={l:'生成详情页',m:`A8O 修护精华 30ml · ${selected.plan.length} 屏`,s:'ok',r:'刚刚'};
+  if(current.plan?.steps?.[6])current.plan.steps[6]={l:'等待审批后上架',m:'详情页待人工确认',s:'act',r:'待审批'};
+  const drawerOpen=S.aid===id&&$('dw')?.classList.contains('on');if(drawerOpen){S.dtab=0;S.oi=null;}
+  render();if(drawerOpen)drawDw();syncAppr();toast('详情页图片已生成 · 等待审批');
+ },1800);
+}
 function approveDirection(id,i){
  const [t,a]=findArt(id);if(!a||!a.opts||!a.opts[i])return;
  a.opts[i].s='done';
@@ -1549,7 +1617,7 @@ function directionPlanRows(i){
  ];
 }
 function ensureDirectionPlan(a,i){
- const o=a.opts[i];if(!o.plan)o.plan=directionPlanRows(i);
+ const o=a.opts[i],sourceIndex=Number.isInteger(o.originalIndex)?o.originalIndex:i;if(!o.plan)o.plan=directionPlanRows(sourceIndex);
  o.planReady=true;return o.plan;
 }
 function startDirectionPlanGeneration(id,i){

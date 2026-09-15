@@ -91,6 +91,7 @@ function queue(){
   if(me==='du'&&t.ask&&!t.answered){const askN=t.ask.channels||t.ask.ppt?1:t.ask.qs.length;q.push({t,a:{id:'ask-'+t.id,by:t.ag},oi:null,ttl:t.ask.ppt?'PPT 生成设置待补充':t.ask.channels?'目标渠道待你补充':askN+' 个问题待你回答',
     g:['#C4B5FD','#7C3AED'],ty:'待补充',plat:null,vals:[{l:'信息缺口',v:t.ask.ppt?'PPT 生成设置':t.ask.channels?'渠道配置':askN+' 项',s:'bad'}],wait:8,sla:null,ask:1});}
   if(!t.arts)return;t.arts.forEach(a=>{
+  if(a.deferred)return;
   if(a.m1){
    if(a.m1.stage==='owner'&&me===a.m1.owner)q.push({t,a,oi:null,ttl:a.ttl,g:a.g,ty:'负责人审核',plat:a.plat,vals:[{l:'M1 产出',v:'待你先批准',s:'warn'}],wait:5,sla:30,m1:'owner'});
    if(a.m1.stage==='requester'&&me===a.m1.requester)q.push({t,a,oi:null,ttl:t.demoDualAgents?'双 Agent 交付待 dudu 验收':a.ttl,g:a.g,ty:'验收',plat:a.plat,vals:t.demoDualAgents?[{l:'详情页内容',v:'Brooks 已批准',s:'ok'},{l:'巡检报告',v:'Brooks 已批准',s:'ok'}]:[{l:'Brooks',v:'已批准',s:'ok'}],wait:0,sla:null,m1:'requester',priority:1});
@@ -98,7 +99,9 @@ function queue(){
   }
   if(me!=='du')return;
  
- if(a.mode==='options'){a.opts.forEach((o,i)=>{if(o.s==='review')
+ if(a.mode==='options'&&a.id==='a4-direction'&&['direction-review','plan-review'].includes(a.flowStage)){
+    const o=a.opts[0];q.push({t,a,oi:0,ttl:a.flowStage==='plan-review'?'A8O 修护精华 · 完整规划表':a.ttl+' · 3 选 1',g:o.g,ty:a.ty,plat:a.plat,vals:a.flowStage==='plan-review'?[{l:'规划表',v:(o.plan?.length||0)+' 屏',s:'ok'}]:[{l:'创意方向',v:'3 选 1',s:'warn'}],wait:181,sla:null});}
+ else if(a.mode==='options'){a.opts.forEach((o,i)=>{if(o.s==='review')
     q.push({t,a,oi:i,ttl:o.t,g:o.g,ty:a.ty,plat:a.plat,vals:[{l:'禁用词',v:'通过',s:'ok'},{l:'字数',v:'412/1000',s:'ok'}],wait:181,sla:null});});}
   else if(a.st==='review')
     q.push({t,a,oi:null,ttl:a.ttl,g:a.g||(a.rows?['#F9A8D4','#DB2777']:['#C4B5FD','#8B5CF6']),ty:a.ty,plat:a.plat,vals:a.vals,
@@ -263,7 +266,7 @@ function tickToday(){
 /* ---- one conversation per thread, scoped ---- */
 function allC(t){
  const out=(t.cmts||[]).map(c=>({...c,sc:null}));
- (t.arts||[]).forEach(a=>{
+ (t.arts||[]).filter(a=>!a.deferred).forEach(a=>{
   (a.sub||[]).forEach(m=>out.push({...m,sc:{k:'a',aid:a.id,label:a.ttl||a.ty}}));
   (a.opts||[]).forEach((o,i)=>(o.sub||[]).forEach(m=>out.push({...m,sc:{k:'o',aid:a.id,i,label:o.t}})));
   (a.rows||[]).forEach((r,i)=>(r.sub||[]).forEach(m=>out.push({...m,sc:{k:'r',aid:a.id,i,label:r.n}})));

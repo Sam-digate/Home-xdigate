@@ -490,7 +490,7 @@ function dPdpTable(a){
  const [,directions]=findArt('a4-direction');
  const i=Number.isInteger(a.sourceDirection)?a.sourceDirection:1;
  const o=directions&&directions.opts?directions.opts[i]:null;
- const rows=o&&o.plan?o.plan:directionPlanRows(i);
+ const rows=a.planRows||(o&&o.plan?o.plan:directionPlanRows(i));
  return dPdpPlanRows(a.id,i,rows,false);
 }
 function dDirectionPlanPreview(a,i){
@@ -525,7 +525,7 @@ function setPdpPlanRows(aid,directionIndex,open){
  const [,art]=findArt(aid);
  const [,directions]=findArt('a4-direction');
  const option=directions&&directions.opts?directions.opts[directionIndex]:null;
- const rows=art?.m1?(art.planRows||(art.planRows=directionPlanRows(Number.isInteger(art.sourceDirection)?art.sourceDirection:1))):(option&&option.plan?option.plan:directionPlanRows(directionIndex));
+ const rows=art?.planRows||(art?.m1?(art.planRows||(art.planRows=directionPlanRows(Number.isInteger(art.sourceDirection)?art.sourceDirection:1))):(option&&option.plan?option.plan:directionPlanRows(directionIndex)));
  S.pdpPlanOpen=S.pdpPlanOpen||{};
  rows.forEach((_,rowIndex)=>{S.pdpPlanOpen[`${aid}:${directionIndex}:${rowIndex}`]=open;});
  drawDw();
