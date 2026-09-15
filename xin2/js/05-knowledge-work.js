@@ -49,20 +49,20 @@ const SAVED_OUTPUTS=[
  {n:'蓄水期预算分配建议',dom:'电商',cat:'分析结论',v:'v1',summary:'基于近 90 天四个计划的数据对比，建议提高老客召回预算占比，并控制相似人群拓展的成本波动。',tags:['预算分配','蓄水期','数据分析','A80PARIS'],related:'11.11 大促',agent:'数据分析 Agent',owner:'du',saved:'昨天 17:02',from:'数据分析 · A80PARIS',reads:11,using:2,last:'昨天',tid:'t19',aid:'a14'}];
 
 /* ============ 数据源 · Base Data Capability ============ */
-const DSTAT={fresh:{n:'正常',c:'done'},stale:{n:'已过期',c:'review'},error:{n:'异常',c:'hold'},off:{n:'检测已暂停',c:'todo'}};
+const DSTAT={fresh:{n:'正常',c:'done'},error:{n:'异常',c:'hold'},off:{n:'检测已暂停',c:'todo'}};
 const DSRC=[
  {id:'d1',n:'淘宝_店铺数据',brand:'EVO1.1',plat:'天猫国际',updatedAt:'2026-09-10 18:00:32',cad:'1d',st:'fresh',
   desc:'数据按预期节奏正常同步',reads:1840,ags:['insp','ana','ad','list'],owner:'Brooks',base:['p2','p3']},
- {id:'d2',n:'淘客',brand:'EVO1.1',plat:'天猫国际',updatedAt:'2026-09-10 17:59:03',cad:'1d',st:'stale',
+ {id:'d2',n:'淘客',brand:'EVO1.1',plat:'天猫国际',updatedAt:'2026-09-10 17:59:03',cad:'1d',st:'error',
   desc:'最近一次同步已超过更新周期',reads:620,ags:['ad','ana','rep'],owner:'Brooks',base:['p2'],why:'最近一次同步已超过更新周期，请检查同步任务。'},
  {id:'d3',n:'淘宝直播',brand:'EVO1.1',plat:'天猫国际',updatedAt:'2026-09-10 18:00:56',cad:'1d',st:'off',
   desc:'更新状态检测已暂停，数据仍按原接入方式更新',reads:0,ags:[],owner:'Ariel',base:[],why:'检测已暂停，系统不会判断更新是否正常，也不会生成异常提醒。'},
  {id:'d4',n:'淘宝_万象台',brand:'EVO1.1',plat:'天猫国际',updatedAt:'2026-09-10 18:03:12',cad:'1d',st:'error',
-  desc:'最近一次同步失败，请检查授权',reads:410,ags:['ad','ana'],owner:'Sophie',base:['p5'],why:'最近一次同步失败，当前授权或接口连接可能已失效。'},
+  desc:'最近一次同步异常，请检查授权',reads:410,ags:['ad','ana'],owner:'Sophie',base:['p5'],why:'最近一次同步异常，当前授权或接口连接可能已失效。'},
  {id:'d5',n:'天猫流量',brand:'EVO1.1',plat:'天猫国际',updatedAt:'2026-09-10 18:01:16',cad:'1d',st:'fresh',
   desc:'数据按预期节奏正常同步',reads:2260,ags:['ana','rep','listen'],owner:'Ariel',base:[]}
 ];
-const DSRUNSTAT={success:{n:'成功',c:'success'},failed:{n:'失败',c:'failed'},skipped:{n:'未运行',c:'skipped'},retried:{n:'重试成功',c:'retried'}};
+const DSRUNSTAT={success:{n:'成功',c:'success'},failed:{n:'异常',c:'failed'}};
 const DSRUNS={
  d1:{month:{total:30,success:30,failed:0,skipped:0,rate:'100%'},runs:[
   {at:'2026-09-10 18:00:32',st:'success',dur:'42 秒',rows:'1,840 条',note:'数据按预期节奏完成同步'},
@@ -80,9 +80,9 @@ const DSRUNS={
   {at:'2026-09-08 18:00:56',st:'skipped',dur:'—',rows:'0 条',note:'更新状态检测已暂停，本次未检测'},
   {at:'2026-09-07 18:00:56',st:'skipped',dur:'—',rows:'0 条',note:'更新状态检测已暂停，本次未检测'}]},
  d4:{month:{total:30,success:27,failed:2,skipped:1,rate:'90%'},runs:[
-  {at:'2026-09-10 18:03:12',st:'failed',dur:'18 秒',rows:'0 条',note:'授权校验失败，接口连接可能已失效'},
+  {at:'2026-09-10 18:03:12',st:'failed',dur:'18 秒',rows:'0 条',note:'授权校验异常，接口连接可能已失效'},
   {at:'2026-09-09 18:03:08',st:'success',dur:'47 秒',rows:'410 条',note:'数据按预期节奏完成同步'},
-  {at:'2026-09-08 18:16:44',st:'retried',dur:'1 分 06 秒',rows:'398 条',note:'首次连接超时，自动重试后同步成功'},
+  {at:'2026-09-08 18:16:44',st:'success',dur:'1 分 06 秒',rows:'398 条',note:'首次连接超时，自动重试后同步成功'},
   {at:'2026-09-07 18:03:19',st:'success',dur:'44 秒',rows:'405 条',note:'数据按预期节奏完成同步'},
   {at:'2026-09-06 18:03:00',st:'failed',dur:'21 秒',rows:'0 条',note:'平台接口连接超时'}]},
  d5:{month:{total:30,success:30,failed:0,skipped:0,rate:'100%'},runs:[
@@ -99,46 +99,34 @@ function dsPlatformKey(d){
  if(d.plat.includes('京东'))return 'jd';
  return 'other';
 }
-function dsAttentionCount(){return DSRC.filter(d=>(d.st==='error'||d.st==='stale')&&!d.handled).length;}
+function dsAttentionCount(){return DSRC.filter(d=>d.st==='error'&&!d.handled).length;}
 function kDataSources(){
  if(S.dsFilter===undefined)S.dsFilter='all';
  if(S.dsPlatform===undefined)S.dsPlatform='all';
  const platforms=[['all','全部来源'],['tmall','天猫'],['douyin','抖音'],['jd','京东']];
  const platformRows=S.dsPlatform==='all'?DSRC:DSRC.filter(d=>dsPlatformKey(d)===S.dsPlatform);
- const err=platformRows.filter(d=>d.st==='error'),stale=platformRows.filter(d=>d.st==='stale');
- const blocked=[...new Set([...err,...stale].flatMap(d=>d.base))];
  const rows=S.dsFilter==='all'?platformRows:platformRows.filter(d=>d.st===S.dsFilter);
- const filters=[['all','数据源',platformRows.length],['fresh','正常',dsCount('fresh',platformRows)],['stale','已过期',dsCount('stale',platformRows)],['error','异常',dsCount('error',platformRows)],['off','检测已暂停',dsCount('off',platformRows)]];
+ const filters=[['all','数据源',platformRows.length],['fresh','正常',dsCount('fresh',platformRows)],['error','异常',dsCount('error',platformRows)],['off','检测已暂停',dsCount('off',platformRows)]];
  return `<div class="bar" style="margin:0 0 var(--sp-3);gap:var(--sp-2);flex-wrap:wrap">
    <div class="seg">${filters.map(([key,label,count])=>`<button class="${S.dsFilter===key?'on':''}" onclick="S.dsFilter='${key}';render()">${key==='all'?count+' 个'+label:label+' '+count}</button>`).join('')}</div>
    <div class="seg" aria-label="按平台筛选数据源">${platforms.map(([key,label])=>`<button class="${S.dsPlatform===key?'on':''}" onclick="S.dsPlatform='${key}';render()">${label}</button>`).join('')}</div>
    <span class="spacer"></span>
    <span style="font-size:var(--fs-xs);color:var(--t3)">上次刷新：2026-09-11 18:29:13</span></div>
 
- ${err.length||stale.length?`<div class="kcomp" style="margin:0 0 var(--sp-3);background:var(--danger-bg);border-color:var(--danger-bd)">
-   <div style="flex:1;min-width:240px">
-     <div style="display:flex;align-items:baseline;gap:var(--sp-2);margin-bottom:5px">
-       <span class="num" style="font-size:22px;font-weight:800;color:var(--danger-fg)">${err.length+stale.length}</span>
-       <span style="font-size:var(--fs-sm);color:var(--danger-fg-strong)">个数据源不健康</span></div>
-     <div style="font-size:var(--fs-xs);color:var(--danger-fg-strong);line-height:1.7">
-       ${blocked.length?`<b>连带影响：${blocked.length} 条自动提案规则暂停运行。</b><br>
-        这是静默失败——提案不会报错，它只是不再出现。`:'暂无连带影响。'}</div></div>
-   <button class="btn sm" onclick="openDSBulkTaskForm()">为异常建任务</button></div>`:''}
-
- ${[...rows].sort((a,b)=>({error:0,stale:1,fresh:2,off:3})[a.st]-({error:0,stale:1,fresh:2,off:3})[b.st])
+ ${[...rows].sort((a,b)=>({error:0,fresh:1,off:2})[a.st]-({error:0,fresh:1,off:2})[b.st])
   .map(d=>`<div class="row ds-source-card" style="${
-    d.st==='error'?'border-left:3px solid var(--red);':d.st==='stale'?'border-left:3px solid var(--gold);':''}">
+    d.st==='error'?'border-left:3px solid var(--red);':''}">
    <button type="button" class="ds-source-main" onclick="openDS('${d.id}')"><span style="display:block;min-width:0">
      <span style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
        <b style="font-size:13.5px">${esc(d.n)}</b>
        <span class="chip lv">${d.brand}</span>
        <span class="chip dom">${d.plat}</span>
        <span class="st ${DSTAT[d.st].c}">${DSTAT[d.st].n}</span>
-       ${d.base.length&&(d.st==='error'||d.st==='stale')?`<span class="chip" style="background:var(--danger-bg);color:var(--danger-fg);border:1px solid var(--danger-bd)">${d.base.length} 个自动提案已暂停</span>`:''}</span>
+       ${d.base.length&&d.st==='error'?`<span class="chip" style="background:var(--danger-bg);color:var(--danger-fg);border:1px solid var(--danger-bd)">${d.base.length} 个自动提案已暂停</span>`:''}</span>
      <span style="display:block;font-size:var(--fs-sm);color:var(--t2);margin-top:5px">${esc(d.desc)}</span>
      <span style="display:block;font-size:var(--fs-xs);color:var(--t3);margin-top:4px">
        更新周期 ${d.cad} · 最后更新 ${d.updatedAt} · 成功率 ${DSRUNS[d.id].month.rate} · 被读 ${d.reads.toLocaleString()} 次 · ${d.ags.length} 个 Agent 在用</span></span></button>
-   <div class="ds-source-actions">${d.st==='error'||d.st==='stale'?`<button class="btn sm" onclick="openDSTaskForm('${d.id}')">建单去修</button>${d.handled?'<span class="ds-handled-note">已处理 · 明日继续检测</span>':`<button class="btn ghost sm" onclick="markDSHandled('${d.id}')">标记为已处理</button>`}`:''}${d.st==='off'?`<button class="btn sm" onclick="enableDS('${d.id}')">恢复检测</button>`:`<button class="btn ghost sm" onclick="pauseDSDetection('${d.id}')">暂停检测</button>`}<button class="btn ghost sm" onclick="openDSRun('${d.id}')">查看运行记录</button>${d.handledAt?`<span class="ds-handled-time">处理人：${esc(dsHandledBy(d))} · 处理时间：${formatDSHandledAt(d.handledAt)}</span>`:''}</div>
+   <div class="ds-source-actions">${d.st==='error'?(d.handled?'<span class="ds-handled-note">已处理 · 明日继续检测</span>':`<button class="btn sm" onclick="openDSTaskForm('${d.id}')">建单去修</button><button class="btn ghost sm" onclick="markDSHandled('${d.id}')">标记为已处理</button>`):''}${d.st==='off'?`<button class="btn sm" onclick="enableDS('${d.id}')">恢复检测</button>`:`<button class="btn ghost sm" onclick="pauseDSDetection('${d.id}')">暂停检测</button>`}<button class="btn ghost sm" onclick="openDSRun('${d.id}')">查看运行记录</button>${d.handledAt?`<span class="ds-handled-time">处理人：${esc(dsHandledBy(d))} · 处理时间：${formatDSHandledAt(d.handledAt)}</span>`:''}</div>
    </div>`).join('')||'<div class="allclear">当前筛选下没有数据源。</div>'}`;
 }
 
@@ -168,7 +156,7 @@ function setDSTab(tab){S.dsTab=tab;drawDSDrawer();}
 
 function drawDSDrawer(){
  const d=DSRC.find(x=>x.id===S.ds);if(!d)return;
- const bad=d.st==='error'||d.st==='stale',tab=S.dsTab||0;
+ const bad=d.st==='error',tab=S.dsTab||0;
  $('dw').innerHTML=`<div class="dw-h">
    <button class="ib" onclick="closeDw()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
    <div style="flex:1;min-width:0"><div class="ty">数据源 · ${d.plat}</div><h3>${esc(d.n)}</h3></div>
@@ -178,7 +166,7 @@ function drawDSDrawer(){
   </div>
   <div class="dw-b">${tab===0?dsInfoPane(d,bad):dsRunPane(d)}</div>
   <div class="dw-f">
-   ${d.st==='off'?`<button class="btn" onclick="enableDS('${d.id}')">恢复检测</button>`:bad?`<button class="btn" onclick="openDSTaskForm('${d.id}')">建单去修</button>${d.handled?'<span class="ds-handled-note">已处理 · 明日继续检测</span>':`<button class="btn ghost" onclick="markDSHandled('${d.id}')">标记为已处理</button>`}<button class="btn ghost" onclick="pauseDSDetection('${d.id}')">暂停检测</button>`
+   ${d.st==='off'?`<button class="btn" onclick="enableDS('${d.id}')">恢复检测</button>`:bad?`${d.handled?'<span class="ds-handled-note">已处理 · 明日继续检测</span>':`<button class="btn" onclick="openDSTaskForm('${d.id}')">建单去修</button><button class="btn ghost" onclick="markDSHandled('${d.id}')">标记为已处理</button>`}<button class="btn ghost" onclick="pauseDSDetection('${d.id}')">暂停检测</button>`
     :`<button class="btn ghost" onclick="toast('已触发一次同步')">立即同步</button><button class="btn ghost" onclick="pauseDSDetection('${d.id}')">暂停检测</button>`}
    <span style="margin-left:auto;font-size:var(--fs-xs);color:var(--t3)">${d.handledAt?`处理人：${esc(dsHandledBy(d))} · 处理时间：${formatDSHandledAt(d.handledAt)} · `:''}${d.reads.toLocaleString()} 次被读</span>
   </div>`;
@@ -201,26 +189,24 @@ function dsInfoPane(d,bad){return `
      <div class="ctxr"><span class="k">被读次数</span><span class="v num">${d.reads.toLocaleString()}</span></div>
      <div class="ctxr"><span class="k">在用的 agent</span><span class="v">${d.ags.length?d.ags.map(a=>nick(a)).join(' · '):'没有 agent 在用'}</span></div>
      <div class="ctxr"><span class="k">关联自动提案</span><span class="v" style="${d.base.length&&bad?'color:var(--danger-fg)':''}">${d.base.length?d.base.length+' 条规则':'没有关联规则'}</span></div></div>
-   <div class="note">这个源是 <b>Base Data</b> 提供的。Base Data 为自动提案规则提供 <code>baseline.lookup</code>——
-     <b>没有基准就不发提案</b>。所以数据源一挂，提案系统是<b>静默停摆</b>，不是报错。</div>
  `;}
 
 function dsRunPane(d){
- const h=DSRUNS[d.id],stats=[['成功率',h.month.rate],['成功',h.month.success],['失败',h.month.failed],['未运行',h.month.skipped]];
+ const h=DSRUNS[d.id],stats=[['成功率',h.month.rate],['成功',h.month.success],['异常',h.month.failed]],runs=h.runs.filter(r=>r.st!=='skipped');
  return `<div class="ds-run-head"><div><b>近 30 天运行</b><span>计划运行 ${h.month.total} 次</span></div><span>更新周期 ${d.cad}</span></div>
   <div class="ds-run-summary">${stats.map(([label,value],i)=>`<div class="ds-run-stat ${i===0?'primary':''}"><span>${label}</span><b class="num">${value}</b></div>`).join('')}</div>
   <div class="ds-run-section-title">每日运行记录</div>
-  <div class="ds-run-list">${h.runs.map(r=>{const st=DSRUNSTAT[r.st];return `<div class="ds-run-item">
+  <div class="ds-run-list">${runs.length?runs.map(r=>{const st=DSRUNSTAT[r.st];return `<div class="ds-run-item">
    <span class="ds-run-dot ${st.c}" aria-hidden="true"></span>
    <div class="ds-run-main"><div class="ds-run-line"><b>${r.at}</b><span class="ds-run-status ${st.c}">${st.n}</span></div><div class="ds-run-note">${esc(r.note)}</div></div>
-  </div>`;}).join('')}</div>`;
+  </div>`;}).join(''):`<div class="allclear">${d.st==='off'?'检测已暂停，暂停期间不产生状态检测记录。':'暂无运行记录。'}</div>`}</div>`;
 }
 
 function openDSTaskForm(id){
  const d=DSRC.find(x=>x.id===id);
  if(!d)return;
- const issue=d.st==='stale'?'同步已过期':'同步异常';
- const check=d.st==='stale'?'同步任务与更新周期':'授权或接口连接';
+ const issue='同步异常';
+ const check='授权、接口连接或同步任务';
  const prefill=`修复数据源「${d.n}」${issue}。检查${d.plat}${check}，恢复同步后验证数据更新。`;
  closeDw();openNew(null,prefill,'');
 }
@@ -253,9 +239,9 @@ function confirmPauseDSDetection(id){
 }
 
 function openDSBulkTaskForm(){
- const bad=DSRC.filter(d=>d.st==='error'||d.st==='stale');
+ const bad=DSRC.filter(d=>d.st==='error');
  if(!bad.length){toast('当前没有需要处理的数据源异常');return;}
- const issues=bad.map(d=>`「${d.n}」${d.st==='error'?'同步异常':'同步已过期'}`).join('；');
+ const issues=bad.map(d=>`「${d.n}」同步异常`).join('；');
  const prefill=`修复数据源问题：${issues}。逐项检查平台授权、接口连接和同步排期，恢复后验证数据更新，并确认受影响的自动提案规则重新运行。`;
  openNew(null,prefill,'');
 }
