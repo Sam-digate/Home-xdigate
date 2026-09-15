@@ -222,9 +222,21 @@ function enableDS(id){
 
 function pauseDSDetection(id){
  const d=DSRC.find(x=>x.id===id);if(!d||d.st==='off')return;
+ $('mod').classList.remove('asset-mode','plan-mode');
+ $('mod').innerHTML=`<div class="mbox" style="max-width:480px" role="dialog" aria-modal="true" aria-labelledby="pause-ds-title">
+  <div class="mhd"><h3 id="pause-ds-title">暂停更新状态检测？</h3></div>
+  <div class="mbd"><div style="font-size:var(--fs-sm);color:var(--t2);line-height:1.7">
+   暂停「${esc(d.n)}」后，数据仍会正常同步，但系统不会检测更新状态，也不会生成异常提醒。你可以随时恢复检测。</div></div>
+  <div class="mft"><button class="btn" onclick="confirmPauseDSDetection('${d.id}')">确认暂停</button><button class="btn ghost" onclick="closeMod()">取消</button></div>
+ </div>`;
+ $('mod').classList.add('on');
+}
+
+function confirmPauseDSDetection(id){
+ const d=DSRC.find(x=>x.id===id);if(!d||d.st==='off'){closeMod();return;}
  d.healthBeforePause=d.st;d.descBeforePause=d.desc;d.st='off';
  d.desc='更新状态检测已暂停，数据仍按原接入方式更新';
- closeDw();render();toast('检测已暂停 · 数据仍会继续更新');
+ closeMod();closeDw();render();toast('检测已暂停 · 数据仍会继续更新');
 }
 
 function openDSBulkTaskForm(){
