@@ -748,7 +748,7 @@ function openChatImportModal(){
 }
 function openChatImportHistory(){
  if(!Array.isArray(S.chatImportHistoryHidden))S.chatImportHistoryHidden=[];
- S.chatImportHistoryOpen=null;drawChatImportHistory();
+ drawChatImportHistory();
 }
 function drawChatImportHistory(){
  const hidden=S.chatImportHistoryHidden||[],rows=CHAT_IMPORT_HISTORY.filter(item=>!hidden.includes(item.id));
@@ -758,14 +758,16 @@ function drawChatImportHistory(){
  $('dw').classList.add('on');$('scrim').classList.add('on');if(window.lucide)lucide.createIcons({root:$('dw'),attrs:{width:16,height:16,'stroke-width':1.8}});
 }
 function chatImportHistoryCard(item){
- const open=S.chatImportHistoryOpen===item.id,scope=item.scope.join(' / ');
- return `<article class="chat-history-card ${open?'open':''}">
-  <div class="chat-history-card-head"><div class="chat-history-main"><h4>${esc(item.store)}</h4><div class="chat-history-tags"><span class="chat-tag approved">已完成</span>${item.platforms.map(platform=>`<span class="chat-tag platform ${platform[1]}">${platform[0]}</span>`).join('')}</div></div><div class="chat-history-actions"><button class="chat-history-view-icon" aria-expanded="${open}" onclick="toggleChatImportHistory('${item.id}')" aria-label="${open?'收起':'查看'} ${esc(item.store)} 的导入详情"><i data-lucide="eye" aria-hidden="true"></i></button><button class="chat-history-delete" onclick="deleteChatImportHistory('${item.id}')" aria-label="删除 ${esc(item.store)} 的导入记录"><i data-lucide="trash-2" aria-hidden="true"></i></button></div></div>
+ const scope=item.scope.join(' / ');
+ return `<article class="chat-history-card">
+  <div class="chat-history-card-head"><div class="chat-history-main"><h4>${esc(item.store)}</h4><div class="chat-history-tags"><span class="chat-tag approved">已完成</span>${item.platforms.map(platform=>`<span class="chat-tag platform ${platform[1]}">${platform[0]}</span>`).join('')}</div></div><div class="chat-history-actions"><button class="chat-history-view-icon" onclick="showChatImportHistorySummary('${item.id}')" aria-label="查看 ${esc(item.store)} 的导入说明"><i data-lucide="eye" aria-hidden="true"></i></button><button class="chat-history-delete" onclick="deleteChatImportHistory('${item.id}')" aria-label="删除 ${esc(item.store)} 的导入记录"><i data-lucide="trash-2" aria-hidden="true"></i></button></div></div>
   <p class="chat-history-scope">${esc(scope)}</p>
-  ${open?`<div class="chat-history-detail"><span>导入范围</span><p>本批次包含 ${item.scope.length} 个店铺的聊天记录，已完成分析并生成建议回复。</p></div>`:''}
  </article>`;
 }
-function toggleChatImportHistory(id){S.chatImportHistoryOpen=S.chatImportHistoryOpen===id?null:id;drawChatImportHistory();}
+function showChatImportHistorySummary(id){
+ const item=CHAT_IMPORT_HISTORY.find(record=>record.id===id);if(!item)return;
+ toast(`${item.store}：本批次包含 ${item.scope.length} 个店铺的聊天记录，已完成分析并生成建议回复。`);
+}
 function deleteChatImportHistory(id){
  const item=CHAT_IMPORT_HISTORY.find(record=>record.id===id);if(!item)return;
  openChatDeleteConfirm({kind:'history',id,title:'删除这条导入记录？',name:item.store,description:'删除后，这条历史导入记录将不再显示。'});
@@ -907,7 +909,7 @@ function cancelChatDelete(){S.chatDeleteAction=null;closeMod();}
 function confirmChatDelete(){
  const action=S.chatDeleteAction;if(!action)return;S.chatDeleteAction=null;closeMod();
  if(action.kind==='history'){
-  S.chatImportHistoryHidden=[...new Set([...(S.chatImportHistoryHidden||[]),action.id])];if(S.chatImportHistoryOpen===action.id)S.chatImportHistoryOpen=null;drawChatImportHistory();toast('导入记录已删除');return;
+  S.chatImportHistoryHidden=[...new Set([...(S.chatImportHistoryHidden||[]),action.id])];drawChatImportHistory();toast('导入记录已删除');return;
  }
  chatRecordState();
  if(action.kind==='record'){

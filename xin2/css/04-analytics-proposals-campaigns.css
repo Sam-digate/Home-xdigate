@@ -128,7 +128,7 @@
 .chat-history-body{padding:0;background:#F8F6FC}
 .chat-history-list{display:flex;flex-direction:column;gap:10px;padding:14px}
 .chat-history-card{overflow:hidden;padding-bottom:12px;border:1px solid var(--border);border-radius:12px;background:#fff;transition:border-color .16s ease,box-shadow .16s ease}
-.chat-history-card:hover,.chat-history-card.open{border-color:var(--primary-lt);box-shadow:var(--sh-sm)}
+.chat-history-card:hover{border-color:var(--primary-lt);box-shadow:var(--sh-sm)}
 .chat-history-card-head{display:flex;align-items:flex-start;gap:var(--sp-3);padding:12px 12px 0}
 .chat-history-main{flex:1;min-width:0}
 .chat-history-main h4{margin:0 0 6px;color:var(--t1);font-size:var(--fs-md);font-weight:700;line-height:1.45}
@@ -136,14 +136,11 @@
 .chat-history-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}
 .chat-history-view-icon,.chat-history-delete{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex:0 0 auto;cursor:pointer}
 .chat-history-view-icon{color:var(--primary);background:var(--primary-bg)}
-.chat-history-view-icon:hover,.chat-history-view-icon[aria-expanded="true"]{background:#E9E1FF;color:var(--primary-h)}
+.chat-history-view-icon:hover{background:#E9E1FF;color:var(--primary-h)}
 .chat-history-delete{color:var(--danger-fg);background:var(--danger-bg)}
 .chat-history-delete:hover{background:#FFE1E4;color:var(--danger-fg-strong)}
 .chat-history-view-icon svg,.chat-history-delete svg{width:15px;height:15px}
 .chat-history-scope{margin:8px 12px 0;color:var(--t3);font-size:var(--fs-xs);line-height:1.55;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chat-history-detail{margin:12px 14px 0;padding:12px;border-radius:9px;background:var(--surface-tint)}
-.chat-history-detail span{display:block;margin-bottom:5px;color:var(--t3);font-size:var(--fs-xs);font-weight:600}
-.chat-history-detail p{margin:0;color:var(--t2);font-size:var(--fs-sm);line-height:1.65}
 .chat-history-empty{padding:64px 20px;text-align:center;color:var(--t3);font-size:var(--fs-sm)}
 .chat-record-filters{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-3) 12px;border-bottom:1px solid var(--border);background:#FCFBFF;flex-wrap:wrap}
 .chat-date-filter,.chat-record-pagination select{height:34px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--t2);font:600 var(--fs-xs)/1 inherit}
