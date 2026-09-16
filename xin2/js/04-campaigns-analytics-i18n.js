@@ -365,6 +365,9 @@ function qaAct(i){
 
 /* ============ i18n ============ */
 const DICT={"今日": "Today", "工作": "Work", "提案": "Proposals", "活动": "Campaigns", "数据分析": "Analytics", "知识库": "Knowledge", "设置": "Settings", "内容运营 · 默认范围 内容": "Content ops · default scope Content", "个 Agent 在跑": "agents running", "在线": "online", "帮我… 或搜索": "Ask me… or search", "审批": "Approvals", "项目": "Project", "内容": "Content", "电商": "E-commerce", "用户运营": "Customer Ops", "平台": "Platform", "日常": "Ad hoc", "全部": "All", "上下文": "Context", "做": "Do", "库": "Library", "待开始": "Not started", "进行中": "Running", "待审批": "Needs approval", "已交付": "Delivered", "待补充信息": "Needs input", "已批准": "Approved", "待审核": "Pending", "已归档": "Archived", "已拒绝": "Rejected", "已确认": "Confirmed", "候选": "Shortlisted", "已发 Brief": "Brief sent", "可提交": "Ready", "待补资质": "Missing docs", "正常": "Healthy", "等审批": "At gate", "待触发": "Idle", "已停用": "Disabled", "已上线": "Live", "开发中": "In dev", "规划中": "Planned", "空的": "Empty", "已过期": "Stale", "已审阅": "Reviewed", "待审阅": "Unreviewed", "未审阅": "Not reviewed", "新建议": "New", "评估中": "Assessing", "已采纳": "Accepted", "已忽略": "Dismissed", "待决定": "To decide", "高": "High", "中": "Medium", "低": "Low", "低风险": "Low risk", "中风险": "Med risk", "高风险": "High risk", "未使用": "Unused", "已使用": "Used", "已提案": "Proposed", "不可用": "Blocked", "批准": "Approve", "退回": "Return", "忽略": "Dismiss", "稍后": "Snooze", "采纳": "Accept", "撤销": "Undo", "编辑": "Edit", "删除": "Delete", "保存": "Save", "取消": "Cancel", "发送": "Send", "留言": "Comment", "回复": "Reply", "打开": "Open", "详情": "Details", "看依据": "Evidence", "建单": "Create task", "建单去做": "Create a task", "立即运行": "Run now", "立即跑一次": "Run once now", "暂停": "Pause", "全部恢复": "Resume all", "全局暂停": "Pause all", "重新启用": "Re-enable", "催": "Nudge", "催一下": "Nudge", "新建任务": "New task", "新建活动": "New campaign", "新建例行": "New routine", "新建配方": "New recipe", "加排期": "Add schedule", "变成例行": "Make recurring", "展开为任务": "Expand into a task", "存进知识库": "Save to Knowledge", "存为模板": "Save as template", "改一下再采纳": "Edit then accept", "要求修改": "Request a change", "调整计划": "Adjust plan", "清除筛选": "Clear filters", "看板": "Board", "按日期": "By date", "分组": "Grouped", "列表": "List", "展开": "Expand", "收起": "Collapse", "放大": "Expand", "上传": "Upload", "导入": "Import", "新建": "New", "问": "Ask", "问一句": "Ask", "去处理": "Handle", "去回答": "Answer", "去看": "View", "看运行": "See run", "排期与历史": "Schedule & history", "逐条评论": "One by one", "评论": "Comments", "入选": "Select", "淘汰": "Drop", "发 Brief": "Send brief", "放回候选": "Back to shortlist", "提交上架": "Submit listing", "催资质": "Chase docs", "暂缓": "Hold", "全部提交": "Submit all", "批准名单": "Approve list", "选这个": "Pick this", "回到当前对话": "Back to current", "回到对话": "Back to chat", "新对话": "New chat", "历史": "History", "意图": "Intent", "计划": "Plan", "执行": "Run", "产出": "Artifact", "交付": "Delivery", "决定": "Decision", "需要你补充": "Needs your input", "你的补充": "Your answers", "线程评论": "Thread comments", "评论": "Comments", "主 Agent": "Lead agent", "累计成本": "Total cost", "更新": "Updated", "负责人": "Owner", "自主": "Autonomy", "计划 v": "Plan v", "版本": "Versions", "本次运行": "This run", "本次提问": "This question", "历史运行": "Run history", "更早问过的": "Earlier questions", "常驻线程": "standing thread", "置顶": "Pinned", "手动": "Manual", "定时触发": "Scheduled", "事件触发": "Event", "采纳提案": "From proposal", "触发方式": "Trigger", "已完成": "Done", "刚刚": "just now", "条新": "new", "小时前": "h ago", "分钟前": "m ago", "今天": "Today", "昨天": "Yesterday", "本周一": "Monday", "本周早些时候": "Earlier this week", "下次": "Next", "上次": "Last", "频率": "Frequency", "时间": "Time", "时区": "Timezone", "送达": "Deliver to", "链路": "Chain", "步": "steps", "次": "×", "轮": "turns", "条": "", "个": "", "天": "d", "需要你的地方": "What needs you", "你的指标": "Your metrics", "品牌健康度": "Brand health", "问分析师": "Ask the analyst", "来源": "Source", "Agent 读的东西": "what agents read", "Agent 写的东西": "what agents wrote", "品牌来源完整度": "Brand sources complete", "条已填": "filled", "已批准产出": "Approved outputs", "模板": "Templates", "素材": "Assets", "产品": "Products", "达人": "Creators", "热点": "Hotspots", "品牌": "Brand", "Agent 登记处": "Agent registry", "配方": "Recipes", "例行": "Routines", "Broker 控制台": "Broker console", "需要你审批": "Needs your approval", "正在跑": "Running now", "停住了": "Stuck", "昨夜完成": "Finished overnight", "条新提案等你看": "new proposals for you", "没有等你的决定了": "Nothing waiting on you.", "需要你处理": "Needs you", "需要注意": "Worth watching", "任务": "Tasks", "依赖关系": "Dependencies", "共同基准 Brief": "Shared brief", "预算": "Budget", "阶段": "Phase", "当前": "current", "已跑": "run", "次使用": "uses", "人工修改率": "Human-edit rate", "信号": "Signal", "基准": "Baseline", "采纳后执行": "On accept, runs", "预估": "Est.", "置信": "Confidence", "可逆": "Reversible", "部分可逆": "Partly reversible", "不可逆": "Irreversible", "剩": "left", "逾期": "Overdue", "等待": "Waiting", "被压下的": "Suppressed", "压制日志": "Suppression log", "发射器": "Emitters", "采纳率": "Accept rate", "运行记录": "Run record", "它怎么想的": "how it reasoned", "读取": "Read", "判断": "Reason", "工具": "Tool", "生成": "Write", "自主级别": "Autonomy", "产出与校验": "Outputs & checks", "最近运行": "Recent runs", "概览": "Overview", "配置": "Config", "30天运行": "30-day runs", "平均耗时": "Avg duration", "成功率": "Success", "编辑率": "Edit rate", "30天成本": "30-day cost", "运营视角": "Operator view", "品牌方视角": "Brand view", "分析即任务": "Analysis as tasks", "对话为主": "Chat-first", "最近的分析": "Recent analyses", "分析线程": "Analysis thread", "分析结论": "Analysis", "治理": "Governance", "谁在读": "Who reads it", "被读次数": "Times read", "在用的 agent": "Agents using it", "对 agent 可见": "Visible to agents", "审阅状态": "Review state", "最后更新": "Last updated", "更新人": "Updated by", "从未": "never", "从未填写": "Never filled", "匹配依据": "Match basis", "名单": "Roster", "打分权重": "Scoring weights", "适配": "Fit", "粉丝": "Followers", "报价": "Rate", "证据": "sources", "采集时间": "Collected", "使用状态": "Usage", "采集者": "Collected by", "没挂产品": "No product linked", "人工上传": "Uploaded", "Agent 生成": "Agent-made", "已批准产出晋升": "Promoted output", "被用": "used", "个 SKU": "SKUs", "齐了": "complete", "缺件": "incomplete", "齐": "ok", "缺": "missing", "来自": "from", "替代": "supersedes", "作为来源打开": "Open as source", "撤销晋升": "Un-promote", "从空白新建": "Start blank", "改得太多": "Edited too often", "个模板": "templates", "个来自真实产出": "from real artifacts", "什么时候用它": "When to use it", "模板名": "Template name", "产出类型": "Artifact type", "不可更改": "locked", "将被谁读": "Read by", "哪些地方每次都不一样": "What changes each time", "这些会变成槽位": "these become slots", "替代了哪个模板": "Supersedes which template", "槽位": "Slots", "缺口": "Gap", "接下来三次": "Next three runs", "异常处理": "Exception handling", "错过一次": "If missed", "补跑": "Catch up", "跳过": "Skip", "上次还没跑完": "If still running", "排队": "Queue", "失败重试": "Retries", "次后自动停用": "failures then auto-disable", "人工介入": "Human step", "跑完通知": "Notify when done", "到点等审批": "Stop for approval", "全自动": "Fully automatic", "审批门": "Approval gate", "会产生的变更": "Changes it will make", "可逆性": "Reversibility", "等待时长": "Waiting since", "批准并执行": "Approve and run", "拒绝": "Reject", "看会执行什么": "See what will run", "未建线程": "No task created", "没有需要人处理的东西": "nothing needed a human", "静默": "silent", "打开常驻线程": "Open standing thread", "看它跑出的任务": "See the tasks it created", "每一条都是一个任务线程：一个意图、一次对话、一个最终产出。范围默认是你的领域，活动会跨范围。": "Every row is a task thread: one intent, one conversation, one final output. Scope defaults to your domain; campaigns cut across.", "Agent 主动发现的建议。每一条都是一个可以直接跑的预编排方案——采纳就变成一条任务线程。": "Suggestions agents found on their own. Each is a pre-composed run — accepting it opens a task thread.", "Agent 主动发现、且已经编排好的决定。采纳即执行——它不会给你留一件待办。": "Decisions agents found and already composed. Accepting executes — it never leaves you a to-do.", "活动是项目里的项目：把跨领域的任务放在同一个基准下。审批仍然在「今日」，这里看的是整体走到哪了。": "A campaign is a project inside the project: cross-domain tasks on one shared brief. Approvals still live in Today; this is where you see overall progress.", "指标不是配出来的，是问出来的。每个数都标了口径、时间和来源——取不到就说取不到。": "Metrics aren't configured, they're asked for. Every number carries its definition, timestamp and source — and says so when it can't be fetched.", "Agent 读的（来源）和 Agent 写的（产出）分开放。": "What agents read (Sources) and what agents wrote (Outputs) are kept apart.", "已批准的产出会晋升成来源": "Approved outputs get promoted into Sources", "所以下次生成时，它站在的是被人确认过的东西上。": "So the next generation stands on something a human confirmed.", "这里是登记处，不是工作台。每个 agent 的自主级别、归属、成本和产出类型都在这里定——工作永远发生在「工作」里。": "This is the registry, not a workbench. Autonomy, ownership, cost and output types are set here — work always happens in Work.", "已上线 / 开发中 / 规划中 只出现在这一页。工作页上的状态只表示「要不要你处理」。": "Live / In dev / Planned appear only on this page. Statuses in Work only mean \"does this need you\".", "配方是": "A recipe is", "一串按顺序跑的 agent": "a chain of agents run in order", "，手动触发。跑顺了就给它挂个排期，它就变成例行。": ", triggered by hand. Once it runs well, give it a schedule and it becomes a routine.", "例行 = 配方 + 排期。每次触发都跑在同一条": "Routine = recipe + schedule. Every trigger runs inside the same", "里，不会每天新开一条。": "— it doesn't open a new one each day.", "没命中条件的那次不建线程，也不提醒——": "A run that matches nothing creates no task and sends no alert —", "静默是正常的": "silence is normal", "，不是失败。": ", not failure.", "Agent 不会凭空干活——它总是跑在某条线程里。": "An agent never works in a vacuum — it always runs inside a thread.", "你说要做什么，小排决定该谁上、什么顺序。你不用挑 agent——挑错了它也不会说。": "You say what you want; the Orchestrator decides who and in what order. You don't pick agents — if you picked wrong it wouldn't tell you.", "链路里有不可逆动作，已自动设为": "The chain contains an irreversible step, so it's set to", "，不能改成全自动。": "and can't be fully automatic.", "全自动只适合": "Fully automatic suits only", "低风险、可逆": "low-risk, reversible", "的活儿。涉及发布、费用、上架这类不可逆动作，请选「到点等审批」。": " work. For publishing, spend or listing — anything irreversible — choose Stop for approval.", "注意力是有预算的。够不上门槛的不会推给你——但你可以看它压下了什么。": "Attention has a budget. Anything below the bar isn't pushed to you — but you can see what it held back.", "必须选一个理由——它是": "You must pick a reason — it's the only thing", "唯一能学到东西的地方。忽略得越具体，它下次越不会白推。": "can learn from. The more specific the dismissal, the less it wastes your attention next time.", "这不会给你留待办。点确认，": "This leaves you no to-do. Confirm and", "立刻开始执行。": "starts immediately.", "不可逆动作。执行后无法自动撤回": "Irreversible. It cannot be rolled back automatically", "这是一条": "This is a", "——例行每次触发都跑在这里，不会每天新开一条。": "— every trigger runs here rather than opening a new thread daily.", "常驻分析线程": "standing analysis thread", "——所有数据问题都问在这一条里，不会每问一次开一条。": "— every data question lives in this one thread rather than opening one each time.", "问不是做。": "Asking isn't doing.", "结论要变成活儿，得另开一条：在产出上点「建单去做」。": "To turn a conclusion into work, open a separate task from the artifact.", "每个数都取自接口，不估算": "Every number is fetched, never estimated", "这里每个数都是取回来的，不是估出来的": "Every number here is retrieved, not estimated", "——取不到我会直说，不会编。": "— if I can't fetch it I'll say so rather than invent it.", "相关性，不是因果": "Correlation, not causation", "轻的问题不用建线程": "light questions don't need a task", "对话会存着，但": "Chats are kept, but", "结论不该只活在对话里": "conclusions shouldn't live only in a chat", "——有用的答案记得建单或存进知识库，不然过两周谁也找不到。": " — turn useful answers into tasks or save them to Knowledge, or nobody will find them in two weeks.", "还是空的，": "still empty,", "条超过 3 个月没更新。": "stale for over 3 months.", "Agent 会照样跑": "Agents will run anyway", "——它不知道自己缺东西，只有你知道。": " — they don't know what's missing. Only you do.", "过期的来源照样在给 agent 打底": "A stale source still grounds every agent", "，而且不会有人提醒。": ", and nothing will warn you.", "这是": "This is a", "被策展的可信来源": "curated source of truth", "。改动要过审之后 agent 才会读到——不然一次手滑就会悄悄影响所有产出。": ". Edits are reviewed before agents read them — otherwise one slip quietly changes every output.", "模板是从": "Templates come from", "已经成立的产出": "artifacts that actually worked", "里抽出来的，不是凭空写的。凭空写的模板没经过真实场景，用两次就得改。": ", not from a blank page. A template written cold hasn't met reality and needs rewriting after two uses.", "它从已经成立的产出里来": "It comes from artifacts that worked", "产品不只是一条记录，是": "A product isn't just a record — it's", "「对某个用途是否齐了」": "whether it's complete for a given use", "。同一个 SKU 可能电商能上、报关不行。": ". The same SKU can be listable but not clearable through customs.", "热点库是": "The hotspot pool is", "跨品牌采集、按适配度分发": "collected across brands and distributed by fit", "入库是自动的，不是审批门槛。人的操作是开启、暂停、修正和补充。": "Ingestion is automatic, not an approval gate. People enable, pause, correct and supplement.", "热点是素材，不是任务。要用它就开一条内容线程——热点本身不会自己变成活儿。": "A hotspot is material, not work. To use one, open a content thread — it won't become work by itself.", "品牌方视角是": "The brand view is an", "内部预览": "internal preview", "第一阶段品牌方不开放登录": "brand owners don't get logins in stage one", "我只做检测和汇报": "I only detect and report", "没有仪表盘要配，也没有图表要拖。": "No dashboards to configure, no charts to drag.", "这一页只放数字，只读。": "This page holds numbers only, read-only.", "平均": "avg", "成功": "success", "发起": "opened by", "秒": "s", "小时": "h", "分钟": "min", "分": "pts", "月": "mo", "件": "", "人": "", "第": "#", "批": "batch", "已": "", "通过": "pass", "未过": "fail", "贡献": "contributes", "依据": "Evidence", "被读": "read", "在用": "in use", "占": "of", "它还排除了": "It also ruled out", "种做法": "other options", "不做会怎样": "If you don't", "我看到了什么": "What I saw", "为什么值得打扰你": "Why it's worth your attention", "我排除了什么": "What I ruled out", "照做会怎样": "If you do", "为什么提这条": "why it raised this", "说": "says", "希望你做的": "What they want", "PM 逐条确认": "PM confirms each", "直接交给运营": "Straight to the operator", "自动执行 · 例外找人": "Auto, exceptions to a human", "例外找人": "exceptions to a human", "禁用词": "banned words", "字数": "length", "图片": "images", "战略规划数据": "Strategic planning", "竞争对手分析": "Competitor analysis", "品牌生态位分析": "Brand niche", "情感质量": "Sentiment quality", "自然可见度": "Earned visibility", "共鸣度": "Resonance", "拥护质量": "Advocacy quality", "风险修正": "Risk modifier", "修正前": "pre-modifier", "自然提及": "organic mentions", "采集但不计分": "collected, not scored", "自有内容": "owned content", "付费合作": "paid partner", "权重与口径": "Weights & definitions", "评分权重": "Scoring weights", "数据源": "Data sources", "品牌关键词": "Brand keywords", "采集边界": "Collection scope", "不采集": "Not collected", "回溯": "Backfill", "品类基准": "Category baseline", "关键词": "Keywords", "模型": "model", "口径": "Definition", "数据时间": "As of", "目标": "target", "健康区间": "healthy range", "均值": "avg", "在下面问一句就能改": "ask below to change", "已固定": "fixed", "内部口径": "Internal view", "对外口径": "Client-facing view", "含阈值与内部判断": "includes thresholds and internal calls", "给客户看的说法": "how we'd say it to the client", "品牌方还没有登录权限": "brand owners have no login yet", "完整度": "completeness", "过期": "stale", "空": "empty", "填": "filled", "被谁读": "read by", "申报名称": "Declaration name", "包装图": "Package image", "净重": "Net weight", "成分表": "Ingredients", "尺寸": "Size", "类目": "Category", "售价": "Price", "商品主图": "Main image", "报关": "Customs", "功效检测报告": "efficacy test report", "成分中英对照": "bilingual ingredient list", "筹备": "Prep", "预热": "Warm-up", "蓄水": "Build-up", "爆发": "Peak", "返场": "Encore", "定调": "Framing", "铺货": "Rollout", "扩散": "Amplify", "复盘": "Review", "规划": "Plan", "进行中的活动": "Active campaigns", "已结束": "Ended", "处卡住": "blocked", "跨范围显示": "shown across scopes", "按领域分组": "grouped by domain", "个领域": "domains", "只有活动这一层看得到": "only visible at the campaign layer", "卡住": "Blocked", "决定中位时长": "Median time to decide", "今日推送": "Pushed today", "归属覆盖": "Ownership coverage", "每人每天预算": "per person per day", "低于采纳率下限的会被自动降级": "below the accept-rate floor is auto-demoted", "校准偏差": "Calibration delta", "停用": "Disable", "观察": "Observe", "自动": "Auto", "已降级": "Demoted", "分数": "Score", "门槛": "Threshold", "归属": "Owner", "判断错了": "Wrong call", "时机不对": "Bad timing", "已经处理了": "Already handled", "不归我管": "Not my area", "基准看着不对": "Baseline looks wrong", "有用但现在不做": "Useful, not now", "补充说明": "Optional note", "可选": "optional", "先选一个理由": "Pick a reason first", "理由会回到反馈回路": "The reason feeds the loop", "预期影响": "Expected impact", "会执行什么": "What will run", "声称置信": "Claimed confidence", "排序分": "Rank score", "排期": "Schedule", "生效起": "Active since", "一次性": "One-off", "每天": "Daily", "每周": "Weekly", "每月": "Monthly", "手动跑": "manual", "有排期": "scheduled", "做什么": "What it does", "名称": "Name", "会作为意图写进线程": "becomes the thread's intent", "不同意就直接说": "Disagree? just say so", "重排": "Re-plan", "让小排排一下": "Let the Orchestrator plan it", "由": "by", "排的": "planned it", "改动": "changed", "下次触发起生效": "takes effect from the next trigger", "还没有": "No ", "不在本次原型范围内": "is out of scope for this prototype", "还没": "Not yet ", "看是哪": "See which", "看它怎么想的": "See how it reasoned", "查看日志": "View log", "实时": "live", "失败": "Failed", "数据源超时": "data source timeout", "被过滤掉的提案": "Filtered out", "这些没推给你 —— 以及为什么": "Not pushed to you — and why", "换一批": "Regenerate", "换一批方向": "a fresh set of directions", "自动剪辑尚未具备": "auto-editing not available", "成片需人工完成": "final cut is manual", "看 Brief": "View brief", "生成 Brief": "Generate brief", "对方已确认": "They confirmed", "标记已发布": "Mark published", "录入表现数据": "Log performance", "合作 Brief": "Collaboration brief", "开场要求": "Opening requirement", "必须做到": "Must include", "不能出现": "Must not include", "交付节点": "Delivery milestones", "已发布": "Published", "每人一份": "one per creator", "跟进": "Follow-up", "上次表现": "Last collaboration", "录入本次表现": "Log this collaboration", "标签": "Tags", "小红书": "Xiaohongshu", "抖音": "Douyin"};
+DICT['聊天记录分析']='Chat History Analysis';
+DICT['聊天记录分析页面将在下一步设计。']='The chat history analysis page will be designed next.';
+DICT['全部店铺']='All stores';
 const DKEYS=Object.keys(DICT).sort((a,b)=>b.length-a.length);
 
 let LANG='zh';
@@ -465,6 +468,33 @@ function anaSide(own){
 }
 const DEFAULT_ANALYTICS_KPIS=['gmv','conversion','roas','stock_days'];
 const MAX_ANALYTICS_KPIS=8;
+const ANALYTICS_STORES=[
+ {id:'all',name:'全部店铺'},
+ {id:'tmall',name:'A8OPARIS 天猫国际旗舰店'},
+ {id:'douyin',name:'A8OPARIS 抖音旗舰店'},
+ {id:'jd',name:'A8OPARIS 京东旗舰店'}
+];
+const CHAT_RECORDS=[
+ {id:'cr1',q:'要先做测试吗？',answer:'您可以选择先进行测试，这样能更好地了解自己的需求和适合的产品。如果您有任何疑问，欢迎随时咨询我们！',platform:'天猫',platformId:'tmall',store:'EVO1.1海外旗舰店',kb:'通用KB',group:'evo产品问答'},
+ {id:'cr2',q:'如何申请退款？',answer:'您可以在收到货后7天内申请退款。只需登录您的账户，找到订单页面，点击申请退款即可。如果您已经拒收了包裹，退款会在我们确认收到退回的商品后处理。请注意，退款处理时间通常为1–3个工作日，具体时间可能会因银行处理而有所不同。',platform:'小红书',platformId:'red',store:'cliganic海外旗舰店',kb:'通用KB',group:'退换类'},
+ {id:'cr3',q:'这个益生菌适合多大孩子？',answer:'我们建议3岁以上的孩子可以使用我们的益生菌产品，具体选择可以根据孩子的需求来决定。如果您有关于便秘的具体情况，可以告诉我，我可以为您推荐更合适的产品哦。',platform:'天猫',platformId:'tmall',store:'LiveSpo海外旗舰店',kb:'通用KB',group:'livespo产品问答'},
+ {id:'cr4',q:'这个喷雾了用不用冲洗？',answer:'这个喷雾使用后不需要冲洗，您可以直接让它在鼻腔内发挥作用。使用时请按照说明书的指引进行操作，确保效果最佳。如果还有其他问题，随时问我！',platform:'天猫',platformId:'tmall',store:'LiveSpo海外旗舰店',kb:'通用KB',group:'livespo产品问答'},
+ {id:'cr5',q:'这个益生菌的成分是什么？',answer:'请发送图片或截图给客服看一下，方便我们帮您核实哦。',platform:'天猫',platformId:'tmall',store:'LiveSpo海外旗舰店',kb:'依赖图片',group:'livespo产品问答'},
+ {id:'cr6',q:'适合哪个年龄段的人群？',answer:'这个产品适合18周岁以上的成人服用，未成年人不可以吃的哦。',platform:'京东',platformId:'jd',store:'TRU NIAGEN海外旗舰店',kb:'产品KB',group:'关联商品 9 个'},
+ {id:'cr7',q:'一瓶能吃多久？',answer:'一瓶五加仑NAD+维活丸有30粒，建议成人每日1–3粒，具体用量可根据个人需求调整。如果每天吃1粒，整瓶可以吃30天；如果每天吃3粒，整瓶可以吃10天。希望这个信息对您有帮助！',platform:'京东',platformId:'jd',store:'TRU NIAGEN海外旗舰店',kb:'产品KB',group:'关联商品 1 个'},
+ {id:'cr8',q:'怎么吃呢？',answer:'加强版的服用方法是：每次500mg，每日早饭或午饭随餐或餐后时摄取2粒软胶囊，适合50岁以上，以及40岁以上精力不足的人群。希望对您有帮助！',platform:'京东',platformId:'jd',store:'TRU NIAGEN海外旗舰店',kb:'产品KB',group:'关联商品 2 个'},
+ {id:'cr9',q:'保质期多久？',answer:'我们的产品保质期一般为24个月，具体日期会在产品包装上标明。请您在购买时查看包装上的生产日期和保质期，以确保在有效期内使用。如果您还有其他问题，随时可以问我！',platform:'京东',platformId:'jd',store:'TRU NIAGEN海外旗舰店',kb:'通用KB',group:'TN产品问答'},
+ {id:'cr10',q:'我可以把不用的购物金退款吗？',answer:'购物金一般是无法直接退款的，但您可以在有效期内使用它进行消费。如果您有特殊情况需要处理，请提供订单信息，我们会有专属客服为您核实处理。希望能帮到您！',platform:'天猫',platformId:'tmall',store:'Moraz洗护海外旗舰店',kb:'通用KB',group:'优惠活动'}
+];
+const CHAT_IMPORT_HISTORY=[
+ {id:'ih1',store:'EPAPLUS海外旗舰店',platforms:[['天猫','tmall']],scope:['EPAPLUS海外旗舰店','Moraz洗护海外旗舰店','Tru Niagen海外旗舰店','TRU NIAGEN海外旗舰店']},
+ {id:'ih2',store:'Tru Niagen海外旗舰店',platforms:[['小红书','red'],['天猫','tmall'],['京东','jd']],scope:['Tru Niagen海外旗舰店','TRU NIAGEN海外旗舰店','EPAPLUS海外旗舰店']},
+ {id:'ih3',store:'EVO1.1海外旗舰店',platforms:[['天猫','tmall'],['京东','jd']],scope:['EVO1.1海外旗舰店','cliganic海外旗舰店','TRU NIAGEN海外旗舰店','Arcwell海外官方旗舰店']},
+ {id:'ih4',store:'EPAPLUS海外旗舰店',platforms:[['天猫','tmall'],['京东','jd']],scope:['EPAPLUS海外旗舰店','TRU NIAGEN海外旗舰店','Tru Niagen海外旗舰店','cliganic海外旗舰店']},
+ {id:'ih5',store:'Tru Niagen海外旗舰店',platforms:[['天猫','tmall'],['京东','jd'],['小红书','red']],scope:['Tru Niagen海外旗舰店','Moraz洗护海外旗舰店','TRU NIAGEN海外旗舰店','EPAPLUS海外旗舰店']},
+ {id:'ih6',store:'TRU NIAGEN海外旗舰店',platforms:[['京东','jd'],['天猫','tmall']],scope:['TRU NIAGEN海外旗舰店','EPAPLUS海外旗舰店','Tru Niagen海外旗舰店','Moraz洗护海外旗舰店']},
+ {id:'ih7',store:'cliganic海外旗舰店',platforms:[['天猫','tmall'],['京东','jd']],scope:['cliganic海外旗舰店','TRU NIAGEN海外旗舰店','Tru Niagen海外旗舰店']}
+];
 function analyticsKpiIds(){
  const valid=new Set(KPI.map(k=>k.id));
  if(!Array.isArray(S.anaKpiIds))S.anaKpiIds=DEFAULT_ANALYTICS_KPIS.slice();
@@ -483,8 +513,13 @@ function analyticsKpiPicker(){
  return `<div class="ana-kpi-control"><button id="ana-kpi-trigger" class="ana-kpi-trigger" aria-expanded="false" aria-controls="ana-kpi-panel" onclick="toggleAnalyticsKpiPicker()"><i data-lucide="sliders-horizontal" aria-hidden="true"></i><span>管理 KPI</span><i class="ana-kpi-chevron" data-lucide="chevron-down" aria-hidden="true"></i></button>
   <div id="ana-kpi-panel" class="ana-kpi-panel" role="group" aria-label="选择展示的 KPI" onclick="event.stopPropagation()" hidden>${KPI.map(k=>`<label class="ana-kpi-option"><input type="checkbox" data-kpi="${k.id}" ${ids.includes(k.id)?'checked':''} ${full&&!ids.includes(k.id)?'disabled':''} onchange="toggleAnalyticsKpi('${k.id}',this)"><span>${esc(k.menu||k.k)}</span></label>`).join('')}<div class="ana-kpi-hint">最多选择 ${MAX_ANALYTICS_KPIS} 项，至少保留 1 项</div></div></div>`;
 }
+function analyticsStorePicker(){
+ const selected=ANALYTICS_STORES.find(store=>store.id===(S.anaStore||'all'))||ANALYTICS_STORES[0];
+ return `<div class="ana-store-control"><button id="ana-store-trigger" class="ana-kpi-trigger ana-store-trigger" aria-expanded="false" aria-controls="ana-store-panel" onclick="toggleAnalyticsStorePicker()"><i data-lucide="store" aria-hidden="true"></i><span>${esc(selected.name)}</span><i class="ana-kpi-chevron" data-lucide="chevron-down" aria-hidden="true"></i></button>
+  <div id="ana-store-panel" class="ana-kpi-panel ana-store-panel" role="listbox" aria-label="选择店铺" onclick="event.stopPropagation()" hidden>${ANALYTICS_STORES.map(store=>`<button class="ana-store-option ${store.id===selected.id?'on':''}" role="option" aria-selected="${store.id===selected.id}" onclick="selectAnalyticsStore('${store.id}')"><span>${esc(store.name)}</span></button>`).join('')}</div></div>`;
+}
 function anaKpiOverview(){
- return `<section class="ana-kpi-overview" aria-label="你的指标"><div class="ana-kpi-head"><div class="ana-kpi-title">你的指标</div>${analyticsDatePicker()}${analyticsKpiPicker()}</div>
+ return `<section class="ana-kpi-overview" aria-label="你的指标"><div class="ana-kpi-head"><div class="ana-kpi-title">你的指标</div>${analyticsDatePicker()}${analyticsKpiPicker()}${analyticsStorePicker()}</div>
   <div class="kpigrid" id="ana-kpi-grid">${analyticsKpiCards()}</div></section>`;
 }
 function metricGuide(){
@@ -602,13 +637,28 @@ function analyticsDateRange(){
 function toggleAnalyticsKpiPicker(){
  const panel=$('ana-kpi-panel'),trigger=$('ana-kpi-trigger');if(!panel||!trigger)return;
  const opening=panel.hidden;
- if(opening)closeAnalyticsDatePicker();
+ if(opening){closeAnalyticsDatePicker();closeAnalyticsStorePicker();}
  panel.hidden=!opening;trigger.setAttribute('aria-expanded',String(opening));
  if(opening)panel.querySelector('input:not(:disabled)')?.focus();
 }
 function closeAnalyticsKpiPicker(focus=false){
  const panel=$('ana-kpi-panel'),trigger=$('ana-kpi-trigger');if(!panel||panel.hidden)return;
  panel.hidden=true;if(trigger){trigger.setAttribute('aria-expanded','false');if(focus)trigger.focus();}
+}
+function toggleAnalyticsStorePicker(){
+ const panel=$('ana-store-panel'),trigger=$('ana-store-trigger');if(!panel||!trigger)return;
+ const opening=panel.hidden;
+ if(opening){closeAnalyticsDatePicker();closeAnalyticsKpiPicker();}
+ panel.hidden=!opening;trigger.setAttribute('aria-expanded',String(opening));
+ if(opening)panel.querySelector('[role="option"][aria-selected="true"]')?.focus();
+}
+function closeAnalyticsStorePicker(focus=false){
+ const panel=$('ana-store-panel'),trigger=$('ana-store-trigger');if(!panel||panel.hidden)return;
+ panel.hidden=true;trigger.setAttribute('aria-expanded','false');if(focus)trigger.focus();
+}
+function selectAnalyticsStore(id){
+ const store=ANALYTICS_STORES.find(item=>item.id===id);if(!store)return;
+ S.anaStore=id;closeAnalyticsStorePicker();render();toast(`已切换至${store.name}`);
 }
 function syncAnalyticsKpiPicker(){
  const ids=analyticsKpiIds(),full=ids.length>=MAX_ANALYTICS_KPIS,panel=$('ana-kpi-panel'),grid=$('ana-kpi-grid');
@@ -657,7 +707,7 @@ function selectAnalyticsDate(key){
 function toggleAnalyticsDatePicker(){
  const panel=$('ana-range-panel');if(!panel)return;
  if(!panel.hidden){closeAnalyticsDatePicker(true);return;}
- closeAnalyticsKpiPicker();
+ closeAnalyticsKpiPicker();closeAnalyticsStorePicker();
  const range=analyticsDateRange(),[year,month]=range.start.split('-').map(Number);
  S.anaRangeDraft={year,month:month-1,start:null};drawAnalyticsCalendar();
  panel.hidden=false;$('ana-range-trigger').setAttribute('aria-expanded','true');panel.querySelector(`[data-date="${range.start}"]`)?.focus();
@@ -672,17 +722,304 @@ function applyAnalyticsDateRange(start,end){
  $('ana-range-trigger').querySelector('span').textContent=start+' ~ '+end;
  closeAnalyticsDatePicker(true);toast('时间范围已更新，当前指标仍为演示数据');
 }
-document.addEventListener('click',e=>{if(!e.target.closest('.ana-range-control'))closeAnalyticsDatePicker();if(!e.target.closest('.ana-kpi-control'))closeAnalyticsKpiPicker();});
-document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('ana-range-panel')&&!$('ana-range-panel').hidden)closeAnalyticsDatePicker(true);else if($('ana-kpi-panel')&&!$('ana-kpi-panel').hidden)closeAnalyticsKpiPicker(true);});
+document.addEventListener('click',e=>{if(!e.target.closest('.ana-range-control'))closeAnalyticsDatePicker();if(!e.target.closest('.ana-kpi-control'))closeAnalyticsKpiPicker();if(!e.target.closest('.ana-store-control'))closeAnalyticsStorePicker();if(!e.target.closest('.chat-date-control'))closeChatRecordDatePicker();if(!e.target.closest('.chat-filter-control'))closeChatRecordFilterPickers();if(!e.target.closest('.chat-detail-picker'))closeChatDetailPickers();});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('ana-range-panel')&&!$('ana-range-panel').hidden)closeAnalyticsDatePicker(true);else if($('ana-kpi-panel')&&!$('ana-kpi-panel').hidden)closeAnalyticsKpiPicker(true);else if($('ana-store-panel')&&!$('ana-store-panel').hidden)closeAnalyticsStorePicker(true);else if($('chat-date-panel')&&!$('chat-date-panel').hidden)closeChatRecordDatePicker(true);else if(document.querySelector('.chat-detail-picker-panel:not([hidden])'))closeChatDetailPickers(true);else closeChatRecordFilterPickers(true);});
+function analyticsViewTabs(){
+ const view=S.anaView||'data';
+ return `<div class="bar"><div class="seg" role="tablist" aria-label="数据分析视图">
+  <button role="tab" aria-selected="${view==='data'}" class="${view==='data'?'on':''}" onclick="S.anaView='data';render()">数据分析</button>
+  <button role="tab" aria-selected="${view==='chat'}" class="${view==='chat'?'on':''}" onclick="S.anaView='chat';render()">聊天记录分析</button>
+ </div></div>`;
+}
+function chatRecordState(){
+ if(!Array.isArray(S.chatSelected))S.chatSelected=[];
+ if(!Array.isArray(S.chatHidden))S.chatHidden=[];
+ if(!Array.isArray(S.chatApproved))S.chatApproved=[];
+ if(typeof S.chatAnalyzing!=='boolean')S.chatAnalyzing=false;
+ if(!S.chatPlatform)S.chatPlatform='all';
+ if(!S.chatStore)S.chatStore='all';
+ if(!S.chatStatus)S.chatStatus='pending';
+ if(!S.chatKb)S.chatKb='all';
+ if(!Number.isInteger(S.chatPage))S.chatPage=1;
+ return S;
+}
+function openChatImportModal(){
+ S.chatImportFile=null;drawChatImportModal();
+}
+function openChatImportHistory(){
+ if(!Array.isArray(S.chatImportHistoryHidden))S.chatImportHistoryHidden=[];
+ S.chatImportHistoryOpen=null;drawChatImportHistory();
+}
+function drawChatImportHistory(){
+ const hidden=S.chatImportHistoryHidden||[],rows=CHAT_IMPORT_HISTORY.filter(item=>!hidden.includes(item.id));
+ $('dw').classList.remove('focus','expanded');
+ $('dw').innerHTML=`<div class="dw-h"><button class="ib" onclick="closeDw()" aria-label="关闭"><i data-lucide="x" aria-hidden="true"></i></button><div style="flex:1;min-width:0"><div class="ty">客户聊天记录分析</div><h3>导入记录</h3></div></div>
+  <div class="dw-b chat-history-body"><div class="chat-history-list">${rows.length?rows.map(chatImportHistoryCard).join(''):'<div class="chat-history-empty">暂无导入记录</div>'}</div></div>`;
+ $('dw').classList.add('on');$('scrim').classList.add('on');if(window.lucide)lucide.createIcons({root:$('dw'),attrs:{width:16,height:16,'stroke-width':1.8}});
+}
+function chatImportHistoryCard(item){
+ const open=S.chatImportHistoryOpen===item.id,scope=item.scope.join(' / ');
+ return `<article class="chat-history-card ${open?'open':''}">
+  <div class="chat-history-card-head"><div class="chat-history-main"><h4>${esc(item.store)}</h4><div class="chat-history-tags"><span class="chat-tag approved">已完成</span>${item.platforms.map(platform=>`<span class="chat-tag platform ${platform[1]}">${platform[0]}</span>`).join('')}</div></div><div class="chat-history-actions"><button class="chat-history-view-icon" aria-expanded="${open}" onclick="toggleChatImportHistory('${item.id}')" aria-label="${open?'收起':'查看'} ${esc(item.store)} 的导入详情"><i data-lucide="eye" aria-hidden="true"></i></button><button class="chat-history-delete" onclick="deleteChatImportHistory('${item.id}')" aria-label="删除 ${esc(item.store)} 的导入记录"><i data-lucide="trash-2" aria-hidden="true"></i></button></div></div>
+  <p class="chat-history-scope">${esc(scope)}</p>
+  ${open?`<div class="chat-history-detail"><span>导入范围</span><p>本批次包含 ${item.scope.length} 个店铺的聊天记录，已完成分析并生成建议回复。</p></div>`:''}
+ </article>`;
+}
+function toggleChatImportHistory(id){S.chatImportHistoryOpen=S.chatImportHistoryOpen===id?null:id;drawChatImportHistory();}
+function deleteChatImportHistory(id){
+ const item=CHAT_IMPORT_HISTORY.find(record=>record.id===id);if(!item)return;
+ openChatDeleteConfirm({kind:'history',id,title:'删除这条导入记录？',name:item.store,description:'删除后，这条历史导入记录将不再显示。'});
+}
+function drawChatImportModal(){
+ const file=S.chatImportFile,size=file?`${Math.max(1,Math.ceil(file.size/1024))} KB`:'';
+ $('mod').classList.remove('plan-mode','asset-mode');
+ $('mod').innerHTML=`<form class="mbox chat-import-modal" role="dialog" aria-modal="true" aria-labelledby="chat-import-title" onsubmit="event.preventDefault();confirmChatImport()">
+  <header class="chat-import-head"><div><h3 id="chat-import-title">导入聊天记录</h3><p>上传从「聊天记录测试」页面导出的 JSON 文件，系统会自动开始 AI 分析。</p></div><button type="button" class="ib chat-import-close" onclick="closeMod()" aria-label="关闭"><i data-lucide="x" aria-hidden="true"></i></button></header>
+  <div class="chat-import-body"><label>选择聊天记录 JSON 文件</label><input id="chat-import-input" type="file" accept=".json,application/json" hidden onchange="selectChatImportFile(this.files[0])">
+   <div class="chat-import-dropzone ${file?'has-file':''}" role="button" tabindex="0" aria-label="${file?'重新选择聊天记录 JSON 文件':'选择聊天记录 JSON 文件'}" onclick="$('chat-import-input').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();$('chat-import-input').click()}" ondragover="event.preventDefault();this.classList.add('dragging')" ondragleave="this.classList.remove('dragging')" ondrop="handleChatImportDrop(event)">
+    ${file?`<i data-lucide="file-json" aria-hidden="true"></i><div><strong>${esc(file.name)}</strong><span>${size} · 点击重新选择</span></div>`:`<i data-lucide="upload-cloud" aria-hidden="true"></i><strong>点击上传聊天记录文件<span>.json</span></strong><small>也可以将文件拖放到这里</small>`}
+   </div>
+  </div>
+  <footer class="chat-import-foot"><button type="button" class="btn ghost" onclick="closeMod()">取消</button><button type="submit" class="btn" ${file?'':'disabled'}>开始分析</button></footer>
+ </form>`;
+ $('mod').classList.add('on');if(window.lucide)lucide.createIcons({root:$('mod'),attrs:{width:18,height:18,'stroke-width':1.8}});
+}
+function selectChatImportFile(file){
+ if(!file)return;
+ if(!/\.json$/i.test(file.name)){toast('请选择 JSON 格式的聊天记录文件');return;}
+ S.chatImportFile=file;drawChatImportModal();
+}
+function handleChatImportDrop(event){
+ event.preventDefault();event.currentTarget.classList.remove('dragging');selectChatImportFile(event.dataTransfer?.files?.[0]);
+}
+function confirmChatImport(){
+ const file=S.chatImportFile;if(!file)return;
+ S.chatAnalyzing=true;S.chatImportFile=null;closeMod();render();toast(`已导入 ${file.name}，正在分析`);
+}
+function stopChatAnalysis(){
+ if(!S.chatAnalyzing)return;
+ S.chatAnalyzing=false;render();toast('分析已终止');
+}
+function filteredChatRecords(){
+ chatRecordState();
+ return CHAT_RECORDS.filter(record=>!S.chatHidden.includes(record.id))
+  .filter(record=>S.chatPlatform==='all'||record.platformId===S.chatPlatform)
+  .filter(record=>S.chatStore==='all'||record.store===S.chatStore)
+  .filter(record=>S.chatStatus==='all'||(S.chatStatus==='approved'?S.chatApproved.includes(record.id):!S.chatApproved.includes(record.id)))
+  .filter(record=>S.chatKb==='all'||record.kb===S.chatKb)
+  .filter(()=>!S.chatDateRange||('2026-09-16'>=S.chatDateRange.start&&'2026-09-16'<=S.chatDateRange.end));
+}
+function chatRecordSelect(id,checked){
+ chatRecordState();
+ S.chatSelected=checked?[...new Set([...S.chatSelected,id])]:S.chatSelected.filter(item=>item!==id);render();
+}
+function chatRecordSelectAll(checked){
+ const ids=filteredChatRecords().map(record=>record.id);
+ S.chatSelected=checked?[...new Set([...S.chatSelected,...ids])]:S.chatSelected.filter(id=>!ids.includes(id));render();
+}
+function setChatRecordFilter(key,value){S[key]=value;S.chatPage=1;render();}
+function chatRecordFilterPicker(name,label,options,value,wide=false){
+ const selected=options.find(option=>option[0]===value)||options[0];
+ return `<div class="chat-filter-control ${wide?'wide':''}"><button id="chat-filter-${name}-trigger" class="ana-kpi-trigger chat-filter-trigger" aria-expanded="false" aria-controls="chat-filter-${name}-panel" onclick="toggleChatRecordFilterPicker('${name}')"><span>${esc(selected[1])}</span><i class="ana-kpi-chevron" data-lucide="chevron-down" aria-hidden="true"></i></button><div id="chat-filter-${name}-panel" class="ana-kpi-panel chat-filter-panel" role="listbox" aria-label="${esc(label)}" onclick="event.stopPropagation()" hidden>${options.map(option=>`<button class="ana-store-option ${option[0]===value?'on':''}" role="option" aria-selected="${option[0]===value}" onclick="selectChatRecordFilter('${name}','${option[0]}')">${esc(option[1])}</button>`).join('')}</div></div>`;
+}
+function toggleChatRecordFilterPicker(name){
+ const panel=$(`chat-filter-${name}-panel`),trigger=$(`chat-filter-${name}-trigger`);if(!panel||!trigger)return;
+ const opening=panel.hidden;closeChatRecordFilterPickers(false,name);closeChatRecordDatePicker();
+ panel.hidden=!opening;trigger.setAttribute('aria-expanded',String(opening));
+ if(opening)panel.querySelector('[role="option"][aria-selected="true"]')?.focus();
+}
+function closeChatRecordFilterPickers(focus=false,except=''){
+ document.querySelectorAll('.chat-filter-control').forEach(control=>{
+  const panel=control.querySelector('.chat-filter-panel'),trigger=control.querySelector('.chat-filter-trigger');
+  if(!panel||panel.id===`chat-filter-${except}-panel`||panel.hidden)return;
+  panel.hidden=true;if(trigger){trigger.setAttribute('aria-expanded','false');if(focus)trigger.focus();}
+ });
+}
+function selectChatRecordFilter(name,value){
+ const keys={platform:'chatPlatform',store:'chatStore',status:'chatStatus',kb:'chatKb'};if(!keys[name])return;
+ setChatRecordFilter(keys[name],value);
+}
+function chatRecordDatePicker(){
+ const range=S.chatDateRange,label=range?`${range.start} ~ ${range.end}`:'时间筛选';
+ return `<div class="chat-date-control"><button id="chat-date-trigger" class="chat-date-filter" aria-expanded="false" aria-controls="chat-date-panel" onclick="toggleChatRecordDatePicker()"><i data-lucide="calendar-days" aria-hidden="true"></i><span>${label}</span></button><div id="chat-date-panel" class="ana-range-panel" role="dialog" aria-label="选择聊天记录日期范围" onclick="event.stopPropagation()" hidden></div></div>`;
+}
+function drawChatRecordCalendar(){
+ const panel=$('chat-date-panel'),draft=S.chatRangeDraft;if(!panel||!draft)return;
+ const saved=S.chatDateRange||{},start=draft.start||saved.start||'',end=draft.start?draft.start:(saved.end||'');
+ const first=new Date(draft.year,draft.month,1),offset=(first.getDay()+6)%7,today=analyticsDateKey(new Date());
+ const days=Array.from({length:42},(_,i)=>{
+  const date=new Date(draft.year,draft.month,i-offset+1),key=analyticsDateKey(date),endpoint=key===start||key===end,inRange=start&&end&&key>=start&&key<=end;
+  return `<button class="ana-calendar-day ${date.getMonth()!==draft.month?'other':''} ${inRange?'in-range':''} ${endpoint?'endpoint':''} ${key===today?'today':''}" data-chat-date="${key}" aria-label="${key}${key===start?'，开始日期':''}${key===end?'，结束日期':''}" aria-pressed="${endpoint}" onclick="selectChatRecordDate('${key}')">${date.getDate()}</button>`;
+ }).join('');
+ panel.innerHTML=`<div class="ana-calendar-head"><button class="ana-calendar-nav" data-chat-month="prev" aria-label="上个月" onclick="moveChatRecordMonth(-1)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button><span class="ana-calendar-title">${draft.year} 年 ${draft.month+1} 月</span><button class="ana-calendar-nav" data-chat-month="next" aria-label="下个月" onclick="moveChatRecordMonth(1)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></div><div class="ana-calendar-grid">${['一','二','三','四','五','六','日'].map(day=>`<span class="ana-calendar-week">${day}</span>`).join('')}${days}</div><div class="ana-calendar-hint" role="status">${draft.start?draft.start+' 起 · 请选择结束日期':'点选开始日期，再点结束日期'}</div>`;
+}
+function toggleChatRecordDatePicker(){
+ const panel=$('chat-date-panel'),trigger=$('chat-date-trigger');if(!panel||!trigger)return;
+ if(!panel.hidden){closeChatRecordDatePicker(true);return;}
+ closeAnalyticsDatePicker();closeAnalyticsKpiPicker();closeAnalyticsStorePicker();closeChatRecordFilterPickers();
+ const base=S.chatDateRange?new Date(S.chatDateRange.start+'T00:00:00'):new Date();
+ S.chatRangeDraft={year:base.getFullYear(),month:base.getMonth(),start:null};drawChatRecordCalendar();panel.hidden=false;trigger.setAttribute('aria-expanded','true');
+ (panel.querySelector('[data-chat-date].today')||panel.querySelector('[data-chat-date]'))?.focus();
+}
+function closeChatRecordDatePicker(focus=false){
+ const panel=$('chat-date-panel'),trigger=$('chat-date-trigger');if(!panel||panel.hidden)return;
+ panel.hidden=true;trigger.setAttribute('aria-expanded','false');if(focus)trigger.focus();
+}
+function moveChatRecordMonth(offset){
+ const draft=S.chatRangeDraft;if(!draft)return;const date=new Date(draft.year,draft.month+offset,1);draft.year=date.getFullYear();draft.month=date.getMonth();drawChatRecordCalendar();
+ $('chat-date-panel').querySelector(`[data-chat-month="${offset<0?'prev':'next'}"]`)?.focus();
+}
+function selectChatRecordDate(key){
+ const draft=S.chatRangeDraft;if(!draft)return;
+ if(!draft.start){draft.start=key;drawChatRecordCalendar();$('chat-date-panel').querySelector(`[data-chat-date="${key}"]`)?.focus();return;}
+ const [start,end]=[draft.start,key].sort();S.chatDateRange={start,end};S.chatPage=1;closeChatRecordDatePicker();render();toast(`已筛选 ${start} 至 ${end} 的聊天记录`);
+}
+function setChatRecordPage(page){S.chatPage=Math.max(1,Math.min(4,page));render();}
+function deleteChatRecord(id){
+ const record=CHAT_RECORDS.find(item=>item.id===id);if(!record)return;
+ openChatDeleteConfirm({kind:'record',id,fromDetail:S.chatDetailDraft?.id===id&&$('dw').classList.contains('on'),title:'删除这条客户问题？',name:record.q,description:'删除后，该问题及其建议回复将从当前列表中移除。'});
+}
+function approveSelectedChatRecords(){
+ chatRecordState();const count=S.chatSelected.length;if(!count)return;
+ S.chatApproved=[...new Set([...S.chatApproved,...S.chatSelected])];S.chatSelected=[];render();toast(`已批准 ${count} 条建议回复`);
+}
+function downloadSelectedChatRecords(){
+ chatRecordState();const records=CHAT_RECORDS.filter(record=>S.chatSelected.includes(record.id));if(!records.length)return;
+ const quote=value=>'"'+String(value).replace(/"/g,'""')+'"';
+ const csv=['客户问题,建议回复,平台,店铺,知识库',...records.map(record=>[record.q,record.answer,record.platform,record.store,record.kb].map(quote).join(','))].join('\n');
+ const url=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'})),link=document.createElement('a');
+ link.href=url;link.download='客户聊天记录.csv';link.click();URL.revokeObjectURL(url);toast(`已下载 ${records.length} 条记录`);
+}
+function deleteSelectedChatRecords(){
+ chatRecordState();const count=S.chatSelected.length;if(!count)return;
+ openChatDeleteConfirm({kind:'selected',count,title:`删除已选择的 ${count} 条记录？`,name:`共 ${count} 条客户问题`,description:'删除后，这些问题及其建议回复将从当前列表中移除。'});
+}
+function openChatDeleteConfirm(action){
+ S.chatDeleteAction=action;$('mod').classList.remove('plan-mode','asset-mode');
+ $('mod').innerHTML=`<div class="mbox chat-delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="chat-delete-title" aria-describedby="chat-delete-description">
+  <div class="chat-delete-head"><div class="chat-delete-icon"><i data-lucide="trash-2" aria-hidden="true"></i></div><div><h3 id="chat-delete-title">${esc(action.title)}</h3><p id="chat-delete-description">${esc(action.description)}</p></div><button class="ib" onclick="cancelChatDelete()" aria-label="关闭"><i data-lucide="x" aria-hidden="true"></i></button></div>
+  <div class="chat-delete-target"><span>即将删除</span><strong>${esc(action.name)}</strong></div>
+  <div class="chat-delete-foot"><button class="btn ghost" onclick="cancelChatDelete()">取消</button><button class="btn chat-delete-confirm" onclick="confirmChatDelete()"><i data-lucide="trash-2" aria-hidden="true"></i>确认删除</button></div>
+ </div>`;
+ $('mod').classList.add('on');if(window.lucide)lucide.createIcons({root:$('mod'),attrs:{width:17,height:17,'stroke-width':1.9}});
+}
+function cancelChatDelete(){S.chatDeleteAction=null;closeMod();}
+function confirmChatDelete(){
+ const action=S.chatDeleteAction;if(!action)return;S.chatDeleteAction=null;closeMod();
+ if(action.kind==='history'){
+  S.chatImportHistoryHidden=[...new Set([...(S.chatImportHistoryHidden||[]),action.id])];if(S.chatImportHistoryOpen===action.id)S.chatImportHistoryOpen=null;drawChatImportHistory();toast('导入记录已删除');return;
+ }
+ chatRecordState();
+ if(action.kind==='record'){
+  S.chatHidden=[...new Set([...S.chatHidden,action.id])];S.chatSelected=S.chatSelected.filter(item=>item!==action.id);if(action.fromDetail)closeDw();render();toast('记录已删除');return;
+ }
+ const count=S.chatSelected.length;S.chatHidden=[...new Set([...S.chatHidden,...S.chatSelected])];S.chatSelected=[];render();toast(`已删除 ${count} 条记录`);
+}
+function cancelChatRecordSelection(){S.chatSelected=[];render();}
+function viewChatRecord(id){
+ const record=CHAT_RECORDS.find(item=>item.id===id);if(!record)return;
+ S.chatDetailDraft={id,question:record.q,answer:record.answer,kb:record.kb,group:record.group,keywords:record.keywords||record.q.replace(/[？?！!。]/g,''),scope:record.scope||(record.kb==='通用KB'?'通用，可跨品牌/平台复用':'适用于当前知识库内容'),sampleQuestion:record.q,sampleAnswer:record.answer};drawChatRecordDetail();
+}
+function chatDetailOptions(name){
+ return name==='kb'?['通用KB','产品KB','依赖图片']:[...new Set(CHAT_RECORDS.map(record=>record.group))];
+}
+function chatDetailPicker(name,label,value){
+ const options=chatDetailOptions(name);
+ return `<div class="chat-detail-picker"><label>${label}</label><button id="chat-detail-${name}-trigger" class="ana-kpi-trigger chat-detail-picker-trigger" aria-expanded="false" aria-controls="chat-detail-${name}-panel" onclick="toggleChatDetailPicker('${name}')"><span>${esc(value)}</span><i class="ana-kpi-chevron" data-lucide="chevron-down" aria-hidden="true"></i></button><div id="chat-detail-${name}-panel" class="ana-kpi-panel chat-detail-picker-panel" role="listbox" aria-label="选择${label}" hidden>${options.map((option,index)=>`<button class="ana-store-option ${option===value?'on':''}" role="option" aria-selected="${option===value}" onclick="selectChatDetailPicker('${name}',${index})">${esc(option)}</button>`).join('')}</div></div>`;
+}
+function drawChatRecordDetail(){
+ const draft=S.chatDetailDraft,record=draft&&CHAT_RECORDS.find(item=>item.id===draft.id);if(!draft||!record)return;
+ $('dw').classList.remove('focus','expanded');
+ const body=`<div class="fld chat-detail-field"><label for="chat-detail-question">客户问题</label><textarea id="chat-detail-question" rows="4" oninput="S.chatDetailDraft.question=this.value" onblur="saveChatRecordDetail(false,true)">${esc(draft.question)}</textarea></div>
+   <div class="fld chat-detail-field reply"><label for="chat-detail-answer">建议回复</label><textarea id="chat-detail-answer" rows="10" oninput="S.chatDetailDraft.answer=this.value" onblur="saveChatRecordDetail(false,true)">${esc(draft.answer)}</textarea></div>
+   <div class="chat-detail-meta-grid">${chatDetailPicker('kb','知识库归属',draft.kb)}</div>
+   <div class="chat-detail-support-grid"><div class="fld chat-detail-support-field"><label for="chat-detail-keywords">触发关键词</label><textarea id="chat-detail-keywords" rows="2" oninput="S.chatDetailDraft.keywords=this.value" onblur="saveChatRecordDetail(false,true)">${esc(draft.keywords)}</textarea></div><div class="fld chat-detail-support-field"><label for="chat-detail-scope">适用范围</label><textarea id="chat-detail-scope" rows="2" oninput="S.chatDetailDraft.scope=this.value" onblur="saveChatRecordDetail(false,true)">${esc(draft.scope)}</textarea></div></div>
+   <div class="chat-sample-head"><h4>样本对话</h4><span><i data-lucide="lock" aria-hidden="true"></i>只读内容</span></div>
+   <div class="chat-sample-block"><p><strong>顾客</strong><span>${esc(draft.sampleQuestion)}</span></p><p><strong>客服</strong><span>${esc(draft.sampleAnswer)}</span></p></div>
+   <div class="chat-sample-block"><p><strong>顾客</strong><span>这个和我现在看的产品有什么区别？</span></p><p><strong>客服</strong><span>主要区别在适用场景和核心卖点上，可以先确认您更关注效果、成分还是使用体验。</span></p></div>`;
+ $('dw').innerHTML=`<div class="dw-h chat-detail-head"><button class="ib" onclick="closeDw()" aria-label="关闭"><i data-lucide="x" aria-hidden="true"></i></button><div style="flex:1;min-width:0"><div class="ty">聊天记录分析 · ${esc(record.platform)}</div><h3>${esc(record.q)}</h3></div></div>
+  <div class="dw-b chat-detail-body">${body}</div>
+  <div class="dw-f chat-detail-foot"><button class="btn" onclick="saveChatRecordDetail(true)">批准</button><button class="btn ghost" onclick="downloadChatRecordDetail()"><i data-lucide="download" aria-hidden="true"></i>下载</button><button class="btn ghost chat-detail-delete" onclick="deleteChatRecord('${record.id}')"><i data-lucide="trash-2" aria-hidden="true"></i>删除</button></div>`;
+ $('dw').classList.add('on');$('scrim').classList.add('on');if(window.lucide)lucide.createIcons({root:$('dw'),attrs:{width:16,height:16,'stroke-width':1.8}});syncDrawerExpandControl();
+}
+function toggleChatDetailPicker(name){
+ const panel=$(`chat-detail-${name}-panel`),trigger=$(`chat-detail-${name}-trigger`);if(!panel||!trigger)return;
+ const opening=panel.hidden;closeChatDetailPickers(false,name);panel.hidden=!opening;trigger.setAttribute('aria-expanded',String(opening));if(opening)panel.querySelector('[aria-selected="true"]')?.focus();
+}
+function closeChatDetailPickers(focus=false,except=''){
+ document.querySelectorAll('.chat-detail-picker-panel').forEach(panel=>{
+  if(panel.id===`chat-detail-${except}-panel`||panel.hidden)return;
+  panel.hidden=true;const trigger=$(panel.id.replace('-panel','-trigger'));if(trigger){trigger.setAttribute('aria-expanded','false');if(focus)trigger.focus();}
+ });
+}
+function selectChatDetailPicker(name,index){
+ const options=chatDetailOptions(name),value=options[index];if(!S.chatDetailDraft||value===undefined)return;
+ S.chatDetailDraft[name]=value;drawChatRecordDetail();
+}
+function saveChatRecordDetail(approve=false,quiet=false){
+ const draft=S.chatDetailDraft,record=draft&&CHAT_RECORDS.find(item=>item.id===draft.id);if(!draft||!record)return;
+ const question=draft.question.trim(),answer=draft.answer.trim();if(!question||!answer){toast('客户问题和建议回复不能为空');return;}
+ record.q=question;record.answer=answer;record.kb=draft.kb;record.group=draft.group;record.keywords=draft.keywords.trim();record.scope=draft.scope.trim();
+ if(approve){chatRecordState();S.chatApproved=[...new Set([...S.chatApproved,record.id])];}
+ render();
+ if(approve){closeDw();toast('已批准并保存修改');return;}
+ if(!quiet)toast('问题详情已保存');
+}
+function downloadChatRecordDetail(){
+ const draft=S.chatDetailDraft,record=draft&&CHAT_RECORDS.find(item=>item.id===draft.id);if(!draft||!record)return;
+ const data={客户问题:draft.question,建议回复:draft.answer,标签:draft.kb,分组:draft.group,平台:record.platform,店铺:record.store,样本对话:[{顾客:draft.sampleQuestion,客服:draft.sampleAnswer}]};
+ const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'})),link=document.createElement('a');link.href=url;link.download=`客户问题-${record.id}.json`;link.click();URL.revokeObjectURL(url);toast('问题详情已下载');
+}
+function chatRecordRows(){
+ const records=filteredChatRecords(),page=S.chatPage||1;
+ if(page!==1)return `<div class="chat-record-empty">当前原型仅录入第 1 页示例数据。</div>`;
+ if(!records.length)return `<div class="chat-record-empty">当前筛选下没有聊天记录。</div>`;
+ return records.map(record=>{const approved=S.chatApproved.includes(record.id);return `<div class="chat-record-row">
+  <div class="chat-record-check"><input type="checkbox" aria-label="选择 ${esc(record.q)}" ${S.chatSelected.includes(record.id)?'checked':''} onchange="chatRecordSelect('${record.id}',this.checked)"></div>
+  <div class="chat-record-question"><strong>${esc(record.q)}</strong><div class="chat-record-tags"><span class="chat-tag ${approved?'approved':'pending'}">${approved?'已批准':'待审核'}</span><span class="chat-tag ai-reply">AI 自动回复</span><span class="chat-tag platform ${record.platformId}">${record.platform}</span><span class="chat-tag kb">${record.kb}</span><span class="chat-record-group">${record.group.startsWith('关联')?'':'分组：'}${esc(record.group)}</span></div><div class="chat-record-source">${esc(record.store)} / 2026/9/16</div></div>
+  <div class="chat-record-answer">${esc(record.answer)}</div>
+  <div class="chat-record-actions"><button class="chat-icon-button view" aria-label="查看 ${esc(record.q)}" onclick="viewChatRecord('${record.id}')"><i data-lucide="eye" aria-hidden="true"></i></button><button class="chat-icon-button delete" aria-label="删除 ${esc(record.q)}" onclick="deleteChatRecord('${record.id}')"><i data-lucide="trash-2" aria-hidden="true"></i></button></div>
+ </div>`;}).join('');
+}
+function analyticsChatView(){
+ chatRecordState();
+ const records=filteredChatRecords(),allSelected=records.length&&records.every(record=>S.chatSelected.includes(record.id));
+ const stores=[['all','全部店铺'],...Array.from(new Set(CHAT_RECORDS.map(record=>record.store))).map(store=>[store,store])];
+ return `<div class="wrap chat-analysis-page">
+  <div class="eyebrow">工作 · 客户聊天记录分析</div><h1>客户聊天记录分析</h1>
+  <div class="sub ana-page-intro">导入客户聊天记录，AI 自动沉淀高频问题与建议回复，审核后进入知识运营。</div>
+  ${analyticsViewTabs()}
+  <div class="chat-summary" aria-label="聊天记录统计">
+   ${[['171','建议总数'],['33','当前筛选'],[String(138+S.chatApproved.length),'已批准'],['13','导入批次数'],[String(S.chatSelected.length),'已选择']].map(item=>`<div class="chat-summary-item"><strong class="num">${item[0]}</strong><span>${item[1]}</span></div>`).join('')}
+  </div>
+  <section class="chat-record-panel" aria-label="客户聊天记录">
+   <header class="chat-record-panel-head"><div><h2>客户聊天记录分析</h2><p>分析导入的客户聊天记录，审核 AI 建议回复。</p></div><div class="chat-record-head-actions">${S.chatAnalyzing?'<span class="chat-analysis-running" role="status"><i aria-hidden="true"></i>正在分析中</span><button class="btn ghost sm chat-analysis-stop" onclick="stopChatAnalysis()">终止分析</button>':''}<button class="btn ghost sm" onclick="openChatImportHistory()"><i data-lucide="history" aria-hidden="true"></i>导入记录</button><button class="btn sm" onclick="openChatImportModal()"><i data-lucide="plus" aria-hidden="true"></i>导入聊天记录</button></div></header>
+   <div class="chat-record-filters">
+    ${chatRecordFilterPicker('platform','平台筛选',[['all','全部平台'],['tmall','天猫'],['red','小红书'],['jd','京东']],S.chatPlatform)}
+    ${chatRecordFilterPicker('store','店铺筛选',stores,S.chatStore,true)}
+    ${chatRecordFilterPicker('status','状态筛选',[['pending','待审核'],['approved','已批准'],['all','全部状态']],S.chatStatus)}
+    ${chatRecordFilterPicker('kb','知识库筛选',[['all','全部知识库'],['通用KB','通用KB'],['产品KB','产品KB'],['依赖图片','依赖图片']],S.chatKb)}
+    ${chatRecordDatePicker()}
+   </div>
+   <div class="chat-record-table-head"><div><input type="checkbox" aria-label="选择当前筛选下的全部记录" ${allSelected?'checked':''} onchange="chatRecordSelectAll(this.checked)"></div><div>客户问题</div><div>建议回复</div><div>操作</div></div>
+   <div class="chat-record-list">${chatRecordRows()}</div>
+   <footer class="chat-record-footer"><strong>总计 33 项</strong><div class="chat-record-pagination"><span>每页</span><select aria-label="每页条数"><option>10</option></select><span>条</span><button class="page-text" ${S.chatPage===1?'disabled':''} onclick="setChatRecordPage(${S.chatPage-1})">上一页</button>${[1,2,3,4].map(page=>`<button class="page-number ${page===S.chatPage?'on':''}" aria-current="${page===S.chatPage?'page':'false'}" onclick="setChatRecordPage(${page})">${page}</button>`).join('')}<button class="page-text" ${S.chatPage===4?'disabled':''} onclick="setChatRecordPage(${S.chatPage+1})">下一页</button></div></footer>
+  </section>
+  ${S.chatSelected.length?`<div class="chat-bulk-bar" role="toolbar" aria-label="已选择记录的批量操作"><div class="chat-bulk-count">已选择 <strong class="num">${S.chatSelected.length}</strong></div><button onclick="approveSelectedChatRecords()"><i data-lucide="check" aria-hidden="true"></i><span>批准</span></button><button onclick="downloadSelectedChatRecords()"><i data-lucide="download" aria-hidden="true"></i><span>下载</span></button><button class="danger" onclick="deleteSelectedChatRecords()"><i data-lucide="trash-2" aria-hidden="true"></i><span>删除</span></button><button onclick="cancelChatRecordSelection()"><i data-lucide="x" aria-hidden="true"></i><span>取消</span></button></div>`:''}
+ </div>`;
+}
 function vAnal(){
  S.per='op';
  const own=S.per==='op';
+ if(!S.anaView)S.anaView='data';
+ if(S.anaView==='chat')return analyticsChatView();
  if(S.setup)return anaSetup();
  S.alay='b';
- return `<div class="wrap" style="max-width:1000px">
+ return `<div class="wrap">
   <div class="eyebrow">上下文 · 数据分析</div><h1>数据分析</h1>
   <div class="sub ana-page-intro">指标不是配出来的，是问出来的。每个数都标了口径、时间和来源——取不到就说取不到。<br>
     <b>只有当答案需要调用其他 agent 时才建任务</b>，否则就停留在对话里。</div>
+  ${analyticsViewTabs()}
   ${S.alay==='b'?anaB(own):`<div class="analgrid dlay"><div class="analmain">
   <div class="sech"><span class="t">品牌健康度</span><span class="bar2"></span>
     <span class="hint">舆情监控 · 模型 ${BH.model} · ${BH.at}</span></div>
@@ -773,8 +1110,9 @@ function vAnal(){
  </div>`;
 }
 function anaSetup(){
- return `<div class="wrap" style="max-width:720px">
+ return `<div class="wrap">
   <div class="eyebrow">上下文 · 数据分析</div><h1>数据分析</h1>
+  ${analyticsViewTabs()}
   <div class="firstrun">
     <div class="fr-ic">${AV('ana',44)}</div>
     <h3 style="font-family:'Sora';font-size:var(--fs-xl);font-weight:700;margin-bottom:var(--sp-2)">先把你关心的指标定下来</h3>

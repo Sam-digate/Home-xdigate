@@ -154,7 +154,7 @@ function vToday(){
  const late=ALLQ.filter(x=>x.sla&&x.wait>x.sla).length,
    near=ALLQ.filter(x=>x.sla&&x.wait<=x.sla&&x.wait>x.sla*.6).length;
  const done=T.filter(t=>t.st==='done');
- return `<div class="wrap" style="max-width:900px">
+ return `<div class="wrap">
   <div class="eyebrow">今日</div>
   <h1>需要你的地方</h1>
   <div class="daystrip"><span class="dt">8月15日 · 周六</span>

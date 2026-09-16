@@ -1397,7 +1397,7 @@ function vProp(){
  if(S.ptab===undefined)S.ptab=0;
  const A=pOpen(),B=PROPS.filter(p=>['taken','running','done'].includes(p.st)),C=PROPS.filter(p=>p.st==='drop');
  const L=[A,B,C,[]][S.ptab];
- return `<div class="wrap" style="max-width:1060px">
+ return `<div class="wrap">
   <div class="eyebrow">做 · 提案</div><h1>提案</h1>
   <div class="sub">Agent 主动发现、且已经编排好的决定。采纳即执行——它不会给你留一件待办。</div>
   <div class="bar">

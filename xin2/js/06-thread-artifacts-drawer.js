@@ -111,7 +111,7 @@ function vThread(){
     <span class="chip dom">${t.dom}</span>
     <span class="crbadge ${crInfo(t).s}">${crInfo(t).av} 由 <b>${crInfo(t).nm}</b> 发起</span></div></div>
   <div class="empty"><div class="h">这条线程还没铺内容</div><div style="font-size:var(--fs-md);margin-bottom:var(--sp-4)">原型里详细展开了 4 条线程，分别演示不同的产出类型。</div><button class="btn" onclick="go('work')">回到工作</button></div></div>`;
- return `<div class="wrap" style="max-width:780px">
+ return `<div class="wrap">
   <div class="th-hd">
     <div class="crumb"><button onclick="go('work')">工作</button> › ${t.camp?`<button onclick="goCamp('${t.camp}')">${t.camp}</button>`:'日常'} › <span>任务</span></div>
     <h2>${esc(t.t)}</h2>
