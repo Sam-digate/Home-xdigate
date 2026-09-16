@@ -72,6 +72,7 @@
 .empty .h{font-family:'Sora';font-size:var(--fs-lg);font-weight:600;color:var(--t2);margin-bottom:var(--sp-1)}
 
 /* ---------- thread ---------- */
+.thread-wrap{max-width:806px}
 .th-hd{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:var(--sp-4) 22px;margin-bottom:var(--sp-4)}
 .crumb{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp-3)}
 .crumb button{color:var(--primary);font-size:var(--fs-xs)}
