@@ -73,7 +73,7 @@ drawAgent=function(){
 };
 
 function agPrompts(a){
- const mine=promptsOf(a.id),shared=sharedFor(a.id),slots=SLOTS[a.id]||[],states=['test','live','pending','retired'];
+ const mine=promptsOf(a.id),shared=sharedFor(a.id),slots=SLOTS[a.id]||[],states=['live','test','pending','retired'];
  const counts=Object.fromEntries(states.map(k=>[k,mine.filter(p=>p.st===k).length]));
  S.pmPromptFilter=S.pmPromptFilter||{};
  if(!states.includes(S.pmPromptFilter[a.id]))S.pmPromptFilter[a.id]='test';
@@ -84,7 +84,7 @@ function agPrompts(a){
 }
 function pmRow(p,isRef){const st=PMST[p.st];return `<button class="pmrow ${isRef?'ref':''}" onclick="openPrompt('${p.id}')"><span class="pmv">v${p.v}</span><span class="pmb"><span class="pmt">${esc(p.n)}<span class="st ${st.c}">${st.n}</span>${p.ty==='frag'?'<span class="chip mut">共享片段</span>':''}${isRef?`<span class="chip dom">被 ${(p.use||[]).length} 个 Agent 引用</span>`:''}</span><span class="pmm">${p.model?`<span class="pmmodel">${p.model}</span>`:'<span class="pmmodel none">无直接模型 · 被其他提示词组合调用</span>'} · ${p.by} · ${p.at}${p.st==='live'&&p.runs?` · 已跑 <span class="num">${p.runs}</span> 次 · 编辑率 <span class="num">${p.ed}%</span>`:''}</span><span class="pmm" style="color:var(--t2)">${p.note&&p.note!=='—'?'改动理由(备注)：'+esc(p.note):'<span style="color:var(--danger-fg)">这一版没写改动理由(备注)</span>'}</span></span></button>`}
 function sharedPromptsView(){
- const states=['test','live','pending','retired'],counts=Object.fromEntries(states.map(k=>[k,PSHARED.filter(p=>p.st===k).length]));
+ const states=['live','test','pending','retired'],counts=Object.fromEntries(states.map(k=>[k,PSHARED.filter(p=>p.st===k).length]));
  if(!states.includes(S.pmSharedFilter))S.pmSharedFilter='test';
  const active=S.pmSharedFilter,visible=PSHARED.filter(p=>p.st===active),activeName=PMST[active].n;
  return `<div class="note" style="margin-bottom:var(--sp-3)">共享提示词不属于任何单个 Agent。改一版，所有引用它的 Agent 下次运行就一起变——上线审批比单个 Agent 的提示词更重。</div><div class="bar" style="margin:0 0 14px"><span class="chip mut">${PSHARED.length} 条</span><span class="chip mut">${PSHARED.filter(p=>p.ty==='frag').length} 个共享片段</span><span class="spacer"></span><button class="btn sm" onclick="newPrompt(null)">＋ 新建共享提示词</button></div><div class="pm-filterbar" role="tablist" aria-label="共享提示词状态">${states.map(k=>`<button class="${active===k?'on':''}" role="tab" aria-selected="${active===k}" onclick="S.pmSharedFilter='${k}';render()"><span>${PMST[k].n}</span><span class="pm-filter-count">${counts[k]}</span></button>`).join('')}</div>${visible.length?visible.map(p=>pmRow(p,true)).join(''):`<div class="allclear pm-empty">暂无${activeName}的共享提示词。</div>`}`
