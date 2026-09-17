@@ -615,7 +615,7 @@ function vAgents(){
  </div>`;
 }
 function agRow(a){
- const l=LV[a.lv], hot=a.ed>=30&&a.b==='live',m=agAdmin(a);
+ const l=LV[a.lv], hot=a.ed>=30&&a.b==='live',m=agAdmin(a),pending=typeof PROMPTS!=='undefined'?PROMPTS.filter(p=>p.ag===a.id&&p.st==='pending').length:0;
  return `<button class="row" onclick="openAgent('${a.id}')" style="align-items:flex-start;padding:var(--sp-3) 14px">
   ${AV(a.id,34)}
   <span style="flex:1;min-width:0">
@@ -628,7 +628,7 @@ function agRow(a){
     <span style="display:block;font-size:var(--fs-xs);color:var(--t3);margin-top:var(--sp-1)">
       PM ${a.pm} · 成功率 <span class="num">${a.b==='live'?a.ok+'%':'—'}</span> · 平均评分 <span class="num">${m.rating}</span> · 返工率 <span class="num">${m.returnRate}</span> · 准时率 <span class="num">${m.ontime}</span> · 风险 <span class="num" style="${m.risk!=='正常'?'color:var(--warn-fg);font-weight:600':''}">${m.risk}</span>
     </span>
-  </span></button>`;
+  </span>${pending?`<span class="ag-prompt-alert"><span class="ag-prompt-alert-dot"></span>提示词待审核 <b class="num">${pending}</b></span>`:''}</button>`;
 }
 
 

@@ -1,7 +1,7 @@
 /* ============ nav ============ */
 function renderNav(){
  $('nav').innerHTML=NAV.map(x=>{if(x.d)return '<div class="nv-div"></div>';
-  const badge=x.id==='know'?dsAttentionCount():(x.b?(x.b==='live'?T.filter(t=>t.st!=='done').length:x.b):0);
+  const badge=x.id==='know'?dsAttentionCount():x.id==='agent'?(typeof agentAttentionCount==='function'?agentAttentionCount():0):(x.b?(x.b==='live'?T.filter(t=>t.st!=='done').length:x.b):0);
   return `<button class="nv ${S.view===x.id?'on':''}" onclick="go('${x.id}',null,{nav:true})">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICON[x.i]}</svg>
     ${x.n}${badge?`<span class="bdg num">${badge}</span>`:''}</button>`}).join('');
@@ -13,7 +13,7 @@ function renderAccount(){
  const acct=$('acct');if(acct)acct.innerHTML=`<div class="account-panel">${['du','br'].map(k=>{const x=U[k],r=k==='br'?'产品负责人':'任务发起人';return `<button class="${id===k?'on':''}" onclick="switchAccount('${k}',event)" aria-pressed="${id===k}">
   <span class="av" style="width:24px;height:24px;background:linear-gradient(135deg,${x.c}99,${x.c});font-size:var(--fs-xs)">${x.s}</span>
   <span><b>${x.n}</b><span class="meta">${r}${id===k?' · 当前身份':''}</span></span>
- </button>`}).join('')}<div class="account-demo-note">身份仅用于：M1 审批演示 · 天猫详情页内容和新建任务流程演示</div></div>`;
+ </button>`}).join('')}<div class="account-demo-note">身份仅用于：M1 审批演示 · 提示词审核 · 天猫详情页内容和新建任务流程演示</div></div>`;
  const u=U[id]||U.du;
  const top=$('topav');if(top){top.textContent=u.s;top.style.background=`linear-gradient(135deg,${u.c}99,${u.c})`;}
 }
