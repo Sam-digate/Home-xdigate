@@ -42,7 +42,7 @@ const PROMPTS=[
 function allPrompts(){return PROMPTS.concat(PSHARED)}
 function findPrompt(id){return allPrompts().find(p=>p.id===id)}
 function promptsOf(id){return PROMPTS.filter(p=>p.ag===id)}
-function sharedFor(id){return PSHARED.filter(p=>(p.use||[]).includes(id))}
+function sharedFor(id){return PSHARED.filter(p=>p.st==='live'&&(p.use||[]).includes(id))}
 function livePrompt(id){return PROMPTS.find(p=>p.ag===id&&p.st==='live')}
 function pendingPromptCount(){return allPrompts().filter(p=>p.st==='pending').length}
 function agentAttentionCount(){return RECIPES.filter(r=>r.attn).length+pendingPromptCount()}
