@@ -50,7 +50,7 @@ function go(v,id,opt){closeSb();S.fopen=null;
 function syncAppr(){const b=$('apprb');if(b)b.innerHTML='审批 <span class="c num">'+queue().length+'</span>';}
 const _r=render;render=function(){_r();syncAppr();syncLive();renderAccount();
  const lz=$('lz'),le=$('le');if(lz)lz.className=LANG==='zh'?'on':'';if(le)le.className=LANG==='en'?'on':'';
- trAll();};
+ trAll();if(window.lucide)lucide.createIcons();};
 try{
  const o=(typeof Element!=='undefined')&&Object.getOwnPropertyDescriptor(Element.prototype,'innerHTML');
  if(o&&o.set)['dw','mod'].forEach(id=>{const el=$(id);if(!el)return;
@@ -70,6 +70,7 @@ function render(){
  else if(S.view==='camp')html=vCamp();
  else if(S.view==='anal')html=vAnal();
  else if(S.view==='prop')html=vProp();
+ else if(S.view==='permission')html=vPermission();
  else html=vSoon();
  v.innerHTML=withBackNav(html);
  if(S.view==='thread')afterThread();

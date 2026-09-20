@@ -271,7 +271,7 @@ function openContentData(i){
  </div>`;
  $('mod').classList.add('on');
 }
-function closeMod(){S.manualFallback=false;S.campSync=null;S.newCampaignId=null;$('mod').classList.remove('on','plan-mode','asset-mode');}
+function closeMod(){if(typeof closePermissionFocus==='function')closePermissionFocus();S.manualFallback=false;S.campSync=null;S.newCampaignId=null;$('mod').classList.remove('on','plan-mode','asset-mode','permission-modal-wrap');}
 function mkThread(){
  const v=$('ni').value.trim();if(!v){toast('先写一句你想做什么');return;}
  if(v.includes('人工')){createManualPendingThread();return;}

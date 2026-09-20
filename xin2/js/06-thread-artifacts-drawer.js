@@ -1079,7 +1079,7 @@ function scrollDrawerToBottom(){
   if(body)body.scrollTop=body.scrollHeight;
  }));
 }
-function closeDw(){S.ag=null;S.trace=null;S.prop=null;S.hot=null;S.kb=null;S.brief=null;S.kfilterOpen=null;S.auditCreator=null;S.prestartAgentTid=null;S.prestartAgentPick=null;if(S.trT){clearInterval(S.trT);S.trT=null;}$('dw').classList.remove('on','focus','expanded');$('scrim').classList.remove('on');S.focus=false;syncDrawerExpandControl();
+function closeDw(){if(typeof closePermissionFocus==='function')closePermissionFocus();S.ag=null;S.trace=null;S.prop=null;S.hot=null;S.kb=null;S.brief=null;S.kfilterOpen=null;S.auditCreator=null;S.prestartAgentTid=null;S.prestartAgentPick=null;if(S.trT){clearInterval(S.trT);S.trT=null;}$('dw').classList.remove('on','focus','expanded');$('scrim').classList.remove('on');S.focus=false;syncDrawerExpandControl();
  document.querySelectorAll('.pk').forEach(e=>e.classList.remove('sel'));}
 function openHistoryArtifact(tid,index){
  const t=T.find(x=>x.id===tid),x=t&&t.log&&t.log[index];if(!t||!x||x.silent)return;

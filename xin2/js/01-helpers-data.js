@@ -36,7 +36,8 @@ const ICON={
  camp:'<path d="M3 11l18-6v14L3 13z"/><path d="M7 12v5a2 2 0 004 0v-4"/>',
  anal:'<path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/>',
  know:'<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>',
- agent:'<circle cx="12" cy="7" r="3.5"/><path d="M5.5 21a6.5 6.5 0 0113 0"/>'
+ agent:'<circle cx="12" cy="7" r="3.5"/><path d="M5.5 21a6.5 6.5 0 0113 0"/>',
+ permission:'<path d="M12 3 4.5 6.2v5.2c0 4.6 3 7.9 7.5 9.6 4.5-1.7 7.5-5 7.5-9.6V6.2L12 3Z"/><path d="M9.3 12.1 11 13.8l3.8-4"/>'
 };
 const NAV=[
  {id:'today',n:'今日',i:'today'},
@@ -47,7 +48,9 @@ const NAV=[
  {id:'anal',n:'数据分析',i:'anal'},
  {d:1},
  {id:'know',n:'知识库',i:'know'},
- {id:'agent',n:'Agents',i:'agent'}
+ {id:'agent',n:'Agents',i:'agent'},
+ {d:1},
+ {id:'permission',n:'权限管理',i:'permission'}
 ];
 
 function prestartPlanPreset(agid){
@@ -643,4 +646,4 @@ const STN={todo:'待开始',run:'进行中',review:'待审批',done:'已交付',
 const DOMS=['全部','内容','电商','用户运营','KOL','B2B'];
 const DAYN=['今天','昨天','本周早些时候'];
 
-let S={view:'work',mode:'kanban',dom:'全部',approvalDom:'全部',tid:null,aid:null,focus:false,dtab:0,liveT:null,liveI:0,hist:[],currentUser:'du',accountOpen:false};
+let S={view:location.hash==='#permission'?'permission':'work',mode:'kanban',dom:'全部',approvalDom:'全部',tid:null,aid:null,focus:false,dtab:0,liveT:null,liveI:0,hist:[],currentUser:'du',accountOpen:false};
