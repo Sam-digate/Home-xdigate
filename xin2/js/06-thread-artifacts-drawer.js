@@ -181,6 +181,8 @@ function vThread(){
           <button class="btn ghost sm" onclick="promoteThread()">变成例行 ↗</button></div>`}
       </div></div>`}
 
+    ${t.supplement?renderThreadSupplement(t):''}
+
     ${t.ask&&!t.answered&&(!t.prestartDemo||t.plan.status!=='pending')?`<div class="node wait"><div class="nlab">需要你补充 · CLARIFY</div>
       <div class="bub"><div class="who agent-run-hit" role="button" tabindex="0" onclick="openTrace('${t.ag}','${t.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTrace('${t.ag}','${t.id}')}" title="查看运行状态"><span class="avs" style="background:${a.c}">${a.s}</span><span class="nm">${esc(t.ask.agentLabel||a.n)}</span>
         <span class="chip mut">${t.ask.ppt?'PPT 生成设置':t.ask.channels?'目标渠道':t.ask.qs.length+' 个问题'}</span><span class="tm">8分钟前</span></div>
@@ -474,6 +476,21 @@ function removeM1DirectionReference(id){
  m1DirectionOption(a).referenceImage=null;drawDw();toast('已移除参考产品图');
 }
 function toggleM1Comment(){const opening=!S.pc;S.pc=!S.pc;drawDw();if(opening)scrollDrawerToBottom();}
+function renderThreadSupplement(t){
+ const x=t.supplement;
+ return `<div class="node ok"><div class="nlab">你的补充 · ANSWERED</div>
+  <div class="bub me"><div class="who"><span class="avs" style="background:${U.du.c}">DU</span><span class="nm">dudu</span><span class="tm">刚刚</span></div>
+   <div class="thread-supplement" aria-label="已录入的活动表单">
+    <div class="thread-supplement-field wide"><span>名称</span><b>${esc(x.name)}</b></div>
+    <div class="thread-supplement-field"><span>活动类型</span><b>${esc(x.type)}</b></div>
+    <div class="thread-supplement-field"><span>活动时间范围</span><b>${esc(x.period)}</b></div>
+    <div class="thread-supplement-config">
+     <span class="thread-supplement-label">投放配置</span>
+     <div class="thread-supplement-table"><div class="head"><span>平台</span><span>预算（元）</span><span>图文篇数</span></div><div class="row"><b>${esc(x.platform)}</b><b class="num">${esc(x.budget)}</b><b class="num">${esc(x.articles)}</b></div></div>
+    </div>
+   </div>
+  </div></div>`;
+}
 function answeredRunningNode(t,a){
  if(t.live||!t.ask||!t.answered||t.st!=='run'||(t.arts&&t.arts.length))return '';
  const p=t.answerRun?.p||42,tk=t.answerRun?.tk||480,sub=t.answerRun?.sub||'正在根据补充信息生成后续产出';
@@ -1269,7 +1286,7 @@ else if(a.mode==='csa'){
   if((isDetailDirection||isActivityDirection||isSeoDirection)&&S.pc)body+=directionComments;
  }
  else if(a.mode==='options'){tabs=['方向对比','版本'];body=[dOpts(a),dVer(a)][S.dtab];}
- else if(a.mode==='roster'){tabs=['名单','合作简报','效果分析','版本'];body=[dRoster(a),dContentAudit(a),dEffectAnalysis(a),dVer(a)][S.dtab];}
+ else if(a.mode==='roster'){tabs=['名单','内容审核','效果分析'];if(S.dtab>2)S.dtab=0;body=[dRoster(a),dContentAudit(a),dEffectAnalysis(a)][S.dtab];}
  else if(a.listing){tabs=['上架流程','版本'];body=[dListingWorkflow(a)+(S.pc?`<div id="listing-comments" style="margin-top:var(--sp-4)">${subPane(a,0)}</div>`:''),dVer(a)][S.dtab];}
  else if(a.mode==='items'){tabs=['SKU','校验','版本'];body=[dItems(a),dOut(a),dVer(a)][S.dtab];}
  else if(a.manualOutput){

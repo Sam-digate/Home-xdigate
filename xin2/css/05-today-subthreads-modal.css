@@ -144,7 +144,18 @@
 .channel-product-menu button{display:flex;align-items:center;gap:var(--sp-2);width:100%;padding:var(--sp-2);border-radius:7px;text-align:left;font-size:var(--fs-xs);color:var(--t2)}
 .channel-product-menu button:hover{background:var(--primary-bg)}.channel-product-menu .tick{width:16px;color:var(--primary);font-weight:700}
 .channel-del{width:32px;height:38px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--t3);font-size:var(--fs-xl);line-height:1}.channel-del:hover{border-color:#FCA5A5;color:#DC2626;background:var(--danger-bg)}
+.thread-supplement{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-2);margin-top:var(--sp-2)}
+.thread-supplement-field{display:grid;gap:3px;min-width:0;padding:8px 10px;border-radius:7px;background:var(--surface-tint)}
+.thread-supplement-field.wide,.thread-supplement-config{grid-column:1/-1}
+.thread-supplement-field>span,.thread-supplement-label{color:var(--t3);font-size:var(--fs-xs);font-weight:500}
+.thread-supplement-field>b{overflow-wrap:anywhere;color:var(--t1);font-size:var(--fs-sm);font-weight:600;line-height:1.5}
+.thread-supplement-config{display:grid;gap:7px;margin-top:var(--sp-1)}
+.thread-supplement-table{overflow:hidden;border:1px solid var(--hairline);border-radius:8px;background:var(--surface-tint)}
+.thread-supplement-table>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:center;min-height:36px;padding:0 10px}
+.thread-supplement-table .head{min-height:30px;border-bottom:1px solid var(--hairline);color:var(--t3);font-size:var(--fs-xs);font-weight:500}
+.thread-supplement-table .row{color:var(--t1);font-size:var(--fs-sm)}.thread-supplement-table .row b{font-weight:600}
 @media(max-width:660px){.channel-labels{display:none}.channel-row{grid-template-columns:minmax(0,1fr) 92px 32px}.channel-product{grid-column:1/3}.channel-del{grid-column:3;grid-row:1}.channel-row{padding-bottom:var(--sp-2);border-bottom:1px solid #F0EDFA}.channel-row:last-child{border-bottom:0;padding-bottom:0}}
+@media(max-width:560px){.thread-supplement{grid-template-columns:1fr}.thread-supplement-field.wide,.thread-supplement-config{grid-column:auto}.thread-supplement-table>div{padding:0 8px}}
 
 /* PPT Agent · 生成前补充表单 */
 .ppt-ask{display:grid;gap:var(--sp-4);padding:var(--sp-4);background:var(--surface-tint)}

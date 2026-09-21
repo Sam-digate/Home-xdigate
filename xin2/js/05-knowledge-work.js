@@ -1369,7 +1369,7 @@ function setDom(d){S.dom=d;render();}
 function setMode(m){S.mode=m;render();}
 function kanban(L){
  return `<div class="kb">${COLS.map(c=>{
-  const it=L.filter(t=>t.st===c.k||(c.k==='review'&&t.st==='ask')).sort((a,b)=>a.id==='t-general-agent-demo'?-1:b.id==='t-general-agent-demo'?1:a.id==='t-ppt-form-demo'?-1:b.id==='t-ppt-form-demo'?1:a.id==='t-seo-flow-demo'?-1:b.id==='t-seo-flow-demo'?1:0);
+  const it=L.filter(t=>t.st===c.k||(c.k==='review'&&t.st==='ask')).sort((a,b)=>a.id==='t5'?-1:b.id==='t5'?1:a.id==='t-general-agent-demo'?-1:b.id==='t-general-agent-demo'?1:a.id==='t-ppt-form-demo'?-1:b.id==='t-ppt-form-demo'?1:a.id==='t-seo-flow-demo'?-1:b.id==='t-seo-flow-demo'?1:0);
   return `<div class="kcol">
    <div class="kh"><span class="dot" style="background:${c.c}"></span><span class="t">${c.n}</span><span class="n num">${it.length}</span></div>
    ${it.map(kcard).join('')||'<div style="padding:var(--sp-3) 4px;font-size:var(--fs-sm);color:var(--t3)">空</div>'}

@@ -794,13 +794,13 @@ function dContentAudit(a,creatorIndex=0,embedded=false){
  const activeCreatorIndex=global&&selected?selected.creatorIndex:creatorIndex;
  const creator=a.rows[activeCreatorIndex]||a.rows[0];
  if(S.audit===null||S.audit===undefined)return `${embedded?`<button class="rvb" onclick="closeCreatorAudit()">← 返回达人名单</button>`:''}
-  <div class="audit-toolbar" style="${embedded?'margin-top:var(--sp-3)':''}"><span class="ttl">${embedded?esc(creator.n)+' · ':''}合作简报</span></div>
+  <div class="audit-toolbar" style="${embedded?'margin-top:var(--sp-3)':''}"><span class="ttl">${embedded?esc(creator.n)+' · ':''}内容审核</span></div>
   ${list.length?list.map((x,i)=>`<button class="audit-card ${x.current?'current':''}" onclick="S.audit=${i};drawDw()">
     <div class="audit-card-h"><span class="audit-dot ${x.current?'':'old'}"></span><b>${esc(x.name)}</b><span class="chip mut">${x.kind}</span><span class="chip mut">v${x.v}</span></div>
     <div class="audit-card-m"><span>提交于 ${x.at}</span><span class="spacer"></span><span class="st ${x.pending?'run':x.current?'hold':'todo'}">${x.status}</span><span class="st ${x.pending?'run':'done'}">${x.gate}</span></div>
    </button>`).join(''):`<div class="empty" style="padding:var(--sp-6) 16px"><div class="h">还没有内容提交</div><div class="s">录入第一篇内容后，会在这里单独审核和保留版本。</div></div>`}`;
  const x=list[S.audit]||list[0];
- return `<button class="rvb" onclick="S.audit=null;drawDw()">← 返回${embedded?esc(creator.n)+'的内容提交':'合作简报'}</button>
+ return `<button class="rvb" onclick="S.audit=null;drawDw()">← 返回${embedded?esc(creator.n)+'的内容提交':'内容审核'}</button>
   <div style="display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-3)">
    <b style="font-family:'Sora';font-size:var(--fs-md)">${esc(x.name)}</b><span class="chip mut">${x.kind}</span><span class="chip mut">第 ${x.v} 版</span>
    <span style="margin-left:auto" class="st ${x.pending?'run':x.current?'hold':'todo'}">${x.status}</span><span class="st ${x.pending?'run':'done'}">${x.gate}</span>

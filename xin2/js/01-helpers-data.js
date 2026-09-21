@@ -337,8 +337,9 @@ const T=[
      {k:'sys',tx:'已生成 v1 · 变更 1 句'}]}],
  cmts:[{w:'ar',tx:'规则上限是 ¥10，但这单外箱全破，建议按 ¥12 走特批。已同步给主管。',at:'今天 09:51',on:'补偿上限'}]},
 
-{cr:{s:'h',w:'du'},id:'t5',trig:'manual',new:6,t:'11.11 达人短名单 · 腰部 KOC 30 人',camp:'11.11 大促',dom:'KOL',ag:'kol',own:'so',st:'review',up:'26分钟前',day:0,lv:'M2',cost:'¥21.10',
+{cr:{s:'h',w:'du'},id:'t5',trig:'manual',new:6,workTop:300,t:'11.11 达人短名单 · 腰部 KOC 30 人',camp:'11.11 大促',dom:'KOL',ag:'kol',own:'so',st:'review',up:'26分钟前',day:0,lv:'M2',cost:'¥21.10',
  intent:{who:'du',tx:'11.11 蓄水期要铺腰部 KOC，按方向二的真实感调性找 30 个人，预算 8 万以内。',at:'今天 09:50'},
+ supplement:{name:'11.11 达人短名单 · 腰部 KOC 30 人',type:'品牌曝光',period:'2026-08-06 ～ 2026-09-29',platform:'小红书',budget:'¥80,000',articles:'30 篇'},
  plan:{tx:'从达人库匹配 → 生成短名单供评论 → 批准后逐个发 Brief → 发布后复盘。',steps:[
   {l:'读取达人库与品牌调性',at:1,m:'知识库 · 达人 · 1,240 位',s:'ok',r:'14秒'},
   {l:'按方向二画像匹配打分',m:'评估 300 位 · 输出 30 位',s:'ok',r:'2分41秒'},
