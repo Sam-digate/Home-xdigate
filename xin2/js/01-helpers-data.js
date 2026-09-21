@@ -142,8 +142,9 @@ function promotionPrompt(r){return `产品：${r.productName}\n广告标语：${
 function promotionImageFromRow(r){return {id:'image-'+r.id,rowId:r.id,l:promotionImageLabel(r),src:r.src,prompt:promotionPrompt(r),refs:[{name:'产品参考图',url:r.src}],generating:false,version:1,generatedRevision:r.revision};}
 
 /* ============ data ============ */
- const ONLINE={rep:1,listen:1,routine:1,gen:1,plan:1,pub:1,trend:1,comp:1,pdp:1,ad:1,insp:1,exec:1,cs:1,msg:1,kol:1,seo:1,orch:1,broker:1,kb:1,ana:1,csa:1,adplan:1,promoimg:1,list:1};
+ const ONLINE={rep:1,listen:1,routine:1,gen:1,plan:1,pub:1,trend:1,comp:1,pdp:1,ad:1,insp:1,exec:1,cs:1,msg:1,kol:1,seo:1,orch:1,broker:1,kb:1,ana:1,csa:1,adplan:1,promoimg:1,list:1,general:1};
 const AG={
+ general:{n:'通用 Agent',c:'#7C3AED',s:'通'},
  plan:{n:'活动策划 Agent',c:'#F59E0B',s:'策'},
  gen:{n:'内容生成 Agent',c:'#7C3AED',s:'内'},
  vid:{n:'视频生成 Agent',c:'#E11D48',s:'视'},
@@ -160,6 +161,15 @@ const AG={
 const U={du:{n:'dudu',c:'#7C3AED',s:'DU'},so:{n:'Sophie',c:'#E11D48',s:'SO'},br:{n:'Brooks',c:'#0891B2',s:'BR'},ar:{n:'Ariel',c:'#10B981',s:'AR'},sam:{n:'Sam',c:'#7C83C6',s:'SA'}};
 
 const T=[
+{cr:{s:'h',w:'du'},id:'t-general-agent-demo',trig:'manual',workTop:160,t:'生成好评返现文案',camp:null,dom:'内容',ag:'general',own:'du',generalAgentDemo:true,generalAgentConfirmed:false,prestartDemo:true,st:'review',up:'刚刚',day:0,lv:'M1',cost:'—',outputCount:0,
+ intent:{who:'du',tx:'帮我生成一个好评返现的文案。',at:'刚刚'},
+ plan:{v:1,status:'pending',startedAt:null,tx:'由通用 Agent 与你通过多轮对话补充使用场景、语气和奖励形式，生成 1 份好评返现文案；提交前检查平台合规风险，不自动发布。',expected:'1 份好评返现文案，可在对话中继续调整。',reason:'这是一次简单的单次文案需求，不需要调用固定业务编排，适合由通用 Agent 承接。',steps:[
+  {l:'确认使用场景与文案要求',m:'包裹卡片 · 客服私聊 · 订单完成页',s:'todo',r:'未开始'},
+  {l:'生成好评返现文案',m:'语气 · 字数 · 奖励形式',s:'todo',r:'未开始'},
+  {l:'检查平台合规风险',m:'避免强制或诱导用户给出好评',s:'todo',r:'未开始'},
+  {l:'提交文案确认',m:'人工确认后交付，不自动发布',s:'todo',r:'未开始'}]},generalMessages:[],arts:[],cmts:[]},
+{cr:{s:'h',w:'du'},id:'t-agent-permission-demo',trig:'manual',workTop:120,t:'A80PARIS 新品种草文案',camp:null,dom:'内容',ag:'gen',own:'du',permissionBlocked:true,permissionRequest:null,st:'todo',up:'刚刚',day:0,lv:'M1',cost:'—',outputCount:0,
+ intent:{who:'du',tx:'为 A80PARIS 新品准备一组社媒种草文案，系统推荐使用内容生成 Agent。',at:'刚刚'},arts:[],cmts:[]},
 {cr:{s:'h',w:'du'},id:'t-ppt-form-demo',trig:'manual',new:1,workTop:90,t:'A80PARIS 抖音传播方案 · PPT 生成',camp:null,dom:'内容',ag:'ppt',own:'du',st:'ask',up:'刚刚',day:0,lv:'M1',cost:'—',outputCount:0,
  intent:{who:'du',tx:'把 A80PARIS 抖音内容传播方案整理成一份 PPT。先确认生成设置，再输出大纲；大纲确认后再生成最终文件。',at:'刚刚'},
  plan:{v:1,tx:'先补充 PPT 语言、视觉主题和版式模板；根据设置生成逐页大纲，确认后制作 PPT 并提供下载与在线编辑地址。',steps:[

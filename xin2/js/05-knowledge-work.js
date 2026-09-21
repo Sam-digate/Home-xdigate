@@ -1369,23 +1369,40 @@ function setDom(d){S.dom=d;render();}
 function setMode(m){S.mode=m;render();}
 function kanban(L){
  return `<div class="kb">${COLS.map(c=>{
-  const it=L.filter(t=>t.st===c.k||(c.k==='review'&&t.st==='ask')).sort((a,b)=>a.id==='t-ppt-form-demo'?-1:b.id==='t-ppt-form-demo'?1:a.id==='t-seo-flow-demo'?-1:b.id==='t-seo-flow-demo'?1:0);
+  const it=L.filter(t=>t.st===c.k||(c.k==='review'&&t.st==='ask')).sort((a,b)=>a.id==='t-general-agent-demo'?-1:b.id==='t-general-agent-demo'?1:a.id==='t-ppt-form-demo'?-1:b.id==='t-ppt-form-demo'?1:a.id==='t-seo-flow-demo'?-1:b.id==='t-seo-flow-demo'?1:0);
   return `<div class="kcol">
    <div class="kh"><span class="dot" style="background:${c.c}"></span><span class="t">${c.n}</span><span class="n num">${it.length}</span></div>
    ${it.map(kcard).join('')||'<div style="padding:var(--sp-3) 4px;font-size:var(--fs-sm);color:var(--t3)">空</div>'}
   </div>`;}).join('')}</div>`;
 }
 function kcard(t){
+ if(t.permissionBlocked)return permissionBlockedKcard(t);
   const a=AG[t.ag]||{c:'#8B7FC7',s:'?',n:t.ag};
  return `<button class="kcard src${(t.cr||{s:'h'}).s} ${t.new?'hasnew':''}" onclick="go('thread','${t.id}')">
   <div class="tt">${t.new?'<span class="nd"></span>':''}${t.pin?'<span class="pinb">置顶</span>':''}${esc(t.t)}</div>
-  <div class="meta">${t.camp?`<span class="chip camp">${t.camp}</span>`:'<span class="chip mut">日常</span>'}<span class="chip dom">${t.dom}</span><span class="chip lv">${t.lv}</span>${t.prestartDemo&&t.plan?.status==='rejected'?'<span class="chip" style="background:#FFF0F0;color:#C43232">计划未通过</span>':canAdjustPrestartPlan(t)?'<span class="chip mut">计划待确认</span>':''}</div>
+  <div class="meta">${t.camp?`<span class="chip camp">${t.camp}</span>`:'<span class="chip mut">日常</span>'}<span class="chip dom">${t.dom}</span><span class="chip lv">${t.lv}</span>${t.generalAgentDemo&&!t.generalAgentConfirmed?'<span class="chip general-agent-wait">Agent 待确认</span>':t.generalAgentDemo?'<span class="chip general-agent-live">通用 Agent</span>':t.prestartDemo&&t.plan?.status==='rejected'?'<span class="chip" style="background:#FFF0F0;color:#C43232">计划未通过</span>':canAdjustPrestartPlan(t)?'<span class="chip mut">计划待确认</span>':''}</div>
   <div class="ft">
     ${t.new?`<span class="nchip">${t.new} 条新</span>`:''}
     <span class="byline">${crInfo(t).av} <b>${crInfo(t).nm}</b> 发起</span>
     <span style="margin-left:auto">${t.up}</span>
   </div>
  </button>`;
+}
+function permissionBlockedKcard(t){
+ const requested=t.permissionRequest==='pending',creator=crInfo(t);
+ return `<article class="kcard srch task-permission-card" aria-label="${esc(t.t)}，推荐 Agent 暂无权限">
+  <div class="tt">${esc(t.t)}</div>
+  <div class="meta"><span class="chip mut">日常</span><span class="chip dom">${esc(t.dom)}</span><span class="chip lv">${esc(t.lv)}</span></div>
+  <div class="task-permission-recommend">
+   <div class="task-permission-agent"><span class="task-permission-lock"><i data-lucide="lock-keyhole"></i></span><span><b>内容生成 Agent</b><small>系统推荐 · 最适合当前任务</small></span><em class="${requested?'pending':''}">${requested?'申请中':'暂无权限'}</em></div>
+   <p>Dudu 尚未获得该 Agent 的使用权限，授权前不能开始执行。</p>
+   <button type="button" ${requested?'disabled':''} onclick="requestTaskAgentPermission('${t.id}',event)">${requested?'<i data-lucide="clock-3"></i> 已申请':'申请权限'}</button>
+  </div>
+  <div class="ft"><span class="byline">${creator.av} <b>${creator.nm}</b> 发起</span><span style="margin-left:auto">${esc(t.up)}</span></div>
+ </article>`;
+}
+function requestTaskAgentPermission(id,event){
+ event?.stopPropagation();const task=T.find(item=>item.id===id);if(!task||task.permissionRequest==='pending')return;task.permissionRequest='pending';render();toast('已向管理员申请“内容生成 Agent”权限');
 }
 function bydate(L){
  return [0,1,2].map(d=>{

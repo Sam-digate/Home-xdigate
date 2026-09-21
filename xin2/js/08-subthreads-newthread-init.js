@@ -66,6 +66,14 @@ function subSend(kind,id,oi){
   if(kind==='chg')x.sub.push({k:'sys',tx:'已更新数据分析结论 · 口径与来源同步刷新'});
   drawDw();const l=$('sl');if(l)l.scrollTop=l.scrollHeight;toast(kind==='chg'?'分析结论已按要求更新':'客户成功已回复');return;
  }
+ if(a.mode==='general-session'){
+  if(kind==='chg'){
+   a.v++;a.ttl='好评返现文案 · v'+a.v;a.ex='已根据本次会话补充要求更新。';a.body=generalAgentDemoBody();a.st='review';
+   x.sub.push({w:'general',k:'ag',tx:a.body,at:'刚刚'});x.sub.push({k:'sys',tx:'已生成 v'+a.v+' · 本次会话产出已更新'});
+   const [task]=findArt(id);if(task){task.st='review';task.up='刚刚';}
+  }
+  render();drawDw();scrollDrawerToBottom();toast(kind==='chg'?'通用 Agent 已生成新版本':'已留言');return;
+ }
  if(a.mode==='promoseq'){
   if(kind==='chg')promotionNeedsReview(a);
   render();drawDw();scrollDrawerToBottom();toast(kind==='chg'?'修改要求已记录，等待推广计划处理':'已留言');return;

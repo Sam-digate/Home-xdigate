@@ -1,6 +1,7 @@
 /* ============ plan adjustment ============ */
 
 function canAdjustPrestartPlan(t){return !!(t?.prestartDemo&&t.plan.status==='pending'&&!t.plan.startedAt);}
+function generalAgentDemoBody(){return '感谢您的支持！完成订单后，欢迎分享真实的使用体验。提交评价截图即可领取店铺准备的小礼遇；评价内容请以实际感受为准，无需指定为好评。具体领取方式请联系在线客服。';}
 function prestartAgents(){return REG.filter(a=>prestartPlanPreset(a.id)&&a.b==='live'&&a.enabled!==false&&ONLINE[a.id]);}
 function prestartPlanNode(t){
  const pending=canAdjustPrestartPlan(t),a=AG[t.ag]||{},p=t.plan,d=S.prestartDraft?.tid===t.id?S.prestartDraft:null;
@@ -21,7 +22,7 @@ function prestartPlanNode(t){
    <textarea rows="2" aria-label="不通过原因" placeholder="填写不通过原因" oninput="setPrestartReject(this.value)">${esc(S.prestartReject.tx)}</textarea>
    <div class="prestart-plan-editor-actions"><button class="btn sm" onclick="confirmPrestartReject('${t.id}')">确定</button><button class="btn ghost sm" onclick="cancelPrestartReject('${t.id}')">取消</button></div>
   </div>`:`<div class="prestart-plan-actions"><button class="btn ghost sm" onclick="openPrestartPlan('${t.id}')">调整计划 ↗</button><button class="btn ghost sm" onclick="openManualPrestart('${t.id}')">手动调整</button><button class="btn sm" onclick="startPrestartPlan('${t.id}')">确认并开始</button><button class="prestart-reject-link" onclick="openPrestartReject('${t.id}')">不通过</button></div>`):''}
-  ${!pending&&!rejected&&t.st!=='done'?`<div style="margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:1px solid var(--hairline)"><button class="btn ghost sm" onclick="promoteThread()">变成例行 ↗</button></div>`:''}
+  ${!pending&&!rejected&&t.st!=='done'&&!t.generalAgentDemo?`<div style="margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:1px solid var(--hairline)"><button class="btn ghost sm" onclick="promoteThread()">变成例行 ↗</button></div>`:''}
  </div></div>`;
 }
 function manualPrestartAgents(){return REG.filter(a=>a.b==='live'&&a.enabled!==false&&ONLINE[a.id]);}
@@ -40,7 +41,7 @@ function manualPrestartDrawer(){
 }
 function openManualPrestart(id){
  const t=T.find(x=>x.id===id);if(!canAdjustPrestartPlan(t))return toast('计划已开始执行，不能更换 Agent');
- S.prestartDraft=null;S.prestartReject=null;S.prestartManualTid=null;S.prestartAgentTid=id;S.prestartAgentPick=[...(t.agents?.length?t.agents:[t.ag])];
+ S.prestartDraft=null;S.prestartReject=null;S.prestartManualTid=null;S.prestartAgentTid=id;S.prestartAgentPick=t.generalAgentDemo?[]:[...(t.agents?.length?t.agents:[t.ag])];
  manualPrestartDrawer();$('dw').classList.add('on');$('scrim').classList.add('on');
 }
 function selectManualPrestartAgent(id){
@@ -66,13 +67,13 @@ function confirmManualPrestartAgent(){
  const t=T.find(x=>x.id===S.prestartAgentTid),available=manualPrestartAgents(),ids=Array.isArray(S.prestartAgentPick)?S.prestartAgentPick:[],agents=ids.map(id=>available.find(a=>a.id===id)).filter(Boolean);if(!t||!canAdjustPrestartPlan(t))return toast('当前计划已不能更换 Agent');
  if(!agents.length)return toast('请至少选择 1 个 Agent');
  const base=manualPrestartPlan(agents,t),dual=ids.length===2&&ids[0]==='pdp'&&ids[1]==='insp';
- t.ag=ids[0];t.agents=[...ids];t.agentLabels=Object.fromEntries(ids.map(id=>[id,agentLabel(id)]));t.agentStates=Object.fromEntries(ids.map((id,i)=>[id,i===0?'待确认':dual&&id==='insp'?'等待详情页批准':'等待前序 Agent']));t.demoDualAgents=dual;t.dom=agents[0].dom||t.dom;t.lv=agents[0].maturity||LV[agents[0].lv].k;t.plan={...t.plan,...base,v:(t.plan.v||1)+1,status:'pending',startedAt:null};t.up='刚刚';
+ t.ag=ids[0];t.agents=[...ids];t.agentLabels=Object.fromEntries(ids.map(id=>[id,agentLabel(id)]));t.agentStates=Object.fromEntries(ids.map((id,i)=>[id,i===0?'待确认':dual&&id==='insp'?'等待详情页批准':'等待前序 Agent']));t.demoDualAgents=dual;if(t.generalAgentDemo)t.generalAgentDemo=false;t.dom=agents[0].dom||t.dom;t.lv=agents[0].maturity||LV[agents[0].lv].k;t.plan={...t.plan,...base,v:(t.plan.v||1)+1,status:'pending',startedAt:null};t.up='刚刚';
  closeDw();renderNav();render();toast('已选择 '+agents.length+' 个 Agent · 请确认执行顺序与计划');
 }
 function openPrestartPlan(id){
  const t=T.find(x=>x.id===id);if(!canAdjustPrestartPlan(t)){toast('计划已开始执行，不能再调整原计划');return;}
  S.prestartManualTid=null;S.prestartReject=null;
- S.prestartDraft={tid:id,tx:'生成内容前，还可以调整Agent'};
+ S.prestartDraft={tid:id,tx:t.generalAgentDemo?'补充语气、字数、奖励形式或使用场景':'生成内容前，还可以调整Agent'};
  render();
 }
 function openPrestartReject(id){
@@ -98,6 +99,10 @@ function cancelPrestartPlan(id){
 }
 function savePrestartPlan(id){
  const t=T.find(x=>x.id===id),d=S.prestartDraft;if(!d||d.tid!==id||!canAdjustPrestartPlan(t)){toast('计划已开始执行，不能再调整原计划');return;}
+ if(t.generalAgentDemo){
+  const note=d.tx.trim();if(!note){toast('请填写需要调整的内容');return;}
+  t.plan.v=(t.plan.v||1)+1;t.plan.adj=note;t.plan.tx='由通用 Agent 通过多轮对话完成本次文案，并按补充要求执行：'+note+'。提交前检查平台合规风险，不自动发布。';t.up='刚刚';S.prestartDraft=null;renderNav();render();toast('通用 Agent 计划已调整 · 等待确认开始');return;
+ }
  const agent=prestartAgents().find(a=>a.id==='plan');if(!agent){toast('活动策划 Agent 暂不可用，请稍后再试');return;}
  if(t.ag==='plan'){S.prestartDraft=null;render();toast('当前已是活动策划 Agent，等待确认开始');return;}
  t.ag=agent.id;t.agents=[agent.id];t.agentLabels={[agent.id]:agentLabel(agent.id)};t.agentStates={[agent.id]:'待确认'};t.demoDualAgents=false;t.dom=agent.dom;t.lv=agent.maturity||LV[agent.lv].k;
@@ -110,6 +115,14 @@ function startPrestartPlan(id){
  if(S.prestartManualTid===id){toast('请先保存或取消手动调整');return;}
  if(S.prestartReject?.tid===id){toast('请先确定或取消不通过原因');return;}
  const assignedAgents=t.agents?.length?t.agents:[t.ag];
+ if(t.generalAgentDemo){
+  t.plan.confirmed={ag:t.ag,agents:[...assignedAgents],tx:t.plan.tx,expected:t.plan.expected,steps:t.plan.steps.map(s=>({l:s.l,m:s.m}))};
+  t.plan.startedAt=new Date().toISOString();t.plan.status='running';t.generalAgentConfirmed=true;t.st='run';t.up='刚刚';
+  t.plan.steps=t.plan.steps.map((s,i)=>({...s,s:i===0?'ok':i===1?'act':'todo',r:i===0?'已确认':i===1?'进行中':'未开始'}));
+  t.live={t:'通用 Agent 正在生成好评返现文案',el:'刚刚',sub:['正在理解文案使用场景与表达要求…','正在生成文案内容…','正在检查平台合规风险…'],p:38,tk:260};t.arts=[];t.outputCount=0;
+  S.prestartDraft=null;S.prestartManualTid=null;(t.cmts=t.cmts||[]).push({k:'sys',tx:'已确认计划 v'+t.plan.v+'，通用 Agent 开始执行。',at:'刚刚'});
+  renderNav();render();toast('计划已确认 · 通用 Agent 正在生成');setTimeout(()=>finishGeneralAgentDemo(id),3600);return;
+ }
  if(!assignedAgents.every(id=>manualPrestartAgents().some(a=>a.id===id))){toast('推荐的 Agent 暂不可用，请先调整计划');return;}
  if(!t.plan.tx.trim()||!t.plan.expected.trim()||!t.plan.steps.length){toast('请先补齐执行计划');return;}
  // Capture the approved specification before marking any execution step active.

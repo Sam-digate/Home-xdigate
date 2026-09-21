@@ -5,6 +5,32 @@ function manualPeopleLabel(ids){return (ids||[]).map(id=>U[id]?.n||id).join('、
 function manualTaskPeople(t){return t?.manualAssignees?.length?t.manualAssignees:(t?.manualAssignee?[t.manualAssignee]:[]);}
 function manualArtifactPeople(m){return m?.assignees?.length?m.assignees:(m?.assignee?[m.assignee]:[]);}
 function manualRecordWho(m){return manualPeopleLabel(manualArtifactPeople(m))||'人工处理人';}
+function openGeneralAgentDrawer(id){
+ const t=T.find(item=>item.id===id);if(!t)return;if(!t.generalAgentConfirmed){go('thread',id);return;}const artifact=t.arts?.find(a=>a.mode==='general-session');if(!artifact)return;openDw(artifact.id);S.pc=true;drawDw();scrollDrawerToBottom();
+}
+function drawGeneralAgentDrawer(){
+ const t=T.find(item=>item.id===S.generalAgentTaskId);if(!t)return;
+ const confirmed=!!t.generalAgentConfirmed,messages=t.generalMessages||[],artifact=t.arts?.find(a=>a.mode==='general-session');
+ $('dw').innerHTML=`<div class="dw-h general-agent-head"><button class="ib" onclick="closeDw()" aria-label="关闭"><i data-lucide="x"></i></button><div><div class="ty">通用 Agent</div><h3>${esc(t.t)}</h3></div></div>
+  ${confirmed?`<div class="dw-tabs general-agent-tabs"><button class="on">对话</button><button>产出 ${t.outputCount||0}</button></div>`:''}
+  <div class="dw-b general-agent-body">
+   ${confirmed?`<div class="general-chat-message agent"><div class="general-chat-bubble general-chat-output"><b>${esc(artifact?.ttl||'好评返现文案 · v1')}</b><span>${esc(artifact?.body||'')}</span></div></div>${messages.map(m=>`<div class="general-chat-message ${m.role}"><div class="general-chat-bubble ${m.role==='agent'?'general-chat-output':''}">${m.title?`<b>${esc(m.title)}</b>`:''}<span>${esc(m.text)}</span></div></div>`).join('')}`:''}
+  </div>
+  <div class="dw-f general-agent-foot">${confirmed?`<button class="general-agent-attach" aria-label="添加附件" onclick="toast('可添加图片或文件')"><i data-lucide="paperclip"></i></button><textarea id="general-agent-input" rows="1" placeholder="继续补充或修改要求…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendGeneralAgentMessage('${t.id}')}"></textarea><button class="btn" onclick="sendGeneralAgentMessage('${t.id}')">发送</button>`:`<button class="btn ghost" onclick="toast('可从已授权 Agent 中重新选择')">更换 Agent</button><span></span><button class="btn" onclick="confirmGeneralAgentRecommendation('${t.id}')">确认并开始</button>`}</div>`;
+ if(window.lucide)lucide.createIcons();
+}
+function confirmGeneralAgentRecommendation(id){
+ const t=T.find(item=>item.id===id);if(!t||t.generalAgentConfirmed)return;t.generalAgentConfirmed=true;t.st='run';t.up='刚刚';t.generalMessages=[];render();drawGeneralAgentDrawer();toast('已确认通用 Agent · 任务开始执行');
+}
+function finishGeneralAgentDemo(id){
+ const t=T.find(item=>item.id===id);if(!t||!t.generalAgentDemo||t.arts?.some(a=>a.mode==='general-session'))return;
+ t.live=null;t.plan.status='completed';t.plan.steps=t.plan.steps.map(s=>({...s,s:'ok',r:'已完成'}));t.arts=[{id:'a-general-session-1',tid:t.id,mode:'general-session',ty:'会话产出',ttl:'好评返现文案 · v1',by:'general',v:1,st:'review',pv:'none',g:['#C4B5FD','#7C3AED'],ex:'由通用 Agent 根据本次会话生成。',body:generalAgentDemoBody(),vals:[],sub:[]}];t.outputCount=1;t.st='review';t.up='刚刚';
+ if(S.view==='thread'&&S.tid===id)render();else{renderNav();render();}toast('通用 Agent 已生成 1 份本次会话产出');
+}
+function generalAgentQuickReply(id,text){const input=$('general-agent-input');if(input){input.value=text;input.focus();}else sendGeneralAgentMessage(id,text);}
+function sendGeneralAgentMessage(id,preset){
+ const t=T.find(item=>item.id===id),input=$('general-agent-input'),text=(preset||input?.value||'').trim();if(!t||!text)return;t.generalMessages=t.generalMessages||[];t.generalMessages.push({role:'user',text,at:'刚刚'});const artifact=t.arts?.find(a=>a.mode==='general-session');if(artifact){artifact.v+=1;artifact.ttl='好评返现文案 · v'+artifact.v;artifact.ex='已根据本次会话补充要求更新。';artifact.body=generalAgentDemoBody();artifact.st='review';t.generalMessages.push({role:'agent',title:artifact.ttl,text:artifact.body,at:'刚刚'});}t.st='review';t.up='刚刚';render();drawGeneralAgentDrawer();const body=$('dw')?.querySelector('.dw-b');if(body)body.scrollTop=body.scrollHeight;
+}
 function toggleThreadManualPerson(id,checked){
  const list=Array.isArray(S.manualPeople)?[...S.manualPeople]:[S.manualPerson||'br'];
  const set=new Set(list);if(checked)set.add(id);else set.delete(id);
@@ -573,6 +599,7 @@ function pptFilePeek(a){
 }
 function peek(a){
  const g=AG[a.by];
+ if(a.mode==='general-session')return generalSessionPeek(a);
  if(a.mode==='pptfile')return pptFilePeek(a);
  if(a.mode==='pptoutline')return pptOutlinePeek(a);
  if(a.mode==='seo-intake')return seoIntakePeek(a);
@@ -631,7 +658,7 @@ function peek(a){
        ${a.rows.length<9?'':'<span style="margin-left:var(--sp-3);font-size:var(--fs-xs);color:var(--t3);align-self:center">+22</span>'}</div>
    </div>
    <div class="vals">${a.vals.map(v=>`<span class="val ${v.s}">${v.s==='ok'?'✓':'!'} ${v.l} <span class="m">${v.v}</span></span>`).join('')}</div>
-   <div class="pk-a">${a.st==='review'?`<button class="btn sm" onclick="act('${a.id}','批准')">${a.mode==='items'?'全部提交':'批准名单'}</button>`:''}
+   <div class="pk-a">${a.st==='review'?`<button class="btn sm" onclick="act('${a.id}','批准')">${a.mode==='items'?'全部提交':'批准'}</button>`:''}
      <button class="btn ghost sm" onclick="openDw('${a.id}')">打开</button>
      ${a.mode==='roster'?'':`<button class="rvb" onclick="openDw('${a.id}');setTimeout(()=>toggleRow(0),40)">逐条评论 ${tot?`<span class="n">${tot}</span>`:''}</button>`}
      <span class="v num">v${a.v} · 26分钟前</span></div>
@@ -767,6 +794,15 @@ function peek(a){
     ${a.nxt.map(n=>n==='存进知识库'||n==='存为模板'
       ?`<button class="na" onclick="saveTpl('${a.id}')">${n} →</button>`
       :`<button class="na" onclick="toast('已在同一线程中新增步骤：${n}')">${n} →</button>`).join('')}</div>`:''}
+ </div>`;
+}
+function generalSessionPeek(a){
+ return `<div class="pk general-session-artifact" id="pk-${a.id}">
+  <div class="pk-h"><span class="ty">产出 · 本次会话</span><span class="chip general-agent-live">通用 Agent</span><span class="st ${a.st}">${STN[a.st]}</span></div>
+  <button class="general-session-preview" onclick="openGeneralAgentDrawer('${a.tid}')">
+   <b>${esc(a.ttl)}</b><span class="general-session-copy">${esc(a.body)}</span>
+  </button>
+  <div class="pk-a">${a.st==='review'?`<button class="btn sm" onclick="act('${a.id}','批准')">批准</button><button class="btn ghost sm" onclick="act('${a.id}','退回')">退回</button>`:''}<button class="btn ghost sm" onclick="openGeneralAgentDrawer('${a.tid}')">打开会话</button><span class="v num">v${a.v} · 刚刚</span></div>
  </div>`;
 }
 function downloadActivityPlan(format){S.planDownloadOpen=false;if($('dw')?.classList.contains('on'))drawDw();else render();toast('已开始下载 '+format+' 格式活动策划');}
@@ -1033,6 +1069,7 @@ function dPptDirection(a){
   <div class="note">这一方向是本次唯一方案。确认后，PPT Agent 将严格按照当前大纲生成演示文稿。</div>${S.pc?`<div style="margin-top:var(--sp-4)">${subPane(a)}</div>`:''}`;
 }
 function togglePptComment(){const opening=!S.pc;S.pc=opening;drawDw();if(opening)scrollDrawerToBottom();}
+function toggleGeneralSessionComment(){const opening=!S.pc;S.pc=opening;drawDw();if(opening)scrollDrawerToBottom();}
 function confirmPptOutline(id){
  const [t,a]=findArt(id);if(!t||!a||a.outlineConfirmed)return;
  a.outlineConfirmed=true;a.st='done';a.drawerReturning=false;t.st='run';t.up='刚刚';
@@ -1079,7 +1116,7 @@ function scrollDrawerToBottom(){
   if(body)body.scrollTop=body.scrollHeight;
  }));
 }
-function closeDw(){if(typeof closePermissionFocus==='function')closePermissionFocus();S.ag=null;S.trace=null;S.prop=null;S.hot=null;S.kb=null;S.brief=null;S.kfilterOpen=null;S.auditCreator=null;S.prestartAgentTid=null;S.prestartAgentPick=null;if(S.trT){clearInterval(S.trT);S.trT=null;}$('dw').classList.remove('on','focus','expanded');$('scrim').classList.remove('on');S.focus=false;syncDrawerExpandControl();
+function closeDw(){if(typeof closePermissionFocus==='function')closePermissionFocus();S.ag=null;S.trace=null;S.prop=null;S.hot=null;S.kb=null;S.brief=null;S.kfilterOpen=null;S.auditCreator=null;S.prestartAgentTid=null;S.prestartAgentPick=null;S.generalAgentTaskId=null;if(S.trT){clearInterval(S.trT);S.trT=null;}$('dw').classList.remove('on','focus','expanded');$('scrim').classList.remove('on');S.focus=false;syncDrawerExpandControl();
  document.querySelectorAll('.pk').forEach(e=>e.classList.remove('sel'));}
 function openHistoryArtifact(tid,index){
  const t=T.find(x=>x.id===tid),x=t&&t.log&&t.log[index];if(!t||!x||x.silent)return;
@@ -1190,6 +1227,10 @@ if(a.mode==='seo-intake'){
  tabs=['关键词确认'];
  body=dSeoIntake(a);
  }
+else if(a.mode==='general-session'){
+ tabs=['文案','版本'];
+ body=[`<div class="general-session-drawer-doc"><h3>${esc(a.ttl)}</h3><div>${esc(a.body)}</div></div>${S.pc?`<div class="general-session-comments" style="margin-top:var(--sp-4)">${subPane(a)}</div>`:''}`,dVer(a)][S.dtab];
+ }
 else if(a.mode==='pptfile'){
  tabs=['文件信息','版本'];
  body=[dPptFile(a),dVer(a)][S.dtab];
@@ -1228,7 +1269,7 @@ else if(a.mode==='csa'){
   if((isDetailDirection||isActivityDirection||isSeoDirection)&&S.pc)body+=directionComments;
  }
  else if(a.mode==='options'){tabs=['方向对比','版本'];body=[dOpts(a),dVer(a)][S.dtab];}
- else if(a.mode==='roster'){tabs=['名单','内容审核','效果分析','版本'];body=[dRoster(a),dContentAudit(a),dEffectAnalysis(a),dVer(a)][S.dtab];}
+ else if(a.mode==='roster'){tabs=['名单','合作简报','效果分析','版本'];body=[dRoster(a),dContentAudit(a),dEffectAnalysis(a),dVer(a)][S.dtab];}
  else if(a.listing){tabs=['上架流程','版本'];body=[dListingWorkflow(a)+(S.pc?`<div id="listing-comments" style="margin-top:var(--sp-4)">${subPane(a,0)}</div>`:''),dVer(a)][S.dtab];}
  else if(a.mode==='items'){tabs=['SKU','校验','版本'];body=[dItems(a),dOut(a),dVer(a)][S.dtab];}
  else if(a.manualOutput){
@@ -1284,6 +1325,7 @@ else if(a.mode==='csa'){
   <div class="dw-b">${body}</div>
   <div class="dw-f ${a.inspection||a.sentiment||a.listing?'inspection-actions':isStandaloneDirection?'direction-actions':''}">
     ${a.mode==='seo-intake'?seoIntakeFooter(a)
+     :a.mode==='general-session'?`${a.st==='review'?`<button class="btn" onclick="act('${a.id}','批准');closeDw()">批准</button><button class="btn ghost" onclick="act('${a.id}','退回');closeDw()">退回</button>`:''}<button class="rvb ${S.pc?'on':''}" onclick="toggleGeneralSessionComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`
      :a.mode==='pptfile'?pptFileFooter(a)
      :a.mode==='pptoutline'?pptOutlineFooter(a)
      :a.mode==='csa'?csaFooter(a)
@@ -1328,7 +1370,7 @@ else if(a.mode==='csa'){
       ${drawerReturnButton(a)}`:a.st==='run'?`<span style="font-size:var(--fs-sm);color:var(--t2)">Agent 还在生成，完成后会回到待审批。</span>`:''}
       ${S.dtab===1?`<button class="btn ghost" onclick="downloadAllPlanImages()"><i data-lucide="download"></i>批量下载</button>`:''}
       ${!a.drawerReturning&&S.dtab<4?`<button class="rvb ${S.pc?'on':''}" aria-expanded="${!!S.pc}" aria-controls="seo-comments" onclick="toggleSeoComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`:''}`
-     :a.st==='review'||a.mode==='options'?`<button class="btn" onclick="act('${a.id}','批准');closeDw()">${a.mode==='roster'?'批准名单':'批准'}</button>
+     :a.st==='review'||a.mode==='options'?`<button class="btn" onclick="act('${a.id}','批准');closeDw()">批准</button>
       ${a.mode==='roster'||a.mode==='pdpseq'?'':`<button class="btn ghost" onclick="act('${a.id}','退回');closeDw()">退回并说明</button>`}`
      :a.st==='run'?`<span style="font-size:var(--fs-sm);color:var(--t2)">Agent 还在生成，完成后会回到待审批。</span>`
      :''}

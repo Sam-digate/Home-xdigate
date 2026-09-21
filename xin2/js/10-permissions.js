@@ -38,14 +38,14 @@ const PERMISSION_PROJECTS=[
 ];
 
 const PERMISSION_MEMBERS=[
- {id:'du',name:'dudu',email:'dudu@xdigate.cn',initials:'DU',color:'#7C3AED',role:'super',status:'active',last:'刚刚',agents:[],projects:[]},
  {id:'br',name:'Brooks',email:'brooks@xdigate.cn',initials:'BR',color:'#0891B2',role:'admin',status:'active',last:'今天 10:32',agents:[],projects:[]},
+ {id:'du',name:'Dudu',accountId:'dudu',password:'Dudu66',initials:'DU',color:'#7C3AED',role:'member',status:'active',last:'刚刚',agents:['ppt','trend','ana'],projects:['a80','tmall']},
  {id:'asher',name:'asher',email:'asher@xdigate.cn',initials:'AS',color:'#2563EB',role:'member',status:'active',last:'今天 09:18',agents:['gen','ppt','pdp','trend'],projects:['a80','tmall']},
  {id:'so',name:'Sophie',email:'sophie@xdigate.cn',initials:'SO',color:'#E11D48',role:'member',status:'active',last:'昨天 18:42',agents:['gen','plan','kol'],projects:['tmall','red']},
  {id:'ar',name:'Ariel',email:'ariel@xdigate.cn',initials:'AR',color:'#10B981',role:'member',status:'active',last:'昨天 16:05',agents:['cs','trend'],projects:['a80']},
  {id:'sam',name:'Sam',email:'sam@xdigate.cn',initials:'SA',color:'#7C83C6',role:'member',status:'active',last:'9 月 18 日',agents:['gen','vid','pdp'],projects:['tmall','douyin']},
  {id:'cherry',name:'Cherry',email:'cherry@xdigate.cn',initials:'CH',color:'#C026D3',role:'member',status:'active',last:'9 月 17 日',agents:['ppt'],projects:['a80']},
- {id:'lily',name:'Lily',email:'lily@xdigate.cn',initials:'LI',color:'#D97706',role:'member',status:'pending',last:'尚未加入',agents:[],projects:[]}
+ {id:'lily',name:'Lily',email:'lily@xdigate.cn',initials:'LI',color:'#D97706',role:'member',status:'active',last:'尚未登录',agents:[],projects:[]}
 ];
 
 function permissionState(){
@@ -60,11 +60,12 @@ function permissionTabKey(event){
 function permissionRoleLabel(role){return role==='super'?'超级管理员':role==='admin'?'管理员':'成员';}
 function permissionRoleClass(role){return role==='super'?'super':role==='admin'?'admin':'member';}
 function permissionStatus(m){
- if(m.status==='pending')return '<span class="permission-status pending"><i></i>待加入</span>';
  if(m.status==='disabled')return '<span class="permission-status disabled"><i></i>已停用</span>';
  return '<span class="permission-status active"><i></i>正常</span>';
 }
 function permissionAvatar(m,size='md'){return `<span class="permission-avatar ${size}" style="--avatar:${m.color}">${esc(m.initials)}</span>`;}
+function permissionAccountId(m){return m.accountId||(m.email?m.email.split('@')[0]:m.id);}
+function permissionAccountPassword(m){return m.password||'XDGATE';}
 function permissionMemberAgents(m){
  if(m.role!=='member')return '<span class="permission-all-access"><i data-lucide="check-circle-2"></i>全部 Agent</span>';
  if(!m.agents.length)return '<span class="permission-none">暂未授权</span>';
@@ -79,15 +80,14 @@ function permissionMemberProjects(m){
 }
 function permissionMemberRows(){
  const q=S.permQuery.trim().toLowerCase();
- const rows=PERMISSION_MEMBERS.filter(m=>m.role!=='super'&&(!q||`${m.name} ${m.email}`.toLowerCase().includes(q)));
- if(!rows.length)return `<tr><td colspan="7"><div class="permission-empty"><i data-lucide="search-x"></i><b>没有找到成员</b><span>换一个姓名或邮箱试试。</span></div></td></tr>`;
+ const rows=PERMISSION_MEMBERS.filter(m=>m.role!=='super'&&(!q||`${m.name} ${permissionAccountId(m)}`.toLowerCase().includes(q)));
+ if(!rows.length)return `<tr><td colspan="6"><div class="permission-empty"><i data-lucide="search-x"></i><b>没有找到成员</b><span>换一个姓名或账号 ID 试试。</span></div></td></tr>`;
  return rows.map(m=>`<tr class="${m.role==='member'?'permission-row':'permission-row-static'}" ${m.role==='member'?`onclick="openPermissionMember('${m.id}')"`:''}>
-  <td><div class="permission-person">${permissionAvatar(m)}<span><b>${esc(m.name)}</b><small>${esc(m.email)}</small></span></div></td>
+  <td><div class="permission-person">${permissionAvatar(m)}<span><b>${esc(m.name)}</b><small>账号 ID：${esc(permissionAccountId(m))}</small></span></div></td>
   <td><span class="permission-role ${permissionRoleClass(m.role)}">${permissionRoleLabel(m.role)}</span></td>
   <td>${permissionMemberProjects(m)}</td>
   <td>${permissionMemberAgents(m)}</td>
   <td>${permissionStatus(m)}</td>
-  <td class="permission-muted">${esc(m.last)}</td>
   <td>${m.role==='member'?`<button class="permission-icon-button" aria-label="编辑 ${esc(m.name)} 的权限" onclick="event.stopPropagation();openPermissionMember('${m.id}')"><i data-lucide="chevron-right"></i></button>`:''}</td>
  </tr>`).join('');
 }
@@ -113,17 +113,15 @@ function permissionAgentRows(){
 function vPermission(){
  permissionState();
  const active=PERMISSION_MEMBERS.filter(m=>m.role!=='super'&&m.status==='active').length;
- const pending=PERMISSION_MEMBERS.filter(m=>m.role==='member'&&m.status==='pending').length;
  return `<div class="wrap permission-page">
   <header class="permission-head">
    <div><h1>权限管理</h1><p>管理组织成员，并决定每位成员可以访问哪些品牌、使用哪些 Agent。</p></div>
-   <button class="btn permission-invite" onclick="openPermissionInvite()"><i data-lucide="user-plus"></i>邀请成员</button>
+   <button class="btn permission-invite" onclick="openPermissionCreateAccount()"><i data-lucide="user-plus"></i>创建账号</button>
   </header>
   <div class="permission-overview" aria-label="权限概览">
-   <span><b class="num">${active}</b> 位活跃成员</span><i></i><span><b class="num">${pending}</b> 位待加入</span><i></i><span><b class="num">${PERMISSION_PROJECTS.length}</b> 个品牌</span><i></i><span><b class="num">${PERMISSION_AGENTS.length}</b> 个可授权 Agent</span>
+   <span><b class="num">${active}</b> 位活跃成员</span><i></i><span><b class="num">${PERMISSION_PROJECTS.length}</b> 个品牌</span><i></i><span><b class="num">${PERMISSION_AGENTS.length}</b> 个可授权 Agent</span>
   </div>
-  <div class="permission-demo-note"><i data-lucide="flask-conical"></i>演示数据 · 成员与授权仅用于原型预览</div>
-  <div class="permission-tabs" role="tablist" aria-label="权限管理视图">
+  <div class="seg permission-tabs" role="tablist" aria-label="权限管理视图">
    <button id="permission-members-tab" role="tab" aria-controls="permission-members-panel" aria-selected="${S.permView==='members'}" tabindex="${S.permView==='members'?'0':'-1'}" class="${S.permView==='members'?'on':''}" onclick="S.permView='members';render()" onkeydown="permissionTabKey(event)">成员管理</button>
    <button id="permission-agents-tab" role="tab" aria-controls="permission-agents-panel" aria-selected="${S.permView==='agents'}" tabindex="${S.permView==='agents'?'0':'-1'}" class="${S.permView==='agents'?'on':''}" onclick="S.permView='agents';render()" onkeydown="permissionTabKey(event)">Agent 授权</button>
   </div>
@@ -131,10 +129,10 @@ function vPermission(){
    <div class="permission-toolbar">
     <div><h2 id="permission-members-title">全部成员</h2><p>为普通成员设置可访问的品牌与可使用的 Agent。</p></div>
     <div class="permission-filters">
-     <label class="permission-search"><i data-lucide="search"></i><input value="${esc(S.permQuery)}" placeholder="搜索姓名或邮箱" aria-label="搜索成员" oninput="filterPermissionMembers(this.value)"></label>
+     <label class="permission-search"><i data-lucide="search"></i><input value="${esc(S.permQuery)}" placeholder="搜索姓名或账号 ID" aria-label="搜索成员" oninput="filterPermissionMembers(this.value)"></label>
     </div>
    </div>
-   <div class="permission-scroll-hint"><i data-lucide="move-horizontal"></i>左右滑动查看完整权限</div><div class="permission-table-wrap" tabindex="0" aria-label="成员权限表，可横向滚动"><table class="permission-table"><thead><tr><th>成员</th><th>平台角色</th><th>品牌</th><th>Agent 权限</th><th>状态</th><th>最近活跃</th><th></th></tr></thead><tbody>${permissionMemberRows()}</tbody></table></div>
+   <div class="permission-scroll-hint"><i data-lucide="move-horizontal"></i>左右滑动查看完整权限</div><div class="permission-table-wrap" tabindex="0" aria-label="成员权限表，可横向滚动"><table class="permission-table"><thead><tr><th>成员</th><th>平台角色</th><th>品牌</th><th>Agent 权限</th><th>状态</th><th></th></tr></thead><tbody>${permissionMemberRows()}</tbody></table></div>
   </section>`:`<section id="permission-agents-panel" class="permission-panel" role="tabpanel" aria-labelledby="permission-agents-tab">
    <div class="permission-toolbar"><div><h2 id="permission-agents-title">Agent 授权</h2><p>从 Agent 维度添加或移除成员；管理员无需重复授权。</p></div></div>
    <div class="permission-scroll-hint"><i data-lucide="move-horizontal"></i>左右滑动查看完整授权</div><div class="permission-table-wrap" tabindex="0" aria-label="Agent 授权表，可横向滚动"><table class="permission-table permission-agent-table"><thead><tr><th>Agent</th><th>已授权</th><th>成员</th><th>状态</th><th></th></tr></thead><tbody>${permissionAgentRows()}</tbody></table></div>
@@ -183,7 +181,7 @@ function applyPermissionAgentTemplate(id){
  const count=$('permission-agent-count');if(count)count.textContent=S.permDraft.agents.length;[...new Set(PERMISSION_AGENTS.map(a=>a.domain))].forEach(refreshPermissionAgentGroup);refreshPermissionAgentTemplates();
 }
 function refreshPermissionAgentTemplates(){
- const active=permissionActiveAgentTemplate();document.querySelectorAll('.permission-template-button').forEach(button=>{const on=button.dataset.template===active;button.classList.toggle('on',on);button.setAttribute('aria-pressed',on);});const custom=$('permission-template-custom');if(custom)custom.hidden=active!=='custom';
+ const active=permissionActiveAgentTemplate();document.querySelectorAll('.permission-template-button').forEach(button=>{const on=button.dataset.template===active;button.classList.toggle('on',on);button.setAttribute('aria-pressed',on);});
 }
 function togglePermissionAgentDomain(domain,checked){
  const ids=PERMISSION_AGENTS.filter(a=>a.domain===domain).map(a=>a.id),set=new Set(S.permDraft.agents);ids.forEach(id=>checked?set.add(id):set.delete(id));S.permDraft.agents=[...set];
@@ -221,17 +219,18 @@ function refreshPermissionBrandPicker(){
 function drawPermissionMember(){
  const m=PERMISSION_MEMBERS.find(x=>x.id===S.permMemberId);if(!m)return;
  const draft=S.permDraft;
- $('dw').innerHTML=`<div class="dw-h permission-drawer-head">${permissionCloseButton()}${permissionAvatar(m,'lg')}<div><div class="ty">成员权限</div><h3 id="permission-drawer-title">${esc(m.name)}</h3><span>${esc(m.email)}</span></div></div>
+ $('dw').innerHTML=`<div class="dw-h permission-drawer-head">${permissionCloseButton()}${permissionAvatar(m,'lg')}<div><div class="ty">成员权限</div><h3 id="permission-drawer-title">${esc(m.name)}</h3></div></div>
   <div class="dw-b permission-drawer-body" onclick="if(S.permBrandPickerOpen)togglePermissionBrandPicker(false)">
+   <section class="permission-form-section permission-invite-details"><div class="permission-section-title"><div><h4>账号信息</h4><p>账号信息仅供查看，不可在此修改。</p></div></div><div class="permission-invite-fields"><label class="permission-field"><span>姓名</span><input value="${esc(m.name)}" readonly aria-readonly="true"></label><label class="permission-field"><span>账号 ID</span><input value="${esc(permissionAccountId(m))}" readonly aria-readonly="true"></label><label class="permission-field permission-field-wide"><span>密码</span><span class="permission-password readonly"><input id="permission-account-password" type="password" value="${esc(permissionAccountPassword(m))}" readonly aria-readonly="true"><button id="permission-password-toggle" type="button" aria-label="显示密码" aria-pressed="false" onclick="togglePermissionPassword()"><i data-lucide="eye"></i></button></span></label></div></section>
    <section class="permission-form-section"><div class="permission-section-title"><div><h4>可访问的品牌</h4><p>选择该成员可以进入和参与工作的品牌。</p></div><span><b id="permission-project-count" class="num">${draft.projects.length}</b> / ${PERMISSION_PROJECTS.length}</span></div>
     <div class="permission-brand-picker" onclick="event.stopPropagation()"><div class="permission-brand-select" role="button" tabindex="0" aria-label="选择可访问的品牌" onclick="togglePermissionBrandPicker()" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();togglePermissionBrandPicker()}"><span id="permission-brand-summary" class="permission-brand-summary">${permissionBrandSummary()}</span><button type="button" class="permission-brand-toggle" aria-label="展开品牌选择" aria-expanded="false" onclick="event.stopPropagation();togglePermissionBrandPicker()"><i data-lucide="chevron-down"></i></button></div><div id="permission-brand-dropdown" class="permission-brand-dropdown" hidden><div class="permission-brand-search"><i data-lucide="search"></i><input id="permission-brand-search-input" placeholder="搜索品牌" aria-label="搜索品牌" oninput="filterPermissionBrands(this.value);$('permission-brand-search-clear').hidden=!this.value"><button id="permission-brand-search-clear" type="button" aria-label="清除搜索内容" hidden onclick="clearPermissionBrandSearch()">×</button></div><div class="permission-brand-actions"><label><input id="permission-brand-all" type="checkbox" onchange="toggleAllPermissionBrands(this.checked)"><span class="permission-check"></span><b>全部品牌</b></label></div><div class="permission-brand-options">${PERMISSION_PROJECTS.map(p=>`<label class="permission-brand-option" data-brand-id="${p.id}" data-search="${esc(p.name.toLowerCase())}"><input type="checkbox" value="${p.id}" ${draft.projects.includes(p.id)?'checked':''} onchange="togglePermissionDraftProject('${p.id}',this.checked)"><span class="permission-check"></span><b>${esc(p.name)}</b></label>`).join('')}<div id="permission-brand-empty" class="permission-brand-empty" hidden>没有找到品牌</div></div></div></div>
    </section>
    <section class="permission-form-section"><div class="permission-section-title"><div><h4>可使用的 Agent</h4><p>选择该成员登录后可以看见和使用的 Agent。</p></div><span><b id="permission-agent-count" class="num">${draft.agents.length}</b> / ${PERMISSION_AGENTS.length}</span></div>
-    <div class="permission-agent-control"><div class="permission-agent-templates"><div class="permission-template-label"><b>快捷权限</b><span>选择一个模板后仍可逐项调整</span></div><div class="permission-template-buttons">${PERMISSION_AGENT_TEMPLATES.map(template=>`<button class="permission-template-button ${permissionActiveAgentTemplate()===template.id?'on':''}" data-template="${template.id}" aria-pressed="${permissionActiveAgentTemplate()===template.id}" onclick="applyPermissionAgentTemplate('${template.id}')">${esc(template.name)}</button>`).join('')}<span id="permission-template-custom" class="permission-template-custom" ${permissionActiveAgentTemplate()==='custom'?'':'hidden'}>自定义</span></div></div>
+    <div class="permission-agent-control"><div class="permission-agent-templates"><div class="permission-template-label"><b>快捷权限</b><span>选择一个模板后仍可逐项调整</span></div><div class="permission-template-buttons">${PERMISSION_AGENT_TEMPLATES.map(template=>`<button class="permission-template-button ${permissionActiveAgentTemplate()===template.id?'on':''}" data-template="${template.id}" aria-pressed="${permissionActiveAgentTemplate()===template.id}" onclick="applyPermissionAgentTemplate('${template.id}')">${esc(template.name)}</button>`).join('')}<span id="permission-template-custom" class="permission-template-custom" role="status">自定义</span></div></div>
      <div class="permission-agent-picker"><div class="permission-agent-groups">${[...new Set(PERMISSION_AGENTS.map(a=>a.domain))].map(domain=>{const agents=PERMISSION_AGENTS.filter(a=>a.domain===domain),selected=agents.filter(a=>draft.agents.includes(a.id)).length;return `<section class="permission-agent-group" data-agent-group="${esc(domain)}"><div class="permission-agent-group-head"><b>${esc(domain)}</b><span class="permission-agent-group-count">${selected} / ${agents.length}</span></div><div class="permission-agent-options"><label class="permission-agent-all"><input type="checkbox" ${selected===agents.length?'checked':''} onchange="togglePermissionAgentDomain('${domain}',this.checked)"><span class="permission-check"></span><b>全部</b></label>${agents.map(a=>`<label class="permission-agent-option"><input type="checkbox" value="${a.id}" ${draft.agents.includes(a.id)?'checked':''} onchange="togglePermissionDraftAgent('${a.id}',this.checked)"><span class="permission-check"></span><b>${esc(a.name)}</b></label>`).join('')}</div></section>`;}).join('')}</div></div></div>
    </section>
   </div>
-  <div class="dw-f permission-drawer-foot">${m.role==='member'&&m.status!=='pending'?`<button class="btn ghost permission-disable" onclick="togglePermissionMemberStatus('${m.id}')">${m.status==='disabled'?'恢复成员':'停用成员'}</button>`:'<span></span>'}<div><button class="btn ghost" onclick="closeDw()">取消</button><button class="btn" onclick="savePermissionMember()">保存更改</button></div></div>`;
+  <div class="dw-f permission-drawer-foot">${m.role==='member'?`<button class="btn ghost permission-disable" onclick="togglePermissionMemberStatus('${m.id}')">${m.status==='disabled'?'恢复成员':'停用成员'}</button>`:'<span></span>'}<div><button class="btn ghost" onclick="closeDw()">取消</button><button class="btn" onclick="savePermissionMember()">保存更改</button></div></div>`;
  refreshPermissionBrandPicker();[...new Set(PERMISSION_AGENTS.map(a=>a.domain))].forEach(refreshPermissionAgentGroup);
  if(window.lucide)lucide.createIcons();
 }
@@ -257,7 +256,7 @@ function drawPermissionAgent(){
  $('dw').innerHTML=`<div class="dw-h permission-drawer-head">${permissionCloseButton()}<span class="permission-agent-mark large" style="--agent:${a.color}"><i data-lucide="bot"></i></span><div><div class="ty">Agent 授权</div><h3 id="permission-drawer-title">${esc(a.name)}</h3><span>${esc(a.domain)}</span></div></div>
   <div class="dw-b permission-drawer-body"><div class="permission-note neutral"><i data-lucide="info"></i><span>超级管理员和管理员默认可以访问全部 Agent，此处仅配置普通成员。</span></div>
    <section class="permission-form-section"><div class="permission-section-title"><div><h4>可使用成员</h4><p>取消勾选后，成员将不能继续进入或运行该 Agent。</p></div><span><b id="permission-member-count" class="num">${S.permAgentDraft.length}</b> 位</span></div>
-    <div class="permission-member-checks">${members.map(m=>`<label class="${m.status==='disabled'?'disabled':''}"><input type="checkbox" ${S.permAgentDraft.includes(m.id)?'checked':''} ${m.status==='disabled'?'disabled':''} onchange="togglePermissionAgentMember('${m.id}',this.checked)"><span class="permission-check"></span>${permissionAvatar(m)}<span><b>${esc(m.name)}</b><small>${m.status==='pending'?'待加入':m.status==='disabled'?'已停用':esc(m.email)}</small></span></label>`).join('')}</div>
+    <div class="permission-member-checks">${members.map(m=>`<label class="${m.status==='disabled'?'disabled':''}"><input type="checkbox" ${S.permAgentDraft.includes(m.id)?'checked':''} ${m.status==='disabled'?'disabled':''} onchange="togglePermissionAgentMember('${m.id}',this.checked)"><span class="permission-check"></span>${permissionAvatar(m)}<span><b>${esc(m.name)}</b><small>${m.status==='disabled'?'已停用':`账号 ID：${esc(permissionAccountId(m))}`}</small></span></label>`).join('')}</div>
    </section>
   </div><div class="dw-f permission-drawer-foot"><span></span><div><button class="btn ghost" onclick="closeDw()">取消</button><button class="btn" onclick="savePermissionAgent()">保存更改</button></div></div>`;
  if(window.lucide)lucide.createIcons();
@@ -268,29 +267,32 @@ function savePermissionAgent(){
  closeDw();render();toast('Agent 授权成员已更新');
 }
 
-function openPermissionInvite(){
+function openPermissionCreateAccount(){
  S.permDraft={agents:[],projects:[]};S.permBrandPickerOpen=false;
  const draft=S.permDraft;
- $('dw').innerHTML=`<div class="dw-h permission-drawer-head">${permissionCloseButton()}<span class="permission-invite-mark"><i data-lucide="user-plus"></i></span><div><div class="ty">成员管理</div><h3 id="permission-drawer-title">邀请成员</h3><span>邀请成员加入 XDIGATE 工作空间</span></div></div>
+ $('dw').innerHTML=`<div class="dw-h permission-drawer-head">${permissionCloseButton()}<span class="permission-invite-mark"><i data-lucide="user-plus"></i></span><div><div class="ty">成员管理</div><h3 id="permission-drawer-title">创建账号</h3></div></div>
   <div class="dw-b permission-drawer-body" onclick="if(S.permBrandPickerOpen)togglePermissionBrandPicker(false)">
-   <section class="permission-form-section permission-invite-details"><div class="permission-section-title"><div><h4>成员信息</h4><p>邀请将发送到成员的工作邮箱。</p></div></div><div class="permission-invite-fields"><label class="permission-field"><span>姓名</span><input id="permission-invite-name" required autocomplete="off" placeholder="输入成员姓名"></label><label class="permission-field"><span>邮箱</span><input id="permission-invite-email" type="email" required autocomplete="off" placeholder="name@company.com" onkeydown="if(event.key==='Enter')submitPermissionInvite()"></label></div></section>
+   <section class="permission-form-section permission-invite-details"><div class="permission-section-title"><div><h4>账号信息</h4><p>设置成员的登录账号和初始密码。</p></div></div><div class="permission-invite-fields"><label class="permission-field"><span>姓名</span><input id="permission-invite-name" required autocomplete="off" placeholder="输入成员姓名"></label><label class="permission-field"><span>账号 ID</span><input id="permission-account-id" required minlength="3" maxlength="32" autocomplete="username" placeholder="例如：sophie"></label><label class="permission-field permission-field-wide"><span>密码</span><span class="permission-password"><input id="permission-account-password" type="password" required minlength="6" autocomplete="new-password" placeholder="至少输入 6 位密码" onkeydown="if(event.key==='Enter')submitPermissionAccount()"><button id="permission-password-toggle" type="button" aria-label="显示密码" aria-pressed="false" onclick="togglePermissionPassword()"><i data-lucide="eye"></i></button></span></label></div></section>
    <section class="permission-form-section"><div class="permission-section-title"><div><h4>可访问的品牌</h4><p>设置成员加入后可以进入和参与工作的品牌。</p></div><span><b id="permission-project-count" class="num">${draft.projects.length}</b> / ${PERMISSION_PROJECTS.length}</span></div>
     <div class="permission-brand-picker" onclick="event.stopPropagation()"><div class="permission-brand-select" role="button" tabindex="0" aria-label="选择可访问的品牌" onclick="togglePermissionBrandPicker()" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();togglePermissionBrandPicker()}"><span id="permission-brand-summary" class="permission-brand-summary">${permissionBrandSummary()}</span><button type="button" class="permission-brand-toggle" aria-label="展开品牌选择" aria-expanded="false" onclick="event.stopPropagation();togglePermissionBrandPicker()"><i data-lucide="chevron-down"></i></button></div><div id="permission-brand-dropdown" class="permission-brand-dropdown" hidden><div class="permission-brand-search"><i data-lucide="search"></i><input id="permission-brand-search-input" placeholder="搜索品牌" aria-label="搜索品牌" oninput="filterPermissionBrands(this.value);$('permission-brand-search-clear').hidden=!this.value"><button id="permission-brand-search-clear" type="button" aria-label="清除搜索内容" hidden onclick="clearPermissionBrandSearch()">×</button></div><div class="permission-brand-actions"><label><input id="permission-brand-all" type="checkbox" onchange="toggleAllPermissionBrands(this.checked)"><span class="permission-check"></span><b>全部品牌</b></label></div><div class="permission-brand-options">${PERMISSION_PROJECTS.map(p=>`<label class="permission-brand-option" data-brand-id="${p.id}" data-search="${esc(p.name.toLowerCase())}"><input type="checkbox" value="${p.id}" onchange="togglePermissionDraftProject('${p.id}',this.checked)"><span class="permission-check"></span><b>${esc(p.name)}</b></label>`).join('')}<div id="permission-brand-empty" class="permission-brand-empty" hidden>没有找到品牌</div></div></div></div>
    </section>
    <section class="permission-form-section"><div class="permission-section-title"><div><h4>可使用的 Agent</h4><p>设置成员加入后可以看见和使用的 Agent。</p></div><span><b id="permission-agent-count" class="num">${draft.agents.length}</b> / ${PERMISSION_AGENTS.length}</span></div>
-    <div class="permission-agent-control"><div class="permission-agent-templates"><div class="permission-template-label"><b>快捷权限</b><span>选择一个模板后仍可逐项调整</span></div><div class="permission-template-buttons">${PERMISSION_AGENT_TEMPLATES.map(template=>`<button type="button" class="permission-template-button ${permissionActiveAgentTemplate()===template.id?'on':''}" data-template="${template.id}" aria-pressed="${permissionActiveAgentTemplate()===template.id}" onclick="applyPermissionAgentTemplate('${template.id}')">${esc(template.name)}</button>`).join('')}<span id="permission-template-custom" class="permission-template-custom" ${permissionActiveAgentTemplate()==='custom'?'':'hidden'}>自定义</span></div></div>
+    <div class="permission-agent-control"><div class="permission-agent-templates"><div class="permission-template-label"><b>快捷权限</b><span>选择一个模板后仍可逐项调整</span></div><div class="permission-template-buttons">${PERMISSION_AGENT_TEMPLATES.map(template=>`<button type="button" class="permission-template-button ${permissionActiveAgentTemplate()===template.id?'on':''}" data-template="${template.id}" aria-pressed="${permissionActiveAgentTemplate()===template.id}" onclick="applyPermissionAgentTemplate('${template.id}')">${esc(template.name)}</button>`).join('')}<span id="permission-template-custom" class="permission-template-custom" role="status">自定义</span></div></div>
      <div class="permission-agent-picker"><div class="permission-agent-groups">${[...new Set(PERMISSION_AGENTS.map(a=>a.domain))].map(domain=>{const agents=PERMISSION_AGENTS.filter(a=>a.domain===domain),selected=agents.filter(a=>draft.agents.includes(a.id)).length;return `<section class="permission-agent-group" data-agent-group="${esc(domain)}"><div class="permission-agent-group-head"><b>${esc(domain)}</b><span class="permission-agent-group-count">${selected} / ${agents.length}</span></div><div class="permission-agent-options"><label class="permission-agent-all"><input type="checkbox" ${selected===agents.length?'checked':''} onchange="togglePermissionAgentDomain('${domain}',this.checked)"><span class="permission-check"></span><b>全部</b></label>${agents.map(a=>`<label class="permission-agent-option"><input type="checkbox" value="${a.id}" ${draft.agents.includes(a.id)?'checked':''} onchange="togglePermissionDraftAgent('${a.id}',this.checked)"><span class="permission-check"></span><b>${esc(a.name)}</b></label>`).join('')}</div></section>`;}).join('')}</div></div></div>
    </section>
-  </div><div class="dw-f permission-drawer-foot"><span></span><div><button class="btn ghost" onclick="closeDw()">取消</button><button class="btn" onclick="submitPermissionInvite()">发送邀请</button></div></div>`;
+  </div><div class="dw-f permission-drawer-foot"><span></span><div><button class="btn ghost" onclick="closeDw()">取消</button><button class="btn" onclick="submitPermissionAccount()">创建账号</button></div></div>`;
  refreshPermissionBrandPicker();[...new Set(PERMISSION_AGENTS.map(a=>a.domain))].forEach(refreshPermissionAgentGroup);permissionDrawerOpen();setTimeout(()=>$('permission-invite-name')?.focus(),30);
 }
-function submitPermissionInvite(){
- const nameInput=$('permission-invite-name'),emailInput=$('permission-invite-email');if(!nameInput||!emailInput)return;
- if(!nameInput.reportValidity()||!emailInput.reportValidity())return;
- const name=nameInput.value.trim(),email=emailInput.value.trim(),role='member';
- if(PERMISSION_MEMBERS.some(m=>m.email.toLowerCase()===email.toLowerCase())){toast('该邮箱已经是组织成员');return;}
+function submitPermissionAccount(){
+ const nameInput=$('permission-invite-name'),accountInput=$('permission-account-id'),passwordInput=$('permission-account-password');if(!nameInput||!accountInput||!passwordInput)return;
+ if(!nameInput.reportValidity()||!accountInput.reportValidity()||!passwordInput.reportValidity())return;
+ const name=nameInput.value.trim(),accountId=accountInput.value.trim(),password=passwordInput.value,role='member';
+ if(PERMISSION_MEMBERS.some(m=>permissionAccountId(m).toLowerCase()===accountId.toLowerCase())){toast('该账号 ID 已存在');accountInput.focus();return;}
  const agents=[...S.permDraft.agents],projects=[...S.permDraft.projects];
  const initials=(name.match(/[A-Za-z]/g)||name.split('')).slice(0,2).join('').toUpperCase();
- PERMISSION_MEMBERS.push({id:'member-'+Date.now(),name,email,initials:initials||'ME',color:'#7C3AED',role,status:'pending',last:'尚未加入',agents,projects});
- closeDw();render();toast(`邀请已发送给 ${name}`);
+ PERMISSION_MEMBERS.push({id:'member-'+Date.now(),name,accountId,password,initials:initials||'ME',color:'#7C3AED',role,status:'active',last:'尚未登录',agents,projects});
+ closeDw();render();toast(`${name} 的账号已创建`);
+}
+function togglePermissionPassword(){
+ const input=$('permission-account-password'),button=$('permission-password-toggle');if(!input||!button)return;const showing=input.type==='text';input.type=showing?'password':'text';button.setAttribute('aria-label',showing?'显示密码':'隐藏密码');button.setAttribute('aria-pressed',String(!showing));button.innerHTML=`<i data-lucide="${showing?'eye':'eye-off'}"></i>`;if(window.lucide)lucide.createIcons();input.focus();
 }

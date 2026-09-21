@@ -646,7 +646,7 @@ function briefCommentSend(kind,i){
  openBrief(i,true);const list=$('brief-sl');if(list)list.scrollTop=list.scrollHeight;
 }
 function openBrief(i,keepComment=false){
- const [,a]=findArt('a7');const r=a.rows[i];S.brief=i;if(!keepComment)S.briefComment=false;
+ const [,a]=findArt('a7');const r=a.rows[i];r.briefGenerated=true;S.brief=i;if(!keepComment)S.briefComment=false;
  const briefCount=(r.briefSub||[]).filter(m=>m.k!=='sys').length;
  $('dw').innerHTML=`<div class="dw-h">
    <button class="ib" onclick="S.brief=null;drawDw()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -685,30 +685,25 @@ function creatorPriceBand(i){const n=Number(creatorRates(i)[0].replace(/[^0-9]/g
 function dRoster(a){
  if(Number.isInteger(S.auditCreator))return dContentAudit(a,S.auditCreator,true);
  const by={};a.rows.forEach(r=>by[r.s]=(by[r.s]||0)+1);
+ const unselectedStatuses=['候选','已淘汰'];
+ const selectedCount=a.rows.filter(r=>!unselectedStatuses.includes(r.s)).length;
+ const unselectedCount=a.rows.length-selectedCount;
+ const group=['all','selected','unselected'].includes(S.kgroup)?S.kgroup:'all';
+ const groupStatuses=group==='selected'?['洽谈中','已确认','合作中','已完成']:group==='unselected'?['候选','已淘汰']:Object.keys(RST);
+ const groupCount=group==='selected'?selectedCount:group==='unselected'?unselectedCount:a.rows.length;
  const tags=[...new Set(a.rows.flatMap(r=>r.tags||[]))];
  const ft=S.ktag&&tags.includes(S.ktag)?S.ktag:null;
- const fs=S.kstatus&&Object.prototype.hasOwnProperty.call(RST,S.kstatus)?S.kstatus:null;
+ const fs=S.kstatus&&groupStatuses.includes(S.kstatus)?S.kstatus:null;
  const fp=['low','mid','high'].includes(S.kprice)?S.kprice:null;
  const priceMeta=[['low','¥0–¥500',2],['mid','¥500–¥1,000',3],['high','¥1,000–¥2,000',3]];
  const priceStats=Object.fromEntries(priceMeta.map(([k,,target])=>{const list=a.rows.filter((r,i)=>creatorPriceBand(i)===k);return[k,{target,candidates:list.length,approved:list.filter(r=>['已确认','合作中','已完成'].includes(r.s)).length}]}));
- const rows=a.rows.filter((r,i)=>(!ft||(r.tags||[]).includes(ft))&&(!fs||r.s===fs)&&(!fp||creatorPriceBand(i)===fp));
- return `<div class="roster-statuses">
-   <button class="status-filter all ${!fs?'on':''}" onclick="S.kstatus=null;S.kfilterOpen=null;drawDw()">全部 ${a.rows.length}</button>
-   ${Object.keys(RST).map(k=>`<button class="status-filter ${RST[k]} ${fs===k?'on':''}" onclick="S.kstatus='${k}';S.kfilterOpen=null;drawDw()">${k} ${by[k]||0}</button>`).join('')}
- </div>
- <div class="roster-filterarea"><div class="roster-filterbar">
-   <button class="filter-capsule ${S.kfilterOpen==='price'?'on':''}" onclick="S.kfilterOpen=S.kfilterOpen==='price'?null:'price';drawDw()"><span>图文报价：${fp?(priceMeta.find(x=>x[0]===fp)||[])[1]:'全部'}</span><i data-lucide="${S.kfilterOpen==='price'?'chevron-up':'chevron-down'}"></i></button>
-   <button class="filter-capsule ${S.kfilterOpen==='tag'?'on':''}" onclick="S.kfilterOpen=S.kfilterOpen==='tag'?null:'tag';drawDw()"><span>标签：${ft||'全部'}</span><i data-lucide="${S.kfilterOpen==='tag'?'chevron-up':'chevron-down'}"></i></button>
- </div>
- ${S.kfilterOpen==='price'?`<div class="roster-filterpanel"><div class="roster-pricegrid">
-   <button class="price-filter all ${!fp?'on':''}" onclick="S.kprice=null;S.kfilterOpen=null;drawDw()"><span class="t">全部</span><span class="s">${a.rows.length} 位候选</span></button>
-   ${priceMeta.map(([k,label])=>{const x=priceStats[k],full=x.approved>=x.target;return `<button class="price-filter ${fp===k?'on':''}" onclick="S.kprice='${k}';S.kfilterOpen=null;drawDw()"><span class="t">${label}${full?' / 已满':''}</span><span class="s">目标 ${x.target} · 候选 ${x.candidates} · 已批 ${x.approved}</span></button>`}).join('')}
- </div></div>`:S.kfilterOpen==='tag'?`<div class="roster-filterpanel"><div class="roster-taglist open">
-   <button class="tag ${!ft?'on':''}" onclick="S.ktag=null;S.kfilterOpen=null;drawDw()">全部</button>
-   ${tags.map(t=>`<button class="tag ${ft===t?'on':''}" onclick="S.ktag='${t}';S.kfilterOpen=null;drawDw()">${t}</button>`).join('')}
- </div></div>`:''}
- </div>
- ${rows.length?rows.map((r)=>{const i=a.rows.indexOf(r),rates=creatorRates(i),quality=r.m>=90?'内容稳定':'一般契合',auditCount=contentAudits(a,i).length;return `<div class="pk" style="margin-bottom:var(--sp-2)">
+ const inGroup=r=>group==='all'||(group==='selected'?!unselectedStatuses.includes(r.s):unselectedStatuses.includes(r.s));
+ const rows=a.rows.filter((r,i)=>inGroup(r)&&(!ft||(r.tags||[]).includes(ft))&&(!fs||r.s===fs)&&(!fp||creatorPriceBand(i)===fp));
+ const scopeTabs=[['all','全部',a.rows.length],['selected','已入选',selectedCount],['unselected','未入选',unselectedCount]].map(([key,label,count])=>`<button role="tab" aria-selected="${group===key}" class="${group===key?'on':''}" onclick="S.kgroup='${key}';S.kstatus=null;S.kfilterOpen=null;drawDw()"><span class="roster-scope-label">${label}</span><span class="roster-scope-count">${count}</span></button>`).join('');
+ const statusTabs=groupStatuses.map(status=>`<button class="status-filter ${RST[status]} ${fs===status?'on':''}" onclick="S.kstatus='${status}';S.kfilterOpen=null;drawDw()">${status} ${by[status]||0}</button>`).join('');
+ const cards=rows.map(r=>{
+  const i=a.rows.indexOf(r),rates=creatorRates(i),quality=r.m>=90?'内容稳定':'一般契合';
+  return `<div class="pk" style="margin-bottom:var(--sp-2)">
    <div style="display:flex;align-items:flex-start;gap:var(--sp-3);padding:var(--sp-3) 13px">
      <span class="pv sq" style="${grad(r.g[0],r.g[1])};width:38px;height:38px;flex:0 0 38px;border-radius:50%;margin-top:var(--sp-1)"></span>
      <div style="flex:1;min-width:0">
@@ -726,16 +721,38 @@ function dRoster(a){
    </div>
    <div class="pk-a" style="border-top:1px solid var(--hairline)">
      ${r.s==='候选'?`<button class="btn sm" onclick="kolSet(${i},'已确认')">入选</button>
-       <button class="btn ghost sm" onclick="openBrief(${i})">生成 Brief</button>
        <button class="btn ghost sm" onclick="kolSet(${i},'已淘汰')">淘汰</button>`
       :r.s==='已淘汰'?`<span style="font-size:var(--fs-sm);color:var(--t3)">已淘汰</span>
        <button class="btn ghost sm" onclick="kolSet(${i},'候选')">放回候选</button>`
       :`<button class="btn ghost sm" onclick="openContentData(${i})">＋ 录入内容数据</button>
-       <button class="btn ghost sm" onclick="openBrief(${i})">看 Brief ↗</button>`}
-     <button class="btn ghost sm" style="margin-left:auto" onclick="${auditCount?`openCreatorAudit(${i})`:`openAuditSubmit(${i})`}">${auditCount?'内容审核 '+auditCount:'＋ 录入审核内容'}</button>
+       <button class="btn ghost sm" onclick="openBrief(${i})">${r.briefGenerated||(r.briefSub||[]).length?'看 Brief ↗':'生成 Brief'}</button>`}
+     <select class="roster-status-select" aria-label="${esc(r.n)}的合作状态" onchange="kolSet(${i},this.value)">${Object.keys(RST).map(status=>`<option value="${status}" ${r.s===status?'selected':''}>${status}</option>`).join('')}</select>
    </div>
    ${S.or===i?`<div style="padding:0 13px 12px">${subPane(a,i)}</div>`:''}
- </div>`;}).join(''):'<div class="empty" style="padding:var(--sp-5) 16px"><div class="h">没有符合当前筛选的达人</div><button class="btn ghost sm" onclick="S.ktag=null;S.kstatus=null;S.kprice=null;drawDw()">清除筛选</button></div>'}`;
+ </div>`;
+ }).join('');
+ const empty=`<div class="empty" style="padding:var(--sp-5) 16px"><div class="h">没有符合当前筛选的达人</div><button class="btn ghost sm" onclick="S.kgroup='all';S.ktag=null;S.kstatus=null;S.kprice=null;drawDw()">清除筛选</button></div>`;
+ return `<div class="roster-scope-tabs" role="tablist" aria-label="达人入选范围">
+   ${scopeTabs}
+ </div>
+ <div class="roster-statuses roster-statuses-secondary">
+   <button class="status-filter all ${!fs?'on':''}" onclick="S.kstatus=null;S.kfilterOpen=null;drawDw()">全部 ${groupCount}</button>
+   ${statusTabs}
+ </div>
+ <div class="roster-filterarea"><div class="roster-filterbar">
+   <button class="filter-capsule ${S.kfilterOpen==='price'?'on':''}" onclick="S.kfilterOpen=S.kfilterOpen==='price'?null:'price';drawDw()"><span>图文报价：${fp?(priceMeta.find(x=>x[0]===fp)||[])[1]:'全部'}</span><i data-lucide="${S.kfilterOpen==='price'?'chevron-up':'chevron-down'}"></i></button>
+   <button class="filter-capsule ${S.kfilterOpen==='tag'?'on':''}" onclick="S.kfilterOpen=S.kfilterOpen==='tag'?null:'tag';drawDw()"><span>标签：${ft||'全部'}</span><i data-lucide="${S.kfilterOpen==='tag'?'chevron-up':'chevron-down'}"></i></button>
+   <span class="roster-data-summary">全部 <b class="num">${a.rows.length}</b><i>/</i>已入选 <b class="num">${selectedCount}</b></span>
+ </div>
+ ${S.kfilterOpen==='price'?`<div class="roster-filterpanel"><div class="roster-pricegrid">
+   <button class="price-filter all ${!fp?'on':''}" onclick="S.kprice=null;S.kfilterOpen=null;drawDw()"><span class="t">全部</span><span class="s">${a.rows.length} 位候选</span></button>
+   ${priceMeta.map(([k,label])=>{const x=priceStats[k],full=x.approved>=x.target;return `<button class="price-filter ${fp===k?'on':''}" onclick="S.kprice='${k}';S.kfilterOpen=null;drawDw()"><span class="t">${label}${full?' / 已满':''}</span><span class="s">目标 ${x.target} · 候选 ${x.candidates} · 已批 ${x.approved}</span></button>`}).join('')}
+ </div></div>`:S.kfilterOpen==='tag'?`<div class="roster-filterpanel"><div class="roster-taglist open">
+   <button class="tag ${!ft?'on':''}" onclick="S.ktag=null;S.kfilterOpen=null;drawDw()">全部</button>
+   ${tags.map(t=>`<button class="tag ${ft===t?'on':''}" onclick="S.ktag='${t}';S.kfilterOpen=null;drawDw()">${t}</button>`).join('')}
+ </div></div>`:''}
+  </div>
+ ${cards||empty}`;
 }
 function contentAudits(a,creatorIndex=0){
  const creator=a.rows[creatorIndex]||a.rows[0],name=creator?creator.n:'小鹿在成都';
@@ -777,13 +794,13 @@ function dContentAudit(a,creatorIndex=0,embedded=false){
  const activeCreatorIndex=global&&selected?selected.creatorIndex:creatorIndex;
  const creator=a.rows[activeCreatorIndex]||a.rows[0];
  if(S.audit===null||S.audit===undefined)return `${embedded?`<button class="rvb" onclick="closeCreatorAudit()">← 返回达人名单</button>`:''}
-  <div class="audit-toolbar" style="${embedded?'margin-top:var(--sp-3)':''}"><span class="ttl">${embedded?esc(creator.n)+' · ':''}内容审核</span></div>
+  <div class="audit-toolbar" style="${embedded?'margin-top:var(--sp-3)':''}"><span class="ttl">${embedded?esc(creator.n)+' · ':''}合作简报</span></div>
   ${list.length?list.map((x,i)=>`<button class="audit-card ${x.current?'current':''}" onclick="S.audit=${i};drawDw()">
     <div class="audit-card-h"><span class="audit-dot ${x.current?'':'old'}"></span><b>${esc(x.name)}</b><span class="chip mut">${x.kind}</span><span class="chip mut">v${x.v}</span></div>
     <div class="audit-card-m"><span>提交于 ${x.at}</span><span class="spacer"></span><span class="st ${x.pending?'run':x.current?'hold':'todo'}">${x.status}</span><span class="st ${x.pending?'run':'done'}">${x.gate}</span></div>
    </button>`).join(''):`<div class="empty" style="padding:var(--sp-6) 16px"><div class="h">还没有内容提交</div><div class="s">录入第一篇内容后，会在这里单独审核和保留版本。</div></div>`}`;
  const x=list[S.audit]||list[0];
- return `<button class="rvb" onclick="S.audit=null;drawDw()">← 返回${embedded?esc(creator.n)+'的内容提交':'内容审核'}</button>
+ return `<button class="rvb" onclick="S.audit=null;drawDw()">← 返回${embedded?esc(creator.n)+'的内容提交':'合作简报'}</button>
   <div style="display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-3)">
    <b style="font-family:'Sora';font-size:var(--fs-md)">${esc(x.name)}</b><span class="chip mut">${x.kind}</span><span class="chip mut">第 ${x.v} 版</span>
    <span style="margin-left:auto" class="st ${x.pending?'run':x.current?'hold':'todo'}">${x.status}</span><span class="st ${x.pending?'run':'done'}">${x.gate}</span>
