@@ -1231,12 +1231,18 @@ const KCREATOR_FILTERS={
  format:[['all','全部合作形式'],['图文','图文'],['视频','视频'],['综合','综合']],
  favorite:[['all','全部收藏状态'],['yes','已收藏'],['no','未收藏']]
 };
+const KCREATOR_DY_FILTERS={
+ fans:KCREATOR_FILTERS.fans,
+ brand:[['all','全部品牌匹配'],['matched','已匹配'],['unmatched','未匹配']],
+ settlement:[['all','全部结算额'],['under500','500元以下'],['500to1000','500–1,000元'],['1000to2500','1,000–2,500元'],['over2500','2,500元以上']],
+ status:[['all','全部状态'],['待建联','待建联'],['合同确认','合同确认']]
+};
 function kCreatorFans(value){
  const text=String(value||'').replace(/,/g,'').trim(),number=parseFloat(text);
  if(!Number.isFinite(number))return null;
  return number*(/亿/.test(text)?1e8:/万/.test(text)?1e4:/k/i.test(text)?1e3:/m/i.test(text)?1e6:1);
 }
-function kCreatorMatches(r){
+function kCreatorMatches(r,platform){
  const f=S.kCreatorFilters||{},query=(S.kCreatorSearch||'').trim().toLocaleLowerCase();
  if(query&&![r.n,r.h,...(r.tags||[])].join(' ').toLocaleLowerCase().includes(query))return false;
  const ranges={under1:[0,1e4],'1to5':[1e4,5e4],'5to10':[5e4,1e5],'10to50':[1e5,5e5],over50:[5e5,Infinity]};
@@ -1248,6 +1254,16 @@ function kCreatorMatches(r){
  if(f.format&&f.format!=='all'&&!formats.includes(f.format))return false;
  const favorite=r.favorite===true||r.favorite===1;
  if(f.favorite==='yes'&&!favorite||f.favorite==='no'&&favorite)return false;
+ if(platform==='dy'){
+  const d=r.kbDy||{},matched=d.brandMatch&&d.brandMatch!=='/';
+  if(f.brand==='matched'&&!matched||f.brand==='unmatched'&&matched)return false;
+  if(f.status&&f.status!=='all'&&d.status!==f.status)return false;
+  const settlement=String(d.total||'');
+  if(f.settlement&&f.settlement!=='all'){
+   const band=settlement.includes('2500-5000')?'over2500':settlement.includes('1000-2500')?'1000to2500':settlement.includes('500-1000')?'500to1000':'under500';
+   if(band!==f.settlement)return false;
+  }
+ }
  return true;
 }
 function kCreatorRate(r,kind){
@@ -1255,7 +1271,7 @@ function kCreatorRate(r,kind){
  return hit?String(hit).trim().slice(kind.length).trim():'—';
 }
 function setKCreatorFilter(key,value){
- if(!Object.hasOwn(KCREATOR_FILTERS,key))return;
+ if(!Object.hasOwn(KCREATOR_FILTERS,key)&&!Object.hasOwn(KCREATOR_DY_FILTERS,key))return;
  S.kCreatorFilters={...(S.kCreatorFilters||{}),[key]:value};render();
 }
 function searchKCreators(input){
@@ -1268,23 +1284,37 @@ function searchKAssets(input){
  S.assetSearch=input.value;render();
  const next=$('asset-search');if(next){next.focus({preventScroll:true});next.setSelectionRange(start,end);}
 }
+function kCreatorDyTable(list){
+ return `<div class="kc-table-wrap"><table class="kc-table kc-dy-settlement-table">
+  <colgroup><col style="width:190px"><col style="width:210px"><col style="width:78px"><col style="width:96px"><col style="width:78px"><col style="width:108px"><col style="width:110px"><col style="width:110px"><col style="width:110px"><col style="width:110px"><col style="width:92px"><col style="width:108px"><col style="width:76px"></colgroup>
+  <thead><tr><th>达人</th><th>分类</th><th>粉丝</th><th>品牌匹配</th><th>AI 校验</th><th>结算总额</th><th>直播结算总额</th><th>视频结算总额</th><th>图文结算总额</th><th>橱窗结算总额</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead>
+  <tbody>${list.map(({r,i})=>{const d=r.kbDy||{};return `<tr tabindex="0" onclick="openKCreator(${i})" onkeydown="if(event.key==='Enter'){openKCreator(${i})}">
+   <td><span class="kc-person"><button class="creator-fav ${isCreatorFav(r,i)?'on':''}" onclick="toggleCreatorFav(${i},event)" aria-label="${isCreatorFav(r,i)?'取消收藏':'收藏'}${esc(r.n)}">★</button><span class="avatar" style="${grad(r.g[0],r.g[1])}"></span><span style="min-width:0"><span class="name">${esc(r.n)}</span><span class="handle">${esc(r.h||'')}</span></span></span></td>
+   <td><span class="kc-table-tags">${(r.tags||[]).map(x=>`<span class="kc-table-tag">${esc(x)}</span>`).join('')}</span></td>
+   <td class="kc-dy-number">${esc(r.f||'—')}</td><td class="kc-dy-muted">${esc(d.brandMatch||'/')}</td><td class="kc-dy-muted">${esc(d.aiCheck||'/')}</td>
+   ${['total','live','video','article','showcase'].map(key=>`<td class="kc-dy-money ${d[key]==='—'?'empty':''}">${esc(d[key]||'—')}</td>`).join('')}
+   <td><span class="kc-dy-status">${esc(d.status||'待建联')}</span></td><td class="kc-dy-updated">${esc(d.updated||'—')}</td>
+   <td><button class="kc-table-action" onclick="event.stopPropagation();openKCreatorHomepage(${i})" aria-label="访问${esc(r.n)}的主页">主页 ↗</button></td>
+  </tr>`;}).join('')}</tbody></table></div>`;
+}
 function kCreators(rows){
  const platforms={xhs:'小红书',dy:'抖音',bili:'B站'};
  const selected=Object.hasOwn(platforms,S.kCreatorPlatform)?S.kCreatorPlatform:'xhs';
  const platformOf=r=>r.src==='bilibili'?'bili':r.src;
- const list=rows.map((r,i)=>({r,i})).filter(({r})=>platformOf(r)===selected&&kCreatorMatches(r));
+ const list=rows.map((r,i)=>({r,i})).filter(({r})=>platformOf(r)===selected&&kCreatorMatches(r,selected));
  const filters=S.kCreatorFilters||{};
+ const filterSet=selected==='dy'?KCREATOR_DY_FILTERS:KCREATOR_FILTERS;
  return `<div class="bar" style="margin:0 0 14px">
-  <div class="seg" role="group" aria-label="达人平台筛选">${Object.entries(platforms).map(([key,label])=>`<button class="${selected===key?'on':''}" aria-pressed="${selected===key}" onclick="S.kCreatorPlatform='${key}';render()">${label}</button>`).join('')}</div>
+  <div class="seg" role="group" aria-label="达人平台筛选">${Object.entries(platforms).map(([key,label])=>`<button class="${selected===key?'on':''}" aria-pressed="${selected===key}" onclick="S.kCreatorPlatform='${key}';S.kCreatorFilters={};render()">${label}</button>`).join('')}</div>
  </div>
  <div class="kc-filterbar">
   <label class="kc-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input id="kc-search" type="text" aria-label="搜索博主名或标签" placeholder="搜索博主名或标签" value="${esc(S.kCreatorSearch||'')}" oninput="if(!event.isComposing)searchKCreators(this)" oncompositionend="searchKCreators(this)"></label>
-  ${Object.entries(KCREATOR_FILTERS).map(([key,options])=>`<select class="${filters[key]&&filters[key]!=='all'?'active':''}" aria-label="${options[0][1]}" onchange="setKCreatorFilter('${key}',this.value)">${options.map(([value,label])=>`<option value="${value}" ${value===(filters[key]||'all')?'selected':''}>${label}</option>`).join('')}</select>`).join('')}
+  ${Object.entries(filterSet).map(([key,options])=>`<select class="${filters[key]&&filters[key]!=='all'?'active':''}" aria-label="${options[0][1]}" onchange="setKCreatorFilter('${key}',this.value)">${options.map(([value,label])=>`<option value="${value}" ${value===(filters[key]||'all')?'selected':''}>${label}</option>`).join('')}</select>`).join('')}
   <button class="btn kc-column-btn" type="button" aria-label="设置达人库表格列"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16"/><path d="M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></svg>设置列</button>
   <button class="btn kc-add" onclick="toast('添加达人表单待配置')">＋ 添加达人</button>
  </div>
  <div class="kc-result-count">当前名单显示 ${list.length} / ${rows.length} 位</div>
-  ${list.length?`<div class="kc-table-wrap"><table class="kc-table">
+  ${list.length?(selected==='dy'?kCreatorDyTable(list):`<div class="kc-table-wrap"><table class="kc-table">
    <colgroup><col style="width:190px"><col style="width:210px"><col style="width:72px"><col style="width:72px"><col style="width:76px"><col style="width:86px"><col style="width:86px"><col style="width:90px"><col style="width:112px"><col style="width:88px"><col style="width:76px"></colgroup>
    <thead><tr><th>达人</th><th>标签</th><th>平台</th><th>粉丝</th><th>互动率</th><th>图文报价</th><th>视频报价</th><th>合作状态</th><th>契合评分</th><th>AI 校验</th><th>操作</th></tr></thead>
    <tbody>${list.map(({r,i})=>{const platform=platformOf(r),check=r.flag?['需核实','bad']:r.cool&&r.cool!=='无限制'?['冷却期','warn']:['通过','ok'];return `<tr tabindex="0" onclick="openKCreator(${i})" onkeydown="if(event.key==='Enter'){openKCreator(${i})}">
@@ -1297,7 +1327,7 @@ function kCreators(rows){
     <td><span class="kc-table-score"><span class="bar"><i style="width:${Math.max(0,Math.min(100,Number(r.m)||0))}%;background:${r.m>=90?'#10B981':r.m>=80?'#7C3AED':r.m>=70?'#F59E0B':'#EF4444'}"></i></span>${esc(r.m)}</span></td>
     <td><span class="kc-check ${check[1]}">${check[0]}</span></td>
     <td><button class="kc-table-action" onclick="event.stopPropagation();openKCreatorHomepage(${i})" aria-label="访问${esc(r.n)}的主页">主页 ↗</button></td>
-   </tr>`;}).join('')}</tbody></table></div>`:'<div class="allclear">当前名单暂无符合筛选条件的达人</div>'}
+   </tr>`;}).join('')}</tbody></table></div>`):'<div class="allclear">当前名单暂无符合筛选条件的达人</div>'}
  `;
 }
 function openKCreatorHomepage(i){
@@ -1368,8 +1398,12 @@ function fpill(key,label,opts){
 function setDom(d){S.dom=d;render();}
 function setMode(m){S.mode=m;render();}
 function kanban(L){
+ const preferredOrder=['t5','t-douyin-creators','t-general-agent-demo','t-ppt-form-demo','t-seo-flow-demo'];
  return `<div class="kb">${COLS.map(c=>{
-  const it=L.filter(t=>t.st===c.k||(c.k==='review'&&t.st==='ask')).sort((a,b)=>a.id==='t5'?-1:b.id==='t5'?1:a.id==='t-general-agent-demo'?-1:b.id==='t-general-agent-demo'?1:a.id==='t-ppt-form-demo'?-1:b.id==='t-ppt-form-demo'?1:a.id==='t-seo-flow-demo'?-1:b.id==='t-seo-flow-demo'?1:0);
+  const it=L.filter(t=>t.st===c.k||(c.k==='review'&&t.st==='ask')).sort((a,b)=>{
+   const ai=preferredOrder.indexOf(a.id),bi=preferredOrder.indexOf(b.id);
+   return (ai<0?preferredOrder.length:ai)-(bi<0?preferredOrder.length:bi);
+  });
   return `<div class="kcol">
    <div class="kh"><span class="dot" style="background:${c.c}"></span><span class="t">${c.n}</span><span class="n num">${it.length}</span></div>
    ${it.map(kcard).join('')||'<div style="padding:var(--sp-3) 4px;font-size:var(--fs-sm);color:var(--t3)">空</div>'}
@@ -1380,7 +1414,7 @@ function kcard(t){
   const a=AG[t.ag]||{c:'#8B7FC7',s:'?',n:t.ag};
  return `<button class="kcard src${(t.cr||{s:'h'}).s} ${t.new?'hasnew':''}" onclick="go('thread','${t.id}')">
   <div class="tt">${t.new?'<span class="nd"></span>':''}${t.pin?'<span class="pinb">置顶</span>':''}${esc(t.t)}</div>
-  <div class="meta">${t.camp?`<span class="chip camp">${t.camp}</span>`:'<span class="chip mut">日常</span>'}<span class="chip dom">${t.dom}</span><span class="chip lv">${t.lv}</span>${t.generalAgentDemo&&!t.generalAgentConfirmed?'<span class="chip general-agent-wait">Agent 待确认</span>':t.generalAgentDemo?'<span class="chip general-agent-live">通用 Agent</span>':t.prestartDemo&&t.plan?.status==='rejected'?'<span class="chip" style="background:#FFF0F0;color:#C43232">计划未通过</span>':canAdjustPrestartPlan(t)?'<span class="chip mut">计划待确认</span>':''}</div>
+  <div class="meta">${t.camp?`<span class="chip camp">${t.camp}</span>`:'<span class="chip mut">日常</span>'}${t.platform?`<span class="chip plat">${esc(t.platform)}</span>`:''}<span class="chip dom">${t.dom}</span><span class="chip lv">${t.lv}</span>${t.generalAgentDemo&&!t.generalAgentConfirmed?'<span class="chip general-agent-wait">Agent 待确认</span>':t.generalAgentDemo?'<span class="chip general-agent-live">通用 Agent</span>':t.prestartDemo&&t.plan?.status==='rejected'?'<span class="chip" style="background:#FFF0F0;color:#C43232">计划未通过</span>':canAdjustPrestartPlan(t)?'<span class="chip mut">计划待确认</span>':''}</div>
   <div class="ft">
     ${t.new?`<span class="nchip">${t.new} 条新</span>`:''}
     <span class="byline">${crInfo(t).av} <b>${crInfo(t).nm}</b> 发起</span>

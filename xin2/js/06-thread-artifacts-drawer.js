@@ -661,20 +661,21 @@ function peek(a){
     </span>
    </div></div>`;
  }
- if(a.mode==='roster'||a.mode==='items'){
-  const by={};a.rows.forEach(r=>by[r.s]=(by[r.s]||0)+1);
+if(a.mode==='roster'||a.mode==='items'){
+  const by={};a.rows.forEach(r=>{const status=a.mode==='roster'?rosterStatus(a,r):r.s;by[status]=(by[status]||0)+1;});
   const tot=a.rows.reduce((n,r)=>n+subCount(r),0);
+  const cardVals=a.workflow==='douyin'?[{l:'全部达人',v:`${a.rows.length} 人`,s:'ok'},{l:'已入选达人',v:`${a.rows.filter(r=>!['待建联','已取消'].includes(rosterStatus(a,r))).length} 人`,s:'ok'}]:(a.vals||[]);
   return `<div class="pk" id="pk-${a.id}">
    <div class="pk-h"><span class="ty">产出 · ${a.ty}</span><span class="chip mut">${a.rows.length} ${a.mode==='items'?'个 SKU':'人'}</span>
      <span class="st ${a.st}">${STN[a.st]}</span>${artifactRunLink(a.by)}</div>
    <div class="pk-b" onclick="openDw('${a.id}')" style="display:block">
      <div class="pk-t"><div class="tt">${esc(a.ttl)}</div><div class="ex">${esc(a.ex)}</div></div>
-     <div style="display:flex;gap:var(--sp-1);margin-top:var(--sp-3);flex-wrap:wrap">${Object.keys(by).map(k=>`<span class="st ${RST[k]||(k==='可提交'?'done':'hold')}">${k} ${by[k]}</span>`).join('')}</div>
+     <div style="display:flex;gap:var(--sp-1);margin-top:var(--sp-3);flex-wrap:wrap">${Object.keys(by).map(k=>`<span class="st ${(a.mode==='roster'?rosterStatusMap(a):RST)[k]||(k==='可提交'?'done':'hold')}">${k} ${by[k]}</span>`).join('')}</div>
      <div style="display:flex;gap:-8px;margin-top:var(--sp-3)">${a.rows.slice(0,8).map(r=>
        `<span class="pv sq" style="${grad(r.g[0],r.g[1])};width:26px;height:26px;flex:0 0 26px;border-radius:50%;margin-right:-6px;border:2px solid #fff"></span>`).join('')}
-       ${a.rows.length<9?'':'<span style="margin-left:var(--sp-3);font-size:var(--fs-xs);color:var(--t3);align-self:center">+22</span>'}</div>
+       ${a.rows.length<9?'':`<span style="margin-left:var(--sp-3);font-size:var(--fs-xs);color:var(--t3);align-self:center">+${a.rows.length-8}</span>`}</div>
    </div>
-   <div class="vals">${a.vals.map(v=>`<span class="val ${v.s}">${v.s==='ok'?'✓':'!'} ${v.l} <span class="m">${v.v}</span></span>`).join('')}</div>
+   ${cardVals.length?`<div class="vals">${cardVals.map(v=>`<span class="val ${v.s}">${v.s==='ok'?'✓':'!'} ${v.l} <span class="m">${v.v}</span></span>`).join('')}</div>`:''}
    <div class="pk-a">${a.st==='review'?`<button class="btn sm" onclick="act('${a.id}','批准')">${a.mode==='items'?'全部提交':'批准'}</button>`:''}
      <button class="btn ghost sm" onclick="openDw('${a.id}')">打开</button>
      ${a.mode==='roster'?'':`<button class="rvb" onclick="openDw('${a.id}');setTimeout(()=>toggleRow(0),40)">逐条评论 ${tot?`<span class="n">${tot}</span>`:''}</button>`}
@@ -1225,15 +1226,17 @@ function drawDw(){
  const direction=isStandaloneDirection?a.opts[directionIndex]:null;
  if(S.brief!==null&&S.brief!==undefined&&a.rows){openBrief(S.brief);return;}
  if(S.cr!==null&&S.cr!==undefined&&a.rows){
-  const r=a.rows[S.cr];
-  const cp=creatorProfile(r,S.cr);
-  $('dw').innerHTML=`<div class="dw-h">
+ const r=a.rows[S.cr];
+ const cp=creatorProfile(r,S.cr);
+ const isDouyinCreator=cp.plat==='抖音';
+ const creatorTabs=isDouyinCreator?['文档','粉丝消费水平','上播记录','建联话术','本次沟通 '+rosterSubCount(r),'匹配度']:['文档','录入数据 '+creatorContents(r,S.cr).length,'合作记录 '+creatorCollabs(r,S.cr).length,'本次沟通 '+rosterSubCount(r),'匹配度'];
+ $('dw').innerHTML=`<div class="dw-h">
     <button class="ib" onclick="backCreator()" title="返回名单"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
     <div style="flex:1;min-width:0"><div class="ty">知识库 · 达人档案</div><div style="display:flex;align-items:center;gap:var(--sp-1);flex-wrap:wrap"><h3>${esc(cp.n)}</h3><span class="creator-platform-pill">${esc(cp.plat)}</span><span class="creator-update-pill">更新日期 ${esc(cp.updated)}</span></div></div>
     <button class="ib" onclick="closeDw()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-   <div class="dw-tabs">${['文档','录入数据 '+creatorContents(r,S.cr).length,'合作记录 '+creatorCollabs(r,S.cr).length,'本次沟通 '+rosterSubCount(r),'匹配度'].map((x,j)=>`<button class="${(S.crtab||0)===j?'on':''}" onclick="S.creatorCollab=null;S.crtab=${j};drawDw()">${x}</button>`).join('')}</div>
+   <div class="dw-tabs">${creatorTabs.map((x,j)=>`<button class="${(S.crtab||0)===j?'on':''}" onclick="openCreatorTab(${j})">${x}</button>`).join('')}</div>
    <div class="dw-b">${dCreator(a,S.cr)}</div>
-   <div class="dw-f">${(S.crtab||0)===1?`<button class="btn" onclick="openContentData(S.cr)">＋ 录入内容数据</button>`:''}
+   <div class="dw-f">${!isDouyinCreator&&(S.crtab||0)===1?`<button class="btn" onclick="openContentData(S.cr)">＋ 录入内容数据</button>`:''}
      <span style="margin-left:auto;font-size:var(--fs-xs);color:var(--t3)">档案为只读 · 沟通记录属于本次合作</span></div>`;
   return;
  }
@@ -1286,7 +1289,10 @@ else if(a.mode==='csa'){
   if((isDetailDirection||isActivityDirection||isSeoDirection)&&S.pc)body+=directionComments;
  }
  else if(a.mode==='options'){tabs=['方向对比','版本'];body=[dOpts(a),dVer(a)][S.dtab];}
- else if(a.mode==='roster'){tabs=['名单','内容审核','效果分析'];if(S.dtab>2)S.dtab=0;body=[dRoster(a),dContentAudit(a),dEffectAnalysis(a)][S.dtab];}
+ else if(a.mode==='roster'){
+  if(a.workflow==='douyin'){tabs=['名单'];S.dtab=0;S.audit=null;S.auditCreator=null;body=dRoster(a);}
+  else{tabs=['名单','内容审核','效果分析'];if(S.dtab>2)S.dtab=0;body=[dRoster(a),dContentAudit(a),dEffectAnalysis(a)][S.dtab];}
+ }
  else if(a.listing){tabs=['上架流程','版本'];body=[dListingWorkflow(a)+(S.pc?`<div id="listing-comments" style="margin-top:var(--sp-4)">${subPane(a,0)}</div>`:''),dVer(a)][S.dtab];}
  else if(a.mode==='items'){tabs=['SKU','校验','版本'];body=[dItems(a),dOut(a),dVer(a)][S.dtab];}
  else if(a.manualOutput){
@@ -1821,6 +1827,15 @@ function dOpts(a){
 /* ---- creator record (pushed panel) ---- */
 function openCreator(i){S.cr=i;S.crtab=0;S.creatorCollab=null;drawDw();}
 function backCreator(){S.cr=null;S.crtab=0;S.creatorCollab=null;drawDw();}
+function notifyCreatorDataRefresh(i){
+ const [,a]=findArt(S.aid),r=a?.rows?.[i];if(!r)return;
+ r.dataRefreshNotified=true;drawDw();toast('已通知更新数据 · 数据接入重新抓取，稍后随批次更新');
+}
+function openCreatorTab(tab){
+ S.creatorCollab=null;S.crtab=tab;
+ const [,a]=findArt(S.aid);if(tab===4&&Number.isInteger(S.cr))ensureSampleShippingDraft(a,S.cr);drawDw();
+ if(tab===4&&sampleShippingDraftFor(a,S.cr))requestAnimationFrame(()=>requestAnimationFrame(()=>focusSampleShippingForm(S.cr)));
+}
 function creatorProfile(r,i){
  const contacts=[
   ['138 1826 7309','xiaolu_cd'],
@@ -1829,11 +1844,11 @@ function creatorProfile(r,i){
   ['135 7480 3921','may_skincare'],
   ['186 0127 5506','chengfen_notes']
  ][i%5];
- if(i===0)return {n:'小鹿在成都',plat:'小红书',id:'ID: 11671401034',updated:'2026-08-03',tags:['时尚','运动健身','日系','教程','vlog','ootd'],
+ if(S.aid==='a7'&&i===0)return {n:'小鹿在成都',plat:'小红书',id:'ID: 11671401034',updated:'2026-08-03',tags:['时尚','运动健身','日系','教程','vlog','ootd'],
    phone:contacts[0],wechat:contacts[1],
    f:'3.6万',eng:'10.4%',score:65,peer:'超过 72% 的同类目博主',pic:'¥600',video:'¥850',active:'91.4%',ifan:'4.2%',intent:'42.7%',
    risk:'缺少受众数据和帖子样本，导致多项检查结果为 INCOMPLETE。'};
- return {n:r.n,plat:(CSRC[r.src||'xhs']||{}).n||'小红书',id:r.h,updated:'—',tags:r.tags||[],f:r.f,eng:r.eng,
+ return {n:r.n,plat:(CSRC[r.src||'xhs']||{}).n||'小红书',id:r.h,updated:r.updated||'—',tags:r.tags||[],f:r.f,eng:r.eng,settlement:r.settlement,
    phone:contacts[0],wechat:contacts[1],
    score:r.m,peer:'本次画像匹配参考',pic:r.p,video:'—',active:'—',ifan:'—',intent:'—',risk:r.flag||null};
 }
@@ -1842,8 +1857,55 @@ function creatorContactRows(p){
   <div><span>联系方式</span><b>${esc(p.phone)}</b><i></i><span>微信号</span><b>${esc(p.wechat)}</b></div>
  </div>`;
 }
+function dDouyinCreatorData(i){
+ const exact=i===4;
+ const sessions=exact?2:[3,4,2,5,2,3,4,2,3,1][i]||2;
+ const viewers=exact?293:[486,721,358,904,293,512,835,447,526,186][i]||293;
+ const avgOnline=exact?23:[31,46,27,58,23,34,52,29,36,18][i]||23;
+ const watch=exact?'41秒':['48秒','52秒','39秒','56秒','41秒','44秒','1分03秒','37秒','46秒','34秒'][i]||'41秒';
+ const interaction=exact?'10.2%':['8.7%','7.9%','11.4%','9.6%','10.2%','8.9%','6.8%','12.1%','9.2%','7.4%'][i]||'10.2%';
+ const card=(label,value,note='',tone='')=>`<div class="douyin-data-card ${tone}"><span>${label}</span><b>${value}</b>${note?`<small>${note}</small>`:''}</div>`;
+ return `<section class="douyin-data-section"><h4>整体数据</h4><div class="douyin-data-grid">
+  ${card('直播场次',sessions,'直播天数 '+sessions,'highlight')}
+  ${card('直播观看人数',viewers,'累计人次')}
+  ${card('场均直播时长',exact?'1时2分46秒':'约 58 分钟','最近开播时间未提供')}
+ </div></section>
+ <section class="douyin-data-section"><h4>流量数据</h4><div class="douyin-data-grid">
+  ${card('平均在线人数',avgOnline,'在线人数峰值 '+(exact?16:Math.max(avgOnline+9,Math.round(avgOnline*1.4))))}
+  ${card('人均观看时长',watch)}
+  ${card('互动率',interaction)}
+ </div></section>
+ <section class="douyin-data-section"><h4>带货数据</h4><div class="douyin-data-grid">
+  ${card('直播结算总额','无结算记录','不是 0，是没有这条线','empty')}
+  ${card('场均直播结算额','无结算记录','不是 0，是没有这条线','empty')}
+  ${card('直播 GPM','无结算记录','不是 0，是没有这条线','empty')}
+ </div></section>
+ <div class="douyin-data-foot">数据同步于 2026-09-20 23:24 · 由数据接入维护，只读</div>`;
+}
+function dDouyinConsumerLevel(){
+ const bands=[['500+','3.51%'],['200–500','9.27%'],['100–200','21.21%'],['50–100','26.80%'],['25–50','19.45%'],['0–25','19.77%']];
+ return `<section class="douyin-consumer"><div class="douyin-panel-title"><b>粉丝消费水平</b><span>客单价 50–100 元占比最高 26.80%</span></div>
+  <div class="douyin-consumer-chart"><div class="douyin-donut" role="img" aria-label="粉丝消费水平：500元以上3.51%，200至500元9.27%，100至200元21.21%，50至100元26.80%，25至50元19.45%，0至25元19.77%"></div>
+   <div class="douyin-band-list">${bands.map(([band,value])=>`<div><i></i><span>${band}</span><b>${value}</b></div>`).join('')}</div></div>
+  <div class="douyin-fit-note"><b>EVO1.1 <span>¥468–468</span></b><span>潜在带内 <strong>0%</strong></span><span>价格带契合 <strong>5 / 10 分</strong></span><p>紫色档位落在品牌价值带内；逐档按线性叠加——不是「碰到就整档弹进来」，否则价位带差一块钱，分数就跳一整档。</p></div>
+  <div class="douyin-data-foot">数据来自抖音后台「粉丝分析」· 由数据接入维护，只读</div></section>`;
+}
+function dDouyinLiveRecords(r){
+ return `<section class="douyin-live-records"><div class="douyin-panel-title"><b>上播记录</b><span>后端来源，只读 —— 不支持手工录入</span></div>
+  <div class="douyin-record-empty"><b>尚未收到 ${esc(r.n)} 的场次数据。</b><span>场次由每日入站推送产生，合作跑起来后才会出现；我们无法主动拉取。</span></div></section>`;
+}
+function dDouyinOutreach(r){
+ const greeting=`${r.n} 你好，我是 EVO1.1 的商务，想聊聊直播合作。`;
+ const opener=`${r.n} 你好，我是 EVO1.1 的商务对接。\n看到你直播间主打滋补保健，和我们的产品线很契合。\n想聊聊看有没有合作空间。\n方便的话想跟你聊聊具体的合作方式，寄样和坑费都可以谈。`;
+ return `<section class="douyin-outreach"><div class="douyin-panel-title"><b>建联话术</b><span>本地模板</span></div>
+  <label><span>好友申请附言 <small>${greeting.length}/40 字</small></span><textarea rows="2">${esc(greeting)}</textarea></label>
+  <button class="btn ghost sm" onclick="toast('好友申请附言已复制')">复制附言</button>
+  <label><span>通过后开场白</span><textarea rows="7">${esc(opener)}</textarea></label>
+  <div class="douyin-outreach-actions"><button class="btn sm" onclick="toast('建联话术已复制')">复制话术</button><button class="btn ghost sm" onclick="toast('已重新生成建联话术')">重新生成</button><button class="btn ghost sm" onclick="toast('已恢复本地模板')">回到模板</button></div>
+  <div class="douyin-outreach-warning">模板起草，人工发送 —— 系统不会代替你把消息发出去。</div></section>`;
+}
 function creatorContents(r,i){
- if(i!==0)return [];
+ if(S.aid!=='a7'||i!==0)return [];
  return [
   {t:'终于懂了：精致感，是从脖子往下蔓延的',like:501,fav:136,cmt:9,cost:800,date:'2026-04-22'},
   {t:'终于懂了：精致感，是从脖子往下蔓延的',like:501,fav:136,cmt:9,cost:122,date:'2026-04-22'},
@@ -1852,7 +1914,7 @@ function creatorContents(r,i){
  ];
 }
 function creatorRecentContents(r,i){
- if(i!==0)return [];
+ if(S.aid!=='a7'||i!==0)return [];
  return [
   {t:'成都换季急救实录：泛红期我只做这三步',like:684,fav:229,cmt:31,cost:680,date:'2026-07-28'},
   {t:'预算有限也能养稳皮肤，我最近坚持的晚间清单',like:512,fav:301,cmt:26,cost:520,date:'2026-07-19'},
@@ -1861,11 +1923,11 @@ function creatorRecentContents(r,i){
  ];
 }
 function creatorCollabs(r,i){
- if(i===0)return [{name:'11.11 敏感肌真实测评合作',brand:'A80 Paris',period:'2026-08-03 ~ 2026-08-04',video:0,post:6,cost:'¥140',status:'已结束'}];
+ if(S.aid==='a7'&&i===0)return [{name:'11.11 敏感肌真实测评合作',brand:'A80 Paris',period:'2026-08-03 ~ 2026-08-04',video:0,post:6,cost:'¥140',status:'已结束'}];
  return (r.hist||[]).map(h=>({name:h[0],brand:h[1],period:h[0],video:0,post:1,cost:'—',status:'已结束'}));
 }
 function creatorCollabArticles(r,i,collabIndex){
- if(i===0&&collabIndex===0)return [
+ if(S.aid==='a7'&&i===0&&collabIndex===0)return [
   {title:'敏感肌换季急救：我的三步修护流程',date:'2026-08-03',type:'图文',like:684,fav:229,cmt:31,cost:24},
   {title:'精华不是越厚越好，屏障期这样用更舒服',date:'2026-08-03',type:'图文',like:512,fav:301,cmt:26,cost:24},
   {title:'连续 7 天真实记录：泛红状态的变化',date:'2026-08-03',type:'图文',like:873,fav:418,cmt:47,cost:23},
@@ -1930,16 +1992,10 @@ function creatorBrandMatches(r,i){
  const shift=Math.max(-12,Math.min(10,(Number(r.m)||82)-86));
  const score=n=>Math.max(36,Math.min(96,n+shift));
  return [
-  {id:'a80',n:'A80PARIS',abbr:'A',score:score(i===0?92:86),desc:'敏感肌修护、真实测评、低预算高信任感内容。',acts:[
-   {n:'11.11 敏感肌真实测评',date:'2026-08-03 ~ 2026-08-04',score:score(i===0?94:88),note:'内容调性接近真实使用记录，适合承接精华与安瓶的种草沟通。'},
-   {n:'9 月屏障修护内容池',date:'2026-08-15 ~ 2026-09-12',score:score(87),note:'粉丝互动稳定，适合补充教程型笔记和评论区答疑。'}]},
-  {id:'tru',n:'Tru Niagen',abbr:'T',score:score(65),desc:'抗老与精力管理方向，科学感要求更高。',acts:[
-   {n:'618TN 社媒促销活动',date:'2026-06-23 ~ 2026-07-22',score:score(66),note:'平台活跃度达标，但受众与科学营养方向只部分重合。'}]},
-  {id:'evo',n:'EVO1.1',abbr:'E',score:score(58),desc:'AI 定制智能营养品牌，定位偏技术与健康管理。',acts:[
-   {n:'2026.08.3.3',date:'2026-08-02 ~ 2026-08-03',score:score(61),note:'互动率可用，内容风格需要从生活方式转向营养方案解释。'},
-   {n:'中秋活动',date:'2026-07-31 ~ 2026-08-28',score:score(59),note:'节日场景可结合，但品牌心智距离稍远，建议候补。'}]},
-  {id:'live',n:'liveSpo',abbr:'L',score:score(63),desc:'益生菌与消化健康方向，适合轻科普内容。',acts:[
-   {n:'11.11 电商推广计划',date:'2026-08-06 ~ 2026-09-29',score:score(64),note:'生活方式内容可嫁接，但需补充健康品类可信表达。'}]}
+  {id:'a80',n:'A80PARIS',abbr:'A',score:score(i===0?92:86),desc:'敏感肌修护、真实测评、低预算高信任感内容。',category:'敏感肌修护 · 功效护肤',insight:'内容调性接近真实使用记录，粉丝对护肤与生活方式话题互动稳定，适合品牌长期种草和评论区答疑。',tags:[['品类相邻 护肤品','ok'],['互动率 10.2%','ok'],['真实测评内容稳定','ok'],['价格带契合','ok'],['近期同类合作较少','warn']],factors:[['品类契合','+24'],['互动质量','+21'],['内容调性','+20'],['价格带契合','+17'],['合作连续性','+14']]},
+  {id:'tru',n:'Tru Niagen',abbr:'T',score:score(65),desc:'抗老与精力管理方向，科学感要求更高。',category:'营养健康 · 抗老管理',insight:'达人具备稳定的健康话题表达能力，但现有内容以生活方式为主，需要加强科学营养依据和专业信息密度。',tags:[['健康人群重合','ok'],['互动表现稳定','ok'],['科学内容较少','warn'],['价格带略高','warn']],factors:[['人群契合','+20'],['互动质量','+18'],['内容调性','+14'],['专业可信度','+12'],['价格带契合','+10']]},
+  {id:'evo',n:'EVO1.1',abbr:'E',score:score(58),desc:'AI 定制智能营养品牌，定位偏技术与健康管理。',category:'智能营养 · 健康管理',insight:'互动率可用，但达人内容风格偏日常，需要从生活方式表达转向智能营养方案解释，品牌认知建立成本较高。',tags:[['互动率可用','ok'],['健康话题相关','ok'],['技术内容较少','warn'],['品牌心智距离较远','warn']],factors:[['人群契合','+18'],['互动质量','+16'],['内容调性','+11'],['专业可信度','+10'],['品牌认知基础','+3']]},
+  {id:'live',n:'liveSpo',abbr:'L',score:score(63),desc:'益生菌与消化健康方向，适合轻科普内容。',category:'益生菌 · 消化健康',insight:'达人擅长轻量生活方式内容，可承接基础健康科普，但需要补充品类证据和可信表达，避免内容过度娱乐化。',tags:[['轻科普能力','ok'],['生活方式契合','ok'],['品类证据不足','warn'],['转化记录较少','warn']],factors:[['品类契合','+19'],['内容调性','+18'],['互动质量','+16'],['专业可信度','+11'],['历史转化','+8']]}
  ];
 }
 function setCreatorBrandMatch(id){S.creatorMatchBrand=id;drawDw();}
@@ -1955,21 +2011,13 @@ function dCreatorBrandMatch(r,i){
     <span class="creator-brand-score ${creatorMatchTone(b.score)}">${b.score}%</span>
    </button>`).join('')}</div>
   </aside>
-  <section class="creator-campaign-match">
-   <div class="creator-match-head">
-    <span class="creator-brand-avatar lg">${esc(active.abbr)}</span>
-   <div><h4>${esc(active.n)} 进行中的活动</h4><p>推荐活动方案</p></div>
-  </div>
-  <div class="creator-match-cards">${active.acts.map(act=>`<article class="creator-match-card">
-    <div class="creator-match-card-title"><span>${esc(act.n)}</span><b class="${creatorMatchTone(act.score)}">${act.score}%</b></div>
-    <div class="creator-match-date"><span></span>${esc(act.date)}</div>
-    <div class="creator-match-note"><b>AI 匹配洞察</b>${esc(act.note)}</div>
-    <div class="creator-match-actions">
-     <button class="btn sm" onclick="toast('已标记入选候选')">入选</button>
-     <button class="btn ghost sm" onclick="toast('已准备生成 Brief')">生成 Brief</button>
-     <button class="btn ghost sm" onclick="toast('已标记为淘汰')">淘汰</button>
-    </div>
-   </article>`).join('')}</div>
+  <section class="creator-brand-analysis">
+   <div class="creator-brand-analysis-head"><div class="creator-match-head"><span class="creator-brand-avatar lg">${esc(active.abbr)}</span><div><span class="creator-analysis-eyebrow">AI 品牌匹配分析</span><h4>${esc(active.n)}</h4><p>${esc(active.category)}</p></div></div><div class="creator-analysis-score ${creatorMatchTone(active.score)}"><b>${active.score}</b><span>匹配度</span></div></div>
+   <div class="creator-analysis-progress ${creatorMatchTone(active.score)}" role="progressbar" aria-label="${esc(active.n)}品牌匹配度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${active.score}"><i style="width:${active.score}%"></i><span>${active.score}/100</span></div>
+   <div class="creator-match-note"><b>AI 匹配洞察</b>${esc(active.insight)}</div>
+   <div class="creator-analysis-section"><h5>匹配依据</h5><div class="creator-analysis-tags">${active.tags.map(tag=>`<span class="${tag[1]}">${esc(tag[0])}</span>`).join('')}</div></div>
+   <div class="creator-analysis-factors">${active.factors.map(item=>`<div><span>${esc(item[0])}</span><b>${esc(item[1])}</b></div>`).join('')}</div>
+   <p class="creator-analysis-caption">评分基于达人内容调性、受众特征、互动质量、价格带与历史合作数据计算，不再关联具体活动。</p>
   </section>
  </div>`;
 }
@@ -1977,21 +2025,29 @@ function dCreator(a,i){
  const r=a.rows[i];
  const p=creatorProfile(r,i);
  const tab=S.crtab||0;
- if(tab===1)return dCreatorContent(r,i);
- if(tab===2)return Number.isInteger(S.creatorCollab)?dCreatorCollabDetail(r,i,S.creatorCollab):dCreatorCollabs(r,i);
- if(tab===3)return `<div style="font-size:var(--fs-xs);font-weight:600;color:var(--t2);margin-bottom:var(--sp-2)">这次合作的沟通</div>${subPane(a,i)}`;
- if(tab===4)return dCreatorBrandMatch(r,i);
+ if(p.plat==='抖音'){
+  if(tab===1)return dDouyinConsumerLevel();
+  if(tab===2)return dDouyinLiveRecords(r);
+  if(tab===3)return dDouyinOutreach(r);
+  if(tab===4)return `<div style="font-size:var(--fs-xs);font-weight:600;color:var(--t2);margin-bottom:var(--sp-2)">这次合作的沟通</div>${subPane(a,i)}`;
+  if(tab===5)return dCreatorBrandMatch(r,i);
+ }else{
+  if(tab===1)return dCreatorContent(r,i);
+  if(tab===2)return Number.isInteger(S.creatorCollab)?dCreatorCollabDetail(r,i,S.creatorCollab):dCreatorCollabs(r,i);
+  if(tab===3)return `<div style="font-size:var(--fs-xs);font-weight:600;color:var(--t2);margin-bottom:var(--sp-2)">这次合作的沟通</div>${subPane(a,i)}`;
+  if(tab===4)return dCreatorBrandMatch(r,i);
+ }
  return `<div class="creator-overview">
    <div class="creator-main"><div class="creator-avatar-wrap"><div class="creator-avatar">${esc(p.n.slice(0,1).toUpperCase())}</div><button class="creator-fav creator-fav-float ${isCreatorFav(r,i)?'on':''}" onclick="toggleCreatorFav(${i},event)" aria-label="${isCreatorFav(r,i)?'取消收藏':'收藏'}${esc(p.n)}">★</button></div>
-     <div style="min-width:0"><div class="creator-name">${esc(p.n)} <button class="tag" onclick="toast('打开达人主页')">访问主页 ↗</button></div>
+     <div style="min-width:0"><div class="creator-name">${esc(p.n)} <button class="tag" onclick="toast('打开达人主页')">访问主页 ↗</button><button class="creator-refresh-btn ${r.dataRefreshNotified?'notified':''}" type="button" title="数据接入重新抓取，稍后随批次更新" onclick="notifyCreatorDataRefresh(${i})" ${r.dataRefreshNotified?'disabled':''}>${r.dataRefreshNotified?'✓ 已通知更新数据':'↻ 更新数据'}</button></div>
        <div class="creator-id">${esc(p.id)}</div>
        <div class="creator-tags">${p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div></div>
    <div class="creator-topstats"><div class="creator-topstat"><div class="l">粉丝总数</div><div class="v">${p.f}</div></div>
-     <div class="creator-topstat"><div class="l">互动率</div><div class="v purple">${p.eng}</div></div></div>
+     <div class="creator-topstat"><div class="l">${p.settlement?'场均结算额':'互动率'}</div><div class="v ${p.settlement?'':'purple'}">${p.settlement||p.eng}</div></div></div>
  </div>
  ${creatorContactRows(p)}
  ${p.risk?`<div class="creator-risk"><span class="ic"></span><div><div class="t">AI 校验 · 中风险 <span style="font-weight:400;color:var(--t3);margin-left:var(--sp-2)">${p.updated}</span></div><div class="d">${esc(p.risk)}</div></div></div>`:''}
- <div class="creator-metrics">
+ ${p.plat==='抖音'?dDouyinCreatorData(i):`<div class="creator-metrics">
    <div class="creator-metric"><div class="l">数据评分</div><div class="v" style="color:var(--orange-fg)">${p.score}</div><div style="font-size:var(--fs-xs);color:var(--t3);margin-top:var(--sp-1)">${p.peer}</div><div class="creator-scorebar"><i style="width:${p.score}%"></i></div></div>
    <div class="creator-metric"><div class="l">图文报价</div><div class="v" style="color:#2563EB">${p.pic}</div></div>
    <div class="creator-metric"><div class="l">视频报价</div><div class="v" style="color:var(--primary)">${p.video}</div></div>
@@ -1999,7 +2055,7 @@ function dCreator(a,i){
    <div class="creator-metric"><div class="l">互动粉丝</div><div class="v">${p.ifan}</div></div>
    <div class="creator-metric"><div class="l">下单意向</div><div class="v">${p.intent}</div></div>
  </div>
- ${dCreatorRecent(r,i)}`;
+ ${dCreatorRecent(r,i)}`}`;
 }
 
 

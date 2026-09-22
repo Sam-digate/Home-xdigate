@@ -37,10 +37,11 @@ function subPane(a,oi){
    <div class="sub-l" id="sl">${subMsgs(visibleSub)}
     ${a.inspection?.explaining?`<div style="display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-3) 0;color:var(--primary);font-size:var(--fs-sm)" role="status"><span class="spin" aria-hidden="true"></span>${esc(nick(a.by)||'店铺巡检')}正在解释…</div>`:''}</div>
    ${a.rows&&!a.listing?`<div class="collab-meta">
-     ${a.mode==='roster'?`<label class="collab-field"><span>合作状态</span><select onchange="kolSet(${oi},this.value)">${Object.keys(RST).map(s=>`<option ${s===x.s?'selected':''}>${s}</option>`).join('')}</select></label>`:''}
+     ${a.mode==='roster'?`<label class="collab-field"><span>合作状态</span><select onchange="kolSet(${oi},this.value)">${Object.keys(rosterStatusMap(a)).map(s=>`<option ${s===rosterDisplayStatus(a,x,oi)?'selected':''}>${s}</option>`).join('')}</select></label>`:''}
      <label class="collab-field"><span>配合度</span><select onchange="setCreatorField('${a.id}',${oi},'coop',this.value,'配合度')">${['高','中','低'].map(s=>`<option ${s===(x.coop||'中')?'selected':''}>${s}</option>`).join('')}</select></label>
      <label class="collab-field"><span>负责人</span><select onchange="setCreatorField('${a.id}',${oi},'commOwner',this.value,'负责人')">${['待分配','jack','dudu','Sophie','Sam'].map(s=>`<option ${s===(x.commOwner||'待分配')?'selected':''}>${s}</option>`).join('')}</select></label>
    </div>`:''}
+   ${peopleOnly&&a.workflow==='douyin'?dSampleShippingForm(a,oi)+dDouyinContractForm(a,oi):''}
    <div class="sub-c">
      <div style="position:relative"><div id="m-si"></div>
        <textarea id="si" oninput="onKey(event,'si',${peopleOnly})" placeholder="${peopleOnly?'写给同事看 → 对同事说。输入 @ 提到人。':'写给同事看 → 对同事说；写给 Ai 改 → 对Ai说。输入 @ 提到人。'}"></textarea></div>
@@ -57,8 +58,15 @@ function setCreatorField(id,oi,key,value,label){
 function subSend(kind,id,oi){
  const i=$('si');if(!i||!i.value.trim()){toast('先写点什么');return;}
  const [,a]=findArt(id);const kids=a.opts||a.rows||a.plans;const activeEmail=a.mode==='csa'&&S.dtab===1?activeCSAEmail(a):null;const x=activeEmail?(activeEmail.thread=activeEmail.thread||{t:a.csa.customer+' · 客户邮件',sub:[]}):((oi===null)?a:kids[oi]);
+ const hasShipping=a.mode==='roster'&&a.workflow==='douyin'&&!!sampleShippingDraftFor(a,oi);
+ const hasContract=a.mode==='roster'&&a.workflow==='douyin'&&!!douyinContractDraftFor(a,oi);
+ if(hasShipping&&!validateSampleShipping(a,oi))return;
+ if(hasContract&&!validateDouyinContract(a,oi))return;
  x.sub=x.sub||[];
- const tx=i.value.trim();x.sub.push({w:'du',k:kind==='chg'?'chg':undefined,tx,at:'刚刚'});
+ const tx=i.value.trim(),workflowMessage=hasShipping?sampleShippingMessage(sampleShippingDraftFor(a,oi)):hasContract?douyinContractMessage(a,oi):'',sentText=workflowMessage?tx+'\n\n'+workflowMessage:tx;
+ x.sub.push({w:'du',k:kind==='chg'?'chg':undefined,tx:sentText,at:'刚刚'});
+ if(hasShipping){commitSampleShipping(a,oi);render();drawDw();const l=$('sl');if(l)l.scrollTop=l.scrollHeight;requestAnimationFrame(()=>requestAnimationFrame(()=>focusSampleShippingForm(oi)));toast('寄样信息与评论已保存');return;}
+ if(hasContract){commitDouyinContract(a,oi);render();drawDw();const l=$('sl');if(l)l.scrollTop=l.scrollHeight;requestAnimationFrame(()=>requestAnimationFrame(()=>focusDouyinContractForm(oi)));toast('合同信息与评论已保存');return;}
  if(a.mode==='csa'){
   if(S.dtab===1){drawDw();const l=$('sl');if(l)l.scrollTop=l.scrollHeight;toast(kind==='chg'?'邮件修改要求已记录':'已留言');return;}
   if(kind==='note'){drawDw();const l=$('sl');if(l)l.scrollTop=l.scrollHeight;toast('已留言');return;}
@@ -266,7 +274,7 @@ function addContentDataRow(){
  const box=document.querySelector('.content-data-rows');if(box)box.insertAdjacentHTML('beforeend',contentDataRow());
 }
 function openContentData(i){
- const found=findArt('a7'),a=found[1],r=a&&a.rows&&Number.isInteger(i)?a.rows[i]:null;
+ const found=findArt(S.aid),a=found[1],r=a&&a.rows&&Number.isInteger(i)?a.rows[i]:null;
  $('mod').innerHTML=`<div class="mbox content-data-modal">
   <div class="content-data-head"><div class="main"><h3>录入内容数据</h3>
    <div class="sub">${r?esc(r.n)+' · 录入窗口':'11.11 腰部 KOC 短名单 · 录入窗口'}</div></div>
