@@ -121,6 +121,27 @@ function manualReviewRecord(a){
  </div>`;
 }
 function manualReviewHistory(a){return (a.manual?.reviewHistory||[]).map(h=>manualReviewRecord(a,h)).join('');}
+function permissionBlockedPlanNode(t){
+ const requested=t.permissionRequest==='pending',agent=AG[t.ag]||{n:'Agent',c:'#7C3AED',s:'A'},draft=S.prestartDraft?.tid===t.id?S.prestartDraft:null,rejecting=S.prestartReject?.tid===t.id,rejected=t.plan?.status==='rejected';
+ return `<div class="node wait"><div class="nlab">计划 · PLAN</div>
+  <div class="bub permission-plan-blocked">
+   <div class="who"><span class="avs" style="background:${agent.c}">${agent.s}</span><span class="nm">${esc(agent.n)}</span><span class="chip mut">计划 v1</span><span class="tm">${rejected?'未通过':'等待权限'}</span></div>
+   ${rejected?`<div class="prestart-rejected-note"><b>不通过原因：</b>${esc(t.plan.feedback||'未填写')}</div>`:`<div class="permission-plan-message"><span class="permission-plan-lock"><i data-lucide="lock-keyhole"></i></span><div><b>dudu 暂无使用权限</b><p>该任务已匹配到${esc(agent.n)}，获得授权后才能确认计划并开始执行。</p></div></div>
+   ${draft?`<div class="prestart-plan-editor permission-plan-editor"><textarea id="prestart-adjustment" rows="2" aria-label="计划调整要求" placeholder="说明希望如何调整，系统会改用你有权限的 Agent" oninput="setPrestartDraft(this.value)">${esc(draft.tx)}</textarea><div class="prestart-plan-editor-actions"><button class="btn sm" onclick="savePermissionBlockedPlan('${t.id}')">重新规划</button><button class="btn ghost sm" onclick="cancelPrestartPlan('${t.id}')">取消</button></div></div>`:rejecting?`<div class="prestart-plan-editor permission-plan-editor"><textarea rows="2" aria-label="不通过原因" placeholder="填写不通过原因" oninput="setPrestartReject(this.value)">${esc(S.prestartReject.tx)}</textarea><div class="prestart-plan-editor-actions"><button class="btn sm" onclick="confirmPrestartReject('${t.id}')">确定</button><button class="btn ghost sm" onclick="cancelPrestartReject('${t.id}')">取消</button></div></div>`:`<div class="permission-plan-actions"><button class="btn ghost sm" type="button" onclick="openPermissionBlockedPlan('${t.id}')">调整计划 ↗</button><button class="btn ghost sm" type="button" onclick="openManualPrestart('${t.id}')">手动调整</button><button class="btn sm permission-plan-request" type="button" ${requested?'disabled':''} onclick="requestTaskAgentPermission('${t.id}',event)">${requested?'<i data-lucide="clock-3"></i> 已申请，等待管理员处理':'申请权限'}</button><button class="prestart-reject-link" type="button" onclick="openPrestartReject('${t.id}')">不通过</button></div>`}`}
+  </div></div>`;
+}
+function openPermissionBlockedPlan(id){
+ const t=T.find(x=>x.id===id);if(!t?.permissionBlocked)return;
+ S.prestartDraft={tid:id,tx:''};render();requestAnimationFrame(()=>document.querySelector('[aria-label="计划调整要求"]')?.focus());
+}
+function savePermissionBlockedPlan(id){
+ const t=T.find(x=>x.id===id),draft=S.prestartDraft;if(!t?.permissionBlocked||draft?.tid!==id)return;
+ const note=draft.tx.trim();if(!note)return toast('请填写需要调整的内容');
+ const available=manualPrestartAgents(t),agent=available.find(a=>a.dom===t.dom)||available[0];if(!agent)return toast('当前没有可替换的 Agent，请先申请权限');
+ const base=manualPrestartPlan([agent],t);base.tx+=' 调整要求：'+note+'。';
+ t.ag=agent.id;t.agents=[agent.id];t.agentLabels={[agent.id]:agentLabel(agent.id)};t.agentStates={[agent.id]:'待确认'};t.permissionBlocked=false;t.permissionRequest=null;t.prestartDemo=true;t.dom=agent.dom||t.dom;t.lv=agent.maturity||LV[agent.lv].k;t.plan={...t.plan,...base,v:(t.plan.v||1)+1,status:'pending',startedAt:null};t.up='刚刚';S.prestartDraft=null;
+ renderNav();render();toast('已改用 '+agentLabel(agent.id)+' 重新规划，请确认后开始');
+}
 function vThread(){
  const t=T.find(x=>x.id===S.tid);if(!t)return vSoon();
  const a=AG[t.ag];
@@ -172,7 +193,7 @@ function vThread(){
         <div style="font-size:var(--fs-sm);color:var(--t2)">${t.standing==='ana'
           ?'这是<b>常驻分析线程</b>——所有数据问题都问在这一条里，不会每问一次开一条。结论按时间往下排，旧的进历史。<br>如果一个结论要真的动手做，用产出上的<b>建单去做</b>另开一条——<b>问不是做</b>。'
           :'这是一条<b>常驻线程</b>——例行每次触发都跑在这里，不会每天新开一条。只有产出需要你处理时才会浮到「今日」。'}</div></div></div>`:''}
-    ${t.manualPending?manualAssignmentNode(t):t.prestartDemo?prestartPlanNode(t):`<div class="node ok"><div class="nlab">${t.standing?'本次 · 计划':'计划 · PLAN'}</div>
+    ${t.permissionBlocked?permissionBlockedPlanNode(t):t.manualPending?manualAssignmentNode(t):t.prestartDemo?prestartPlanNode(t):`<div class="node ok"><div class="nlab">${t.standing?'本次 · 计划':'计划 · PLAN'}</div>
       <div class="bub"><div class="who${t.manualAssignee?'':' agent-run-hit'}" ${t.manualAssignee?'':`role="button" tabindex="0" onclick="openTrace('${t.ag}','${t.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTrace('${t.ag}','${t.id}')}" title="查看运行状态"`}>${t.manualAssignee?`<span class="avs" style="background:${U[manualTaskPeople(t)[0]].c}">${U[manualTaskPeople(t)[0]].s}</span><span class="nm">${manualPeopleLabel(manualTaskPeople(t))}</span><span class="chip mut">人工执行</span>`:`<span class="avs" style="background:${a.c}">${a.s}</span><span class="nm">${a.n}</span>`}
           ${t.hidePlanVersion?'':`<span class="chip mut">计划 v${t.plan.v||1}</span>`}<span class="tm">${t.plan.v>1?'已调整':'已批准'}</span></div>
         <div style="margin-bottom:var(--sp-3);color:var(--t2)">${esc(t.plan.tx)}</div>
@@ -216,6 +237,8 @@ function vThread(){
         ${t.standing==='ana'?'常驻分析线程不收口——它是你问数据的地方。<b>结论要变成活儿，得另开一条</b>：在产出上点「建单去做」。'
          :t.standing?'常驻线程没有"最终交付物"——它按排期一直跑。每次产出单独审批，批完就归档，线程继续。'
          :t.prestartDemo&&!t.arts.length?(t.plan?.status==='rejected'?'计划未通过，未开始执行。':canAdjustPrestartPlan(t)?'计划待确认，尚未开始执行。':'执行中，尚未生成产出。')
+         :t.permissionBlocked&&t.plan?.status==='rejected'?'计划未通过，未开始执行。'
+         :t.permissionBlocked?'等待获得内容生成 Agent 权限，尚未开始执行。'
          :!t.arts||!t.arts.length?'还没有产出。指定人员和产出模板后，将在当前线程中生成交付模板。'
          :t.st==='done'?'✓ 已交付：<b style="color:var(--t1)">'+esc((t.arts.filter(a=>!a.deferred).slice(-1)[0]||{}).ttl)+'</b>，已沉淀到知识库作为可信来源。'
          :'本线程的交付物为 <b style="color:var(--t1)">'+esc((t.arts.filter(a=>!a.deferred).slice(-1)[0]||{}).ttl)+'</b>。上方产出全部批准后自动收口。'}

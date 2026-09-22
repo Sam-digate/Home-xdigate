@@ -170,8 +170,8 @@ const T=[
   {l:'生成好评返现文案',m:'语气 · 字数 · 奖励形式',s:'todo',r:'未开始'},
   {l:'检查平台合规风险',m:'避免强制或诱导用户给出好评',s:'todo',r:'未开始'},
   {l:'提交文案确认',m:'人工确认后交付，不自动发布',s:'todo',r:'未开始'}]},generalMessages:[],arts:[],cmts:[]},
-{cr:{s:'h',w:'du'},id:'t-agent-permission-demo',trig:'manual',workTop:120,t:'A80PARIS 新品种草文案',camp:null,dom:'内容',ag:'gen',own:'du',permissionBlocked:true,permissionRequest:null,st:'todo',up:'刚刚',day:0,lv:'M1',cost:'—',outputCount:0,
- intent:{who:'du',tx:'为 A80PARIS 新品准备一组社媒种草文案，系统推荐使用内容生成 Agent。',at:'刚刚'},arts:[],cmts:[]},
+{cr:{s:'h',w:'du'},id:'t-agent-permission-demo',trig:'manual',workTop:120,t:'Agent 权限',camp:null,dom:'内容',ag:'gen',own:'du',permissionBlocked:true,permissionRequest:null,st:'todo',up:'刚刚',day:0,lv:'M1',cost:'—',outputCount:0,
+ intent:{who:'du',tx:'为 A80PARIS 新品准备一组社媒种草文案，系统推荐使用内容生成 Agent。',at:'刚刚'},plan:{v:1,status:'pending',startedAt:null,...prestartPlanPreset('gen')},arts:[],cmts:[]},
 {cr:{s:'h',w:'du'},id:'t-ppt-form-demo',trig:'manual',new:1,workTop:90,t:'A80PARIS 抖音传播方案 · PPT 生成',camp:null,dom:'内容',ag:'ppt',own:'du',st:'ask',up:'刚刚',day:0,lv:'M1',cost:'—',outputCount:0,
  intent:{who:'du',tx:'把 A80PARIS 抖音内容传播方案整理成一份 PPT。先确认生成设置，再输出大纲；大纲确认后再生成最终文件。',at:'刚刚'},
  plan:{v:1,tx:'先补充 PPT 语言、视觉主题和版式模板；根据设置生成逐页大纲，确认后制作 PPT 并提供下载与在线编辑地址。',steps:[
@@ -685,4 +685,4 @@ const STN={todo:'待开始',run:'进行中',review:'待审批',done:'已交付',
 const DOMS=['全部','内容','电商','用户运营','KOL','B2B'];
 const DAYN=['今天','昨天','本周早些时候'];
 
-let S={view:location.hash==='#permission'?'permission':'work',mode:'kanban',dom:'全部',approvalDom:'全部',tid:null,aid:null,focus:false,dtab:0,liveT:null,liveI:0,hist:[],currentUser:'du',accountOpen:false};
+let S={view:location.hash==='#permission'?'permission':'work',mode:'kanban',dom:'全部',approvalDom:'全部',tid:null,aid:null,focus:false,dtab:0,liveT:null,liveI:0,hist:[],currentUser:'br',accountOpen:false};

@@ -726,10 +726,8 @@ document.addEventListener('click',e=>{if(!e.target.closest('.ana-range-control')
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('ana-range-panel')&&!$('ana-range-panel').hidden)closeAnalyticsDatePicker(true);else if($('ana-kpi-panel')&&!$('ana-kpi-panel').hidden)closeAnalyticsKpiPicker(true);else if($('ana-store-panel')&&!$('ana-store-panel').hidden)closeAnalyticsStorePicker(true);else if($('chat-date-panel')&&!$('chat-date-panel').hidden)closeChatRecordDatePicker(true);else if(document.querySelector('.chat-detail-picker-panel:not([hidden])'))closeChatDetailPickers(true);else closeChatRecordFilterPickers(true);});
 function analyticsViewTabs(){
  const view=S.anaView||'data';
- return `<div class="bar"><div class="seg" role="tablist" aria-label="数据分析视图">
-  <button role="tab" aria-selected="${view==='data'}" class="${view==='data'?'on':''}" onclick="S.anaView='data';render()">数据分析</button>
-  <button role="tab" aria-selected="${view==='chat'}" class="${view==='chat'?'on':''}" onclick="S.anaView='chat';render()">聊天记录分析</button>
- </div></div>`;
+ const tabs=[{id:'data',permission:'anal.data',name:'数据分析'},{id:'chat',permission:'anal.chat',name:'聊天记录分析'}].filter(tab=>permissionHasPage(tab.permission));
+ return `<div class="bar"><div class="seg" role="tablist" aria-label="数据分析视图">${tabs.map(tab=>`<button role="tab" aria-selected="${view===tab.id}" class="${view===tab.id?'on':''}" onclick="S.anaView='${tab.id}';render()">${tab.name}</button>`).join('')}</div></div>`;
 }
 function chatRecordState(){
  if(!Array.isArray(S.chatSelected))S.chatSelected=[];
@@ -1014,6 +1012,7 @@ function vAnal(){
  S.per='op';
  const own=S.per==='op';
  if(!S.anaView)S.anaView='data';
+ if(!permissionHasPage(`anal.${S.anaView}`))S.anaView=permissionHasPage('anal.data')?'data':'chat';
  if(S.anaView==='chat')return analyticsChatView();
  if(S.setup)return anaSetup();
  S.alay='b';

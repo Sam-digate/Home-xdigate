@@ -1,13 +1,14 @@
 /* ============ nav ============ */
 function renderNav(){
- $('nav').innerHTML=NAV.map(x=>{if(x.d)return '<div class="nv-div"></div>';
+ const visible=[];NAV.forEach(item=>{if(item.d){if(visible.length&&!visible.at(-1).d)visible.push(item);}else if(permissionCanAccessView(item.id))visible.push(item);});while(visible.at(-1)?.d)visible.pop();
+ $('nav').innerHTML=visible.map(x=>{if(x.d)return '<div class="nv-div"></div>';
   const badge=x.id==='know'?dsAttentionCount():x.id==='agent'?(typeof agentAttentionCount==='function'?agentAttentionCount():0):(x.b?(x.b==='live'?T.filter(t=>t.st!=='done').length:x.b):0);
   return `<button class="nv ${S.view===x.id?'on':''}" onclick="go('${x.id}',null,{nav:true})">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICON[x.i]}</svg>
     ${x.n}${badge?`<span class="bdg num">${badge}</span>`:''}</button>`}).join('');
  renderAccount();
 }
-function currentUser(){return S.currentUser||'du';}
+function currentUser(){return S.currentUser||'br';}
 function renderAccount(){
  const id=currentUser();
  const acct=$('acct');if(acct)acct.innerHTML=`<div class="account-panel">${['du','br'].map(k=>{const x=U[k],r=k==='br'?'产品负责人':'任务发起人';return `<button class="${id===k?'on':''}" onclick="switchAccount('${k}',event)" aria-pressed="${id===k}">
@@ -18,7 +19,7 @@ function renderAccount(){
  const top=$('topav');if(top){top.textContent=u.s;top.style.background=`linear-gradient(135deg,${u.c}99,${u.c})`;}
 }
 function toggleAccount(event){if(event)event.stopPropagation();S.accountOpen=!S.accountOpen;renderAccount();}
-function switchAccount(id,event){if(event)event.stopPropagation();S.currentUser=id;S.accountOpen=false;renderNav();render();toast('已切换为 '+U[id].n);}
+function switchAccount(id,event){if(event)event.stopPropagation();S.currentUser=id;S.accountOpen=false;if(!permissionCanAccessView(S.view)){S.view=permissionFirstView();S.tid=null;S.hist=[];}renderNav();render();toast('已切换为 '+U[id].n);}
 function toggleSb(){$('sb').classList.toggle('on');$('sbscrim').classList.toggle('on');}
 function closeSb(){$('sb').classList.remove('on');$('sbscrim').classList.remove('on');}
 function navState(){return {view:S.view,tid:S.tid||null};}
@@ -36,6 +37,7 @@ function goBack(){
  go(prev.view,prev.tid,{back:true});
 }
 function go(v,id,opt){closeSb();S.fopen=null;
+ if(!permissionCanAccessView(v)){toast('你没有访问该页面的权限');const fallback=permissionFirstView();if(S.view!==fallback){S.view=fallback;S.tid=null;S.hist=[];renderNav();render();$('view').scrollTo(0,0);}return;}
  const from=navState(),to={view:v,tid:id||null};
  if(opt?.nav)S.hist=[];
  if(!opt?.back&&!opt?.nav&&!sameNav(from,to)){

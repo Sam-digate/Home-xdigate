@@ -1,6 +1,6 @@
 /* ============ plan adjustment ============ */
 
-function canAdjustPrestartPlan(t){return !!(t?.prestartDemo&&t.plan.status==='pending'&&!t.plan.startedAt);}
+function canAdjustPrestartPlan(t){return !!(t?.plan&&(t.prestartDemo||t.permissionBlocked)&&t.plan.status==='pending'&&!t.plan.startedAt);}
 function generalAgentDemoBody(){return '感谢您的支持！完成订单后，欢迎分享真实的使用体验。提交评价截图即可领取店铺准备的小礼遇；评价内容请以实际感受为准，无需指定为好评。具体领取方式请联系在线客服。';}
 function prestartAgents(){return REG.filter(a=>prestartPlanPreset(a.id)&&a.b==='live'&&a.enabled!==false&&ONLINE[a.id]);}
 function prestartPlanNode(t){
@@ -25,10 +25,15 @@ function prestartPlanNode(t){
   ${!pending&&!rejected&&t.st!=='done'&&!t.generalAgentDemo?`<div style="margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:1px solid var(--hairline)"><button class="btn ghost sm" onclick="promoteThread()">变成例行 ↗</button></div>`:''}
  </div></div>`;
 }
-function manualPrestartAgents(){return REG.filter(a=>a.b==='live'&&a.enabled!==false&&ONLINE[a.id]);}
+function manualPrestartAgents(t){
+ const available=REG.filter(a=>a.b==='live'&&a.enabled!==false&&ONLINE[a.id]);
+ if(!t?.permissionBlocked)return available;
+ const member=typeof PERMISSION_MEMBERS!=='undefined'?PERMISSION_MEMBERS.find(m=>m.id===t.own):null;
+ return member?.role==='member'?available.filter(a=>member.agents.includes(a.id)):available;
+}
 function manualPrestartDrawer(){
  const t=T.find(x=>x.id===S.prestartAgentTid);if(!t)return;
- const list=manualPrestartAgents(),picks=Array.isArray(S.prestartAgentPick)?S.prestartAgentPick:[];
+ const list=manualPrestartAgents(t),picks=Array.isArray(S.prestartAgentPick)?S.prestartAgentPick:[];
  $('dw').innerHTML=`<div class="dw-h">
   <button class="ib" onclick="closeDw()" title="关闭"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
   <div style="flex:1;min-width:0"><div class="ty">调整计划 · Agent</div><h3>选择执行 Agent</h3></div>
@@ -41,11 +46,11 @@ function manualPrestartDrawer(){
 }
 function openManualPrestart(id){
  const t=T.find(x=>x.id===id);if(!canAdjustPrestartPlan(t))return toast('计划已开始执行，不能更换 Agent');
- S.prestartDraft=null;S.prestartReject=null;S.prestartManualTid=null;S.prestartAgentTid=id;S.prestartAgentPick=t.generalAgentDemo?[]:[...(t.agents?.length?t.agents:[t.ag])];
+ S.prestartDraft=null;S.prestartReject=null;S.prestartManualTid=null;S.prestartAgentTid=id;S.prestartAgentPick=t.generalAgentDemo||t.permissionBlocked?[]:[...(t.agents?.length?t.agents:[t.ag])];
  manualPrestartDrawer();$('dw').classList.add('on');$('scrim').classList.add('on');
 }
 function selectManualPrestartAgent(id){
- if(!manualPrestartAgents().some(a=>a.id===id))return;
+ const t=T.find(x=>x.id===S.prestartAgentTid);if(!manualPrestartAgents(t).some(a=>a.id===id))return;
  const scrollTop=$('dw')?.querySelector('.dw-b')?.scrollTop||0;
  const picks=Array.isArray(S.prestartAgentPick)?[...S.prestartAgentPick]:[],i=picks.indexOf(id);
  if(i>=0)picks.splice(i,1);else picks.push(id);
@@ -64,10 +69,10 @@ function manualPrestartPlan(agents,t){
  return {tx:'按选择顺序由 '+labels.join('、')+' 协作执行本次任务；前一个 Agent 完成交付后，再由下一个 Agent 接续处理。',expected:labels.map(x=>x+' 的阶段产出').join('；')+'。',reason:'已由人工选择 '+agents.length+' 个 Agent，并以选择顺序作为执行顺序。',steps:agents.map((agent,i)=>{const preset=prestartPlanPreset(agent.id);return {l:(i+1)+' · '+agentLabel(agent.id),m:preset?.expected||agent.d||'完成本阶段任务',s:'todo',r:'未开始'};})};
 }
 function confirmManualPrestartAgent(){
- const t=T.find(x=>x.id===S.prestartAgentTid),available=manualPrestartAgents(),ids=Array.isArray(S.prestartAgentPick)?S.prestartAgentPick:[],agents=ids.map(id=>available.find(a=>a.id===id)).filter(Boolean);if(!t||!canAdjustPrestartPlan(t))return toast('当前计划已不能更换 Agent');
+ const t=T.find(x=>x.id===S.prestartAgentTid),available=manualPrestartAgents(t),ids=Array.isArray(S.prestartAgentPick)?S.prestartAgentPick:[],agents=ids.map(id=>available.find(a=>a.id===id)).filter(Boolean);if(!t||!canAdjustPrestartPlan(t))return toast('当前计划已不能更换 Agent');
  if(!agents.length)return toast('请至少选择 1 个 Agent');
  const base=manualPrestartPlan(agents,t),dual=ids.length===2&&ids[0]==='pdp'&&ids[1]==='insp';
- t.ag=ids[0];t.agents=[...ids];t.agentLabels=Object.fromEntries(ids.map(id=>[id,agentLabel(id)]));t.agentStates=Object.fromEntries(ids.map((id,i)=>[id,i===0?'待确认':dual&&id==='insp'?'等待详情页批准':'等待前序 Agent']));t.demoDualAgents=dual;if(t.generalAgentDemo)t.generalAgentDemo=false;t.dom=agents[0].dom||t.dom;t.lv=agents[0].maturity||LV[agents[0].lv].k;t.plan={...t.plan,...base,v:(t.plan.v||1)+1,status:'pending',startedAt:null};t.up='刚刚';
+ t.ag=ids[0];t.agents=[...ids];t.agentLabels=Object.fromEntries(ids.map(id=>[id,agentLabel(id)]));t.agentStates=Object.fromEntries(ids.map((id,i)=>[id,i===0?'待确认':dual&&id==='insp'?'等待详情页批准':'等待前序 Agent']));t.demoDualAgents=dual;if(t.generalAgentDemo)t.generalAgentDemo=false;if(t.permissionBlocked){t.permissionBlocked=false;t.permissionRequest=null;t.prestartDemo=true;}t.dom=agents[0].dom||t.dom;t.lv=agents[0].maturity||LV[agents[0].lv].k;t.plan={...t.plan,...base,v:(t.plan.v||1)+1,status:'pending',startedAt:null};t.up='刚刚';
  closeDw();renderNav();render();toast('已选择 '+agents.length+' 个 Agent · 请确认执行顺序与计划');
 }
 function openPrestartPlan(id){
@@ -123,7 +128,7 @@ function startPrestartPlan(id){
   S.prestartDraft=null;S.prestartManualTid=null;(t.cmts=t.cmts||[]).push({k:'sys',tx:'已确认计划 v'+t.plan.v+'，通用 Agent 开始执行。',at:'刚刚'});
   renderNav();render();toast('计划已确认 · 通用 Agent 正在生成');setTimeout(()=>finishGeneralAgentDemo(id),3600);return;
  }
- if(!assignedAgents.every(id=>manualPrestartAgents().some(a=>a.id===id))){toast('推荐的 Agent 暂不可用，请先调整计划');return;}
+ if(!assignedAgents.every(id=>manualPrestartAgents(t).some(a=>a.id===id))){toast('推荐的 Agent 暂不可用，请先调整计划');return;}
  if(!t.plan.tx.trim()||!t.plan.expected.trim()||!t.plan.steps.length){toast('请先补齐执行计划');return;}
  // Capture the approved specification before marking any execution step active.
  t.plan.confirmed={ag:t.ag,agents:[...assignedAgents],tx:t.plan.tx,expected:t.plan.expected,steps:t.plan.steps.map(s=>({l:s.l,m:s.m}))};
