@@ -21,6 +21,14 @@ const KB=[
   tx:'上次盘点为 3 月。近期两个直接竞品已把主推词切到「屏障修护」——这份还没反映。'},
  {id:'k7',n:'产品结构与价值点',cat:'战略规划数据',filled:0,at:null,stale:0,reads:0,ags:[],gov:'none',by:null,tx:''},
  {id:'k8',n:'品牌生态位分析',cat:'品牌生态位分析',filled:0,at:null,stale:0,reads:0,ags:[],gov:'none',by:null,tx:''}];
+function makeSubBrandKnowledge(brandId,brandName,filledCount=0){
+ return KB.map((item,index)=>({...item,id:`${brandId}-${item.id}`,filled:index<filledCount?1:0,at:index<filledCount?'2026/09/18':null,stale:0,reads:index<filledCount?Math.max(6,42-index*5):0,ags:index<filledCount?[...(item.ags||[]).slice(0,2)]:[],gov:index<filledCount?'ok':'none',by:index<filledCount?'品牌团队':null,tx:index<filledCount?`${brandName} 的${item.n}资料。该内容独立归属于此子品牌，Agent 在对应项目中会优先读取这里的品牌信息。`:''}));
+}
+const KNOWLEDGE_BRANDS=[
+ {id:'a8oparis',name:'A8OPARIS',short:'A8',kind:'main',status:'active',description:'集团主品牌',entries:KB},
+ {id:'telosin',name:'Telosin',short:'TE',kind:'sub',parentId:'a8oparis',status:'active',description:'A8OPARIS 旗下子品牌',entries:makeSubBrandKnowledge('telosin','Telosin',5)},
+ {id:'tmb',name:'TMB',short:'TM',kind:'sub',parentId:'a8oparis',status:'active',description:'A8OPARIS 旗下子品牌',entries:makeSubBrandKnowledge('tmb','TMB',3)}
+];
 const KCATS=['全部','战略规划数据','竞争对手分析','品牌生态位分析'];
 const PRODS=[
  {n:'A8O 修护精华 30ml',sku:'A8O-SER-30',need:{电商:1,报关:1},miss:[],st:'ok',g:['#C4B5FD','#7C3AED']},
@@ -248,13 +256,39 @@ function openDSBulkTaskForm(){
 
 const KGRP={src:{n:'来源',d:'Agent 读的东西',tabs:['品牌','产品','素材','品牌文件','达人','热点','数据源']},
  out:{n:'产出',d:'Agent 写的东西',tabs:['已保存产出','模板']}};
-function kComplete(){const f=KB.filter(x=>x.filled).length;return {f,t:KB.length,p:Math.round(f/KB.length*100)};}
+function knowledgeActiveBrand(){
+ if(!S.kbrand||!KNOWLEDGE_BRANDS.some(brand=>brand.id===S.kbrand))S.kbrand=KNOWLEDGE_BRANDS[0].id;
+ return KNOWLEDGE_BRANDS.find(brand=>brand.id===S.kbrand)||KNOWLEDGE_BRANDS[0];
+}
+function knowledgeBrandEntries(){return knowledgeActiveBrand().entries;}
+function setKnowledgeBrand(id){if(!KNOWLEDGE_BRANDS.some(brand=>brand.id===id))return;S.kbrand=id;S.kcat='全部';render();}
+function knowledgeBrandSwitcher(){
+ const active=knowledgeActiveBrand(),main=KNOWLEDGE_BRANDS.find(brand=>brand.kind==='main'),children=KNOWLEDGE_BRANDS.filter(brand=>brand.kind==='sub'&&brand.parentId===main?.id);
+ const brandButton=brand=>`<button type="button" class="${active.id===brand.id?'on':''}" aria-pressed="${active.id===brand.id}" title="${esc(brand.description||brand.name)}" onclick="setKnowledgeBrand('${brand.id}')">${esc(brand.name)}${brand.status==='disabled'?' · 已停用':''}</button>`;
+ return `<div class="bar" style="margin:0 0 12px;gap:var(--sp-2);flex-wrap:wrap"><div class="seg" role="tablist" aria-label="选择品牌资料">${main?brandButton(main):''}${children.map(brandButton).join('')}</div><span class="spacer"></span><button type="button" class="btn sm" onclick="openKnowledgeSubBrand()"><i data-lucide="plus"></i>添加子品牌</button></div>`;
+}
+function openKnowledgeSubBrand(){
+ const main=KNOWLEDGE_BRANDS.find(brand=>brand.kind==='main');
+ $('mod').classList.remove('asset-mode','plan-mode');
+ $('mod').innerHTML=`<form class="mbox kb-brand-create" style="max-width:520px" onsubmit="event.preventDefault();createKnowledgeSubBrand()"><div class="mhd"><div><div class="e">品牌资料</div><h3>添加子品牌</h3></div></div><div class="mbd"><div class="permission-note neutral" style="margin-bottom:var(--sp-3)"><i data-lucide="git-branch"></i><span>新建后会自动生成 8 类空白品牌资料，并归属到主品牌 ${esc(main?.name||'')}。</span></div><div class="kb-brand-create-fields"><label class="wide"><span>子品牌名称</span><input id="kb-subbrand-name" required maxlength="40" placeholder="例如：Telosin"></label></div></div><div class="mft"><button class="btn" type="submit">创建子品牌</button><button class="btn ghost" type="button" onclick="closeMod()">取消</button></div></form>`;
+ $('mod').classList.add('on');if(window.lucide)lucide.createIcons();setTimeout(()=>$('kb-subbrand-name')?.focus(),30);
+}
+function createKnowledgeSubBrand(){
+ const nameInput=$('kb-subbrand-name');
+ if(!nameInput||!nameInput.reportValidity())return;
+ const name=nameInput.value.trim(),letters=(name.match(/[A-Za-z0-9]/g)||name.split('')).slice(0,2).join(''),short=(letters||'SB').toUpperCase();
+ if(KNOWLEDGE_BRANDS.some(brand=>brand.name.toLowerCase()===name.toLowerCase())){toast('该品牌名称已存在');nameInput.focus();return;}
+ const id='subbrand-'+Date.now(),main=KNOWLEDGE_BRANDS.find(brand=>brand.kind==='main');
+ KNOWLEDGE_BRANDS.push({id,name,short,kind:'sub',parentId:main?.id,status:'active',description:'子品牌',entries:makeSubBrandKnowledge(id,name,0)});
+ S.kbrand=id;S.kcat='全部';closeMod();render();toast(`${name} 已创建 · 可开始填写品牌资料`);
+}
+function kComplete(){const entries=knowledgeBrandEntries(),f=entries.filter(x=>x.filled).length;return {f,t:entries.length,p:Math.round(f/entries.length*100)};}
 function vKnow(){
  if(S.kgrp===undefined)S.kgrp='src';
  if(!permissionHasPage(`know.${S.kgrp}`))S.kgrp=permissionHasPage('know.src')?'src':'out';
  if(S.ktab===undefined)S.ktab=0;
  if(S.kdom===undefined)S.kdom='全部';
- const G=KGRP[S.kgrp],c=kComplete(),stale=KB.filter(x=>x.stale).length,dsAlerts=dsAttentionCount();
+ const G=KGRP[S.kgrp],entries=knowledgeBrandEntries(),activeBrand=knowledgeActiveBrand(),c=kComplete(),stale=entries.filter(x=>x.stale).length,dsAlerts=dsAttentionCount();
  return `<div class="wrap">
   <div class="eyebrow">平台 · 知识库</div><h1>知识库</h1>
   <div class="sub">Agent 读的（来源）和 Agent 写的（产出）分开放。保存后的产出可以在这里查看、检索和复用。</div>
@@ -265,14 +299,14 @@ function vKnow(){
     <div style="flex:1;min-width:220px">
       <div style="display:flex;align-items:baseline;gap:var(--sp-2);margin-bottom:var(--sp-1)">
         <span class="num" style="font-size:var(--fs-2xl);font-weight:800">${c.p}%</span>
-        <span style="font-size:var(--fs-sm);color:var(--t2)">品牌来源完整度 · ${c.f}/${c.t} 条已填</span></div>
+        <span style="font-size:var(--fs-sm);color:var(--t2)">${esc(activeBrand.name)} 品牌来源完整度 · ${c.f}/${c.t} 条已填</span></div>
       <div class="rbar"><i style="width:${c.p}%;background:${c.p>=80?'var(--green)':c.p>=50?'var(--gold)':'var(--red)'}"></i></div>
       <div style="font-size:var(--fs-xs);color:var(--t2);margin-top:var(--sp-2)">
         ${c.t-c.f} 条还是空的，${stale} 条超过 3 个月没更新。<b>Agent 会照样跑</b>——它不知道自己缺东西，只有你知道。</div>
     </div>
     <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap">
-      ${KB.filter(x=>!x.filled).map(x=>`<button class="gapchip" onclick="openKB('${x.id}')">缺 ${x.n} ↗</button>`).join('')}
-      ${KB.filter(x=>x.stale).map(x=>`<button class="gapchip warn" onclick="openKB('${x.id}')">${x.n} 已过期 ↗</button>`).join('')}
+      ${entries.filter(x=>!x.filled).map(x=>`<button class="gapchip" onclick="openKB('${x.id}')">缺 ${x.n} ↗</button>`).join('')}
+      ${entries.filter(x=>x.stale).map(x=>`<button class="gapchip warn" onclick="openKB('${x.id}')">${x.n} 已过期 ↗</button>`).join('')}
     </div></div>`:''}
   <div class="bar" style="margin:var(--sp-4) 0 14px;gap:var(--sp-2);flex-wrap:wrap">
     <div class="seg">${G.tabs.map((t,i)=>`<button class="${S.ktab===i?'on':''}" onclick="S.ktab=${i};render()">${t}${t==='数据源'&&dsAlerts?`<span class="kb-tab-alert num">${dsAlerts}</span>`:''}</button>`).join('')}</div>
@@ -413,10 +447,10 @@ function kTpl(){
 }
 function kBrand(){
  if(S.kcat===undefined)S.kcat='全部';
- const L=KB.filter(x=>S.kcat==='全部'||x.cat===S.kcat);
- return `<div class="bar" style="margin:0 0 13px">
+ const brand=knowledgeActiveBrand(),L=knowledgeBrandEntries().filter(x=>S.kcat==='全部'||x.cat===S.kcat);
+ return `${knowledgeBrandSwitcher()}<div class="bar" style="margin:0 0 13px">
    <div class="seg">${KCATS.map(c=>`<button class="${S.kcat===c?'on':''}" onclick="S.kcat='${c}';render()">${c}</button>`).join('')}</div>
-   <span class="spacer"></span><span class="chip mut">${L.length} 条</span></div>
+   <span class="spacer"></span><span class="chip mut">${esc(brand.name)} · ${L.length} 条</span></div>
   ${L.map(x=>`<button class="row" onclick="openKB('${x.id}')" style="align-items:flex-start;padding:var(--sp-3) 14px;${!x.filled?'opacity:.72;border-style:dashed':''}">
     <span style="flex:1;min-width:0">
       <span style="display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap">
@@ -429,14 +463,14 @@ function kBrand(){
     ${x.filled?`<span class="chip lv">${x.reads}</span>`:'<span class="chip mut">—</span>'}</button>`).join('')}`;
 }
 function openKB(id,tab){
- const x=KB.find(y=>y.id===id);
+ const brand=knowledgeActiveBrand(),x=knowledgeBrandEntries().find(y=>y.id===id);if(!x)return;
  if(S.kb!==id)S.kbtab=0;
  if(tab!==undefined)S.kbtab=tab;
  if(S.kbtab===undefined)S.kbtab=0;
  S.kb=id;
  $('dw').innerHTML=`<div class="dw-h">
    <button class="ib" onclick="closeDw()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-   <div style="flex:1;min-width:0"><div class="ty">来源 · ${x.cat}</div><h3>${esc(x.n)}</h3></div>
+   <div style="flex:1;min-width:0"><div class="ty">${esc(brand.name)} · ${x.cat}</div><h3>${esc(x.n)}</h3></div>
    ${!x.filled?'<span class="st hold">空的</span>':x.stale?'<span class="st review">已过期</span>':`<span class="st ${GOV[x.gov].c}">${GOV[x.gov].n}</span>`}</div>
   <div class="dw-tabs"><button class="${S.kbtab===0?'on':''}" onclick="openKB('${id}',0)">内容</button>
    <button class="${S.kbtab===1?'on':''}" onclick="openKB('${id}',1)">使用情况</button></div>
@@ -461,7 +495,7 @@ function openKB(id,tab){
  $('dw').classList.add('on');$('scrim').classList.add('on');
 }
 function saveKBContent(id){
- const x=KB.find(y=>y.id===id),editor=$('kb-content-editor');if(!x||!editor)return;
+ const x=knowledgeBrandEntries().find(y=>y.id===id),editor=$('kb-content-editor');if(!x||!editor)return;
  const value=editor.value.trim();if(!value){toast('内容不能为空');return;}
  x.tx=value;x.filled=1;x.stale=0;x.at='刚刚';x.by='dudu';closeDw();render();toast('内容已保存');
 }
