@@ -695,20 +695,30 @@ function ensureDouyinContractDraft(a,i){
  r.douyinContractDraft=draft;S.douyinContract=draft;return draft;
 }
 function rosterDisplayStatus(a,r,i){return rosterStatus(a,r);}
+function openDouyinWorkflowForm(i,type){
+ if(Number.isInteger(S.cr))S.crtab=4;
+ else S.or=i;
+ drawDw();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  if(type==='shipping')focusSampleShippingForm(i);
+  else focusDouyinContractForm(i);
+ }));
+}
 function kolSet(i,st){
  const [,a]=findArt(S.aid);const r=a&&a.rows&&a.rows[i];if(!r)return;const old=r.s,oldStatus=rosterStatus(a,r);
  if(a.workflow==='douyin'&&st==='样品寄送'&&oldStatus!=='样品寄送'){
   r.s='样品寄送';ensureSampleShippingDraft(a,i);
   (r.sub=r.sub||[]).push({k:'sys',tx:'状态：'+oldStatus+' → 样品寄送 · 由 dudu 操作'});
-  drawDw();render();toast('已切换为样品寄送 · 打开评论可填写寄样信息');return;
+  render();openDouyinWorkflowForm(i,'shipping');toast('已切换为样品寄送 · 寄样表单已加载');return;
  }
  if(a.workflow==='douyin'&&['合同确认','已上播'].includes(st)&&oldStatus!==st){
   S.sampleShipping=null;r.s=st;ensureDouyinContractDraft(a,i);
   (r.sub=r.sub||[]).push({k:'sys',tx:'状态：'+oldStatus+' → '+st+' · 由 dudu 操作'});
-  drawDw();render();toast('已切换为'+st+' · 打开评论可填写合同信息');return;
+  render();openDouyinWorkflowForm(i,'contract');toast('已切换为'+st+' · 合同表单已加载');return;
  }
  if(sampleShippingDraftFor(a,i))S.sampleShipping=null;
  if(douyinContractDraftFor(a,i))S.douyinContract=null;
+ if(a.workflow==='douyin'&&S.or===i)S.or=null;
  r.s=st;
  (r.sub=r.sub||[]).push({k:'sys',tx:'状态：'+old+' → '+st+' · 由 dudu 操作'});
  drawDw();render();toast(r.n+' → '+st);
@@ -722,7 +732,7 @@ function setSampleShippingField(field,value){if(S.sampleShipping)S.sampleShippin
 function cancelSampleShipping(){
  const draft=S.sampleShipping;if(!draft)return;const [,a]=findArt(draft.aid),r=a?.rows?.[draft.i];
  if(r){r.sampleShippingDraft=null;if(rosterStatus(a,r)==='样品寄送')r.s='商务洽谈';(r.sub=r.sub||[]).push({k:'sys',tx:'已取消样品寄送状态 · 由 dudu 操作',at:'刚刚'})}
- S.sampleShipping=null;drawDw();render();toast('已取消样品寄送状态')
+ S.sampleShipping=null;S.or=null;drawDw();render();toast('已取消样品寄送状态')
 }
 function validateSampleShipping(a,i){
  const draft=sampleShippingDraftFor(a,i);if(!draft)return true;
@@ -762,7 +772,7 @@ function setDouyinContractField(field,value){if(S.douyinContract)S.douyinContrac
 function cancelDouyinContract(){
  const draft=S.douyinContract;if(!draft)return;const [,a]=findArt(draft.aid),r=a?.rows?.[draft.i],current=rosterStatus(a,r),previous=current==='已上播'?'合同确认':'商务洽谈';
  if(r){r.s=previous;if(current==='合同确认')r.douyinContractDraft=null;(r.sub=r.sub||[]).push({k:'sys',tx:'状态：'+current+' → '+previous+' · 由 dudu 操作',at:'刚刚'})}
- S.douyinContract=current==='已上播'&&r?r.douyinContractDraft:null;drawDw();render();toast('已取消'+current+'状态')
+ S.douyinContract=current==='已上播'&&r?r.douyinContractDraft:null;S.or=null;drawDw();render();toast('已取消'+current+'状态')
 }
 function validateDouyinContract(a,i){
  const draft=douyinContractDraftFor(a,i);if(!draft)return true;
@@ -813,6 +823,10 @@ function toggleRow(i){
  if(opening&&sampleShippingDraftFor(a,i))requestAnimationFrame(()=>requestAnimationFrame(()=>focusSampleShippingForm(i)));
  else if(opening&&douyinContractDraftFor(a,i))requestAnimationFrame(()=>requestAnimationFrame(()=>focusDouyinContractForm(i)));
 }
+function toggleRosterComment(){
+ const opening=!S.pc;S.pc=opening;S.or=null;drawDw();
+ if(opening)scrollDrawerToBottom();
+}
 const CSRC={xhs:{n:'小红书',c:'#E11D48'},dy:{n:'抖音',c:'#0891B2'}};
 const CREATOR_RATES=[['¥480','¥1,600','¥480'],['¥450','¥800','¥450'],['¥600','¥2,000','¥600'],['¥380','¥700','¥380'],['¥1,200','¥3,200','¥1,200'],['¥800','¥2,400','¥800'],['¥1,500','¥3,600','¥1,500'],['¥1,000','¥2,800','¥1,000']];
 function creatorRates(i,r){
@@ -858,17 +872,15 @@ function dRoster(a){
      </div>
    </div>
    <div class="pk-a" style="border-top:1px solid var(--hairline)">
-     ${isDouyin?(currentStatus==='待建联'?`<button class="btn sm" onclick="kolSet(${i},'已建联')">标记已建联</button><button class="btn ghost sm" onclick="kolSet(${i},'已取消')">取消</button>`:currentStatus==='已取消'?`<button class="btn ghost sm" onclick="kolSet(${i},'待建联')">恢复待建联</button>`:''):r.s==='候选'?`<button class="btn sm" onclick="kolSet(${i},'已确认')">入选</button>
+     ${isDouyin?(currentStatus==='待建联'?`<button class="btn sm" onclick="kolSet(${i},'已建联')">入选</button><button class="btn ghost sm" onclick="kolSet(${i},'已取消')">取消</button>`:currentStatus==='已取消'?`<button class="btn ghost sm" onclick="kolSet(${i},'待建联')">恢复待建联</button>`:''):r.s==='候选'?`<button class="btn sm" onclick="kolSet(${i},'已确认')">入选</button>
        <button class="btn ghost sm" onclick="kolSet(${i},'已淘汰')">淘汰</button>`
       :r.s==='已淘汰'?`<span style="font-size:var(--fs-sm);color:var(--t3)">已淘汰</span>
        <button class="btn ghost sm" onclick="kolSet(${i},'候选')">放回候选</button>`
       :`<button class="btn ghost sm" onclick="openContentData(${i})">＋ 录入内容数据</button>
        <button class="btn ghost sm" onclick="openBrief(${i})">${r.briefGenerated||(r.briefSub||[]).length?'看 Brief ↗':'生成 Brief'}</button>`}
-     <button class="rvb ${S.or===i?'on':''}" onclick="toggleRow(${i})">评论
-       ${rosterSubCount(r)?`<span class="n">${rosterSubCount(r)}</span>`:''} ${S.or===i?'▴':'▾'}</button>
      <select class="roster-status-select" aria-label="${esc(r.n)}的合作状态" onchange="kolSet(${i},this.value)">${Object.keys(statusMap).map(status=>`<option value="${status}" ${currentStatus===status?'selected':''}>${status}</option>`).join('')}</select>
    </div>
-   ${S.or===i?`<div style="padding:0 13px 12px">${subPane(a,i)}</div>`:''}
+   ${isDouyin&&S.or===i?`<div style="padding:0 13px 12px">${subPane(a,i)}</div>`:''}
  </div>`;
  }).join('');
  const empty=`<div class="empty" style="padding:var(--sp-5) 16px"><div class="h">没有符合当前筛选的达人</div><button class="btn ghost sm" onclick="S.kgroup='all';S.ktag=null;S.kstatus=null;S.kprice=null;drawDw()">清除筛选</button></div>`;
@@ -890,7 +902,8 @@ function dRoster(a){
    ${tags.map(t=>`<button class="tag ${ft===t?'on':''}" onclick="S.ktag='${t}';S.kfilterOpen=null;drawDw()">${t}</button>`).join('')}
  </div></div>`:''}
   </div>
- ${cards||empty}`;
+ ${cards||empty}
+ ${S.pc?`<div class="roster-overall-comments" style="margin-top:var(--sp-3)">${subPane(a,null)}</div>`:''}`;
 }
 function contentAudits(a,creatorIndex=0){
  const creator=a.rows[creatorIndex]||a.rows[0],name=creator?creator.n:'小鹿在成都';

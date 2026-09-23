@@ -701,7 +701,7 @@ if(a.mode==='roster'||a.mode==='items'){
    ${cardVals.length?`<div class="vals">${cardVals.map(v=>`<span class="val ${v.s}">${v.s==='ok'?'✓':'!'} ${v.l} <span class="m">${v.v}</span></span>`).join('')}</div>`:''}
    <div class="pk-a">${a.st==='review'?`<button class="btn sm" onclick="act('${a.id}','批准')">${a.mode==='items'?'全部提交':'批准'}</button>`:''}
      <button class="btn ghost sm" onclick="openDw('${a.id}')">打开</button>
-     ${a.mode==='roster'?'':`<button class="rvb" onclick="openDw('${a.id}');setTimeout(()=>toggleRow(0),40)">逐条评论 ${tot?`<span class="n">${tot}</span>`:''}</button>`}
+     ${a.mode==='roster'?`<button class="rvb" onclick="openRosterComments('${a.id}')">评论 ${rosterSubCount(a)?`<span class="n">${rosterSubCount(a)}</span>`:''}</button>`:`<button class="rvb" onclick="openDw('${a.id}');setTimeout(()=>toggleRow(0),40)">逐条评论 ${tot?`<span class="n">${tot}</span>`:''}</button>`}
      <span class="v num">v${a.v} · 26分钟前</span></div>
    ${a.mode==='roster'&&a.nxt&&a.st==='done'?`<div class="nxt"><span class="lb">接下来</span>
      ${a.nxt.map(n=>`<button class="na" onclick="toast('${n==='同步到活动'?'已同步到活动':'已在同一线程中新增步骤：'+n}')">${n} →</button>`).join('')}</div>`:''}</div>`;
@@ -925,6 +925,9 @@ function togglePromotionComment(){
  if(opening)scrollDrawerToBottom();
 }
 function openPromotionComments(id){
+ openDw(id);S.dtab=0;S.pc=true;drawDw();scrollDrawerToBottom();
+}
+function openRosterComments(id){
  openDw(id);S.dtab=0;S.pc=true;drawDw();scrollDrawerToBottom();
 }
 function openReportComments(id){
@@ -1252,7 +1255,7 @@ function drawDw(){
  const r=a.rows[S.cr];
  const cp=creatorProfile(r,S.cr);
  const isDouyinCreator=cp.plat==='抖音';
- const creatorTabs=isDouyinCreator?['文档','粉丝消费水平','上播记录','建联话术','本次沟通 '+rosterSubCount(r),'匹配度']:['文档','录入数据 '+creatorContents(r,S.cr).length,'合作记录 '+creatorCollabs(r,S.cr).length,'本次沟通 '+rosterSubCount(r),'匹配度'];
+ const creatorTabs=isDouyinCreator?['文档','粉丝消费水平','上播记录','建联话术','备注 '+rosterSubCount(r),'匹配度']:['文档','录入数据 '+creatorContents(r,S.cr).length,'合作记录 '+creatorCollabs(r,S.cr).length,'备注 '+rosterSubCount(r),'匹配度'];
  $('dw').innerHTML=`<div class="dw-h">
     <button class="ib" onclick="backCreator()" title="返回名单"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
     <div style="flex:1;min-width:0"><div class="ty">知识库 · 达人档案</div><div style="display:flex;align-items:center;gap:var(--sp-1);flex-wrap:wrap"><h3>${esc(cp.n)}</h3><span class="creator-platform-pill">${esc(cp.plat)}</span><span class="creator-update-pill">更新日期 ${esc(cp.updated)}</span></div></div>
@@ -1260,7 +1263,7 @@ function drawDw(){
    <div class="dw-tabs">${creatorTabs.map((x,j)=>`<button class="${(S.crtab||0)===j?'on':''}" onclick="openCreatorTab(${j})">${x}</button>`).join('')}</div>
    <div class="dw-b">${dCreator(a,S.cr)}</div>
    <div class="dw-f">${!isDouyinCreator&&(S.crtab||0)===1?`<button class="btn" onclick="openContentData(S.cr)">＋ 录入内容数据</button>`:''}
-     <span style="margin-left:auto;font-size:var(--fs-xs);color:var(--t3)">档案为只读 · 沟通记录属于本次合作</span></div>`;
+     <span style="margin-left:auto;font-size:var(--fs-xs);color:var(--t3)">档案为只读 · 备注属于本次合作</span></div>`;
   return;
  }
  let tabs,body;
@@ -1380,6 +1383,8 @@ else if(a.mode==='csa'){
      :a.mode==='roster'&&S.dtab===0&&Number.isInteger(S.auditCreator)?creatorAuditFooter(a,S.auditCreator)
      :a.mode==='roster'&&S.dtab===2?`<button class="btn" onclick="openContentData()">＋ 录入内容数据</button>`
      :a.mode==='roster'&&S.dtab===1?globalAuditFooter(a)
+     :a.mode==='roster'&&S.dtab===0?`${a.st==='review'?`<button class="btn" onclick="act('${a.id}','批准');closeDw()">批准</button>`:''}
+      <button class="rvb ${S.pc?'on':''}" onclick="toggleRosterComment()">评论 ${rosterSubCount(a)?`<span class="n">${rosterSubCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`
      :a.mode==='promoseq'?promotionFooter(a)
        :a.mode==='pdpseq'&&a.id==='a4-direction'&&S.dtab===0?`${a.st==='review'?`<button class="btn" onclick="act('${a.id}','批准');closeDw()">批准</button>`:''}
         <button class="btn ghost" onclick="downloadAllDetailImages()">批量下载</button>${pdpArtifactCommentButton(a)}`
@@ -2052,12 +2057,12 @@ function dCreator(a,i){
   if(tab===1)return dDouyinConsumerLevel();
   if(tab===2)return dDouyinLiveRecords(r);
   if(tab===3)return dDouyinOutreach(r);
-  if(tab===4)return `<div style="font-size:var(--fs-xs);font-weight:600;color:var(--t2);margin-bottom:var(--sp-2)">这次合作的沟通</div>${subPane(a,i)}`;
+  if(tab===4)return `<div style="font-size:var(--fs-xs);font-weight:600;color:var(--t2);margin-bottom:var(--sp-2)">备注</div>${subPane(a,i)}`;
   if(tab===5)return dCreatorBrandMatch(r,i);
  }else{
   if(tab===1)return dCreatorContent(r,i);
   if(tab===2)return Number.isInteger(S.creatorCollab)?dCreatorCollabDetail(r,i,S.creatorCollab):dCreatorCollabs(r,i);
-  if(tab===3)return `<div style="font-size:var(--fs-xs);font-weight:600;color:var(--t2);margin-bottom:var(--sp-2)">这次合作的沟通</div>${subPane(a,i)}`;
+  if(tab===3)return `<div style="font-size:var(--fs-xs);font-weight:600;color:var(--t2);margin-bottom:var(--sp-2)">备注</div>${subPane(a,i,{hideCollabMeta:true})}`;
   if(tab===4)return dCreatorBrandMatch(r,i);
  }
  return `<div class="creator-overview">

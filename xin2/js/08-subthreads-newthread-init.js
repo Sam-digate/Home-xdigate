@@ -22,7 +22,7 @@ function scopeNote(a,oi){
  const group=a.plans?'同一组方案':a.rows?'同一份名单':'同一组方向';
  return '这条评论只落在<b>'+esc(x.t||x.n)+'</b>上——'+group+'里的其他 '+(kids.length-1)+' 个看不到，也不会被改动。';
 }
-function subPane(a,oi){
+function subPane(a,oi,options={}){
  const kids=a.opts||a.rows||a.plans;
  const activeEmail=a.mode==='csa'&&S.dtab===1?activeCSAEmail(a):null;
  const emailThread=activeEmail?(activeEmail.thread=activeEmail.thread||{t:a.csa.customer+' · 客户邮件',sub:[]}):null;
@@ -36,7 +36,7 @@ function subPane(a,oi){
      <span class="s">${subCount({sub:visibleSub})} 条 · 只属于这个${unit}</span></div>
    <div class="sub-l" id="sl">${subMsgs(visibleSub)}
     ${a.inspection?.explaining?`<div style="display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-3) 0;color:var(--primary);font-size:var(--fs-sm)" role="status"><span class="spin" aria-hidden="true"></span>${esc(nick(a.by)||'店铺巡检')}正在解释…</div>`:''}</div>
-   ${a.rows&&!a.listing?`<div class="collab-meta">
+   ${a.rows&&!a.listing&&Number.isInteger(oi)&&!options.hideCollabMeta?`<div class="collab-meta">
      ${a.mode==='roster'?`<label class="collab-field"><span>合作状态</span><select onchange="kolSet(${oi},this.value)">${Object.keys(rosterStatusMap(a)).map(s=>`<option ${s===rosterDisplayStatus(a,x,oi)?'selected':''}>${s}</option>`).join('')}</select></label>`:''}
      <label class="collab-field"><span>配合度</span><select onchange="setCreatorField('${a.id}',${oi},'coop',this.value,'配合度')">${['高','中','低'].map(s=>`<option ${s===(x.coop||'中')?'selected':''}>${s}</option>`).join('')}</select></label>
      <label class="collab-field"><span>负责人</span><select onchange="setCreatorField('${a.id}',${oi},'commOwner',this.value,'负责人')">${['待分配','jack','dudu','Sophie','Sam'].map(s=>`<option ${s===(x.commOwner||'待分配')?'selected':''}>${s}</option>`).join('')}</select></label>
@@ -44,10 +44,10 @@ function subPane(a,oi){
    ${peopleOnly&&a.workflow==='douyin'?dSampleShippingForm(a,oi)+dDouyinContractForm(a,oi):''}
    <div class="sub-c">
      <div style="position:relative"><div id="m-si"></div>
-       <textarea id="si" oninput="onKey(event,'si',${peopleOnly})" placeholder="${peopleOnly?'写给同事看 → 对同事说。输入 @ 提到人。':'写给同事看 → 对同事说；写给 Ai 改 → 对Ai说。输入 @ 提到人。'}"></textarea></div>
+       <textarea id="si" oninput="onKey(event,'si',${peopleOnly})" placeholder="${peopleOnly?'填写备注。输入 @ 提到人。':'写给同事看 → 对同事说；写给 Ai 改 → 对Ai说。输入 @ 提到人。'}"></textarea></div>
      <div class="row2">
        ${peopleOnly?'':a.mode==='csa'&&S.dtab===0?`<button class="btn sm" onclick="subSend('ask','${a.id}',${oi===undefined?null:oi})">对Ai说</button>`:`<button class="btn sm" onclick="subSend('chg','${a.id}',${oi===undefined?null:oi})">对Ai说</button>`}
-       <button class="btn ghost sm" onclick="subSend('note','${a.id}',${oi===undefined?null:oi})">对同事说</button>
+       <button class="btn ghost sm" onclick="subSend('note','${a.id}',${oi===undefined?null:oi})">${peopleOnly?'添加备注':'对同事说'}</button>
       <button class="btn ghost sm" data-mention-toggle onclick="showMent('si',${peopleOnly},this)" title="提到某人">@</button>
      </div></div></div>`;
 }
