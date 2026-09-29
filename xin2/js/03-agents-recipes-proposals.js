@@ -712,7 +712,8 @@ function rcRow(r,sched){
         <b style="font-size:var(--fs-md)">${esc(r.n)}</b>
         ${sched?`<span class="st ${RST2[r.st]}">${RSTN[r.st]}</span>`:'<span class="chip mut">手动</span>'}
         ${r.fresh?'<span class="chip" style="background:#ECFEFF;color:#0E7490;border:1px solid #A5F3FC">新建 · 看前几次</span>':''}
-        <span class="chip dom">${r.dom}</span></div>
+        <span class="chip dom">${r.dom}</span>
+        ${sched?'':'<span class="chip recipe-system">系统</span>'}</div>
       <div style="font-size:var(--fs-sm);color:var(--t2);margin-top:var(--sp-1);line-height:1.6">${esc(r.d)}</div>
     </div>
     <div style="text-align:right;flex:0 0 auto">

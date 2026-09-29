@@ -354,6 +354,7 @@
 .budget-strip{display:flex;align-items:center;gap:var(--sp-3);background:linear-gradient(135deg,#F5F3FF,#FFF7ED);border:1px solid #E9E3FE;border-radius:var(--r);padding:var(--sp-3) 16px;margin:var(--sp-4) 0 16px}
 .pcard{background:#fff;border:1px solid var(--border);border-radius:var(--r);margin-bottom:var(--sp-3);overflow:hidden;transition:.14s}
 .pcard:hover{border-color:var(--primary-lt);box-shadow:var(--sh-sm)}
+.recipe-system{background:#EEF6FF;color:#2563EB;border:1px solid #D7E8FF}
 .saved-output-main{padding:var(--sp-3) 16px}
 .saved-output-head{display:flex;align-items:flex-start;gap:var(--sp-2)}
 .saved-output-title{flex:1;min-width:0}
