@@ -153,7 +153,7 @@ function filterPermissionTenantStatus(value){S.permTenantStatus=value;const body
 function permissionSuperAdminPanel(){
  return `<section id="permission-super-panel" class="permission-panel permission-super-panel" role="tabpanel" aria-labelledby="permission-super-accounts-tab">
   <div class="permission-toolbar permission-member-toolbar"><div class="permission-filters"><label class="permission-search"><i data-lucide="search"></i><input value="${esc(S.permTenantQuery)}" placeholder="搜索管理员账号或 ID" aria-label="搜索管理员账号" oninput="filterPermissionTenantAdmins(this.value)"></label><label class="permission-status-filter"><select aria-label="筛选管理员状态" onchange="filterPermissionTenantStatus(this.value)"><option value="all" ${S.permTenantStatus==='all'?'selected':''}>全部状态</option><option value="active" ${S.permTenantStatus==='active'?'selected':''}>正常</option><option value="disabled" ${S.permTenantStatus==='disabled'?'selected':''}>停用</option></select></label></div><button class="btn permission-invite" onclick="openPermissionTenantAdmin()"><i data-lucide="user-plus"></i>创建管理员</button></div>
-  <div class="permission-super-summary"><span><i data-lucide="shield-check"></i>超级管理员设置品牌可用的 Agent 与子账号额度，品牌管理员只能在授权范围内向下分配。</span></div>
+  <div class="permission-super-summary"><span><i data-lucide="shield-check"></i>超级管理员设置品牌可用的 Agent 与子账号数量，品牌管理员只能在授权范围内向下分配。</span></div>
   <div class="permission-scroll-hint"><i data-lucide="move-horizontal"></i>左右滑动查看完整管理员信息</div><div class="permission-table-wrap" tabindex="0" aria-label="品牌管理员账号表，可横向滚动"><table class="permission-table permission-super-table"><thead><tr><th>管理员账号</th><th>Agent 授权</th><th>子账号</th><th>服务期限</th><th>创建时间</th><th>状态</th><th></th></tr></thead><tbody>${permissionTenantAdminRows()}</tbody></table></div>
  </section>`;
 }
@@ -550,7 +550,7 @@ function savePermissionTenantAdmin(){
 }
 
 function openPermissionCreateAccount(){
- const tenant=permissionCurrentTenantAdmin();if(tenant&&tenant.memberUsed>=tenant.memberLimit){toast(`子账号额度已用完（${tenant.memberUsed} / ${tenant.memberLimit}）`);return;}
+ const tenant=permissionCurrentTenantAdmin();if(tenant&&tenant.memberUsed>=tenant.memberLimit){toast(`子账号数量已达上限（${tenant.memberUsed} / ${tenant.memberLimit}）`);return;}
  S.permAgentScope='tenant';S.permDraft={agents:permissionTenantAgents().map(agent=>agent.id),projects:[],pages:[...permissionTenantPages()]};S.permBrandPickerOpen=false;
  const draft=S.permDraft,projects=permissionAssignableProjects(),accountPrefix=(tenant?.accountId||'u2c').replace(/:$/,'');
  $('dw').innerHTML=`<div class="dw-h permission-drawer-head">${permissionCloseButton()}<span class="permission-invite-mark"><i data-lucide="user-plus"></i></span><div><div class="ty">成员管理</div><h3 id="permission-drawer-title">创建账号</h3></div></div>
@@ -568,7 +568,7 @@ function submitPermissionAccount(){
  if(!nameInput.reportValidity()||!accountInput.reportValidity()||!passwordInput.reportValidity())return;
  const tenant=permissionCurrentTenantAdmin(),accountPrefix=(tenant?.accountId||'u2c').replace(/:$/,''),accountSuffix=accountInput.value.trim(),name=nameInput.value.trim(),accountId=`${accountPrefix}:${accountSuffix}`,password=passwordInput.value,role=roleInput.value==='admin'?'admin':'member';
  if(PERMISSION_MEMBERS.some(m=>permissionAccountId(m).toLowerCase()===accountId.toLowerCase())){toast('该账号 ID 已存在');accountInput.focus();return;}
- if(tenant&&tenant.memberUsed>=tenant.memberLimit){toast(`子账号额度已用完（${tenant.memberUsed} / ${tenant.memberLimit}）`);return;}
+ if(tenant&&tenant.memberUsed>=tenant.memberLimit){toast(`子账号数量已达上限（${tenant.memberUsed} / ${tenant.memberLimit}）`);return;}
  const available=new Set(permissionTenantAgents().map(agent=>agent.id)),brandScope=new Set(permissionAssignableProjects().map(project=>project.id)),agents=[...S.permDraft.agents].filter(agent=>available.has(agent)),projects=[...S.permDraft.projects].filter(project=>brandScope.has(project)),pages=[...permissionTenantPages()];
  const initials=(name.match(/[A-Za-z]/g)||name.split('')).slice(0,2).join('').toUpperCase();
  PERMISSION_MEMBERS.push({id:'member-'+Date.now(),name,accountId,password,initials:initials||'ME',color:'#7C3AED',role,status:'active',createdAt:new Date().toISOString().slice(0,10),last:'尚未登录',agents,projects,pages});
