@@ -11,12 +11,6 @@ const PERMISSION_AGENTS=(typeof REG!=='undefined'?REG.map(a=>({
 ]);
 
 const PERMISSION_AGENT_TEMPLATES=[
- {id:'default',name:'默认权限',agents:['gen','ppt','trend','kb'],pages:['today','work','know.src','agent.registry']},
- {id:'content',name:'内容运营',agents:['gen','vid','plan','pub','trend','comp','msg'],pages:['today','work','prop','camp','anal.data','know.src','know.out','agent.registry','agent.prompts']},
- {id:'commerce',name:'电商运营',agents:['pdp','ecamp','adplan','promoimg','ad','insp','exec','list','cs'],pages:['today','work','camp','anal.data','know.src','know.out','agent.registry']},
- {id:'design',name:'设计',agents:['ppt','gen','vid','promoimg'],pages:['today','work','know.src','know.out','agent.registry','agent.prompts']},
- {id:'kol',name:'达人运营',agents:['kol','brief','recap'],pages:['today','work','camp','anal.data','know.src','know.out','agent.registry']},
- {id:'b2b',name:'B2B 营销',agents:['seo','geo','sem','rep','ana'],pages:['today','work','prop','anal.data','anal.chat','know.src','know.out','agent.registry']},
  {id:'all',name:'全部权限',agents:[],pages:[]}
 ];
 
@@ -39,9 +33,9 @@ const PERMISSION_PROJECTS=[
 ];
 
 const PERMISSION_TENANT_ADMINS=[
- {id:'admin-a80',name:'u2c',accountId:'u2c',password:'U2c666',initials:'U2',color:'#0891B2',projectId:'a80',recipes:['r1','r3','r4'],agents:['ppt','gen','vid','plan','pub','trend','comp','pdp','ecamp','kol','brief','ana'],pages:['today','work','prop','camp','anal.data','anal.chat','know.src','know.out','agent.registry','agent.recipes','agent.routines','agent.prompts','permission'],memberUsed:7,memberLimit:10,projectUsed:15,projectLimit:15,monthlyCredits:500000,expires:'2027-09-30',createdAt:'2026-01-12',status:'active',last:'刚刚'},
- {id:'admin-nexa',name:'Nike',accountId:'nike',password:'Nike666',initials:'NI',color:'#E11D48',projectId:'tmall',recipes:['r1','r3'],agents:['gen','vid','plan','trend','pdp','ecamp','adplan','ana'],pages:['today','work','camp','anal.data','know.src','know.out','agent.registry','agent.prompts','permission'],memberUsed:5,memberLimit:8,projectUsed:8,projectLimit:10,monthlyCredits:200000,expires:'2027-03-31',createdAt:'2026-03-05',status:'active',last:'昨天 17:20'},
- {id:'admin-lumi',name:'Yida',accountId:'yida',password:'Yida666',initials:'YI',color:'#F59E0B',projectId:'douyin',recipes:[],agents:['gen','vid','plan','pub','trend','kol'],pages:['today','work','camp','anal.data','know.src','know.out','agent.registry','permission'],memberUsed:3,memberLimit:5,projectUsed:5,projectLimit:8,monthlyCredits:100000,expires:'2026-12-31',createdAt:'2026-06-18',status:'disabled',last:'9 月 18 日'}
+ {id:'admin-a80',name:'u2c',accountId:'u2c',password:'U2c666',initials:'U2',color:'#0891B2',projectId:'a80',recipes:['r1','r3','r4'],agents:PERMISSION_AGENTS.map(agent=>agent.id),pages:['today','work','prop','camp','anal.data','anal.chat','know.src','know.out','agent.registry','agent.recipes','agent.routines','agent.prompts','permission'],memberUsed:7,memberLimit:10,projectUsed:15,projectLimit:15,monthlyCredits:500000,expires:'2027-09-30',createdAt:'2026-01-12',status:'active',last:'刚刚'},
+ {id:'admin-nexa',name:'Nike',accountId:'nike',password:'Nike666',initials:'NI',color:'#E11D48',projectId:'tmall',recipes:['r1','r3'],agents:PERMISSION_AGENTS.map(agent=>agent.id),pages:['today','work','camp','anal.data','know.src','know.out','agent.registry','agent.prompts','permission'],memberUsed:5,memberLimit:8,projectUsed:8,projectLimit:10,monthlyCredits:200000,expires:'2027-03-31',createdAt:'2026-03-05',status:'active',last:'昨天 17:20'},
+ {id:'admin-lumi',name:'Yida',accountId:'yida',password:'Yida666',initials:'YI',color:'#F59E0B',projectId:'douyin',recipes:[],agents:PERMISSION_AGENTS.map(agent=>agent.id),pages:['today','work','camp','anal.data','know.src','know.out','agent.registry','permission'],memberUsed:3,memberLimit:5,projectUsed:5,projectLimit:8,monthlyCredits:100000,expires:'2026-12-31',createdAt:'2026-06-18',status:'disabled',last:'9 月 18 日'}
 ];
 
 const PERMISSION_PAGE_GROUPS=[
@@ -88,8 +82,8 @@ function permissionRecipeCatalog(){
 
 function permissionCurrentMember(){return PERMISSION_MEMBERS.find(member=>member.id===currentUser());}
 function permissionCurrentTenantAdmin(){
- const member=permissionCurrentMember(),accountId=member?permissionAccountId(member):'';
- return PERMISSION_TENANT_ADMINS.find(admin=>admin.accountId.toLowerCase()===accountId.toLowerCase());
+ const member=permissionCurrentMember(),accountId=member?permissionAccountId(member):'',tenantAccountId=member?.role==='member'&&accountId.includes(':')?accountId.split(':')[0]:accountId;
+ return PERMISSION_TENANT_ADMINS.find(admin=>admin.accountId.toLowerCase()===tenantAccountId.toLowerCase());
 }
 function permissionTenantAgents(){
  const tenant=permissionCurrentTenantAdmin();return tenant?PERMISSION_AGENTS.filter(agent=>tenant.agents.includes(agent.id)):PERMISSION_AGENTS;
@@ -116,40 +110,31 @@ function permissionCanAccessView(view){
 function permissionFirstView(){return ['today','work','prop','camp','anal','know','agent','permission'].find(permissionCanAccessView)||'today';}
 
 function permissionState(){
+ const systemRecipeIds=permissionRecipeCatalog().map(recipe=>recipe.id);PERMISSION_TENANT_ADMINS.forEach(admin=>{admin.recipes=[...systemRecipeIds];admin.pages=[...PERMISSION_PAGE_IDS];});
+ const memberPrefix=(permissionCurrentTenantAdmin()?.accountId||'u2c').replace(/:$/,'');PERMISSION_MEMBERS.forEach(member=>{if(member.role!=='member')return;member.pages=[...PERMISSION_MEMBER_PAGE_IDS];const accountId=permissionAccountId(member);if(accountId&&!accountId.includes(':'))member.accountId=`${memberPrefix}:${accountId}`;});
  if(!S.permLevel)S.permLevel='super';
- if(!S.permSuperView)S.permSuperView='accounts';
- if(!S.permView)S.permView='members';
+ if(!['accounts','recipes'].includes(S.permSuperView))S.permSuperView='accounts';
+ S.permView='members';
  if(S.permQuery==null)S.permQuery='';
  if(!S.permStatus)S.permStatus='all';
  if(!S.permAgentStatus)S.permAgentStatus='all';
  if(S.permTenantQuery==null)S.permTenantQuery='';
  if(!S.permTenantStatus)S.permTenantStatus='all';
- if(!S.permSuperAgentStatus)S.permSuperAgentStatus='all';
 }
 function permissionLevelTabKey(event){
  if(!['ArrowLeft','ArrowRight'].includes(event.key))return;
  event.preventDefault();S.permLevel=S.permLevel==='super'?'admin':'super';render();
  requestAnimationFrame(()=>document.querySelector('.permission-level-tabs button[aria-selected="true"]')?.focus());
 }
-function permissionTabKey(event){
- if(!['ArrowLeft','ArrowRight'].includes(event.key))return;
- event.preventDefault();S.permView=S.permView==='members'?'agents':'members';render();
- requestAnimationFrame(()=>document.querySelector('.permission-tabs button[aria-selected="true"]')?.focus());
-}
 function permissionSuperTabKey(event){
  if(!['ArrowLeft','ArrowRight'].includes(event.key))return;
- const tabs=['accounts','agents','recipes'],current=Math.max(0,tabs.indexOf(S.permSuperView)),step=event.key==='ArrowRight'?1:-1;
+ const tabs=['accounts','recipes'],current=Math.max(0,tabs.indexOf(S.permSuperView)),step=event.key==='ArrowRight'?1:-1;
  event.preventDefault();S.permSuperView=tabs[(current+step+tabs.length)%tabs.length];render();
  requestAnimationFrame(()=>document.querySelector('.permission-super-tabs button[aria-selected="true"]')?.focus());
 }
 function permissionTenantAgentTags(admin){
  const agents=admin.agents.map(id=>PERMISSION_AGENTS.find(agent=>agent.id===id)).filter(Boolean),shown=agents.slice(0,2);
  return `<span class="permission-agent-tags">${shown.map(agent=>`<span>${esc(agent.name)}</span>`).join('')}${agents.length>2?`<span>+${agents.length-2}</span>`:''}</span>`;
-}
-function permissionTenantRecipeTags(admin){
- const catalog=permissionRecipeCatalog(),recipes=(admin.recipes||[]).map(id=>catalog.find(recipe=>recipe.id===id)).filter(Boolean),shown=recipes.slice(0,2);
- if(!recipes.length)return '<span class="permission-none">暂未分配</span>';
- return `<span class="permission-agent-tags">${shown.map(recipe=>`<span>${esc(recipe.name)}</span>`).join('')}${recipes.length>2?`<span>+${recipes.length-2}</span>`:''}</span>`;
 }
 function permissionTenantAdminRows(){
  const query=S.permTenantQuery.trim().toLowerCase();
@@ -172,62 +157,33 @@ function permissionSuperAdminPanel(){
   <div class="permission-scroll-hint"><i data-lucide="move-horizontal"></i>左右滑动查看完整管理员信息</div><div class="permission-table-wrap" tabindex="0" aria-label="品牌管理员账号表，可横向滚动"><table class="permission-table permission-super-table"><thead><tr><th>管理员账号</th><th>Agent 授权</th><th>子账号</th><th>服务期限</th><th>创建时间</th><th>状态</th><th></th></tr></thead><tbody>${permissionTenantAdminRows()}</tbody></table></div>
  </section>`;
 }
-function filterPermissionSuperAgentStatus(value){S.permSuperAgentStatus=value;render();}
-function permissionSuperAgentRows(){
- const rows=PERMISSION_AGENTS.filter(agent=>S.permSuperAgentStatus==='all'||agent.status===S.permSuperAgentStatus);
- if(!rows.length)return `<tr><td colspan="5"><div class="permission-empty"><i data-lucide="search-x"></i><b>没有符合条件的 Agent</b><span>调整状态筛选后再试。</span></div></td></tr>`;
- return rows.map(agent=>{const admins=PERMISSION_TENANT_ADMINS.filter(admin=>admin.agents.includes(agent.id)),shown=admins.slice(0,3);return `<tr class="permission-row" onclick="openPermissionPlatformAgent('${agent.id}')">
-  <td><div class="permission-agent"><span class="permission-agent-mark" style="--agent:${agent.color}"><i data-lucide="bot"></i></span><span><b>${esc(agent.name)}</b><small>${esc(agent.domain)}</small></span></div></td>
-  <td><strong class="permission-count num">${admins.length}</strong> 个账号</td>
-  <td><div class="permission-avatar-stack">${shown.map(admin=>permissionAvatar(admin,'sm')).join('')}${admins.length>3?`<span class="permission-avatar sm more">+${admins.length-3}</span>`:''}${!admins.length?'<span class="permission-none">暂未授权</span>':''}</div></td>
-  <td><label class="permission-agent-status-control" onclick="event.stopPropagation()"><select class="${agent.status==='disabled'?'disabled':'active'}" aria-label="设置 ${esc(agent.name)} 状态" onchange="setPermissionAgentStatus('${agent.id}',this.value,event)"><option value="active" ${agent.status==='active'?'selected':''}>已上线</option><option value="disabled" ${agent.status==='disabled'?'selected':''}>已停用</option></select></label></td>
-  <td><button class="permission-manage-button" onclick="event.stopPropagation();openPermissionPlatformAgent('${agent.id}')">管理账号</button></td>
- </tr>`;}).join('');
-}
-function permissionSuperAgentPanel(){
- return `<section id="permission-super-agents-panel" class="permission-panel permission-super-panel" role="tabpanel" aria-labelledby="permission-super-agents-tab">
-  <div class="permission-toolbar"><div><h2>Agent 管理</h2><p>管理系统 Agent 的上线状态，并设置可使用该 Agent 的品牌管理员账号。</p></div><div class="permission-filters"><label class="permission-status-filter"><select aria-label="筛选系统 Agent 状态" onchange="filterPermissionSuperAgentStatus(this.value)"><option value="all" ${S.permSuperAgentStatus==='all'?'selected':''}>全部状态</option><option value="active" ${S.permSuperAgentStatus==='active'?'selected':''}>已上线</option><option value="disabled" ${S.permSuperAgentStatus==='disabled'?'selected':''}>已停用</option></select></label></div></div>
-  <div class="permission-super-summary"><span><i data-lucide="shield-check"></i>超级管理员控制 Agent 的平台状态与品牌授权；品牌管理员只能在获得授权后向成员分配。</span></div>
-  <div class="permission-scroll-hint"><i data-lucide="move-horizontal"></i>左右滑动查看完整 Agent 信息</div><div class="permission-table-wrap" tabindex="0" aria-label="超级管理员 Agent 管理表，可横向滚动"><table class="permission-table permission-agent-table"><thead><tr><th>Agent</th><th>已授权</th><th>管理员账号</th><th>状态</th><th></th></tr></thead><tbody>${permissionSuperAgentRows()}</tbody></table></div>
- </section>`;
-}
 function permissionSuperRecipePanel(){
  return `<section id="permission-super-recipes-panel" class="permission-panel permission-super-panel" role="tabpanel" aria-labelledby="permission-super-recipes-tab">
-  <div class="permission-toolbar"><div><h2>配方管理</h2><p>引用 Agents 中的现有配方，并设置哪些管理员账号可以直接使用。</p></div><button class="btn permission-invite" onclick="newRecipe()"><i data-lucide="plus"></i>创建配方</button></div>
-  <div class="permission-super-summary"><span><i data-lucide="workflow"></i>管理员获得配方后，会同时获得运行该配方所需的 Agent 与页面权限。</span></div>
-  <div class="permission-scroll-hint"><i data-lucide="move-horizontal"></i>左右滑动查看完整配方信息</div><div class="permission-table-wrap" tabindex="0" aria-label="平台配方管理表，可横向滚动"><table class="permission-table permission-recipe-table"><thead><tr><th>配方</th><th>链路</th><th>已授权</th><th>管理员账号</th><th>使用次数</th><th></th></tr></thead><tbody>${permissionRecipeRows()}</tbody></table></div>
+  <div class="permission-toolbar"><div><h2>系统配方管理</h2><p>管理 Agents 中创建的系统配方及其运行链路。</p></div><button class="btn permission-invite" onclick="newRecipe()"><i data-lucide="plus"></i>创建配方</button></div>
+  <div class="permission-super-summary"><span><i data-lucide="workflow"></i>系统配方创建后会自动提供给全部管理员，无需单独授权。</span></div>
+  <div class="permission-scroll-hint"><i data-lucide="move-horizontal"></i>左右滑动查看完整配方信息</div><div class="permission-table-wrap" tabindex="0" aria-label="平台配方管理表，可横向滚动"><table class="permission-table permission-recipe-table"><thead><tr><th>系统配方</th><th>链路</th><th>使用次数</th></tr></thead><tbody>${permissionRecipeRows()}</tbody></table></div>
  </section>`;
 }
 function permissionRecipeAgentTags(recipe){
  return `<div class="recipe-chain-inline permission-recipe-chain-inline">${recipe.agents.map(id=>`<span class="pstepc">${AV(id,16)} ${nick(id)}</span>`).join('<span class="recipe-chain-arrow">→</span>')}${approvalPill()}</div>`;
 }
 function permissionRecipeRows(){
- const recipes=permissionRecipeCatalog();if(!recipes.length)return `<tr><td colspan="6"><div class="permission-empty"><i data-lucide="workflow"></i><b>暂无配方</b><span>请先在 Agents · 配方中创建配方。</span></div></td></tr>`;
- return recipes.map(recipe=>{const admins=PERMISSION_TENANT_ADMINS.filter(admin=>(admin.recipes||[]).includes(recipe.id)),shown=admins.slice(0,3);return `<tr class="permission-row" onclick="openPermissionRecipe('${recipe.id}')">
+ const recipes=permissionRecipeCatalog();if(!recipes.length)return `<tr><td colspan="3"><div class="permission-empty"><i data-lucide="workflow"></i><b>暂无配方</b><span>请先在 Agents · 配方中创建配方。</span></div></td></tr>`;
+ return recipes.map(recipe=>`<tr class="permission-row" onclick="openPermissionRecipe('${recipe.id}')">
   <td><div class="permission-agent"><span class="permission-agent-mark permission-recipe-mark" style="--agent:#7C3AED"><i data-lucide="workflow"></i></span><span><b>${esc(recipe.name)}</b><small>${esc(recipe.description)}</small></span></div></td>
-  <td>${permissionRecipeAgentTags(recipe)}</td><td><strong class="permission-count num">${admins.length}</strong> 个账号</td>
-  <td><div class="permission-avatar-stack">${shown.map(admin=>permissionAvatar(admin,'sm')).join('')}${admins.length>3?`<span class="permission-avatar sm more">+${admins.length-3}</span>`:''}${!admins.length?'<span class="permission-none">暂未授权</span>':''}</div></td>
-  <td><span class="permission-expiry"><b class="num">${recipe.used}</b> 次</span></td>
-  <td><button class="permission-manage-button" onclick="event.stopPropagation();openPermissionRecipe('${recipe.id}')">管理账号</button></td></tr>`;}).join('');
+  <td>${permissionRecipeAgentTags(recipe)}</td>
+  <td><span class="permission-expiry"><b class="num">${recipe.used}</b> 次</span></td></tr>`).join('');
 }
 function openPermissionRecipe(id){
- const recipe=permissionRecipeCatalog().find(item=>item.id===id);if(!recipe)return;S.permRecipeId=id;S.permRecipeAdmins=PERMISSION_TENANT_ADMINS.filter(admin=>(admin.recipes||[]).includes(id)).map(admin=>admin.id);
+ const recipe=permissionRecipeCatalog().find(item=>item.id===id);if(!recipe)return;S.permRecipeId=id;
  $('dw').innerHTML=`<div class="dw-h permission-drawer-head">${permissionCloseButton()}<span class="permission-agent-mark large" style="--agent:#7C3AED"><i data-lucide="workflow"></i></span><div><div class="ty">超级管理员 · 配方管理</div><h3 id="permission-drawer-title">${esc(recipe.name)}</h3><span>${esc(recipe.description)}</span></div></div>
-  <div class="dw-b permission-drawer-body"><div class="permission-note neutral permission-tenant-note"><i data-lucide="info"></i><span>授权后，管理员可直接使用该配方，并自动获得其依赖的 Agent 与页面。</span></div>
+  <div class="dw-b permission-drawer-body"><div class="permission-note neutral permission-tenant-note"><i data-lucide="info"></i><span>该系统配方会自动提供给全部管理员，无需单独配置账号。</span></div>
    <section class="permission-form-section"><div class="permission-section-title"><div><h4>配方内容</h4><p>内容来自 Agents · 配方；需要修改名称或链路时，请在原配方中编辑。</p></div></div><div class="permission-recipe-summary"><div><span>链路</span>${permissionRecipeAgentTags(recipe)}</div><div><span>配方类型</span><b>手动配方 · ${esc(recipe.domain)}</b></div><div><span>使用情况</span><b>已使用 ${recipe.used} 次</b></div></div></section>
-   <section class="permission-form-section"><div class="permission-section-title"><div><h4>可使用的管理员账号</h4><p>勾选后会自动补齐该配方所需的权限。</p></div><span><b id="permission-recipe-admin-count" class="num">${S.permRecipeAdmins.length}</b> 个账号</span></div><div class="permission-member-checks">${PERMISSION_TENANT_ADMINS.map(admin=>`<label><input type="checkbox" ${S.permRecipeAdmins.includes(admin.id)?'checked':''} onchange="togglePermissionRecipeAdmin('${admin.id}',this.checked)"><span class="permission-check"></span>${permissionAvatar(admin)}<span><b>${esc(admin.name)}</b><small>品牌账号 ID：${esc(admin.accountId)}</small></span></label>`).join('')}</div></section>
-  </div><div class="dw-f permission-drawer-foot"><span></span><div><button class="btn ghost" onclick="closeDw()">取消</button><button class="btn" onclick="savePermissionRecipe()">保存更改</button></div></div>`;
+  </div><div class="dw-f permission-drawer-foot"><span></span><div><button class="btn" onclick="closeDw()">关闭</button></div></div>`;
  permissionDrawerOpen();if(window.lucide)lucide.createIcons();
-}
-function togglePermissionRecipeAdmin(id,checked){const set=new Set(S.permRecipeAdmins||[]);checked?set.add(id):set.delete(id);S.permRecipeAdmins=[...set];const count=$('permission-recipe-admin-count');if(count)count.textContent=set.size;}
-function savePermissionRecipe(){
- const recipe=permissionRecipeCatalog().find(item=>item.id===S.permRecipeId);if(!recipe)return;const selected=new Set(S.permRecipeAdmins||[]);
- PERMISSION_TENANT_ADMINS.forEach(admin=>{const recipes=new Set(admin.recipes||[]);if(selected.has(admin.id)){recipes.add(recipe.id);recipe.agents.forEach(id=>{if(!admin.agents.includes(id))admin.agents.push(id);});recipe.pages.forEach(id=>{if(!admin.pages.includes(id))admin.pages.push(id);});}else recipes.delete(recipe.id);admin.recipes=[...recipes];});
- closeDw();render();toast('配方授权已更新');
 }
 function permissionSuperPanel(){
  if(S.permSuperView==='accounts')return permissionSuperAdminPanel();
- if(S.permSuperView==='agents')return permissionSuperAgentPanel();
  return permissionSuperRecipePanel();
 }
 function permissionRoleLabel(role){return role==='super'?'超级管理员':role==='admin'?'管理员':'成员';}
@@ -350,15 +306,13 @@ function vPermission(){
   ${S.permLevel==='super'?`<div id="permission-super-content" role="tabpanel" aria-labelledby="permission-super-tab">
   <div class="seg permission-tabs permission-subtabs permission-super-tabs" role="tablist" aria-label="超级管理员权限视图">
    <button id="permission-super-accounts-tab" role="tab" aria-controls="permission-super-panel" aria-selected="${S.permSuperView==='accounts'}" tabindex="${S.permSuperView==='accounts'?'0':'-1'}" class="${S.permSuperView==='accounts'?'on':''}" onclick="S.permSuperView='accounts';render()" onkeydown="permissionSuperTabKey(event)">账号管理</button>
-   <button id="permission-super-agents-tab" role="tab" aria-controls="permission-super-agents-panel" aria-selected="${S.permSuperView==='agents'}" tabindex="${S.permSuperView==='agents'?'0':'-1'}" class="${S.permSuperView==='agents'?'on':''}" onclick="S.permSuperView='agents';render()" onkeydown="permissionSuperTabKey(event)">Agent 管理</button>
    <button id="permission-super-recipes-tab" role="tab" aria-controls="permission-super-recipes-panel" aria-selected="${S.permSuperView==='recipes'}" tabindex="${S.permSuperView==='recipes'?'0':'-1'}" class="${S.permSuperView==='recipes'?'on':''}" onclick="S.permSuperView='recipes';render()" onkeydown="permissionSuperTabKey(event)">配方管理</button>
   </div>
   ${permissionSuperPanel()}</div>`:`<div id="permission-admin-content" role="tabpanel" aria-labelledby="permission-admin-tab">
   <div class="seg permission-tabs permission-subtabs" role="tablist" aria-label="管理员权限视图">
-   <button id="permission-members-tab" role="tab" aria-controls="permission-members-panel" aria-selected="${S.permView==='members'}" tabindex="${S.permView==='members'?'0':'-1'}" class="${S.permView==='members'?'on':''}" onclick="S.permView='members';render()" onkeydown="permissionTabKey(event)">成员管理</button>
-   <button id="permission-agents-tab" role="tab" aria-controls="permission-agents-panel" aria-selected="${S.permView==='agents'}" tabindex="${S.permView==='agents'?'0':'-1'}" class="${S.permView==='agents'?'on':''}" onclick="S.permView='agents';render()" onkeydown="permissionTabKey(event)">Agent 授权</button>
+   <button id="permission-members-tab" role="tab" aria-controls="permission-members-panel" aria-selected="true" tabindex="0" class="on">成员管理</button>
   </div>
-  ${S.permView==='members'?`<section id="permission-members-panel" class="permission-panel" role="tabpanel" aria-labelledby="permission-members-tab">
+  <section id="permission-members-panel" class="permission-panel" role="tabpanel" aria-labelledby="permission-members-tab">
    <div class="permission-toolbar permission-member-toolbar">
     <div class="permission-filters">
      <label class="permission-search"><i data-lucide="search"></i><input value="${esc(S.permQuery)}" placeholder="搜索姓名或账号 ID" aria-label="搜索成员" oninput="filterPermissionMembers(this.value)"></label>
@@ -367,10 +321,7 @@ function vPermission(){
     <div class="permission-member-actions">${tenantAdmin?`<span class="permission-seat-badge">子账号 <b class="num">${tenantAdmin.memberUsed}</b> / ${tenantAdmin.memberLimit}</span>`:''}<button class="btn permission-invite" onclick="openPermissionCreateAccount()" ${tenantAdmin&&tenantAdmin.memberUsed>=tenantAdmin.memberLimit?'disabled':''}><i data-lucide="user-plus"></i>创建账号</button></div>
    </div>
    <div class="permission-scroll-hint"><i data-lucide="move-horizontal"></i>左右滑动查看完整权限</div><div class="permission-table-wrap" tabindex="0" aria-label="成员权限表，可横向滚动"><table class="permission-table"><thead><tr><th>成员</th><th>平台角色</th><th>项目</th><th>创建时间</th><th>Agent 权限</th><th>状态</th><th></th></tr></thead><tbody>${permissionMemberRows()}</tbody></table></div>
-  </section>`:`<section id="permission-agents-panel" class="permission-panel" role="tabpanel" aria-labelledby="permission-agents-tab">
-   <div class="permission-toolbar"><div><h2 id="permission-agents-title">Agent 授权</h2><p>管理 Agent 的上线状态和授权成员；停用不会清空已有授权。</p></div><div class="permission-filters"><label class="permission-status-filter"><select aria-label="筛选 Agent 状态" onchange="filterPermissionAgentStatus(this.value)"><option value="all" ${S.permAgentStatus==='all'?'selected':''}>全部状态</option><option value="active" ${S.permAgentStatus==='active'?'selected':''}>已上线</option><option value="disabled" ${S.permAgentStatus==='disabled'?'selected':''}>已停用</option></select></label></div></div>
-   <div class="permission-scroll-hint"><i data-lucide="move-horizontal"></i>左右滑动查看完整授权</div><div class="permission-table-wrap" tabindex="0" aria-label="Agent 授权表，可横向滚动"><table class="permission-table permission-agent-table"><thead><tr><th>Agent</th><th>已授权</th><th>成员</th><th>状态</th><th></th></tr></thead><tbody>${permissionAgentRows()}</tbody></table></div>
-  </section>`}</div>`}
+  </section></div>`}
  </div>`;
 }
 
@@ -396,7 +347,7 @@ function closePermissionFocus(){
 function permissionCloseButton(){return `<button class="permission-close" onclick="closeDw()" aria-label="关闭"><i data-lucide="x"></i></button>`;}
 function permissionTemplateButtonsHtml(){
  const active=permissionActiveAgentTemplate();
- return `<div class="permission-agent-templates"><div class="permission-template-label"><span class="permission-template-icon"><i data-lucide="sparkles"></i></span><div><b>快捷权限</b><span>推荐先选模板，再按需逐项调整</span></div><em>快捷配置</em></div><div class="permission-template-buttons">${PERMISSION_AGENT_TEMPLATES.map(template=>`<button type="button" class="permission-template-button ${active===template.id?'on':''}" data-template="${template.id}" aria-pressed="${active===template.id}" onclick="applyPermissionAgentTemplate('${template.id}')">${esc(template.name)}</button>`).join('')}<span id="permission-template-custom" class="permission-template-custom ${active==='custom'?'on':''}" role="status">自定义</span></div></div>`;
+ return `<div class="permission-agent-templates"><div class="permission-template-label"><span class="permission-template-icon"><i data-lucide="sparkles"></i></span><div><b>快捷权限</b><span>默认开放全部 Agent 权限</span></div><em>快捷配置</em></div><div class="permission-template-buttons">${PERMISSION_AGENT_TEMPLATES.map(template=>`<button type="button" class="permission-template-button ${active===template.id?'on':''}" data-template="${template.id}" aria-pressed="${active===template.id}" onclick="applyPermissionAgentTemplate('${template.id}')">${esc(template.name)}</button>`).join('')}</div></div>`;
 }
 function permissionAgentGroupsHtml(){
  const selected=S.permDraft.agents||[],available=permissionAssignableAgents();
@@ -409,11 +360,10 @@ function permissionPageGroupsHtml(){
 function permissionAccessControlHtml(isCreate=false,scope='member'){
  const draft=S.permDraft;
  const tenantScope=scope==='tenant',subject=tenantScope?'品牌管理员':isCreate?'成员加入后':'该成员登录后';
- return `<section class="permission-form-section permission-access-section"><div class="permission-section-title"><div><h4>页面与 Agent 权限配置</h4><p>设置${subject}可访问的页面与可使用的 Agent。</p></div></div>
+ return `<section class="permission-form-section permission-access-section"><div class="permission-section-title"><div><h4>Agent 权限配置</h4><p>设置${subject}可使用的 Agent，页面默认全部开放。</p></div></div>
   <div class="permission-access-stack">
    <div class="permission-agent-control permission-template-control">${permissionTemplateButtonsHtml()}</div>
    <div class="permission-agent-control permission-access-panel"><div class="permission-access-panel-title"><div><button type="button" class="permission-collapse" aria-label="折叠 Agent 权限配置" aria-expanded="true" aria-controls="permission-agent-panel-body" onclick="togglePermissionAccessPanel(this)"><i data-lucide="chevron-up"></i></button><b>Agent 权限配置</b><span>${tenantScope?'选择该品牌购买并可向下授权的 Agent':isCreate?'选择成员加入后可以看见和使用的 Agent':'选择该成员登录后可以看见和使用的 Agent'}</span></div><div class="permission-access-panel-meta"><em><b id="permission-agent-count" class="num">${draft.agents.length}</b> / ${permissionAssignableAgents().length}</em></div></div><div id="permission-agent-panel-body" class="permission-access-panel-body"><div class="permission-agent-picker"><div class="permission-agent-groups">${permissionAgentGroupsHtml()}</div></div></div></div>
-   <div class="permission-agent-control permission-access-panel permission-page-control"><div class="permission-access-panel-title"><div><button type="button" class="permission-collapse" aria-label="折叠可访问的页面" aria-expanded="true" aria-controls="permission-page-panel-body" onclick="togglePermissionAccessPanel(this)"><i data-lucide="chevron-up"></i></button><b>可访问的页面</b><span>控制一级入口与对应二级页面</span></div><div class="permission-access-panel-meta"><em><b id="permission-page-count" class="num">${draft.pages.filter(id=>permissionAssignablePages().includes(id)).length}</b> / ${permissionAssignablePages().length}</em></div></div><div id="permission-page-panel-body" class="permission-access-panel-body"><div class="permission-page-picker"><div class="permission-agent-groups">${permissionPageGroupsHtml()}</div></div></div></div>
   </div>
  </section>`;
 }
@@ -469,7 +419,7 @@ function applyPermissionAgentTemplate(id){
  const agentCount=$('permission-agent-count'),pageCount=$('permission-page-count');if(agentCount)agentCount.textContent=S.permDraft.agents.length;if(pageCount)pageCount.textContent=S.permDraft.pages.length;[...new Set(PERMISSION_AGENTS.map(a=>a.domain))].forEach(refreshPermissionAgentGroup);refreshPermissionPageGroups();refreshPermissionAgentTemplates();
 }
 function refreshPermissionAgentTemplates(){
- const active=permissionActiveAgentTemplate();document.querySelectorAll('.permission-template-button').forEach(button=>{const on=button.dataset.template===active;button.classList.toggle('on',on);button.setAttribute('aria-pressed',on);});$('permission-template-custom')?.classList.toggle('on',active==='custom');
+ const active=permissionActiveAgentTemplate();document.querySelectorAll('.permission-template-button').forEach(button=>{const on=button.dataset.template===active;button.classList.toggle('on',on);button.setAttribute('aria-pressed',on);});
 }
 function togglePermissionAgentDomain(domain,checked){
  const ids=permissionAssignableAgents().filter(a=>a.domain===domain).map(a=>a.id),set=new Set(S.permDraft.agents);ids.forEach(id=>checked?set.add(id):set.delete(id));S.permDraft.agents=[...set];
@@ -510,22 +460,22 @@ function drawPermissionMember(){
  const draft=S.permDraft,projects=permissionAssignableProjects(),readonly=m.role==='admin';
  $('dw').innerHTML=`<div class="dw-h permission-drawer-head">${permissionCloseButton()}${permissionAvatar(m,'lg')}<div><div class="ty">${readonly?'管理员权限 · 仅查看':'成员权限'}</div><h3 id="permission-drawer-title">${esc(m.name)}</h3></div></div>
   <div class="dw-b permission-drawer-body" onclick="if(S.permBrandPickerOpen)togglePermissionBrandPicker(false)">
-   ${readonly?'<div class="permission-note neutral permission-tenant-note"><i data-lucide="eye"></i><span>这里展示管理员账号当前可访问的项目、页面与 Agent；配置由超级管理员统一调整。</span></div>':''}
-   <section class="permission-form-section permission-invite-details"><div class="permission-section-title"><div><h4>账号信息</h4><p>账号信息仅供查看，不可在此修改。</p></div></div><div class="permission-invite-fields"><label class="permission-field"><span>姓名</span><input value="${esc(m.name)}" readonly aria-readonly="true"></label><label class="permission-field"><span>账号 ID</span><input value="${esc(permissionAccountId(m))}" readonly aria-readonly="true"></label><label class="permission-field permission-field-wide"><span>密码</span><span class="permission-password readonly"><input id="permission-account-password" type="password" value="${esc(permissionAccountPassword(m))}" readonly aria-readonly="true"><button id="permission-password-toggle" type="button" aria-label="显示密码" aria-pressed="false" onclick="togglePermissionPassword()"><i data-lucide="eye"></i></button></span></label></div></section>
+   ${readonly?'<div class="permission-note neutral permission-tenant-note"><i data-lucide="eye"></i><span>管理员默认拥有全部页面；这里展示当前可访问的项目与 Agent，配置由超级管理员统一调整。</span></div>':''}
+   <section class="permission-form-section permission-invite-details"><div class="permission-section-title"><div><h4>账号信息</h4><p>账号信息仅供查看，不可在此修改。</p></div></div><div class="permission-invite-fields"><label class="permission-field"><span>账号 ID</span><input value="${esc(permissionAccountId(m))}" readonly aria-readonly="true"></label><label class="permission-field"><span>密码</span><span class="permission-password readonly"><input id="permission-account-password" type="password" value="${esc(permissionAccountPassword(m))}" readonly aria-readonly="true"><button id="permission-password-toggle" type="button" aria-label="显示密码" aria-pressed="false" onclick="togglePermissionPassword()"><i data-lucide="eye"></i></button></span></label></div></section>
    <section class="permission-form-section"><div class="permission-section-title"><div><h4>可访问的项目</h4><p>项目名称可以使用对应品牌名，默认提供 15 个项目。</p></div><span><b id="permission-project-count" class="num">${draft.projects.length}</b> / ${projects.length}</span></div>
     <div class="permission-brand-picker" onclick="event.stopPropagation()"><div class="permission-brand-select" role="button" tabindex="0" aria-label="选择可访问的项目" onclick="togglePermissionBrandPicker()" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();togglePermissionBrandPicker()}"><span id="permission-brand-summary" class="permission-brand-summary">${permissionBrandSummary()}</span><button type="button" class="permission-brand-toggle" aria-label="展开项目选择" aria-expanded="false" onclick="event.stopPropagation();togglePermissionBrandPicker()"><i data-lucide="chevron-down"></i></button></div><div id="permission-brand-dropdown" class="permission-brand-dropdown" hidden><div class="permission-brand-search"><i data-lucide="search"></i><input id="permission-brand-search-input" placeholder="搜索项目" aria-label="搜索项目" oninput="filterPermissionBrands(this.value);$('permission-brand-search-clear').hidden=!this.value"><button id="permission-brand-search-clear" type="button" aria-label="清除搜索内容" hidden onclick="clearPermissionBrandSearch()">×</button></div><div class="permission-brand-actions"><label><input id="permission-brand-all" type="checkbox" onchange="toggleAllPermissionBrands(this.checked)"><span class="permission-check"></span><b>全部项目</b></label></div><div class="permission-brand-options">${projects.map(p=>`<label class="permission-brand-option" data-brand-id="${p.id}" data-search="${esc(p.name.toLowerCase())}"><input type="checkbox" value="${p.id}" ${draft.projects.includes(p.id)?'checked':''} onchange="togglePermissionDraftProject('${p.id}',this.checked)"><span class="permission-check"></span><b>${esc(p.name)}</b></label>`).join('')}<div id="permission-brand-empty" class="permission-brand-empty" hidden>没有找到项目</div></div></div></div>
    </section>
    ${permissionAccessControlHtml(false,readonly?'tenant':'member')}
   </div>
   <div class="dw-f permission-drawer-foot">${readonly?'<span></span><div><button class="btn" onclick="closeDw()">关闭</button></div>':`<button class="btn ghost permission-disable" onclick="togglePermissionMemberStatus('${m.id}')">${m.status==='disabled'?'恢复成员':'停用成员'}</button><div><button class="btn ghost" onclick="closeDw()">取消</button><button class="btn" onclick="savePermissionMember()">保存更改</button></div>`}</div>`;
- refreshPermissionBrandPicker();refreshPermissionPageGroups();[...new Set(PERMISSION_AGENTS.map(a=>a.domain))].forEach(refreshPermissionAgentGroup);
+ refreshPermissionBrandPicker();[...new Set(PERMISSION_AGENTS.map(a=>a.domain))].forEach(refreshPermissionAgentGroup);
  if(readonly)$('dw').querySelectorAll('.permission-brand-options input,.permission-brand-actions input,.permission-agent-options input,.permission-template-button').forEach(control=>control.disabled=true);
  if(window.lucide)lucide.createIcons();
 }
 function savePermissionMember(){
  const m=PERMISSION_MEMBERS.find(x=>x.id===S.permMemberId);if(!m)return;
  if(m.role!=='member')return;
- const available=new Set(permissionTenantAgents().map(agent=>agent.id)),projects=new Set(permissionAssignableProjects().map(project=>project.id)),pages=new Set(permissionTenantPages());m.agents=[...S.permDraft.agents].filter(agent=>available.has(agent));m.projects=[...S.permDraft.projects].filter(project=>projects.has(project));m.pages=[...(S.permDraft.pages||[])].filter(page=>pages.has(page));if(!permissionCanAccessView(S.view)){S.view=permissionFirstView();S.tid=null;S.hist=[];}closeDw();renderNav();render();toast('成员权限已更新');
+ const available=new Set(permissionTenantAgents().map(agent=>agent.id)),projects=new Set(permissionAssignableProjects().map(project=>project.id));m.agents=[...S.permDraft.agents].filter(agent=>available.has(agent));m.projects=[...S.permDraft.projects].filter(project=>projects.has(project));m.pages=[...permissionTenantPages()];if(!permissionCanAccessView(S.view)){S.view=permissionFirstView();S.tid=null;S.hist=[];}closeDw();renderNav();render();toast('成员权限已更新');
 }
 function togglePermissionMemberStatus(id){
  const m=PERMISSION_MEMBERS.find(x=>x.id===id);if(!m)return;
@@ -556,99 +506,59 @@ function savePermissionAgent(){
  closeDw();render();toast('Agent 授权成员已更新');
 }
 
-function openPermissionPlatformAgent(id){
- const agent=PERMISSION_AGENTS.find(item=>item.id===id);if(!agent)return;
- S.permAgentId=id;S.permAgentDraft=PERMISSION_TENANT_ADMINS.filter(admin=>admin.agents.includes(id)).map(admin=>admin.id);
- drawPermissionPlatformAgent();permissionDrawerOpen();
-}
-function togglePermissionPlatformAgentAdmin(id,checked){
- const selected=new Set(S.permAgentDraft);checked?selected.add(id):selected.delete(id);S.permAgentDraft=[...selected];
- const count=$('permission-tenant-agent-count');if(count)count.textContent=S.permAgentDraft.length;
-}
-function drawPermissionPlatformAgent(){
- const agent=PERMISSION_AGENTS.find(item=>item.id===S.permAgentId);if(!agent)return;
- $('dw').innerHTML=`<div class="dw-h permission-drawer-head">${permissionCloseButton()}<span class="permission-agent-mark large" style="--agent:${agent.color}"><i data-lucide="bot"></i></span><div><div class="ty">超级管理员 · Agent 管理</div><h3 id="permission-drawer-title">${esc(agent.name)}</h3><span>${esc(agent.domain)}</span></div></div>
-  <div class="dw-b permission-drawer-body"><div class="permission-note neutral"><i data-lucide="shield-check"></i><span>在这里授权品牌管理员账号。管理员只能把已获得的 Agent 继续分配给自己的成员。</span></div>
-   <section class="permission-form-section"><div class="permission-section-title"><div><h4>可使用的管理员账号</h4><p>取消勾选后，该品牌及其成员将不能继续进入或运行此 Agent。</p></div><span><b id="permission-tenant-agent-count" class="num">${S.permAgentDraft.length}</b> 个账号</span></div>
-    <div class="permission-member-checks">${PERMISSION_TENANT_ADMINS.map(admin=>`<label><input type="checkbox" ${S.permAgentDraft.includes(admin.id)?'checked':''} onchange="togglePermissionPlatformAgentAdmin('${admin.id}',this.checked)"><span class="permission-check"></span>${permissionAvatar(admin)}<span><b>${esc(admin.name)}</b><small>${admin.status==='disabled'?'账号已停用 · 授权可预先保留':`品牌账号 ID：${esc(admin.accountId)}`}</small></span></label>`).join('')}</div>
-   </section>
-  </div><div class="dw-f permission-drawer-foot"><span></span><div><button class="btn ghost" onclick="closeDw()">取消</button><button class="btn" onclick="savePermissionPlatformAgent()">保存更改</button></div></div>`;
- if(window.lucide)lucide.createIcons();
-}
-function savePermissionPlatformAgent(){
- const id=S.permAgentId,selected=new Set(S.permAgentDraft);
- PERMISSION_TENANT_ADMINS.forEach(admin=>{const agents=new Set(admin.agents);selected.has(admin.id)?agents.add(id):agents.delete(id);admin.agents=[...agents];});
- closeDw();render();toast('Agent 的品牌账号授权已更新');
-}
-
 function openPermissionTenantAdmin(id){
  const admin=id?PERMISSION_TENANT_ADMINS.find(item=>item.id===id):null;
  S.permAgentScope='platform';
  S.permTenantAdminId=admin?.id||null;
- S.permDraft={agents:[...(admin?.agents||[])],projects:[],pages:[...(admin?.pages||[])],recipes:[...(admin?.recipes||[])]};
+ S.permDraft={agents:admin?[...(admin.agents||[])]:PERMISSION_AGENTS.map(agent=>agent.id),projects:[],pages:admin?[...(admin.pages||[])]:[...PERMISSION_PAGE_IDS]};
  drawPermissionTenantAdmin();permissionDrawerOpen();
-}
-function permissionTenantRecipeHtml(){
- const selected=S.permDraft.recipes||[],available=permissionRecipeCatalog();
- return `<section class="permission-form-section permission-recipe-select"><div class="permission-section-title"><div><h4>配方授权</h4><p>直接分配 Agents 中已创建的配方，并自动加入所需的 Agent 与页面权限。</p></div><span><b id="permission-selected-recipe-count" class="num">${selected.length}</b> 个配方</span></div><div class="permission-recipe-options">${available.map(recipe=>`<label><input type="checkbox" ${selected.includes(recipe.id)?'checked':''} onchange="togglePermissionTenantRecipe('${recipe.id}',this.checked)"><span class="permission-check"></span><span class="permission-recipe-option-mark"><i data-lucide="workflow"></i></span><span><b>${esc(recipe.name)}</b><small>${recipe.domain} · ${recipe.agents.length} 步 · 用过 ${recipe.used} 次</small></span></label>`).join('')}</div></section>`;
-}
-function togglePermissionTenantRecipe(id,checked){
- const catalog=permissionRecipeCatalog(),oldSelected=new Set(S.permDraft.recipes||[]),oldDeps=catalog.filter(recipe=>oldSelected.has(recipe.id));
- const oldAgents=new Set(oldDeps.flatMap(recipe=>recipe.agents)),oldPages=new Set(oldDeps.flatMap(recipe=>recipe.pages));
- const manualAgents=(S.permDraft.agents||[]).filter(agent=>!oldAgents.has(agent)),manualPages=(S.permDraft.pages||[]).filter(page=>!oldPages.has(page));
- checked?oldSelected.add(id):oldSelected.delete(id);S.permDraft.recipes=[...oldSelected];
- const recipes=catalog.filter(recipe=>oldSelected.has(recipe.id));S.permDraft.agents=[...new Set([...manualAgents,...recipes.flatMap(recipe=>recipe.agents)])];S.permDraft.pages=[...new Set([...manualPages,...recipes.flatMap(recipe=>recipe.pages)])];
- const count=$('permission-selected-recipe-count');if(count)count.textContent=S.permDraft.recipes.length;
- document.querySelectorAll('.permission-agent-option input').forEach(input=>input.checked=S.permDraft.agents.includes(input.value));document.querySelectorAll('.permission-page-option input').forEach(input=>input.checked=S.permDraft.pages.includes(input.value));
- [...new Set(PERMISSION_AGENTS.map(agent=>agent.domain))].forEach(refreshPermissionAgentGroup);refreshPermissionPageGroups();const agentCount=$('permission-agent-count'),pageCount=$('permission-page-count');if(agentCount)agentCount.textContent=S.permDraft.agents.length;if(pageCount)pageCount.textContent=S.permDraft.pages.length;refreshPermissionAgentTemplates();
 }
 function drawPermissionTenantAdmin(){
  const admin=PERMISSION_TENANT_ADMINS.find(item=>item.id===S.permTenantAdminId),creating=!admin;
  const draft=admin||{name:'',accountId:'',password:'',projectId:'',memberUsed:0,memberLimit:5,projectUsed:0,projectLimit:15,monthlyCredits:100000,expires:'2027-09-30',status:'active'};
  $('dw').innerHTML=`<div class="dw-h permission-drawer-head">${permissionCloseButton()}<span class="permission-invite-mark"><i data-lucide="${creating?'user-plus':'shield-check'}"></i></span><div><div class="ty">超级管理员 · 品牌账号</div><h3 id="permission-drawer-title">${creating?'创建管理员':esc(admin.name)}</h3></div></div>
   <div class="dw-b permission-drawer-body">
-   <div class="permission-note neutral permission-tenant-note"><i data-lucide="info"></i><span>管理员只能访问这里开放的页面、使用已授权的 Agent，并且最多创建指定数量的子账号。</span></div>
-   <section class="permission-form-section permission-invite-details"><div class="permission-section-title"><div><h4>管理员账号</h4><p>管理员账号同时作为品牌账号，账号 ID 是该品牌的唯一标识。</p></div></div><div class="permission-invite-fields"><label class="permission-field"><span>管理员账号</span><input id="permission-tenant-name" required value="${esc(draft.name)}" placeholder="例如：u2c"></label><label class="permission-field"><span>账号 ID</span><input id="permission-tenant-account" required minlength="3" maxlength="32" value="${esc(draft.accountId)}" placeholder="例如：u2c"></label><label class="permission-field permission-field-wide"><span>登录密码</span><span class="permission-password"><input id="permission-account-password" type="password" required minlength="6" value="${esc(draft.password)}" placeholder="至少输入 6 位密码"><button id="permission-password-toggle" type="button" aria-label="显示密码" aria-pressed="false" onclick="togglePermissionPassword()"><i data-lucide="eye"></i></button></span></label></div></section>
+   <div class="permission-note neutral permission-tenant-note"><i data-lucide="info"></i><span>管理员默认拥有全部页面，可使用已授权的 Agent，并且最多创建指定数量的子账号。</span></div>
+   <section class="permission-form-section permission-invite-details"><div class="permission-section-title"><div><h4>管理员账号</h4><p>管理员账号同时作为品牌账号和唯一标识。</p></div></div><div class="permission-invite-fields"><label class="permission-field"><span>管理员账号</span><input id="permission-tenant-name" required minlength="3" maxlength="32" value="${esc(draft.accountId||draft.name)}" placeholder="例如：u2c"></label><label class="permission-field"><span>登录密码</span><span class="permission-password"><input id="permission-account-password" type="password" required minlength="6" value="${esc(draft.password)}" placeholder="至少输入 6 位密码"><button id="permission-password-toggle" type="button" aria-label="显示密码" aria-pressed="false" onclick="togglePermissionPassword()"><i data-lucide="eye"></i></button></span></label></div></section>
    <section class="permission-form-section"><div class="permission-section-title"><div><h4>服务配置</h4><p>设置子账号与项目额度、每月积分、服务有效期和账号状态。</p></div></div><div class="permission-tenant-fields"><label class="permission-field"><span>子账号上限</span><input id="permission-tenant-limit" type="number" min="${draft.memberUsed||1}" max="999" value="${draft.memberLimit}" required></label><label class="permission-field"><span>项目上限</span><input id="permission-tenant-project-limit" type="number" min="${draft.projectUsed||1}" max="999" value="${draft.projectLimit}" required></label><label class="permission-field"><span>每月积分</span><input id="permission-tenant-credits" type="number" min="0" step="1000" value="${draft.monthlyCredits}" required></label><label class="permission-field"><span>服务期限</span><input id="permission-tenant-expiry" type="date" value="${esc(draft.expires)}" required></label><label class="permission-field permission-field-wide"><span>账号状态</span><select id="permission-tenant-status"><option value="active" ${draft.status==='active'?'selected':''}>正常</option><option value="disabled" ${draft.status==='disabled'?'selected':''}>停用</option></select></label></div></section>
-   ${permissionTenantRecipeHtml()}
    ${permissionAccessControlHtml(creating,'tenant')}
   </div><div class="dw-f permission-drawer-foot"><span></span><div><button class="btn ghost" onclick="closeDw()">取消</button><button class="btn" onclick="savePermissionTenantAdmin()">${creating?'创建管理员':'保存更改'}</button></div></div>`;
- [...new Set(PERMISSION_AGENTS.map(agent=>agent.domain))].forEach(refreshPermissionAgentGroup);refreshPermissionPageGroups();
+ [...new Set(PERMISSION_AGENTS.map(agent=>agent.domain))].forEach(refreshPermissionAgentGroup);
  if(window.lucide)lucide.createIcons();
 }
 function savePermissionTenantAdmin(){
- const nameInput=$('permission-tenant-name'),accountInput=$('permission-tenant-account'),passwordInput=$('permission-account-password'),limitInput=$('permission-tenant-limit'),projectLimitInput=$('permission-tenant-project-limit'),creditsInput=$('permission-tenant-credits'),expiryInput=$('permission-tenant-expiry'),statusInput=$('permission-tenant-status');
- if(!nameInput||!accountInput||!passwordInput||!limitInput||!projectLimitInput||!creditsInput||!expiryInput||!statusInput)return;
- if(!nameInput.reportValidity()||!accountInput.reportValidity()||!passwordInput.reportValidity()||!limitInput.reportValidity()||!projectLimitInput.reportValidity()||!creditsInput.reportValidity()||!expiryInput.reportValidity())return;
- const current=PERMISSION_TENANT_ADMINS.find(item=>item.id===S.permTenantAdminId),accountId=accountInput.value.trim();
- if(PERMISSION_TENANT_ADMINS.some(item=>item.id!==current?.id&&item.accountId.toLowerCase()===accountId.toLowerCase())){toast('该管理员账号 ID 已存在');accountInput.focus();return;}
- const name=nameInput.value.trim(),memberLimit=Number(limitInput.value),projectLimit=Number(projectLimitInput.value),monthlyCredits=Number(creditsInput.value);
- if(current){const oldAccountId=current.accountId,linked=PERMISSION_MEMBERS.find(member=>member.role==='admin'&&permissionAccountId(member).toLowerCase()===oldAccountId.toLowerCase());Object.assign(current,{name,accountId,password:passwordInput.value,memberLimit,projectLimit,monthlyCredits,expires:expiryInput.value,status:statusInput.value,recipes:[...(S.permDraft.recipes||[])],agents:[...S.permDraft.agents],pages:[...S.permDraft.pages]});if(linked){linked.name=name;linked.accountId=accountId;linked.password=passwordInput.value;linked.initials=current.initials;linked.pages=[...current.pages];}}
- else{const initials=(name.match(/[A-Za-z]/g)||name.split('')).slice(0,2).join('').toUpperCase()||'AD';PERMISSION_TENANT_ADMINS.unshift({id:'tenant-admin-'+Date.now(),name,accountId,password:passwordInput.value,initials,color:'#7C3AED',projectId:'',recipes:[...(S.permDraft.recipes||[])],agents:[...S.permDraft.agents],pages:[...S.permDraft.pages],memberUsed:0,memberLimit,projectUsed:0,projectLimit,monthlyCredits,expires:expiryInput.value,createdAt:new Date().toISOString().slice(0,10),status:statusInput.value,last:'尚未登录'});}
+ const nameInput=$('permission-tenant-name'),passwordInput=$('permission-account-password'),limitInput=$('permission-tenant-limit'),projectLimitInput=$('permission-tenant-project-limit'),creditsInput=$('permission-tenant-credits'),expiryInput=$('permission-tenant-expiry'),statusInput=$('permission-tenant-status');
+ if(!nameInput||!passwordInput||!limitInput||!projectLimitInput||!creditsInput||!expiryInput||!statusInput)return;
+ if(!nameInput.reportValidity()||!passwordInput.reportValidity()||!limitInput.reportValidity()||!projectLimitInput.reportValidity()||!creditsInput.reportValidity()||!expiryInput.reportValidity())return;
+ const current=PERMISSION_TENANT_ADMINS.find(item=>item.id===S.permTenantAdminId),accountId=nameInput.value.trim();
+ if(PERMISSION_TENANT_ADMINS.some(item=>item.id!==current?.id&&item.accountId.toLowerCase()===accountId.toLowerCase())){toast('该管理员账号已存在');nameInput.focus();return;}
+ const name=accountId,memberLimit=Number(limitInput.value),projectLimit=Number(projectLimitInput.value),monthlyCredits=Number(creditsInput.value),recipes=permissionRecipeCatalog().map(recipe=>recipe.id),pages=[...PERMISSION_PAGE_IDS];
+ if(current){const oldAccountId=current.accountId,linked=PERMISSION_MEMBERS.find(member=>member.role==='admin'&&permissionAccountId(member).toLowerCase()===oldAccountId.toLowerCase());Object.assign(current,{name,accountId,password:passwordInput.value,memberLimit,projectLimit,monthlyCredits,expires:expiryInput.value,status:statusInput.value,recipes,agents:[...S.permDraft.agents],pages});if(linked){linked.name=name;linked.accountId=accountId;linked.password=passwordInput.value;linked.initials=current.initials;linked.pages=[...pages];}}
+ else{const initials=(name.match(/[A-Za-z]/g)||name.split('')).slice(0,2).join('').toUpperCase()||'AD';PERMISSION_TENANT_ADMINS.unshift({id:'tenant-admin-'+Date.now(),name,accountId,password:passwordInput.value,initials,color:'#7C3AED',projectId:'',recipes,agents:[...S.permDraft.agents],pages,memberUsed:0,memberLimit,projectUsed:0,projectLimit,monthlyCredits,expires:expiryInput.value,createdAt:new Date().toISOString().slice(0,10),status:statusInput.value,last:'尚未登录'});}
  closeDw();render();toast(current?'管理员账号已更新':'管理员账号已创建');
 }
 
 function openPermissionCreateAccount(){
  const tenant=permissionCurrentTenantAdmin();if(tenant&&tenant.memberUsed>=tenant.memberLimit){toast(`子账号额度已用完（${tenant.memberUsed} / ${tenant.memberLimit}）`);return;}
- S.permAgentScope='tenant';S.permDraft={agents:[],projects:[],pages:[]};S.permBrandPickerOpen=false;
- const draft=S.permDraft,projects=permissionAssignableProjects();
+ S.permAgentScope='tenant';S.permDraft={agents:permissionTenantAgents().map(agent=>agent.id),projects:[],pages:[...permissionTenantPages()]};S.permBrandPickerOpen=false;
+ const draft=S.permDraft,projects=permissionAssignableProjects(),accountPrefix=(tenant?.accountId||'u2c').replace(/:$/,'');
  $('dw').innerHTML=`<div class="dw-h permission-drawer-head">${permissionCloseButton()}<span class="permission-invite-mark"><i data-lucide="user-plus"></i></span><div><div class="ty">成员管理</div><h3 id="permission-drawer-title">创建账号</h3></div></div>
   <div class="dw-b permission-drawer-body" onclick="if(S.permBrandPickerOpen)togglePermissionBrandPicker(false)">
-   <section class="permission-form-section permission-invite-details"><div class="permission-section-title"><div><h4>账号信息</h4><p>设置成员的登录账号和初始密码。</p></div></div><div class="permission-invite-fields"><label class="permission-field"><span>姓名</span><input id="permission-invite-name" required autocomplete="off" placeholder="输入成员姓名"></label><label class="permission-field"><span>账号 ID</span><input id="permission-account-id" required minlength="3" maxlength="32" autocomplete="username" placeholder="例如：sophie"></label><label class="permission-field permission-field-wide"><span>密码</span><span class="permission-password"><input id="permission-account-password" type="password" required minlength="6" autocomplete="new-password" placeholder="至少输入 6 位密码" onkeydown="if(event.key==='Enter')submitPermissionAccount()"><button id="permission-password-toggle" type="button" aria-label="显示密码" aria-pressed="false" onclick="togglePermissionPassword()"><i data-lucide="eye"></i></button></span></label></div></section>
+   <section class="permission-form-section permission-invite-details"><div class="permission-section-title"><div><h4>账号信息</h4><p>设置成员的登录账号和初始密码。</p></div></div><div class="permission-invite-fields"><label class="permission-field"><span>账号 ID</span><span class="permission-account-prefix"><b>${esc(accountPrefix)}:</b><input id="permission-account-id" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]{3,32}" title="请输入 3–32 位字母、数字、点、下划线或连字符" autocomplete="username" placeholder="例如：sophie"></span></label><label class="permission-field"><span>密码</span><span class="permission-password"><input id="permission-account-password" type="password" required minlength="6" autocomplete="new-password" placeholder="至少输入 6 位密码" onkeydown="if(event.key==='Enter')submitPermissionAccount()"><button id="permission-password-toggle" type="button" aria-label="显示密码" aria-pressed="false" onclick="togglePermissionPassword()"><i data-lucide="eye"></i></button></span></label></div></section>
    <section class="permission-form-section"><div class="permission-section-title"><div><h4>可访问的项目</h4><p>项目名称可以使用对应品牌名，默认提供 15 个项目。</p></div><span><b id="permission-project-count" class="num">${draft.projects.length}</b> / ${projects.length}</span></div>
     <div class="permission-brand-picker" onclick="event.stopPropagation()"><div class="permission-brand-select" role="button" tabindex="0" aria-label="选择可访问的项目" onclick="togglePermissionBrandPicker()" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();togglePermissionBrandPicker()}"><span id="permission-brand-summary" class="permission-brand-summary">${permissionBrandSummary()}</span><button type="button" class="permission-brand-toggle" aria-label="展开项目选择" aria-expanded="false" onclick="event.stopPropagation();togglePermissionBrandPicker()"><i data-lucide="chevron-down"></i></button></div><div id="permission-brand-dropdown" class="permission-brand-dropdown" hidden><div class="permission-brand-search"><i data-lucide="search"></i><input id="permission-brand-search-input" placeholder="搜索项目" aria-label="搜索项目" oninput="filterPermissionBrands(this.value);$('permission-brand-search-clear').hidden=!this.value"><button id="permission-brand-search-clear" type="button" aria-label="清除搜索内容" hidden onclick="clearPermissionBrandSearch()">×</button></div><div class="permission-brand-actions"><label><input id="permission-brand-all" type="checkbox" onchange="toggleAllPermissionBrands(this.checked)"><span class="permission-check"></span><b>全部项目</b></label></div><div class="permission-brand-options">${projects.map(p=>`<label class="permission-brand-option" data-brand-id="${p.id}" data-search="${esc(p.name.toLowerCase())}"><input type="checkbox" value="${p.id}" onchange="togglePermissionDraftProject('${p.id}',this.checked)"><span class="permission-check"></span><b>${esc(p.name)}</b></label>`).join('')}<div id="permission-brand-empty" class="permission-brand-empty" hidden>没有找到项目</div></div></div></div>
    </section>
    ${permissionAccessControlHtml(true)}
   </div><div class="dw-f permission-drawer-foot"><span></span><div><button class="btn ghost" onclick="closeDw()">取消</button><button class="btn" onclick="submitPermissionAccount()">创建账号</button></div></div>`;
- refreshPermissionBrandPicker();refreshPermissionPageGroups();[...new Set(PERMISSION_AGENTS.map(a=>a.domain))].forEach(refreshPermissionAgentGroup);permissionDrawerOpen();setTimeout(()=>$('permission-invite-name')?.focus(),30);
+ refreshPermissionBrandPicker();[...new Set(PERMISSION_AGENTS.map(a=>a.domain))].forEach(refreshPermissionAgentGroup);permissionDrawerOpen();setTimeout(()=>$('permission-account-id')?.focus(),30);
 }
 function submitPermissionAccount(){
- const nameInput=$('permission-invite-name'),accountInput=$('permission-account-id'),passwordInput=$('permission-account-password');if(!nameInput||!accountInput||!passwordInput)return;
- if(!nameInput.reportValidity()||!accountInput.reportValidity()||!passwordInput.reportValidity())return;
- const name=nameInput.value.trim(),accountId=accountInput.value.trim(),password=passwordInput.value,role='member';
+ const accountInput=$('permission-account-id'),passwordInput=$('permission-account-password');if(!accountInput||!passwordInput)return;
+ if(!accountInput.reportValidity()||!passwordInput.reportValidity())return;
+ const tenant=permissionCurrentTenantAdmin(),accountPrefix=(tenant?.accountId||'u2c').replace(/:$/,''),accountSuffix=accountInput.value.trim(),name=accountSuffix,accountId=`${accountPrefix}:${accountSuffix}`,password=passwordInput.value,role='member';
  if(PERMISSION_MEMBERS.some(m=>permissionAccountId(m).toLowerCase()===accountId.toLowerCase())){toast('该账号 ID 已存在');accountInput.focus();return;}
- const tenant=permissionCurrentTenantAdmin();if(tenant&&tenant.memberUsed>=tenant.memberLimit){toast(`子账号额度已用完（${tenant.memberUsed} / ${tenant.memberLimit}）`);return;}
- const available=new Set(permissionTenantAgents().map(agent=>agent.id)),brandScope=new Set(permissionAssignableProjects().map(project=>project.id)),pageScope=new Set(permissionTenantPages()),agents=[...S.permDraft.agents].filter(agent=>available.has(agent)),projects=[...S.permDraft.projects].filter(project=>brandScope.has(project)),pages=[...(S.permDraft.pages||[])].filter(page=>pageScope.has(page));
+ if(tenant&&tenant.memberUsed>=tenant.memberLimit){toast(`子账号额度已用完（${tenant.memberUsed} / ${tenant.memberLimit}）`);return;}
+ const available=new Set(permissionTenantAgents().map(agent=>agent.id)),brandScope=new Set(permissionAssignableProjects().map(project=>project.id)),agents=[...S.permDraft.agents].filter(agent=>available.has(agent)),projects=[...S.permDraft.projects].filter(project=>brandScope.has(project)),pages=[...permissionTenantPages()];
  const initials=(name.match(/[A-Za-z]/g)||name.split('')).slice(0,2).join('').toUpperCase();
  PERMISSION_MEMBERS.push({id:'member-'+Date.now(),name,accountId,password,initials:initials||'ME',color:'#7C3AED',role,status:'active',createdAt:new Date().toISOString().slice(0,10),last:'尚未登录',agents,projects,pages});
  if(tenant)tenant.memberUsed++;
