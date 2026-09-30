@@ -98,7 +98,7 @@ const PM_PROMPT_SECTIONS=[{id:'shared',name:'全程共用片段'},{id:'direction
 const PM_PROMPT_SECTION_BLOCKS={shared:[0],direction:[1],layout:[2,3],image:[],revision:[]};
 function pmSectionBlockIndexes(d){return PM_PROMPT_SECTION_BLOCKS[d.sectionTab||'shared']||[]}
 function pmSectionBlockMeta(d,text,index,total){const section=d.sectionTab||'shared';if(section==='shared')return{group:'片段',name:'广告合规规则'};if(section==='direction')return{group:'主提示词',name:'三套方向与配色'};if(section==='layout')return index===2?{group:'主提示词',name:'任务与素材'}:{group:'片段',name:'页面结构与视觉要求'};return promptBlockMeta(text,index,total)}
-function openPrompt(id){const p=findPrompt(id);if(!p)return;const note=p.note&&p.note!=='—'?p.note:'';S.pm={id,name:p.n,body:p.body,blocks:promptBodyBlocks(p.body),sectionTab:'shared',blockOpen:0,model:p.model,note,originalName:p.n,originalBody:p.body,originalModel:p.model,originalNote:note,lastSavedAt:p.savedAt||p.at||'',dirty:false,tab:0,slotsOpen:false,reasonOpen:false,chat:[]};drawPrompt();$('mod').classList.add('on')}
+function openPrompt(id){const p=findPrompt(id);if(!p)return;const note=p.note&&p.note!=='—'?p.note:'';S.pm={id,name:p.n,body:p.body,blocks:promptBodyBlocks(p.body),sectionTab:'shared',blockOpen:0,model:p.model,note,originalName:p.n,originalBody:p.body,originalModel:p.model,originalNote:note,lastSavedAt:p.savedAt||p.at||'',dirty:false,tab:0,slotsOpen:false,reasonOpen:false,runMode:'step',chat:[]};drawPrompt();$('mod').classList.add('on')}
 function pmSet(k,v){if(!S.pm)return;S.pm[k]=v;S.pm.dirty=S.pm.name!==S.pm.originalName||S.pm.body!==S.pm.originalBody||S.pm.model!==S.pm.originalModel||S.pm.note!==S.pm.originalNote;pmDirtyState()}
 function pmDirtyState(){if(!S.pm)return;const p=findPrompt(S.pm.id),unsaved=!!(p&&p.isNew)||S.pm.dirty,b=$('pm-dirty'),reset=$('pm-reset');if(b){b.hidden=false;b.style.display='';b.className='chip '+(unsaved?'pm-dirty':'pm-saved');b.textContent=unsaved?'未保存':'最近保存 '+(S.pm.lastSavedAt||'刚刚')}if(reset)reset.disabled=!S.pm.dirty}
 function promptSaveTime(){const d=new Date(),pad=n=>String(n).padStart(2,'0');return d.getFullYear()+'.'+pad(d.getMonth()+1)+'.'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())}
@@ -153,11 +153,18 @@ function mountPromptChrome(){
   if(reason){const disclosure=document.createElement('div');disclosure.innerHTML=pmReasonDisclosureHtml(S.pm);reason.replaceWith(disclosure.firstElementChild)}
  }
  applyPromptState(editor);
+ mountPromptRunControls(editor);
  let wide=$('pm-wide');
  if(!wide){wide=document.createElement('button');wide.id='pm-wide';wide.className='ib';wide.setAttribute('onclick','pmToggleWide()');rightHead.appendChild(wide)}
  wide.title=S.pmWide?'收缩':'加宽';wide.setAttribute('aria-label',wide.title);
  wide.innerHTML=S.pmWide?'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v5H3M16 3v5h5M8 21v-5H3M16 21v-5h5"/></svg>':'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>';
  const close=editor.querySelector('.pm-l>.pm-h>.ib');if(close)rightHead.appendChild(close);
+}
+function mountPromptRunControls(editor){
+ const input=editor.querySelector('#pm-in'),row=input&&input.nextElementSibling;if(!row)return;
+ const p=findPrompt(S.pm&&S.pm.id),canRun=!!(p&&['test','live','pending','retired'].includes(p.st)),mode=S.pm?.runMode==='full'?'full':'step';
+ row.className='pm-run-toolbar';
+ row.innerHTML=`<span class="pm-sandbox-note">沙箱 · 不产生产出物</span><div class="pm-run-actions"><div class="pm-run-mode" role="group" aria-label="运行方式"><button type="button" data-mode="step" class="${mode==='step'?'on':''}" aria-pressed="${mode==='step'}" onclick="pmSetRunMode('step')">单步调整</button><button type="button" data-mode="full" class="${mode==='full'?'on':''}" aria-pressed="${mode==='full'}" onclick="pmSetRunMode('full')">跑全程</button></div><button class="btn sm pm-send" onclick="pmRun()" ${canRun?'':'disabled'}>发送</button></div>`;
 }
 function applyPromptState(editor){
  const p=findPrompt(S.pm.id),d=S.pm;if(!p)return;const creator=isPromptCreator(p),reviewer=isPromptReviewer(),editable=p.st==='test'&&creator&&d.tab===0,canRun=['test','live','pending','retired'].includes(p.st),pending=otherPendingPromptVersion(p),body=editor.querySelector('.pm-l>.pm-b'),footer=editor.querySelector('.pm-l>.pm-f');
@@ -186,10 +193,15 @@ function pmResetChat(){
  if(chat)chat.innerHTML='<div class="csa-empty" style="padding:var(--sp-5) 16px">还没跑过。下面写一句试试。</div>';
  if(input){input.value='';input.focus()}
 }
+function pmSetRunMode(mode){
+ const d=S.pm;if(!d||!['step','full'].includes(mode))return;d.runMode=mode;
+ document.querySelectorAll('.pm-run-mode button').forEach(button=>{const active=button.dataset.mode===mode;button.classList.toggle('on',active);button.setAttribute('aria-pressed',String(active))});
+}
 function pmRun(){
  const d=S.pm,p=findPrompt(d.id),i=$('pm-in'),text=i&&i.value.trim();if(!text){toast('先写一句输入');return}
  if(!['test','live','pending','retired'].includes(p.st)){toast('当前状态不能试跑');return}
- d.chat.push({r:'me',t:text},{r:'ag',t:p.shared?'片段已注入；下游提示词会继续生成。':'已按当前提示词生成示例结果。变量槽与约束检查通过。'});
+ const full=d.runMode==='full';
+ d.chat.push({r:'me',t:text},{r:'ag',t:full?'已按完整链路跑完全程，各步骤衔接与约束检查通过。':p.shared?'片段已注入；下游提示词会继续生成。':'已完成当前步骤的调整测试。变量槽与约束检查通过。'});
  if(p.st==='test')p.testRuns=(p.testRuns||0)+1;
  const chat=$('pm-chat');if(chat){chat.innerHTML=pmChatHtml(p,d.chat);chat.scrollTop=chat.scrollHeight}if(i){i.value='';i.focus()}
 }

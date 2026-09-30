@@ -329,17 +329,25 @@ function kBody(){
  return `<div class="allclear">「${t}」不在本次原型范围内。</div>`;
 }
 function kProductSources(){
+ if(S.kpBusiness===undefined)S.kpBusiness='ecommerce';
  if(S.kpSource===undefined)S.kpSource='goods';
  if(S.kpPlatform===undefined)S.kpPlatform='全部';
+ const businessTabs=[['ecommerce','电商'],['tob','ToB']];
  const tabs=[['goods','商品'],['inventory','货品'],['manual','手工表单']];
  const platforms=['全部','天猫','抖音','京东'];
+ const businessNav=`<div class="seg kp-business-nav" role="tablist" aria-label="产品业务分类">${businessTabs.map(([key,label])=>`<button type="button" role="tab" aria-selected="${S.kpBusiness===key}" class="${S.kpBusiness===key?'on':''}" onclick="S.kpBusiness='${key}';render()">${label}</button>`).join('')}</div>`;
+ if(S.kpBusiness==='tob')return `<div class="kp-source-nav">${businessNav}${kpTobViewNav()}<span class="kp-source-spacer"></span>${kpManualTools()}</div>${kpTobProducts()}`;
  const tertiary=S.kpSource==='manual'?kpManualViewNav():`<div class="kp-platform-nav" role="tablist" aria-label="平台筛选">${platforms.map(platform=>`<button type="button" role="tab" aria-selected="${S.kpPlatform===platform}" class="${S.kpPlatform===platform?'on':''}" onclick="S.kpPlatform='${platform}';render()">${platform}</button>`).join('')}</div>`;
  const content=S.kpSource==='manual'?kProds():kpSyncedTable(S.kpSource,S.kpPlatform);
- return `<div class="kp-source-nav"><div class="seg" role="tablist" aria-label="产品二级分类">${tabs.map(([key,label])=>`<button type="button" role="tab" aria-selected="${S.kpSource===key}" class="${S.kpSource===key?'on':''}" onclick="S.kpSource='${key}';render()">${label}</button>`).join('')}</div>${tertiary}${S.kpSource==='manual'?`<span class="kp-source-spacer"></span>${kpManualTools()}`:''}</div>${content}`;
+ return `<div class="kp-source-nav">${businessNav}<div class="seg" role="tablist" aria-label="产品二级分类">${tabs.map(([key,label])=>`<button type="button" role="tab" aria-selected="${S.kpSource===key}" class="${S.kpSource===key?'on':''}" onclick="S.kpSource='${key}';render()">${label}</button>`).join('')}</div>${tertiary}${S.kpSource==='manual'?`<span class="kp-source-spacer"></span>${kpManualTools()}`:''}</div>${content}`;
 }
 function kpManualViewNav(){
  const view=S.productCols||'all';
  return `<div class="kp-views" aria-label="产品字段分组">${[['all','全部列'],['required','必填信息'],['commerce','电商运营'],['customs','海关申报']].map(([key,label])=>`<button type="button" data-kp-view="${key}" class="${view===key?'on':''}" aria-pressed="${view===key}" onclick="kpSetView('${key}')">${label}</button>`).join('')}</div>`;
+}
+function kpTobViewNav(){
+ const view=S.tobProductCols||'all';
+ return `<div class="kp-views" aria-label="ToB 产品字段分组">${[['all','全部列'],['required','必填信息'],['optional','选填信息']].map(([key,label])=>`<button type="button" data-kp-tob-view="${key}" class="${view===key?'on':''}" aria-pressed="${view===key}" onclick="kpSetTobView('${key}')">${label}</button>`).join('')}</div>`;
 }
 function kpManualTools(){
  return `<div class="kp-tools"><div class="kp-import"><button class="btn ghost sm" aria-haspopup="true" aria-expanded="false" onclick="kpToggleImport(this)"><i data-lucide="upload"></i>导入</button><div class="kp-import-menu" hidden><button onclick="kpStartImport()"><i data-lucide="file-up"></i>导入 Excel / CSV</button><button onclick="kpDownloadTemplate()"><i data-lucide="download"></i>下载导入模板</button></div></div><button class="btn sm" onclick="kpAddProduct()"><i data-lucide="circle-plus"></i>新增产品</button></div>`;
@@ -640,15 +648,37 @@ const KP_FIELDS=[
  ['hsCode','商品HS编码','customs',150,'text'],['barcode','商品国际条形码','customs',172,'text'],
  ['originCountry','原产国','customs',116,'select'],['declarationUnit','申报单位','customs',96,'select']
 ];
-const KP_SELECTS={category:['面部精华','面霜','洁面','面膜','其他'],originCountry:['法国','中国','日本','韩国','美国','其他'],declarationUnit:['瓶','盒','支','套','千克']};
+const KP_TOB_FIELDS=[
+ ['productImage','产品图片','required',138,'image'],['productName','产品名称','required',220,'text'],
+ ['industry','所属行业','required',150,'select'],['introduction','产品简介','required',240,'area'],
+ ['coreSellingPoints','核心卖点','required',220,'area'],['productContent','产品内容','required',260,'area'],
+ ['isPhysical','是否实体产品','required',130,'select'],['qualification','资质','optional',200,'area'],
+ ['caseData','案例数据','optional',220,'area'],['officialUrl','官方链接','optional',220,'text'],
+ ['notes','备注','optional',220,'area']
+];
+const KP_SELECTS={category:['面部精华','面霜','洁面','面膜','其他'],originCountry:['法国','中国','日本','韩国','美国','其他'],declarationUnit:['瓶','盒','支','套','千克'],industry:['美妆护肤','食品饮料','消费电子','企业服务','医疗健康','其他'],isPhysical:['是','否']};
 function kpIcons(){if(window.lucide)lucide.createIcons({attrs:{width:15,height:15,'stroke-width':1.8}});}
 function kpPrepareProducts(){
  // Keep seed identity stable when rows are inserted or deleted; drafts remain independent.
  PRODS.forEach((p,i)=>{if(p._seedIndex===undefined)p._seedIndex=i;if(!p._tableReady){p.details=productSeed(p,i);p._tableReady=true;}});
 }
+function kpPrepareTobProducts(){
+ kpPrepareProducts();
+ const seeds=[
+  {industry:'美妆护肤',introduction:'专注敏感肌屏障修护的精华产品。',coreSellingPoints:'温和修护、舒缓泛红、轻薄易吸收。',productContent:'适用于品牌介绍、渠道合作与专业采购场景。',isPhysical:'是',qualification:'法国原产地证明、产品检测报告',caseData:'已服务 12 家专业美容渠道',officialUrl:'https://a8oparis.example.com/serum',notes:'支持渠道资料包'},
+  {industry:'美妆护肤',introduction:'面向敏感肌人群的高浓度安瓶精华。',coreSellingPoints:'小规格高活性、便携独立包装。',productContent:'适合院线体验、礼赠及周期护理方案。',isPhysical:'是',qualification:'产品检测报告',caseData:'院线试用满意度 92%',officialUrl:'https://a8oparis.example.com/ampoule',notes:''},
+  {industry:'美妆护肤',introduction:'用于日常维稳与屏障修护的舒缓面霜。',coreSellingPoints:'长效保湿、舒缓干痒、肤感轻盈。',productContent:'可用于零售、机构护理及组合套装。',isPhysical:'是',qualification:'',caseData:'复购率较同系列均值高 18%',officialUrl:'https://a8oparis.example.com/cream',notes:'可提供试用装'}
+ ];
+ PRODS.forEach((p,i)=>{if(p._tobReady)return;const seed=p._blank?{}:seeds[p._seedIndex%seeds.length]||seeds[0];Object.assign(p.details,{productName:p._blank?'':p.n,industry:'',introduction:'',coreSellingPoints:'',productContent:'',isPhysical:'',qualification:'',caseData:'',officialUrl:'',notes:'',...seed});p._tobReady=true;});
+}
 function kpColumns(view=S.productCols||'all'){
  return KP_FIELDS.filter(f=>view==='all'||f[2]===view||f[0]==='productImage'||f[0]==='declarationName');
 }
+function kpTobColumns(view=S.tobProductCols||'all'){
+ return KP_TOB_FIELDS.filter(f=>view==='all'||f[2]===view||f[0]==='productImage'||f[0]==='productName');
+}
+function kpTobComplete(details){return KP_TOB_FIELDS.filter(field=>field[2]==='required').every(field=>field[4]==='image'?Array.isArray(details[field[0]])&&details[field[0]].length:productHas(details[field[0]]));}
+function kpTobSummary(){const complete=PRODS.filter(product=>kpTobComplete(product.details)).length;return `<span>${PRODS.length} 个产品</span><span class="kp-legend"><i class="kp-dot"></i>必填信息完整 ${complete}</span><span class="kp-legend"><i class="kp-dot missing"></i>必填信息待完善 ${PRODS.length-complete}</span>`;}
 function kpValue(d,key){return key==='dimensions'?['length','width','height'].map(k=>d[k]??'').join(' × '):String(d[key]??'');}
 function kpSummary(){
  const complete=PRODS.filter(p=>productStats(p.details).base===9).length;
@@ -685,7 +715,7 @@ function kpImages(p,i,key){
  return `<div class="kp-images">${files.slice(0,2).map((file,n)=>`<button type="button" class="kp-thumb" title="${esc(kpImageName(file))}" aria-label="预览${key==='productImage'?'产品图片':'包装图'} ${n+1}" onclick="kpOpenImage(${i},'${key}',${n})"><img src="${esc(kpImageUrl(file,key,n,i))}" alt="${esc(kpImageName(file))}" loading="lazy">${n===1&&more?`<span class="kp-more">+${more}</span>`:''}</button>`).join('')}<button type="button" class="kp-upload" title="添加图片" aria-label="添加${key==='productImage'?'产品图片':'包装图'}" aria-haspopup="true" aria-expanded="${menuOpen}" onclick="kpToggleImageMenu(event,${i},'${key}')"><i data-lucide="upload"></i></button></div>`;
 }
 function kpTableCell(p,i,f){
- const [key,label,, ,type]=f,cls=key==='productImage'?'kp-main-image':key==='declarationName'?'kp-name':'';
+ const [key,label,, ,type]=f,cls=key==='productImage'?'kp-main-image':['declarationName','productName'].includes(key)?'kp-name':'';
  if(type==='image')return `<td class="${cls}">${kpImages(p,i,key)}</td>`;
  if(key==='storeUrl')return `<td class="${cls}">${kpStoreUrlCell(p,i,label)}</td>`;
  const value=kpCellText(p.details,key);
@@ -702,30 +732,44 @@ function kProds(){
   </table>${!PRODS.length?'<div class="kp-empty">暂无产品</div>':''}</div>${kpFieldNote()}
  </section>`;
 }
+function kpTobProducts(){
+ kpPrepareTobProducts();
+ const view=S.tobProductCols||'all',columns=kpTobColumns(view),width=columns.reduce((sum,field)=>sum+field[3],104);
+ return `<section id="kp-products">
+  <div class="kp-summary" id="kp-summary">${kpTobSummary()}</div>
+  <div class="kp-scroll" tabindex="0" aria-label="ToB 产品信息表格"><table class="kp-table" style="width:${width}px"><colgroup><col style="width:48px">${columns.map(field=>`<col style="width:${field[3]}px">`).join('')}<col style="width:56px"></colgroup>
+   <thead><tr><th scope="col" class="kp-status">状态</th>${columns.map(field=>`<th scope="col" class="${field[0]==='productImage'?'kp-main-image':field[0]==='productName'?'kp-name':''}">${field[1]}${field[2]==='required'?'<span class="req">*</span>':''}</th>`).join('')}<th scope="col" class="kp-ops">操作</th></tr></thead>
+   <tbody>${PRODS.map((product,index)=>{const complete=kpTobComplete(product.details);return `<tr data-product-row="${index}"><td class="kp-status"><span class="kp-dot ${complete?'':'missing'}" role="img" aria-label="${complete?'必填信息完整':'必填信息待完善'}" title="${complete?'必填信息完整':'必填信息待完善'}"></span></td>${columns.map(field=>kpTableCell(product,index,field)).join('')}<td class="kp-ops"><div class="kp-row-actions"><button class="kp-icon danger" title="删除产品" aria-label="删除产品" onclick="kpAskDelete(${index})"><i data-lucide="trash-2"></i></button></div></td></tr>`;}).join('')}</tbody>
+  </table>${!PRODS.length?'<div class="kp-empty">暂无 ToB 产品</div>':''}</div>
+ </section>`;
+}
 function kpRefresh(reset=false){
  if(S.kpFinishCellEdit){const finish=S.kpFinishCellEdit;S.kpFinishCellEdit=null;finish(true);}
  kpCloseImageMenu();
  const root=$('kp-products');if(!root)return;
  const scroll=root.querySelector('.kp-scroll'),left=reset?0:scroll?.scrollLeft||0,top=reset?0:scroll?.scrollTop||0;
- root.outerHTML=kProds();const next=$('kp-products').querySelector('.kp-scroll');next.scrollLeft=left;next.scrollTop=top;kpIcons();
+ root.outerHTML=S.kpBusiness==='tob'?kpTobProducts():kProds();const next=$('kp-products').querySelector('.kp-scroll');next.scrollLeft=left;next.scrollTop=top;kpIcons();
 }
 function kpSetView(view){
  S.productCols=view;document.querySelectorAll('[data-kp-view]').forEach(button=>{const on=button.dataset.kpView===view;button.classList.toggle('on',on);button.setAttribute('aria-pressed',String(on));});kpRefresh(true);
 }
+function kpSetTobView(view){
+ S.tobProductCols=view;document.querySelectorAll('[data-kp-tob-view]').forEach(button=>{const on=button.dataset.kpTobView===view;button.classList.toggle('on',on);button.setAttribute('aria-pressed',String(on));});kpRefresh(true);
+}
 function kpSyncStatus(i){
  const p=PRODS[i];if(!p)return;
- const ok=productStats(p.details).base===9,dot=document.querySelector(`[data-product-row="${i}"] .kp-dot`);
+ const ok=S.kpBusiness==='tob'?kpTobComplete(p.details):productStats(p.details).base===9,dot=document.querySelector(`[data-product-row="${i}"] .kp-dot`);
  if(dot){dot.classList.toggle('missing',!ok);dot.title=ok?'必填信息完整':'必填信息待完善';dot.setAttribute('aria-label',dot.title);}
- if($('kp-summary'))$('kp-summary').innerHTML=kpSummary();
+ if($('kp-summary'))$('kp-summary').innerHTML=S.kpBusiness==='tob'?kpTobSummary():kpSummary();
 }
 function kpSetValue(p,key,value){
  if(key==='dimensions')['length','width','height'].forEach((k,i)=>p.details[k]=value[i]||'');else p.details[key]=value;
- if(p._blank&&key==='declarationName')p.n=value||'未命名产品';
+ if(p._blank&&['declarationName','productName'].includes(key))p.n=value||'未命名产品';
 }
 function kpEditCell(el,i,key){
  if(el.classList.contains('editing'))return;
  if(S.kpFinishCellEdit&&S.kpFinishCellEdit(true)===false)return;
- const p=PRODS[i],field=KP_FIELDS.find(f=>f[0]===key);if(!p||!field)return;
+ const p=PRODS[i],field=KP_FIELDS.find(f=>f[0]===key)||KP_TOB_FIELDS.find(f=>f[0]===key);if(!p||!field)return;
  const type=field[4],d=p.details;el.classList.add('editing');el.removeAttribute('title');el.innerHTML='';
  let inputs=[];
  if(type==='dimensions'){
@@ -772,8 +816,8 @@ function kpBlankDetails(){
 function kpNewSku(reserved=[]){let n=1;while([...PRODS,...reserved].some(p=>p.sku==='NEW-'+String(n).padStart(3,'0')))n++;return 'NEW-'+String(n).padStart(3,'0');}
 function kpNewProduct(reserved=[]){return {n:'未命名产品',sku:kpNewSku(reserved),need:{电商:0,报关:0},miss:[],st:'bad',g:['#C4B5FD','#7C3AED'],_blank:true,_tableReady:true,_seedIndex:0,details:kpBlankDetails()};}
 function kpAddProduct(){
- kpPrepareProducts();PRODS.unshift(kpNewProduct());kpRefresh(true);
- const cell=document.querySelector('[data-product-row="0"] .kp-name .kp-cell');if(cell)kpEditCell(cell,0,'declarationName');
+ kpPrepareProducts();const product=kpNewProduct();if(S.kpBusiness==='tob')product._tobReady=true;PRODS.unshift(product);kpRefresh(true);
+ const cell=document.querySelector('[data-product-row="0"] .kp-name .kp-cell');if(cell)kpEditCell(cell,0,S.kpBusiness==='tob'?'productName':'declarationName');
 }
 function kpDialog(title,body,foot){
  $('mod').classList.remove('asset-mode','plan-mode');

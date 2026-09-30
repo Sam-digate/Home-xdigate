@@ -80,6 +80,7 @@
 .product-section-title{font-size:var(--fs-xs);font-weight:700;color:var(--t2);margin:var(--sp-1) 0 10px;grid-column:1/-1}
 /* Knowledge-base product table; isolated from task product cards. */
 .kp-source-nav{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin:0 0 var(--sp-3)}
+.kp-business-nav{margin-right:var(--sp-1)}.kp-tob-placeholder{min-height:180px}
 .kp-source-spacer{flex:1 1 20px}
 .kp-platform-nav{display:inline-flex;align-items:center;gap:var(--sp-1);padding:var(--sp-1);border-radius:9px;background:#EAE5FA;flex-wrap:nowrap;margin:0 0 var(--sp-3)}
 .kp-source-nav .kp-platform-nav{margin:0}
