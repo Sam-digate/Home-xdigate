@@ -909,36 +909,39 @@ function kpSpreadsheet(){
  return kpSpreadsheetPromise;
 }
 async function kpDownloadTemplate(){
- kpCloseImport();
- try{const xlsx=await kpSpreadsheet(),headers=['SKU',...KP_FIELDS.map(f=>f[1]+(f[2]==='required'?'*':''))],wb=xlsx.utils.book_new();xlsx.utils.book_append_sheet(wb,xlsx.utils.aoa_to_sheet([headers]),'产品');xlsx.writeFile(wb,'产品导入模板.xlsx');}
+ kpCloseImport();const tob=S.kpBusiness==='tob',fields=tob?KP_TOB_FIELDS:KP_FIELDS;
+ try{const xlsx=await kpSpreadsheet(),headers=[...(tob?[]:['SKU']),...fields.map(f=>f[1]+(f[2]==='required'?'*':''))],wb=xlsx.utils.book_new();xlsx.utils.book_append_sheet(wb,xlsx.utils.aoa_to_sheet([headers]),tob?'ToB 产品':'产品');xlsx.writeFile(wb,tob?'ToB产品导入模板.xlsx':'产品导入模板.xlsx');}
  catch(e){toast('导入工具加载失败，请检查网络后重试');}
 }
 function kpNormHeader(v){return String(v||'').replace(/[\s*\/\-_:：·.（）()×]/g,'').toLowerCase();}
-function kpParseImport(rows){
- const map=new Map();KP_FIELDS.forEach(f=>{[f[0],f[1]].forEach(label=>map.set(kpNormHeader(label),f[0]));});
- Object.entries({产品图:'productImage',产品图片URL:'productImage',包装图URL:'packageImage',净重:'netWeight',规格:'dimensions','规格CM(长*宽*高)':'dimensions',SKU:'sku'}).forEach(([label,key])=>map.set(kpNormHeader(label),key));
+function kpParseImport(rows,business=S.kpBusiness){
+ const tob=business==='tob',fields=tob?KP_TOB_FIELDS:KP_FIELDS,map=new Map();fields.forEach(f=>{[f[0],f[1]].forEach(label=>map.set(kpNormHeader(label),f[0]));});
+ const aliases=tob?{产品图:'productImage',产品图片URL:'productImage',SKU:'sku'}:{产品图:'productImage',产品图片URL:'productImage',包装图URL:'packageImage',净重:'netWeight',规格:'dimensions','规格CM(长*宽*高)':'dimensions',SKU:'sku'};
+ Object.entries(aliases).forEach(([label,key])=>map.set(kpNormHeader(label),key));
+ const expected=tob?'productName':'declarationName',foreign=tob?'商品申报名称':'产品名称';
+ if(rows.length&&!Object.keys(rows[0]).some(header=>map.get(kpNormHeader(header))===expected)&&Object.keys(rows[0]).some(header=>kpNormHeader(header)===kpNormHeader(foreign)))return {products:[],duplicates:0,wrongTemplate:true};
  const products=[];let duplicates=0;
  rows.forEach(row=>{
-  const p=kpNewProduct(products);let found=false;
+  const p=kpNewProduct(products);if(tob){fields.forEach(field=>{p.details[field[0]]=field[4]==='image'?[]:'';});p._tobReady=true;}let found=false;
   Object.entries(row).forEach(([header,raw])=>{
    const key=map.get(kpNormHeader(header)),value=String(raw??'').trim();if(!key||!value)return;found=true;
    if(key==='sku'){p.sku=value;return;}
    if(key==='productImage'||key==='packageImage'){p.details[key]=value.split(/[\n|]+/).map(v=>v.trim()).filter(kpSafeImageUrl).map((url,n)=>({name:`${key==='productImage'?'产品图':'包装图'}${n+1}`,url}));return;}
    if(key==='dimensions'){const dims=value.split(/[xX×*＊]/).map(v=>v.trim().replace(/\s*cm$/i,''));if(dims.length===3&&dims.every(v=>v!==''&&Number.isFinite(Number(v))&&Number(v)>=0))kpSetValue(p,key,dims);return;}
-   p.details[key]=value;
+   p.details[key]=key==='isPhysical'?({'true':'是','false':'否','1':'是','0':'否','yes':'是','no':'否'}[value.toLowerCase()]||value):value;
   });
   if(!found)return;if([...PRODS,...products].some(x=>x.sku===p.sku)){duplicates++;return;}
-  p.n=p.details.declarationName||'未命名产品';products.push(p);
+  p.n=p.details[tob?'productName':'declarationName']||'未命名产品';products.push(p);
  });
  return {products,duplicates};
 }
 function kpStartImport(){
- kpCloseImport();const input=document.createElement('input');input.type='file';input.accept='.xlsx,.xls,.csv';
+ kpCloseImport();const business=S.kpBusiness,tob=business==='tob',input=document.createElement('input');input.type='file';input.accept='.xlsx,.xls,.csv';
  input.onchange=async()=>{
   const file=input.files?.[0];if(!file)return;
   try{const xlsx=await kpSpreadsheet(),book=xlsx.read(await file.arrayBuffer(),{type:'array'}),sheet=book.Sheets[book.SheetNames[0]],rows=xlsx.utils.sheet_to_json(sheet,{defval:'',raw:false});
-   const result=kpParseImport(rows);if(!result.products.length){toast(result.duplicates?'导入的 SKU 已存在，未修改原有产品':'未识别到产品数据，请使用导入模板');return;}
-   S.kpImportRows=result.products;const complete=result.products.filter(p=>productStats(p.details).base===9).length;
+   const result=kpParseImport(rows,business);if(result.wrongTemplate){toast(tob?'文件使用了电商字段，请下载 ToB 产品导入模板后重试':'文件使用了 ToB 字段，请下载电商产品导入模板后重试');return;}if(!result.products.length){toast(result.duplicates?'导入的 SKU 已存在，未修改原有产品':'未识别到产品数据，请使用'+(tob?' ToB 产品':'电商产品')+'导入模板');return;}
+   S.kpImportRows=result.products;const complete=result.products.filter(p=>tob?kpTobComplete(p.details):productStats(p.details).base===9).length;
    kpDialog('导入产品',`<div>${esc(file.name)}</div><strong>${result.products.length} 个产品</strong> · 必填完整 ${complete} · 待完善 ${result.products.length-complete}${result.duplicates?`<div>已跳过 ${result.duplicates} 个重复 SKU</div>`:''}<div class="kp-import-results">${result.products.map(p=>`<div class="kp-import-result"><span>${esc(p.n)}</span><span>${esc(p.sku)}</span></div>`).join('')}</div>`,`<button class="btn ghost" onclick="closeMod()">取消</button><button class="btn" onclick="kpConfirmImport()">确认导入</button>`);
   }catch(e){toast('文件读取失败，请检查文件格式和网络后重试');}
  };input.click();
