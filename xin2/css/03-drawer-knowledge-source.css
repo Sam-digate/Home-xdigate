@@ -91,6 +91,7 @@
 .kp-sync-summary{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap;margin-bottom:var(--sp-2);font-size:var(--fs-xs);color:var(--t3)}
 .kp-sync-all{display:flex;flex-direction:column;gap:var(--sp-5)}.kp-sync-platform-group>h3{margin:0 0 var(--sp-2);font-size:var(--fs-md);color:var(--t1)}
 .kp-sync-summary-main{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap}
+.kp-sync-store{display:flex;min-width:0;flex-direction:column;gap:4px;line-height:1.4}.kp-sync-store-id{color:var(--t1);font-variant-numeric:tabular-nums}.kp-sync-store-name{overflow:hidden;color:var(--t2);font-size:var(--fs-xs);text-overflow:ellipsis;white-space:nowrap}
 .kp-sync-readonly{display:inline-flex;align-items:center;gap:6px}.kp-sync-readonly i{width:7px;height:7px;border-radius:50%;background:#10B981;box-shadow:0 0 0 3px #DDF9ED}
 .kp-sync-scroll{overflow:auto;border:1px solid var(--border);border-radius:8px;background:#fff;scrollbar-width:thin;scrollbar-color:#CDC6E7 #FAF9FF}
 .kp-sync-table{min-width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:var(--fs-sm);color:var(--t1)}

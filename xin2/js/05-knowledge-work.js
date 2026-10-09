@@ -354,17 +354,18 @@ function kpManualTools(){
 }
 const KP_SYNC_SCHEMAS={
  goods:{
-  天猫:[['platform','平台名称',100],['customerId','客户ID',110],['storeId','店铺ID',110],['name','商品名称',280],['numericId','商品数字编号',180],['categoryId','类目ID',130],['mainImageUrl','主图 URL',150]],
-  抖音:[['platform','平台名称',100],['customerId','客户ID',110],['storeId','店铺ID',110],['name','商品名称',280],['numericId','商品数字编号',180],['categoryId','类目ID',130],['mainImageUrl','主图 URL',150]],
-  京东:[['platform','平台名称',100],['customerId','客户ID',110],['storeId','店铺ID',110],['name','商品名称',280],['numericId','商品数字编号',180],['categoryId','类目ID',130],['mainImageUrl','主图 URL',150]]
+  天猫:[['platform','平台名称',100],['customerId','客户ID',110],['storeId','店铺ID',220],['name','商品名称',280],['numericId','商品数字编号',180],['categoryId','类目ID',130],['mainImageUrl','主图 URL',150]],
+  抖音:[['platform','平台名称',100],['customerId','客户ID',110],['storeId','店铺ID',220],['name','商品名称',280],['numericId','商品数字编号',180],['categoryId','类目ID',130],['mainImageUrl','主图 URL',150]],
+  京东:[['platform','平台名称',100],['customerId','客户ID',110],['storeId','店铺ID',220],['name','商品名称',280],['numericId','商品数字编号',180],['categoryId','类目ID',130],['mainImageUrl','主图 URL',150]]
  },
  inventory:{
-  天猫:[['platform','平台名称',100],['customerId','客户ID',100],['storeId','店铺ID',100],['itemId','货品ID',140],['itemCode','货品编码',150],['itemTitle','货品名称',220],['itemTitleEn','货品英文名称',220],['barcode','条码',150],['warehouseCode','仓库编码',130],['batchCode','库存批次号',140],['quantity','正品库存',100],['lockQuantity','锁定库存',100],['dueDate','失效日期',120],['produceDate','生产日期',120],['updatedAt','更新日期',150],['action','操作',80]],
-  抖音:[['platform','平台名称',100],['customerId','客户ID',100],['storeId','店铺ID',100],['itemId','货品ID',140],['itemCode','货品编码',150],['itemTitle','货品名称',220],['itemTitleEn','货品英文名称',220],['barcode','条码',150],['warehouseCode','仓库编码',130],['batchCode','库存批次号',140],['quantity','正品库存',100],['lockQuantity','锁定库存',100],['dueDate','失效日期',120],['produceDate','生产日期',120],['updatedAt','更新日期',150],['action','操作',80]],
-  京东:[['platform','平台名称',100],['customerId','客户ID',100],['storeId','店铺ID',100],['itemId','货品ID',140],['itemCode','货品编码',150],['itemTitle','货品名称',220],['itemTitleEn','货品英文名称',220],['barcode','条码',150],['warehouseCode','仓库编码',130],['batchCode','库存批次号',140],['quantity','正品库存',100],['lockQuantity','锁定库存',100],['dueDate','失效日期',120],['produceDate','生产日期',120],['updatedAt','更新日期',150],['action','操作',80]]
+  天猫:[['platform','平台名称',100],['customerId','客户ID',100],['storeId','店铺ID',220],['itemId','货品ID',140],['itemCode','货品编码',150],['itemTitle','货品名称',220],['itemTitleEn','货品英文名称',220],['barcode','条码',150],['warehouseCode','仓库编码',130],['batchCode','库存批次号',140],['quantity','正品库存',100],['lockQuantity','锁定库存',100],['dueDate','失效日期',120],['produceDate','生产日期',120],['updatedAt','更新日期',150],['action','操作',80]],
+  抖音:[['platform','平台名称',100],['customerId','客户ID',100],['storeId','店铺ID',220],['itemId','货品ID',140],['itemCode','货品编码',150],['itemTitle','货品名称',220],['itemTitleEn','货品英文名称',220],['barcode','条码',150],['warehouseCode','仓库编码',130],['batchCode','库存批次号',140],['quantity','正品库存',100],['lockQuantity','锁定库存',100],['dueDate','失效日期',120],['produceDate','生产日期',120],['updatedAt','更新日期',150],['action','操作',80]],
+  京东:[['platform','平台名称',100],['customerId','客户ID',100],['storeId','店铺ID',220],['itemId','货品ID',140],['itemCode','货品编码',150],['itemTitle','货品名称',220],['itemTitleEn','货品英文名称',220],['barcode','条码',150],['warehouseCode','仓库编码',130],['batchCode','库存批次号',140],['quantity','正品库存',100],['lockQuantity','锁定库存',100],['dueDate','失效日期',120],['produceDate','生产日期',120],['updatedAt','更新日期',150],['action','操作',80]]
  }
 };
 function kpSyncValue(p,i,kind,platform,key){
+ if(key==='storeId'){const storeName=({天猫:'A8OPARIS 官方旗舰店',抖音:'A8OPARIS 抖音官方旗舰店',京东:'A8OPARIS 京东自营旗舰店'})[platform]||'A8OPARIS 官方旗舰店';return `<div class=kp-sync-store><span class=kp-sync-store-id>20001</span><span class=kp-sync-store-name title=${esc(storeName)}>${esc(storeName)}</span></div>`;}
  const d=p.details,prefix={天猫:'TM',抖音:'DY',京东:'JD'}[platform],factor={天猫:1,抖音:.72,京东:.84}[platform];
  const values={
   platform:esc(platform),
