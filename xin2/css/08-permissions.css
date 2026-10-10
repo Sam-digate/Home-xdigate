@@ -180,3 +180,4 @@
 .general-session-drawer-doc h3{margin:0 0 10px;color:var(--t1);font-size:var(--fs-lg);line-height:1.4}
 .general-session-drawer-doc>div{font-size:var(--fs-sm);line-height:1.75;white-space:pre-wrap}
 .general-session-comments .msg>.avs{display:none}
+.permission-auto-grant{display:inline-flex;align-items:center;gap:8px;margin-top:10px;color:var(--t2);font-size:var(--fs-sm);cursor:pointer}.permission-template-buttons .permission-auto-grant{margin-top:0;margin-left:8px}.permission-auto-grant input{width:16px;height:16px;margin:0;accent-color:var(--primary)}.permission-auto-grant input:focus-visible{outline:2px solid var(--primary);outline-offset:3px}.permission-auto-grant-hint{display:block;flex-basis:100%;margin-top:5px;color:var(--t2);font-size:var(--fs-xs);line-height:1.5}

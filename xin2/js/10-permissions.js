@@ -69,6 +69,29 @@ const PERMISSION_MEMBERS=[
  {id:'lily',name:'Lily',email:'lily@xdigate.cn',initials:'LI',color:'#D97706',role:'member',status:'active',createdAt:'2026-07-19',last:'尚未登录',agents:[],projects:[],pages:[...PERMISSION_MEMBER_PAGE_IDS]}
 ];
 
+function permissionAutoGrantDraft(account){return {autoGrantProjects:account?.autoGrantProjects!==false,autoGrantAgents:account?.autoGrantAgents!==false};}
+function permissionAutoGrantHtml(kind){
+ const key=kind==='projects'?'autoGrantProjects':'autoGrantAgents',label=kind==='projects'?'项目':'Agent';
+ return `<label class="permission-auto-grant"><input type="checkbox" ${S.permDraft[key]?'checked':''} onchange="S.permDraft.${key}=this.checked"><span>自动授权以后新增的${label}</span></label>`;
+}
+function permissionAutoGrantSave(){return {...permissionAutoGrantDraft(S.permDraft),autoGrantKnownProjects:PERMISSION_PROJECTS.map(project=>project.id),autoGrantKnownAgents:PERMISSION_AGENTS.map(agent=>agent.id)};}
+function permissionSyncAutoGrants(){
+ const sync=(account,key,catalog,allowed)=>{
+  const flag=key==='projects'?'autoGrantProjects':'autoGrantAgents',knownKey=key==='projects'?'autoGrantKnownProjects':'autoGrantKnownAgents';
+  if(!account[flag])return;
+  if(!Array.isArray(account[knownKey])){account[knownKey]=catalog.map(item=>item.id);return;}
+  const known=new Set(account[knownKey]),grants=new Set(account[key]||[]);
+  catalog.forEach(item=>{if(known.has(item.id)||!allowed.has(item.id))return;grants.add(item.id);known.add(item.id);});
+  account[key]=[...grants];account[knownKey]=[...known];
+ };
+ PERMISSION_TENANT_ADMINS.forEach(admin=>sync(admin,'agents',PERMISSION_AGENTS,new Set(PERMISSION_AGENTS.map(agent=>agent.id))));
+ PERMISSION_MEMBERS.forEach(member=>{
+  const accountId=permissionAccountId(member),prefix=accountId.includes(':')?accountId.split(':')[0]:'u2c',tenant=PERMISSION_TENANT_ADMINS.find(admin=>admin.accountId.toLowerCase()===prefix.toLowerCase());
+  if(!tenant)return;
+  sync(member,'agents',PERMISSION_AGENTS,new Set(tenant.agents||[]));
+  sync(member,'projects',PERMISSION_PROJECTS,new Set(tenant.projects||PERMISSION_PROJECTS.map(project=>project.id)));
+ });
+}
 function permissionRecipePages(domain){
  const pages=['today','work','know.src','know.out','agent.registry','agent.recipes'];
  if(['内容','电商','KOL'].includes(domain))pages.push('camp');
@@ -80,7 +103,7 @@ function permissionRecipeCatalog(){
  return RECIPES.filter(recipe=>!recipe.cad).map(recipe=>({id:recipe.id,name:recipe.n,description:recipe.d,agents:[...recipe.ag],pages:permissionRecipePages(recipe.dom),domain:recipe.dom,used:recipe.used||0,source:recipe}));
 }
 
-function permissionCurrentMember(){return PERMISSION_MEMBERS.find(member=>member.id===currentUser());}
+function permissionCurrentMember(){permissionSyncAutoGrants();return PERMISSION_MEMBERS.find(member=>member.id===currentUser());}
 function permissionCurrentTenantAdmin(){
  const member=permissionCurrentMember(),accountId=member?permissionAccountId(member):'',tenantAccountId=accountId.includes(':')?accountId.split(':')[0]:accountId;
  return PERMISSION_TENANT_ADMINS.find(admin=>admin.accountId.toLowerCase()===tenantAccountId.toLowerCase());
@@ -110,6 +133,7 @@ function permissionCanAccessView(view){
 function permissionFirstView(){return ['today','work','prop','camp','anal','know','agent','permission'].find(permissionCanAccessView)||'today';}
 
 function permissionState(){
+ permissionSyncAutoGrants();
  const systemRecipeIds=permissionRecipeCatalog().map(recipe=>recipe.id);PERMISSION_TENANT_ADMINS.forEach(admin=>{admin.recipes=[...systemRecipeIds];admin.pages=[...PERMISSION_PAGE_IDS];});
  const memberPrefix=(permissionCurrentTenantAdmin()?.accountId||'u2c').replace(/:$/,'');PERMISSION_MEMBERS.forEach(member=>{if(member.role!=='member')return;member.pages=[...PERMISSION_MEMBER_PAGE_IDS];const accountId=permissionAccountId(member);if(accountId&&!accountId.includes(':'))member.accountId=`${memberPrefix}:${accountId}`;});
  if(!S.permLevel)S.permLevel='super';
@@ -341,7 +365,7 @@ function closePermissionFocus(){
 function permissionCloseButton(){return `<button class="permission-close" onclick="closeDw()" aria-label="关闭"><i data-lucide="x"></i></button>`;}
 function permissionTemplateButtonsHtml(){
  const active=permissionActiveAgentTemplate();
- return `<div class="permission-agent-templates"><div class="permission-template-label"><span class="permission-template-icon"><i data-lucide="sparkles"></i></span><div><b>快捷权限</b><span>默认开放全部 Agent 权限</span></div><em>快捷配置</em></div><div class="permission-template-buttons">${PERMISSION_AGENT_TEMPLATES.map(template=>`<button type="button" class="permission-template-button ${active===template.id?'on':''}" data-template="${template.id}" aria-pressed="${active===template.id}" onclick="applyPermissionAgentTemplate('${template.id}')">${esc(template.name)}</button>`).join('')}</div></div>`;
+ return `<div class="permission-agent-templates"><div class="permission-template-label"><span class="permission-template-icon"><i data-lucide="sparkles"></i></span><div><b>快捷权限</b><span>默认开放全部 Agent 权限</span></div><em>快捷配置</em></div><div class="permission-template-buttons">${PERMISSION_AGENT_TEMPLATES.map(template=>`<button type="button" class="permission-template-button ${active===template.id?'on':''}" data-template="${template.id}" aria-pressed="${active===template.id}" onclick="applyPermissionAgentTemplate('${template.id}')">${esc(template.name)}</button>`).join('')}${permissionAutoGrantHtml('agents')}</div></div>`;
 }
 function permissionAgentGroupsHtml(){
  const selected=S.permDraft.agents||[],available=permissionAssignableAgents();
@@ -392,7 +416,7 @@ function openPermissionMember(id){
   const admin=PERMISSION_TENANT_ADMINS.find(item=>item.accountId.toLowerCase()===permissionAccountId(m).toLowerCase());
   S.permDraft={agents:[...(admin?.agents||PERMISSION_AGENTS.map(agent=>agent.id))],projects:PERMISSION_PROJECTS.map(project=>project.id),pages:[...(admin?.pages||PERMISSION_PAGE_IDS)]};
  }else S.permDraft={agents:[...m.agents].filter(agent=>permissionAssignableAgents().some(item=>item.id===agent)),projects:[...(m.projects||[])].filter(project=>permissionAssignableProjects().some(item=>item.id===project)),pages:[...(m.pages||PERMISSION_MEMBER_PAGE_IDS)].filter(page=>permissionAssignablePages().includes(page))};
- S.permBrandPickerOpen=false;drawPermissionMember();permissionDrawerOpen();
+ Object.assign(S.permDraft,permissionAutoGrantDraft(m));S.permBrandPickerOpen=false;drawPermissionMember();permissionDrawerOpen();
 }
 function togglePermissionDraftAgent(id,checked){
  if(!permissionAssignableAgents().some(agent=>agent.id===id))return;
@@ -407,7 +431,7 @@ function permissionActiveAgentTemplate(){
  const agents=[...S.permDraft.agents].sort().join('|'),pages=[...(S.permDraft.pages||[])].sort().join('|');return PERMISSION_AGENT_TEMPLATES.find(template=>[...permissionAgentTemplateIds(template)].sort().join('|')===agents&&[...permissionTemplatePageIds(template)].sort().join('|')===pages)?.id||'custom';
 }
 function applyPermissionAgentTemplate(id){
- const template=PERMISSION_AGENT_TEMPLATES.find(t=>t.id===id);if(!template)return;S.permDraft.agents=permissionAgentTemplateIds(template);S.permDraft.pages=permissionTemplatePageIds(template);
+ const template=PERMISSION_AGENT_TEMPLATES.find(t=>t.id===id);if(!template)return;const allSelected=id==='all'&&permissionAgentTemplateIds(template).every(agent=>S.permDraft.agents.includes(agent));S.permDraft.agents=allSelected?[]:permissionAgentTemplateIds(template);S.permDraft.pages=permissionTemplatePageIds(template);
  document.querySelectorAll('.permission-agent-option input').forEach(input=>{input.checked=S.permDraft.agents.includes(input.value);});
  document.querySelectorAll('.permission-page-option input').forEach(input=>{input.checked=S.permDraft.pages.includes(input.value);});
  const agentCount=$('permission-agent-count'),pageCount=$('permission-page-count');if(agentCount)agentCount.textContent=S.permDraft.agents.length;if(pageCount)pageCount.textContent=S.permDraft.pages.length;[...new Set(PERMISSION_AGENTS.map(a=>a.domain))].forEach(refreshPermissionAgentGroup);refreshPermissionPageGroups();refreshPermissionAgentTemplates();
@@ -475,18 +499,19 @@ function drawPermissionMember(){
    <section class="permission-form-section permission-invite-details"><div class="permission-section-title"><div><h4>账号信息</h4><p>${readonly?'品牌主管理员账号仅供查看。':'账号建立后姓名、账号 ID 和密码不可修改，可调整账号角色。'}</p></div></div><div class="permission-invite-fields">${accountFields}</div></section>
    <section class="permission-form-section"><div class="permission-section-title"><div><h4>可访问的项目</h4><p>项目名称可以使用对应品牌名，默认提供 15 个项目。</p></div><div class="permission-project-title-actions">${readonly?'':permissionProjectCopyControl(m.id)}<span><b id="permission-project-count" class="num">${draft.projects.length}</b> / ${projects.length}</span></div></div>
     <div class="permission-brand-picker" onclick="event.stopPropagation()"><div class="permission-brand-select" role="button" tabindex="0" aria-label="选择可访问的项目" onclick="togglePermissionBrandPicker()" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();togglePermissionBrandPicker()}"><span id="permission-brand-summary" class="permission-brand-summary">${permissionBrandSummary()}</span><button type="button" class="permission-brand-toggle" aria-label="展开项目选择" aria-expanded="false" onclick="event.stopPropagation();togglePermissionBrandPicker()"><i data-lucide="chevron-down"></i></button></div><div id="permission-brand-dropdown" class="permission-brand-dropdown" hidden><div class="permission-brand-search"><i data-lucide="search"></i><input id="permission-brand-search-input" placeholder="搜索项目" aria-label="搜索项目" oninput="filterPermissionBrands(this.value);$('permission-brand-search-clear').hidden=!this.value"><button id="permission-brand-search-clear" type="button" aria-label="清除搜索内容" hidden onclick="clearPermissionBrandSearch()">×</button></div><div class="permission-brand-actions"><label><input id="permission-brand-all" type="checkbox" onchange="toggleAllPermissionBrands(this.checked)"><span class="permission-check"></span><b>全部项目</b></label></div><div class="permission-brand-options">${projects.map(p=>`<label class="permission-brand-option" data-brand-id="${p.id}" data-search="${esc(p.name.toLowerCase())}"><input type="checkbox" value="${p.id}" ${draft.projects.includes(p.id)?'checked':''} onchange="togglePermissionDraftProject('${p.id}',this.checked)"><span class="permission-check"></span><b>${esc(p.name)}</b></label>`).join('')}<div id="permission-brand-empty" class="permission-brand-empty" hidden>没有找到项目</div></div></div></div>
+    ${permissionAutoGrantHtml('projects')}
    </section>
    ${permissionAccessControlHtml(false,readonly?'tenant':m.role==='admin'?'admin':'member')}
   </div>
   <div class="dw-f permission-drawer-foot">${readonly?'<span></span><div><button class="btn" onclick="closeDw()">关闭</button></div>':`<button class="btn ghost permission-disable" onclick="togglePermissionMemberStatus('${m.id}')">${m.status==='disabled'?'恢复成员':'停用成员'}</button><div><button class="btn ghost" onclick="closeDw()">取消</button><button class="btn" onclick="savePermissionMember()">保存更改</button></div>`}</div>`;
  refreshPermissionBrandPicker();[...new Set(PERMISSION_AGENTS.map(a=>a.domain))].forEach(refreshPermissionAgentGroup);
- if(readonly)$('dw').querySelectorAll('.permission-brand-options input,.permission-brand-actions input,.permission-agent-options input,.permission-template-button').forEach(control=>control.disabled=true);
+ if(readonly)$('dw').querySelectorAll('.permission-brand-options input,.permission-brand-actions input,.permission-agent-options input,.permission-template-button,.permission-auto-grant input').forEach(control=>control.disabled=true);
  if(window.lucide)lucide.createIcons();
 }
 function savePermissionMember(){
  const m=PERMISSION_MEMBERS.find(x=>x.id===S.permMemberId);if(!m)return;
  if(permissionIsBrandAdminMember(m))return;
- const roleInput=$('permission-member-role');if(!roleInput)return;const role=roleInput.value==='admin'?'admin':'member',available=new Set(permissionTenantAgents().map(agent=>agent.id)),projects=new Set(permissionAssignableProjects().map(project=>project.id)),agents=[...S.permDraft.agents].filter(agent=>available.has(agent));Object.assign(m,{role,agents,projects:[...S.permDraft.projects].filter(project=>projects.has(project)),pages:[...permissionTenantPages()]});if(!permissionCanAccessView(S.view)){S.view=permissionFirstView();S.tid=null;S.hist=[];}closeDw();renderNav();render();toast('账号角色与权限已更新');
+ const roleInput=$('permission-member-role');if(!roleInput)return;const role=roleInput.value==='admin'?'admin':'member',available=new Set(permissionTenantAgents().map(agent=>agent.id)),projects=new Set(permissionAssignableProjects().map(project=>project.id)),agents=[...S.permDraft.agents].filter(agent=>available.has(agent));Object.assign(m,{role,agents,projects:[...S.permDraft.projects].filter(project=>projects.has(project)),pages:[...permissionTenantPages()],...permissionAutoGrantSave()});if(!permissionCanAccessView(S.view)){S.view=permissionFirstView();S.tid=null;S.hist=[];}closeDw();renderNav();render();toast('账号角色与权限已更新');
 }
 function togglePermissionMemberStatus(id){
  const m=PERMISSION_MEMBERS.find(x=>x.id===id);if(!m)return;
@@ -522,6 +547,7 @@ function openPermissionTenantAdmin(id){
  S.permAgentScope='platform';
  S.permTenantAdminId=admin?.id||null;
  S.permDraft={agents:admin?[...(admin.agents||[])]:PERMISSION_AGENTS.map(agent=>agent.id),projects:[],pages:admin?[...(admin.pages||[])]:[...PERMISSION_PAGE_IDS]};
+ Object.assign(S.permDraft,permissionAutoGrantDraft(admin));S.permMemberReadonly=false;
  drawPermissionTenantAdmin();permissionDrawerOpen();
 }
 function drawPermissionTenantAdmin(){
@@ -544,20 +570,22 @@ function savePermissionTenantAdmin(){
  const current=PERMISSION_TENANT_ADMINS.find(item=>item.id===S.permTenantAdminId),accountId=nameInput.value.trim();
  if(PERMISSION_TENANT_ADMINS.some(item=>item.id!==current?.id&&item.accountId.toLowerCase()===accountId.toLowerCase())){toast('该管理员账号已存在');nameInput.focus();return;}
  const name=accountId,memberLimit=Number(limitInput.value),projectLimit=Number(projectLimitInput.value),monthlyCredits=Number(creditsInput.value),recipes=permissionRecipeCatalog().map(recipe=>recipe.id),pages=[...PERMISSION_PAGE_IDS];
- if(current){const oldAccountId=current.accountId,linked=PERMISSION_MEMBERS.find(member=>member.role==='admin'&&permissionAccountId(member).toLowerCase()===oldAccountId.toLowerCase());Object.assign(current,{name,accountId,password:passwordInput.value,memberLimit,projectLimit,monthlyCredits,expires:expiryInput.value,status:statusInput.value,recipes,agents:[...S.permDraft.agents],pages});if(linked){linked.name=name;linked.accountId=accountId;linked.password=passwordInput.value;linked.initials=current.initials;linked.pages=[...pages];}}
- else{const initials=(name.match(/[A-Za-z]/g)||name.split('')).slice(0,2).join('').toUpperCase()||'AD';PERMISSION_TENANT_ADMINS.unshift({id:'tenant-admin-'+Date.now(),name,accountId,password:passwordInput.value,initials,color:'#7C3AED',projectId:'',recipes,agents:[...S.permDraft.agents],pages,memberUsed:0,memberLimit,projectUsed:0,projectLimit,monthlyCredits,expires:expiryInput.value,createdAt:new Date().toISOString().slice(0,10),status:statusInput.value,last:'尚未登录'});}
+ if(current){const oldAccountId=current.accountId,linked=PERMISSION_MEMBERS.find(member=>member.role==='admin'&&permissionAccountId(member).toLowerCase()===oldAccountId.toLowerCase());Object.assign(current,{name,accountId,password:passwordInput.value,memberLimit,projectLimit,monthlyCredits,expires:expiryInput.value,status:statusInput.value,recipes,agents:[...S.permDraft.agents],pages,...permissionAutoGrantSave()});if(linked){linked.name=name;linked.accountId=accountId;linked.password=passwordInput.value;linked.initials=current.initials;linked.pages=[...pages];}}
+ else{const initials=(name.match(/[A-Za-z]/g)||name.split('')).slice(0,2).join('').toUpperCase()||'AD';PERMISSION_TENANT_ADMINS.unshift({id:'tenant-admin-'+Date.now(),name,accountId,password:passwordInput.value,initials,color:'#7C3AED',projectId:'',recipes,agents:[...S.permDraft.agents],pages,memberUsed:0,memberLimit,projectUsed:0,projectLimit,monthlyCredits,expires:expiryInput.value,createdAt:new Date().toISOString().slice(0,10),status:statusInput.value,last:'尚未登录',...permissionAutoGrantSave()});}
  closeDw();render();toast(current?'管理员账号已更新':'管理员账号已创建');
 }
 
 function openPermissionCreateAccount(){
  const tenant=permissionCurrentTenantAdmin();if(tenant&&tenant.memberUsed>=tenant.memberLimit){toast(`子账号数量已达上限（${tenant.memberUsed} / ${tenant.memberLimit}）`);return;}
  S.permAgentScope='tenant';S.permDraft={agents:permissionTenantAgents().map(agent=>agent.id),projects:[],pages:[...permissionTenantPages()]};S.permBrandPickerOpen=false;
+ Object.assign(S.permDraft,permissionAutoGrantDraft(null));S.permMemberReadonly=false;
  const draft=S.permDraft,projects=permissionAssignableProjects(),accountPrefix=(tenant?.accountId||'u2c').replace(/:$/,'');
  $('dw').innerHTML=`<div class="dw-h permission-drawer-head">${permissionCloseButton()}<span class="permission-invite-mark"><i data-lucide="user-plus"></i></span><div><div class="ty">成员管理</div><h3 id="permission-drawer-title">创建账号</h3></div></div>
   <div class="dw-b permission-drawer-body" onclick="if(S.permBrandPickerOpen)togglePermissionBrandPicker(false)">
    <section class="permission-form-section permission-invite-details"><div class="permission-section-title"><div><h4>账号信息</h4><p>设置姓名、登录账号、初始密码和账号角色，默认创建为成员。</p></div></div><div class="permission-invite-fields"><label class="permission-field"><span>姓名</span><input id="permission-invite-name" required maxlength="40" autocomplete="name" placeholder="输入姓名"></label><label class="permission-field"><span>账号 ID</span><span class="permission-account-prefix"><b>${esc(accountPrefix)}:</b><input id="permission-account-id" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]{3,32}" title="请输入 3–32 位字母、数字、点、下划线或连字符" autocomplete="username" placeholder="例如：sophie"></span></label><label class="permission-field"><span>密码</span><span class="permission-password"><input id="permission-account-password" type="password" required minlength="6" autocomplete="new-password" placeholder="至少输入 6 位密码" onkeydown="if(event.key==='Enter')submitPermissionAccount()"><button id="permission-password-toggle" type="button" aria-label="显示密码" aria-pressed="false" onclick="togglePermissionPassword()"><i data-lucide="eye"></i></button></span></label><label class="permission-field"><span>账号角色</span><select id="permission-account-role"><option value="member" selected>成员</option><option value="admin">普通管理员</option></select></label></div></section>
    <section class="permission-form-section"><div class="permission-section-title"><div><h4>可访问的项目</h4><p>项目名称可以使用对应品牌名，默认提供 15 个项目。</p></div><div class="permission-project-title-actions">${permissionProjectCopyControl()}<span><b id="permission-project-count" class="num">${draft.projects.length}</b> / ${projects.length}</span></div></div>
     <div class="permission-brand-picker" onclick="event.stopPropagation()"><div class="permission-brand-select" role="button" tabindex="0" aria-label="选择可访问的项目" onclick="togglePermissionBrandPicker()" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();togglePermissionBrandPicker()}"><span id="permission-brand-summary" class="permission-brand-summary">${permissionBrandSummary()}</span><button type="button" class="permission-brand-toggle" aria-label="展开项目选择" aria-expanded="false" onclick="event.stopPropagation();togglePermissionBrandPicker()"><i data-lucide="chevron-down"></i></button></div><div id="permission-brand-dropdown" class="permission-brand-dropdown" hidden><div class="permission-brand-search"><i data-lucide="search"></i><input id="permission-brand-search-input" placeholder="搜索项目" aria-label="搜索项目" oninput="filterPermissionBrands(this.value);$('permission-brand-search-clear').hidden=!this.value"><button id="permission-brand-search-clear" type="button" aria-label="清除搜索内容" hidden onclick="clearPermissionBrandSearch()">×</button></div><div class="permission-brand-actions"><label><input id="permission-brand-all" type="checkbox" onchange="toggleAllPermissionBrands(this.checked)"><span class="permission-check"></span><b>全部项目</b></label></div><div class="permission-brand-options">${projects.map(p=>`<label class="permission-brand-option" data-brand-id="${p.id}" data-search="${esc(p.name.toLowerCase())}"><input type="checkbox" value="${p.id}" onchange="togglePermissionDraftProject('${p.id}',this.checked)"><span class="permission-check"></span><b>${esc(p.name)}</b></label>`).join('')}<div id="permission-brand-empty" class="permission-brand-empty" hidden>没有找到项目</div></div></div></div>
+    ${permissionAutoGrantHtml('projects')}
    </section>
    ${permissionAccessControlHtml(true)}
   </div><div class="dw-f permission-drawer-foot"><span></span><div><button class="btn ghost" onclick="closeDw()">取消</button><button class="btn" onclick="submitPermissionAccount()">创建账号</button></div></div>`;
@@ -571,7 +599,7 @@ function submitPermissionAccount(){
  if(tenant&&tenant.memberUsed>=tenant.memberLimit){toast(`子账号数量已达上限（${tenant.memberUsed} / ${tenant.memberLimit}）`);return;}
  const available=new Set(permissionTenantAgents().map(agent=>agent.id)),brandScope=new Set(permissionAssignableProjects().map(project=>project.id)),agents=[...S.permDraft.agents].filter(agent=>available.has(agent)),projects=[...S.permDraft.projects].filter(project=>brandScope.has(project)),pages=[...permissionTenantPages()];
  const initials=(name.match(/[A-Za-z]/g)||name.split('')).slice(0,2).join('').toUpperCase();
- PERMISSION_MEMBERS.push({id:'member-'+Date.now(),name,accountId,password,initials:initials||'ME',color:'#7C3AED',role,status:'active',createdAt:new Date().toISOString().slice(0,10),last:'尚未登录',agents,projects,pages});
+ PERMISSION_MEMBERS.push({id:'member-'+Date.now(),name,accountId,password,initials:initials||'ME',color:'#7C3AED',role,status:'active',createdAt:new Date().toISOString().slice(0,10),last:'尚未登录',agents,projects,pages,...permissionAutoGrantSave()});
  if(tenant)tenant.memberUsed++;
  closeDw();render();toast(`${name} 的账号已创建`);
 }
