@@ -534,7 +534,7 @@ function analysisComposer(metricMode){
 }
 /* B: KPI cards above the conversation and brand-health columns. */
 function analyticsChatExpandButton(){
- const expanded=!!S.anaChatExpanded,label=expanded?'退出全屏':'全屏展开',path=expanded?'M8 3v5H3M16 3v5h5M8 21v-5H3M16 21v-5h5':'M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5';
+ const expanded=!!S.anaChatExpanded,label=expanded?'收起对话窗口':'展开对话窗口',path=expanded?'M8 3v5H3M16 3v5h5M8 21v-5H3M16 21v-5h5':'M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5';
  return `<button type="button" class="ib ana-chat-expand" onclick="toggleAnalyticsChatFullscreen()" title="${label}" aria-label="${label}" aria-pressed="${expanded}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${path}"/></svg></button>`;
 }
 function toggleAnalyticsChatFullscreen(force){
@@ -546,10 +546,6 @@ function toggleAnalyticsChatFullscreen(force){
 document.addEventListener('keydown',event=>{
  const card=document.querySelector('.ana-chat-fullscreen');if(!card||document.querySelector('#mod.on,#dw.on'))return;
  if(event.key==='Escape'){event.preventDefault();toggleAnalyticsChatFullscreen(false);return;}
- if(event.key==='Tab'){
-  const items=[...card.querySelectorAll('button:not([disabled]),textarea:not([disabled]),input:not([disabled]),select:not([disabled]),a[href],[tabindex="0"]')].filter(item=>item.offsetParent!==null),first=items[0],last=items.at(-1);if(!first)return;
-  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
- }
 });
 function anaB(own){
  const metricMode=!!S.qmetric;
