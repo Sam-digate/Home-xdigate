@@ -533,14 +533,33 @@ function analysisComposer(metricMode){
  return `<div class="dockc"><textarea id="qi" rows="2" placeholder="${S.qcur==='live'?'问一句…':'继续这段对话…'}" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendQ()}"></textarea><div style="display:flex;align-items:center;gap:var(--sp-2);margin-top:var(--sp-2)"><span style="flex:1;font-size:var(--fs-xs);color:var(--t3)">Enter 发送 · 数字取自接口，不估算</span><button class="btn sm" onclick="sendQ()">发送</button></div></div>`;
 }
 /* B: KPI cards above the conversation and brand-health columns. */
+function analyticsChatExpandButton(){
+ const expanded=!!S.anaChatExpanded,label=expanded?'退出全屏':'全屏展开',path=expanded?'M8 3v5H3M16 3v5h5M8 21v-5H3M16 21v-5h5':'M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5';
+ return `<button type="button" class="ib ana-chat-expand" onclick="toggleAnalyticsChatFullscreen()" title="${label}" aria-label="${label}" aria-pressed="${expanded}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${path}"/></svg></button>`;
+}
+function toggleAnalyticsChatFullscreen(force){
+ const card=document.querySelector('.ana-chat-card');if(!card)return;
+ S.anaChatExpanded=typeof force==='boolean'?force:!S.anaChatExpanded;
+ card.classList.toggle('ana-chat-fullscreen',S.anaChatExpanded);
+ const button=card.querySelector('.ana-chat-expand');if(button){button.outerHTML=analyticsChatExpandButton();card.querySelector('.ana-chat-expand')?.focus({preventScroll:true});}
+}
+document.addEventListener('keydown',event=>{
+ const card=document.querySelector('.ana-chat-fullscreen');if(!card||document.querySelector('#mod.on,#dw.on'))return;
+ if(event.key==='Escape'){event.preventDefault();toggleAnalyticsChatFullscreen(false);return;}
+ if(event.key==='Tab'){
+  const items=[...card.querySelectorAll('button:not([disabled]),textarea:not([disabled]),input:not([disabled]),select:not([disabled]),a[href],[tabindex="0"]')].filter(item=>item.offsetParent!==null),first=items[0],last=items.at(-1);if(!first)return;
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+ }
+});
 function anaB(own){
  const metricMode=!!S.qmetric;
  let h=anaKpiOverview()+'<div class="blay">';
- h+='<div class="bmain"><div class="card ana-chat-card">';
+ h+='<div class="bmain"><div class="card ana-chat-card'+(S.anaChatExpanded?' ana-chat-fullscreen':'')+'">';
  h+='<div class="dockh">'+AV('ana',26)
   +'<div style="flex:1;min-width:0"><div style="font-size:var(--fs-md);font-weight:600">'+(metricMode?'配置向导':nick('ana'))+'</div>'
   +(metricMode?'<div class="metric-guide-status">基于你的数据</div>':'<div style="font-size:var(--fs-xs);color:var(--t3)">'+esc(curSess().t)+'</div>')+'</div>'
   +'<button class="metric-toggle '+(metricMode?'on':'')+'" onclick="toggleMetricGuide()" aria-pressed="'+metricMode+'" title="'+(metricMode?'返回数据对话':'配置指标')+'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 3l1.3 4.2L17.5 9l-4.2 1.8L12 15l-1.3-4.2L6.5 9l4.2-1.8L12 3Z"/><path d="M19 15l.7 2.3L22 18l-2.3.7L19 21l-.7-2.3L16 18l2.3-.7L19 15Z"/></svg><span>'+(metricMode?'问数据':'配指标')+'</span></button>'
+  +analyticsChatExpandButton()
   +'<button class="ib" onclick="S.qmetric=false;S.qhist=!S.qhist;render()" title="历史"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg></button>'
  +(metricMode?'':'<button class="ib" onclick="newSess()" title="新对话"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>')+'</div>';
  h+='<div class="dockb">'+(metricMode?metricGuide():S.qhist?dockHist():dockMsgs(own))+'</div>';

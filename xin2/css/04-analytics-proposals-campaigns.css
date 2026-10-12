@@ -7,6 +7,7 @@
 .bmain{min-width:0}
 .ana-chat-card{display:flex;flex-direction:column;height:clamp(280px,calc(100vh - 300px),620px);height:clamp(280px,calc(100dvh - 300px),620px);padding:0;overflow:hidden}
 .brail{position:sticky;top:16px}
+.ana-chat-card.ana-chat-fullscreen{position:fixed;inset:0;z-index:90;width:100%;height:100vh;height:100dvh;max-height:none;margin:0;border:0;border-radius:0;background:var(--surface,#fff)}body:has(.ana-chat-fullscreen){overflow:hidden}.ana-chat-fullscreen .dockb{min-height:0;overscroll-behavior:contain}.ana-chat-fullscreen .dockh{padding-inline:clamp(16px,4vw,64px)}.ana-chat-fullscreen .dockc,.ana-chat-fullscreen .dockb{padding-inline:max(16px,calc((100% - 800px)/2))}.ana-chat-expand:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 .mrow{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) 0;border-top:1px solid var(--hairline)}
 .mrow:first-of-type{border-top:0}
 @media(max-width:980px){.analgrid.dlay,.blay{grid-template-columns:1fr}.anaside,.brail{position:static}}
