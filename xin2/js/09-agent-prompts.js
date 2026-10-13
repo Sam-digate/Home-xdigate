@@ -175,7 +175,7 @@ const PM_PROMPT_SECTIONS=[{id:'shared',name:'全程共用片段'},{id:'direction
 const PM_PROMPT_SECTION_BLOCKS={shared:[0],direction:[1],layout:[2,3],image:[],revision:[]};
 function pmSectionBlockIndexes(d){return (d.sectionBlocks||PM_PROMPT_SECTION_BLOCKS)[d.sectionTab||'shared']||[]}
 function pmSectionBlockMeta(d,text,index,total){if(d.blockMeta?.[index])return d.blockMeta[index];const section=d.sectionTab||'shared';if(section==='shared')return{group:'片段',name:'广告合规规则'};if(section==='direction')return{group:'主提示词',name:'三套方向与配色'};if(section==='layout')return index===2?{group:'主提示词',name:'任务与素材'}:{group:'片段',name:'页面结构与视觉要求'};return promptBlockMeta(text,index,total)}
-function openPrompt(id){const p=findPrompt(id);if(!p)return;const note=p.note&&p.note!=='—'?p.note:'';S.pm={id,name:p.n,body:p.body,blocks:(p.blocks||promptBodyBlocks(p.body)).slice(),sectionTab:p.previewSection||'shared',sectionBlocks:p.sectionBlocks,blockMeta:p.blockMeta,blockOpen:0,model:p.model,note,originalName:p.n,originalBody:p.body,originalModel:p.model,originalNote:note,lastSavedAt:p.savedAt||p.at||'',dirty:false,tab:0,slotsOpen:false,reasonOpen:false,runMode:'step',chat:[]};drawPrompt();$('mod').classList.add('on')}
+function openPrompt(id){const p=findPrompt(id);if(!p)return;const note=p.note&&p.note!=='—'?p.note:'';S.pm={id,name:p.n,body:p.body,blocks:(p.blocks||promptBodyBlocks(p.body)).slice(),sectionTab:p.previewSection||'shared',sectionBlocks:p.sectionBlocks,blockMeta:p.blockMeta,blockOpen:0,model:p.model,note,originalName:p.n,originalBody:p.body,originalModel:p.model,originalNote:note,lastSavedAt:p.savedAt||p.at||'',dirty:false,tab:0,slotsOpen:false,reasonOpen:false,runMode:'full',chat:[]};pmRestoreConversationView();drawPrompt();$('mod').classList.add('on')}
 function pmSet(k,v){if(!S.pm)return;S.pm[k]=v;S.pm.dirty=S.pm.name!==S.pm.originalName||S.pm.body!==S.pm.originalBody||S.pm.model!==S.pm.originalModel||S.pm.note!==S.pm.originalNote;pmDirtyState()}
 function pmDirtyState(){if(!S.pm)return;const p=findPrompt(S.pm.id),unsaved=!!(p&&p.isNew)||S.pm.dirty,b=$('pm-dirty'),reset=$('pm-reset');if(b){b.hidden=false;b.style.display='';b.className='chip '+(unsaved?'pm-dirty':'pm-saved');b.textContent=unsaved?'未保存':'最近保存 '+(S.pm.lastSavedAt||'刚刚')}if(reset)reset.disabled=!S.pm.dirty}
 function promptSaveTime(){const d=new Date(),pad=n=>String(n).padStart(2,'0');return d.getFullYear()+'.'+pad(d.getMonth()+1)+'.'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())}
@@ -188,11 +188,11 @@ function validateNewPromptName(p,d){if(!p.isNew)return true;const name=String(d.
 function createPromptTestVersion(id){
  const p=findPrompt(id);if(!p)return;if(!isPromptCreator(p)){duplicatePrompt(id);return}
  const next=Math.max(...promptVersions(p).map(x=>x.v||0))+1,q={...p,id:'prompt-'+Date.now(),family:promptFamily(p),v:next,st:'test',by:promptCurrentName(),at:'刚刚',body:p.body,note:'',runs:0,ed:0,testRuns:0,hist:(p.hist||[]).map(x=>({...x})),slots:(p.slots||[]).slice(),use:p.use?(p.use||[]).slice():undefined};
- (p.shared?PSHARED:PROMPTS).unshift(q);if(q.ag){S.pmPromptFilter=S.pmPromptFilter||{};S.pmPromptFilter[q.ag]='test'}else S.pmSharedFilter='test';openPrompt(q.id);toast('已创建 v'+next+' 测试版本 · 当前使用中版本保持不变')
+ (p.shared?PSHARED:PROMPTS).unshift(q);if(q.ag){S.pmPromptFilter=S.pmPromptFilter||{};S.pmPromptFilter[q.ag]='test'}else S.pmSharedFilter='test';pmInheritPromptConversations(p,q);openPrompt(q.id);toast('已创建 v'+next+' 测试版本 · 当前使用中版本保持不变')
 }
 function duplicatePrompt(id){
  const p=findPrompt(id);if(!p)return;const stamp=Date.now(),shared=!!p.shared,next=Math.max(...promptVersions(p).map(x=>x.v||0))+1,q={...p,id:'prompt-'+stamp,family:promptFamily(p),v:next,st:'test',by:promptCurrentName(),at:'刚刚',note:'',runs:0,ed:0,testRuns:0,hist:(p.hist||[]).map(x=>({...x})),slots:(p.slots||[]).slice(),use:p.use?(p.use||[]).slice():undefined,originId:p.id};
- (shared?PSHARED:PROMPTS).unshift(q);if(shared)S.pmSharedFilter='test';else{S.pmPromptFilter=S.pmPromptFilter||{};S.pmPromptFilter[p.ag]='test'}openPrompt(q.id);toast('已复制为 v'+next+' 测试版本 · 原版本保持不变')
+ (shared?PSHARED:PROMPTS).unshift(q);if(shared)S.pmSharedFilter='test';else{S.pmPromptFilter=S.pmPromptFilter||{};S.pmPromptFilter[p.ag]='test'}pmInheritPromptConversations(p,q);openPrompt(q.id);toast('已复制为 v'+next+' 测试版本 · 原版本保持不变')
 }
 function pmTogglePromptBlock(index){if(!S.pm)return;S.pm.blockOpen=S.pm.blockOpen===index?null:index;S.pm.slotsOpen=false;const shell=document.querySelector('.pm-prompt-blocks'),p=findPrompt(S.pm.id);if(!shell||!p){drawPrompt();return}const scroller=shell.closest('.pm-b'),scrollTop=scroller?.scrollTop||0; shell.innerHTML=pmPromptBlocksHtml(p,S.pm,slotPalette(p));const editable=p.st==='test'&&isPromptCreator(p)&&S.pm.tab===0;shell.querySelectorAll('textarea,select').forEach(control=>control.disabled=!editable);if(!editable)shell.querySelectorAll('.pm-slot').forEach(slot=>slot.removeAttribute('onclick'));if(scroller)scroller.scrollTop=scrollTop}
 function pmChangeBlockModel(value){const model=value==='none'?null:value;pmSet('model',model);document.querySelectorAll('.pm-prompt-block-model-select').forEach(select=>select.value=model||'none')}
@@ -201,7 +201,7 @@ function pmReasonDisclosureHtml(d){const filled=!!String(d.note||'').trim(),summ
 function pmToggleReason(force){if(!S.pm)return;S.pm.reasonOpen=typeof force==='boolean'?force:!S.pm.reasonOpen;const toggle=$('pm-reason-toggle'),panel=$('pm-reason-panel');if(toggle){toggle.classList.toggle('open',S.pm.reasonOpen);toggle.setAttribute('aria-expanded',String(S.pm.reasonOpen))}if(panel)panel.hidden=!S.pm.reasonOpen}
 function pmOpenReason(){pmToggleReason(true);requestAnimationFrame(()=>$('pm-reason')?.focus())}
 function pmSyncReasonStatus(){const value=String(S.pm?.note||'').trim(),state=$('pm-reason-state'),summary=$('pm-reason-summary');if(state){state.textContent='· '+(value?'已填写':'提交上线必填');state.classList.toggle('filled',!!value)}if(summary)summary.textContent=value?'· '+value.replace(/\s+/g,' ').slice(0,34)+(value.length>34?'…':''):''}
-function pmSetPromptSection(id){if(!S.pm||!PM_PROMPT_SECTIONS.some(section=>section.id===id))return;S.pm.sectionTab=id;S.pm.blockOpen=pmSectionBlockIndexes(S.pm)[0]??null;S.pm.slotsOpen=false;const nav=document.querySelector('.pm-section-tabs'),shell=document.querySelector('.pm-prompt-blocks'),p=findPrompt(S.pm.id);if(nav)nav.outerHTML=pmPromptSectionTabsHtml(S.pm);const freshNav=document.querySelector('.pm-section-tabs');if(freshNav)freshNav.scrollLeft=nav?.scrollLeft||0;if(!shell||!p)return;shell.innerHTML=pmPromptBlocksHtml(p,S.pm,slotPalette(p));const editable=p.st==='test'&&isPromptCreator(p)&&S.pm.tab===0;shell.querySelectorAll('textarea,select').forEach(control=>control.disabled=!editable);if(!editable)shell.querySelectorAll('.pm-slot').forEach(slot=>slot.removeAttribute('onclick'));S.pm.activeBlockIndex=pmSectionBlockIndexes(S.pm)[0];requestAnimationFrame(pmResizeBodies)}
+function pmSetPromptSection(id){if(!S.pm||!PM_PROMPT_SECTIONS.some(section=>section.id===id))return;S.pm.sectionTab=id;S.pm.optTarget='stage';S.pm.blockOpen=pmSectionBlockIndexes(S.pm)[0]??null;S.pm.slotsOpen=false;const nav=document.querySelector('.pm-section-tabs'),shell=document.querySelector('.pm-prompt-blocks'),p=findPrompt(S.pm.id);if(nav)nav.outerHTML=pmPromptSectionTabsHtml(S.pm);const freshNav=document.querySelector('.pm-section-tabs');if(freshNav)freshNav.scrollLeft=nav?.scrollLeft||0;if(!shell||!p)return;shell.innerHTML=pmPromptBlocksHtml(p,S.pm,slotPalette(p));const editable=p.st==='test'&&isPromptCreator(p)&&S.pm.tab===0;shell.querySelectorAll('textarea,select').forEach(control=>control.disabled=!editable);if(!editable)shell.querySelectorAll('.pm-slot').forEach(slot=>slot.removeAttribute('onclick'));S.pm.activeBlockIndex=pmSectionBlockIndexes(S.pm)[0];requestAnimationFrame(pmResizeBodies);pmRenderOptimize()}
 function pmPromptBlocksHtml(p,d,palette){
  const blocks=d.blocks||promptBodyBlocks(d.body),indexes=pmSectionBlockIndexes(d),section=PM_PROMPT_SECTIONS.find(s=>s.id===(d.sectionTab||'shared'));
  if(!indexes.length)return `<div class="pm-section-empty"><span>${esc(section.name)}</span>暂未配置提示词</div>`;
@@ -234,10 +234,159 @@ function mountPromptChrome(){
  wide.title=S.pmWide?'收缩':'加宽';wide.setAttribute('aria-label',wide.title);
  wide.innerHTML=S.pmWide?'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v5H3M16 3v5h5M8 21v-5H3M16 21v-5h5"/></svg>':'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>';
  const close=editor.querySelector('.pm-l>.pm-h>.ib');if(close)rightHead.appendChild(close);
+ mountPromptTools(editor);
+}
+function mountPromptTools(editor){
+ const d=S.pm,right=editor.querySelector('.pm-r');if(!d||!right)return;
+ pmInitSessions();
+ editor.classList.add('pm-has-tools');
+ let rail=editor.querySelector('.pm-tool-rail');
+ if(!rail){rail=document.createElement('nav');rail.className='pm-tool-rail';rail.setAttribute('aria-label','提示词辅助工具');rail.innerHTML=`<button type="button" data-tool="run" onclick="pmSwitchTool('run')" title="测试" aria-label="测试"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 11 7-11 7Z"/></svg><span>测试</span></button><button type="button" data-tool="optimize" onclick="pmSwitchTool('optimize')" title="AI 优化" aria-label="AI 优化"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/></svg><span>优化</span></button>`;right.before(rail)}
+ const input=right.querySelector('#pm-in');if(input){input.value=d.runInput||'';input.oninput=()=>{d.runInput=input.value;pmRememberSession('run')}}
+ let panel=right.querySelector('.pm-opt-panel');if(!panel){panel=document.createElement('div');panel.className='pm-opt-panel';right.appendChild(panel)}
+ pmRenderOptimize();pmSwitchTool(d.toolMode||'run');
+}
+const PM_CONVERSATIONS=new Map();
+let pmConversationSequence=0;
+function pmSessionBook(){
+ if(!S.pm)return null;
+ const key=currentUser()+'|'+S.pm.id;
+ if(!PM_CONVERSATIONS.has(key))PM_CONVERSATIONS.set(key,{run:[],optimize:[],active:{}});
+ return PM_CONVERSATIONS.get(key);
+}
+function pmFreshSession(){return {id:++pmConversationSequence,at:Date.now(),title:'新会话',data:{}}}
+function pmRestoreConversationView(){
+ const d=S.pm;if(!d)return;
+ const view=PM_CONVERSATIONS.get(currentUser()+'|'+d.id)?.view;
+ if(view){d.toolMode=view.toolMode;d.sectionTab=view.sectionTab}
+}
+function pmInheritPromptConversations(source,target){
+ const d=S.pm,user=currentUser();
+ if(d?.id===source.id){
+  pmRememberSession('run');pmRememberSession('optimize');
+  const book=pmSessionBook();book.view={toolMode:d.toolMode||'run',sectionTab:d.sectionTab||'shared'};
+ }
+ const original=PM_CONVERSATIONS.get(user+'|'+source.id);if(!original)return;
+ const copy={run:[],optimize:[],active:{},view:original.view?{...original.view}:undefined};
+ ['run','optimize'].forEach(mode=>{
+  copy[mode]=original[mode].map(session=>{
+   const cloned=JSON.parse(JSON.stringify(session));cloned.id=++pmConversationSequence;
+   if(session.id===original.active[mode])copy.active[mode]=cloned.id;
+   return cloned;
+  });
+ });
+ PM_CONVERSATIONS.set(user+'|'+target.id,copy);
+ if(target.blocks)target.blocks=target.blocks.slice();
+}
+function pmInitSessions(){
+ const d=S.pm;if(!d||d.sessionsLoaded)return;
+ const book=pmSessionBook();d.sessionsLoaded=true;
+ ['run','optimize'].forEach(mode=>{
+  let session=book[mode].find(item=>item.id===book.active[mode]);
+  if(!session){session=pmFreshSession();book[mode].push(session);book.active[mode]=session.id}
+  pmRestoreSessionData(mode,session.data);
+ });
+}
+function pmRestoreSessionData(mode,data){
+ const d=S.pm;if(!d)return;const copy=JSON.parse(JSON.stringify(data||{}));
+ if(mode==='run'){d.chat=copy.chat||[];d.runInput=copy.input||'';d.runMode=copy.runMode||'full'}
+ else{d.optChat=copy.chat||[];d.optInput=copy.input||'';d.optReply=copy.reply||'';d.optProposal=copy.proposal||null;d.optTarget=copy.target||'stage'}
+}
+function pmRememberSession(mode){
+ const d=S.pm;if(!d?.sessionsLoaded)return;
+ const book=pmSessionBook(),session=book[mode].find(item=>item.id===book.active[mode]);if(!session)return;
+ const data=mode==='run'?{chat:d.chat||[],input:d.runInput||'',runMode:d.runMode}:{chat:d.optChat||[],input:d.optInput||'',reply:d.optReply,proposal:d.optProposal,target:d.optTarget};
+ session.data=JSON.parse(JSON.stringify(data));session.title=(data.chat.find(m=>m.r==='me')?.t||data.input||'新会话').replace(/\s+/g,' ').slice(0,36);
+ session.at=Date.now();
+}
+function pmMountSessionToolbar(){
+ const right=document.querySelector('.pm-editor .pm-r');if(!right||!S.pm)return;
+ let toolbar=right.querySelector('.pm-session-toolbar');
+ if(!toolbar){toolbar=document.createElement('div');toolbar.className='pm-session-toolbar';right.querySelector('.pm-h').after(toolbar)}
+ const mode=S.pm.toolMode||'run';
+ toolbar.innerHTML=`<button type="button" class="btn ghost sm" id="pm-session-history-button" aria-expanded="false" aria-controls="pm-session-history" onclick="pmToggleSessionHistory()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5m4 0v5l3 2"/></svg>历史记录</button><button type="button" class="btn ghost sm" onclick="pmNewSession()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>新会话</button>`;
+ let history=right.querySelector('.pm-session-history');
+ if(!history){history=document.createElement('section');history.id='pm-session-history';history.className='pm-session-history';history.hidden=true;history.setAttribute('aria-label','会话历史');right.appendChild(history);history.addEventListener('keydown',event=>{if(event.key==='Escape'){event.stopPropagation();pmToggleSessionHistory(false);$('pm-session-history-button')?.focus()}})}
+ history.hidden=true;
+}
+function pmToggleSessionHistory(force){
+ const history=$('pm-session-history'),d=S.pm;if(!history||!d)return;
+ const open=typeof force==='boolean'?force:history.hidden;
+ if(open){
+  const mode=d.toolMode||'run';pmRememberSession(mode);const book=pmSessionBook();
+  const sessions=book[mode].filter(item=>item.data.chat?.length||item.data.input||item.data.reply).slice().sort((a,b)=>b.at-a.at);
+  history.innerHTML=`<div class="pm-session-history-head"><strong>历史记录</strong><button type="button" class="ib" onclick="pmToggleSessionHistory(false)" aria-label="关闭历史记录">×</button></div>${sessions.length?sessions.map(item=>`<button type="button" class="pm-session-entry ${book.active[mode]===item.id?'on':''}" onclick="pmOpenSession(${item.id})"><span>${esc(item.title)}</span><small>${esc(new Date(item.at).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}))}${book.active[mode]===item.id?' · 当前会话':''}</small></button>`).join(''):'<p class="pm-session-empty">暂无历史记录，发送一条消息后会自动保留。</p>'}`;
+ }
+ history.hidden=!open;$('pm-session-history-button')?.setAttribute('aria-expanded',String(open));
+}
+function pmRenderSessionBody(mode){
+ const d=S.pm;if(!d)return;
+ pmToggleSessionHistory(false);
+ if(mode==='optimize')pmRenderOptimize();
+ else{
+  const p=findPrompt(d.id),chat=$('pm-chat'),input=$('pm-in');
+  if(chat)chat.innerHTML=d.chat.length?pmChatHtml(p,d.chat):'<div class="csa-empty" style="padding:var(--sp-5) 16px">还没跑过。下面写一句试试。</div>';
+  if(input)input.value=d.runInput||'';
+  pmSetRunMode(d.runMode==='step'?'step':'full');
+ }
+ requestAnimationFrame(()=>(mode==='run'?$('pm-in'):$('pm-opt-input'))?.focus());
+}
+function pmNewSession(){
+ const d=S.pm;if(!d)return;const mode=d.toolMode||'run';pmRememberSession(mode);
+ const book=pmSessionBook(),session=pmFreshSession();book[mode].push(session);book.active[mode]=session.id;
+ pmRestoreSessionData(mode,{});pmRenderSessionBody(mode);
+}
+function pmOpenSession(id){
+ const d=S.pm;if(!d)return;const mode=d.toolMode||'run',book=pmSessionBook(),session=book[mode].find(item=>item.id===id);if(!session)return;
+ pmRememberSession(mode);book.active[mode]=id;pmRestoreSessionData(mode,session.data);pmRenderSessionBody(mode);toast('已恢复会话，左侧提示词保持不变');
+}
+function pmSwitchTool(mode){
+ const d=S.pm,right=document.querySelector('.pm-editor .pm-r');if(!d||!right||!['run','optimize'].includes(mode))return;
+ d.toolMode=mode;right.classList.toggle('pm-opt-mode',mode==='optimize');
+ document.querySelectorAll('.pm-tool-rail button').forEach(b=>{const on=b.dataset.tool===mode;b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on))});
+ const heading=right.querySelector('.pm-h h3'),label=right.querySelector('.pm-h .ey');
+ if(heading){if(!heading.dataset.runTitle)heading.dataset.runTitle=heading.textContent;heading.textContent=mode==='optimize'?'一起调整提示词':heading.dataset.runTitle}
+ if(label)label.textContent=mode==='optimize'?'AI 优化 · 演示':'试跑';
+ pmMountSessionToolbar();
+}
+function pmOptimizeTargets(){return pmSectionBlockIndexes(S.pm).filter(i=>typeof S.pm.blocks[i]==='string')}
+function pmRenderOptimize(){
+ const d=S.pm,p=findPrompt(d?.id),panel=document.querySelector('.pm-opt-panel');if(!d||!p||!panel)return;
+ const targets=pmOptimizeTargets(),editable=p.st==='test'&&isPromptCreator(p),proposal=d.optProposal;
+ panel.innerHTML=`<div class="pm-opt-content"><div class="pm-opt-messages">${(d.optChat||[]).filter(m=>m.r==='me').map(m=>`<div class="pm-msg me">${esc(m.t)}</div>`).join('')||'<div class="pm-opt-empty"><strong>想怎么调整？</strong><p>例如：语气自然一点，减少重复，但保留变量和输出格式。</p></div>'}</div>${d.optReply?`<div class="pm-opt-response">${esc(d.optReply)}</div>`:''}${proposal?`<div class="pm-opt-apply">${proposal.applied?`<span class="pm-opt-applied"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>已应用</span><button type="button" class="btn ghost sm" onclick="pmGoOptimizeTest()">去测试</button>`:`<button type="button" class="btn sm" onclick="pmApplyOptimize()" ${editable?'':'disabled'}>应用到编辑区</button>`}${!editable?'<p class="pm-opt-notice">当前版本只读，请先在左侧创建测试版本或副本。</p>':''}</div>`:''}</div><div class="pm-opt-composer"><textarea id="pm-opt-input" aria-label="修改要求" rows="3" placeholder="例如：正文少一点广告感，保留原有字段和变量" oninput="S.pm.optInput=this.value;pmRememberSession('optimize')">${esc(d.optInput||'')}</textarea><div class="pm-opt-bottom"><div class="pm-opt-scope"><label for="pm-opt-scope">修改范围</label><select id="pm-opt-scope" onchange="S.pm.optTarget=this.value"><option value="stage">${esc(PM_PROMPT_SECTIONS.find(section=>section.id===(d.sectionTab||'shared'))?.name||'当前阶段')}（全部）</option>${targets.map(i=>`<option value="${i}" ${String(d.optTarget)===String(i)?'selected':''}>${esc(pmSectionBlockMeta(d,d.blocks[i],i,d.blocks.length).name)}</option>`).join('')}</select></div><button type="button" class="btn sm" onclick="pmGenerateOptimize()" ${targets.length?'':'disabled'}>发送</button></div></div>`;
+ const select=$('pm-opt-scope');if(select&&[...select.options].some(o=>o.value===d.optTarget))select.value=d.optTarget;
+ pmRememberSession('optimize');
+}
+function pmGenerateOptimize(){
+ const d=S.pm,request=String(d?.optInput||'').trim();if(!request){toast('先写一下想怎么调整');return}
+ const targets=pmOptimizeTargets(),indexes=d.optTarget&&d.optTarget!=='stage'?targets.filter(i=>String(i)===d.optTarget):targets;
+ if(!indexes.length){toast('当前阶段没有可修改的提示词');return}
+ d.optChat=d.optChat||[];d.optChat.push({r:'me',t:request});
+ if(/^\d+$/.test(request)){d.optProposal=null;d.optReply='你想调整哪一方面呢？可以直接说，比如：语气自然一点、正文精简一些，或者减少重复。我会围绕你的要求来调整，不再逐个重复原文。';d.optInput='';pmRenderOptimize();return}
+ d.optProposal={items:indexes.map(i=>({index:i,name:pmSectionBlockMeta(d,d.blocks[i],i,d.blocks.length).name,before:d.blocks[i],after:d.blocks[i]+(i===indexes[0]?'\n\n本次调整要求：'+request:'')})),applied:false};
+ d.optReply='收到，你希望「'+request+'」。我会保留现有变量和输出格式，把这次要求补充到当前范围的主说明中，其他段落先不改，也不再把整套提示词重复贴出来。\n\n你可以点下方按钮回填，然后切到试跑看看效果。当前仍是交互演示，尚未调用 AI，实际草案只是补充了你的调整要求。';d.optInput='';d.optCompare=false;pmRenderOptimize();
+}
+function pmApplyOptimize(){
+ const d=S.pm,p=findPrompt(d?.id),proposal=d?.optProposal;if(!p||!proposal||proposal.applied)return;
+ if(p.st!=='test'||!isPromptCreator(p)){toast('请先创建可编辑的测试版本');return}
+ if(proposal.items.some(item=>d.blocks[item.index]!==item.before)){toast('原文已变化，请重新生成草案，避免覆盖新修改');return}
+ if(proposal.items.some(item=>!item.after.trim()||slotsUsed(item.before).some(slot=>!slotsUsed(item.after).includes(slot)))){toast('草案不能为空，且需要保留原有变量槽');return}
+ const blocks=d.blocks.slice();proposal.items.forEach(item=>blocks[item.index]=item.after);
+ if(badSlots(p,blocks.join('\n\n')).length){toast('草案包含未声明的变量槽，请先修正');return}
+ d.blocks=blocks;pmSet('body',blocks.join('\n\n'));proposal.applied=true;
+ drawPrompt();toast('已应用到编辑区，尚未保存，可切换到试跑');
+}
+function pmGoOptimizeTest(){
+ const d=S.pm,p=findPrompt(d?.id);if(!d||!p)return;
+ if(!['test','live','pending','retired'].includes(p.st)){toast('当前版本不能试跑');return}
+ pmSwitchTool('run');
+ const hint=document.querySelector('.pm-r>.pm-b>div:first-child');
+ if(hint)hint.textContent='测试当前编辑稿（包含未保存修改）。原型演示，不会保存、上线或产生产出物。';
+ const input=$('pm-in');if(input&&!input.disabled)input.focus();
 }
 function mountPromptRunControls(editor){
  const input=editor.querySelector('#pm-in'),row=input&&input.nextElementSibling;if(!row)return;
- const p=findPrompt(S.pm&&S.pm.id),canRun=!!(p&&['test','live','pending','retired'].includes(p.st)),mode=S.pm?.runMode==='full'?'full':'step';
+ const p=findPrompt(S.pm&&S.pm.id),canRun=!!(p&&['test','live','pending','retired'].includes(p.st)),mode=S.pm?.runMode==='step'?'step':'full';
  row.className='pm-run-toolbar';
  row.innerHTML=`<span class="pm-sandbox-note">沙箱 · 不产生产出物</span><div class="pm-run-actions"><div class="pm-run-mode" role="group" aria-label="运行方式"><button type="button" data-mode="step" class="${mode==='step'?'on':''}" aria-pressed="${mode==='step'}" onclick="pmSetRunMode('step')">单步调整</button><button type="button" data-mode="full" class="${mode==='full'?'on':''}" aria-pressed="${mode==='full'}" onclick="pmSetRunMode('full')">跑全程</button></div><button class="btn sm pm-send" onclick="pmRun()" ${canRun?'':'disabled'}>发送</button></div>`;
 }
@@ -261,7 +410,7 @@ function promptBodyText(index){if(index==='stage'){const d=S.pm,b=d.blocks||prom
 async function copyPromptBody(index){const text=promptBodyText(index);try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(text);else{const helper=document.createElement('textarea');helper.value=text;helper.style.position='fixed';helper.style.opacity='0';document.body.appendChild(helper);helper.select();document.execCommand('copy');helper.remove()}toast('当前板块已复制')}catch(e){toast('复制失败，请手动复制')}}
 function downloadPromptBody(index){const p=findPrompt(S.pm&&S.pm.id);if(!p)return;const blocks=S.pm?.blocks||promptBodyBlocks(S.pm?.body||''),meta=Number.isInteger(index)?pmSectionBlockMeta(S.pm,blocks[index],index,blocks.length):null,blob=new Blob([promptBodyText(index)],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a'),base=(p.n||'提示词')+(meta?'-'+meta.name:''),name=base.replace(/[\\/:*?"<>|]/g,'-');link.href=url;link.download=name+'-v'+p.v+'.txt';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('当前板块已下载')}
 const _closePromptModal=closeMod;
-closeMod=function(){S.pmWide=false;const modal=$('mod'),draft=S.pm&&findPrompt(S.pm.id);if(modal)modal.classList.remove('pm-wide-mode');if(draft&&draft.isNew){const list=draft.shared?PSHARED:PROMPTS,index=list.findIndex(x=>x.id===draft.id);if(index>=0)list.splice(index,1)}S.pm=null;_closePromptModal();if(draft&&draft.isNew){render();if(S.ag)drawAgent()}};
+closeMod=function(){S.pmWide=false;const modal=$('mod'),draft=S.pm&&findPrompt(S.pm.id);if(modal)modal.classList.remove('pm-wide-mode');if(draft&&draft.isNew){const list=draft.shared?PSHARED:PROMPTS,index=list.findIndex(x=>x.id===draft.id);if(index>=0)list.splice(index,1)}pmRememberSession('run');pmRememberSession('optimize');S.pm=null;_closePromptModal();if(draft&&draft.isNew){render();if(S.ag)drawAgent()}};
 function pmChatHtml(p,chat){return chat.map(m=>`<div class="pm-msg ${m.r}">${m.r==='ag'?`<span class="pmw">${esc(p.n)} · v${p.v}</span>`:''}${esc(m.t)}</div>`).join('')}
 function pmResetChat(){
  const d=S.pm,chat=$('pm-chat'),input=$('pm-in');if(!d)return;d.chat=[];
@@ -278,7 +427,7 @@ function pmRun(){
  const full=d.runMode==='full';
  d.chat.push({r:'me',t:text},{r:'ag',t:full?'已按完整链路跑完全程，各步骤衔接与约束检查通过。':p.shared?'片段已注入；下游提示词会继续生成。':'已完成当前步骤的调整测试。变量槽与约束检查通过。'});
  if(p.st==='test')p.testRuns=(p.testRuns||0)+1;
- const chat=$('pm-chat');if(chat){chat.innerHTML=pmChatHtml(p,d.chat);chat.scrollTop=chat.scrollHeight}if(i){i.value='';i.focus()}
+ const chat=$('pm-chat');if(chat){chat.innerHTML=pmChatHtml(p,d.chat);chat.scrollTop=chat.scrollHeight}if(i){i.value='';d.runInput='';i.focus()}pmRememberSession('run');
 }
 function pmHistory(p){const versions=promptVersions(p),pending=versions.find(version=>version.st==='pending'),byNumber=new Map();versions.forEach(version=>{byNumber.set(version.v,{v:version.v,by:version.by,at:version.at,note:version.note,state:version.st,id:version.id});(version.hist||[]).forEach(h=>{if(!byNumber.has(h.v))byNumber.set(h.v,{...h,state:null,id:p.id})})});const rows=[...byNumber.values()].sort((a,b)=>b.v-a.v);return `<div style="font-size:var(--fs-sm);color:var(--t2);line-height:1.7;margin-bottom:var(--sp-3)">每一版都保留。${pending?`v${pending.v} 正在等待上线审核，审核完成前不能回滚。`:'需要时可以提交回滚到历史版本。'}</div>${rows.map(h=>{const rollback=`<button class="btn ghost sm" onclick="revertPrompt('${p.id}',${h.v})">回到这版</button>`,action=h.state==='live'?'<span class="st done">使用中</span>':h.state==='pending'?'<span class="st review">待上线</span>':h.state==='test'?'<span class="st run">测试中</span>':rollback;return `<div class="pm-ver"><span class="pmv">v${h.v}</span><span class="pl"><span class="pm-ver-note-label">改动理由(备注)：</span>${h.note&&h.note!=='—'?esc(h.note):'<span style="color:var(--danger-fg)">未填写</span>'}</span><span style="font-size:var(--fs-xs);color:var(--t3)">${h.by} · ${h.at}</span>${action}</div>`}).join('')}`}
 function pmAskDeletePromptTestVersion(){
