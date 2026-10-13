@@ -32,7 +32,7 @@ function subPane(a,oi,options={}){
  const peopleOnly=a.mode==='roster';
  const visibleSub=peopleOnly?rosterVisibleSub(x):x.sub;
  return `<div class="sub-w">
-   <div class="sub-h"><span class="t">评论</span><span class="chip mut">${esc(label.slice(0,18))}</span>
+   <div class="sub-h"><span class="t">评论</span><span class="chip mut" title="${esc(label)}">${esc(label)}</span>
      <span class="s">${subCount({sub:visibleSub})} 条 · 只属于这个${unit}</span></div>
    <div class="sub-l" id="sl">${subMsgs(visibleSub)}
     ${a.inspection?.explaining?`<div style="display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-3) 0;color:var(--primary);font-size:var(--fs-sm)" role="status"><span class="spin" aria-hidden="true"></span>${esc(nick(a.by)||'店铺巡检')}正在解释…</div>`:''}</div>

@@ -1139,7 +1139,7 @@ function pptOutlineFooter(a){
 function findArt(id){for(const t of T){if(!t.arts)continue;const a=t.arts.find(x=>x.id===id);if(a)return[t,a];}return[];}
 function openDw(id,oi){
  S.aid=id;S.oi=(oi===undefined?null:oi);S.dtab=0;S.pc=false;S.focus=false;S.cr=null;S.brief=null;S.audit=null;S.auditCreator=null;
- const [,openedArtifact]=findArt(id);if(openedArtifact?.mode==='csa')S.pc=true;
+ const [,openedArtifact]=findArt(id);if(drawerSupportsCommentSplit(openedArtifact))S.pc=true;
  if(id==='a2')S.planSections={0:true};
  drawDw();$('dw').classList.add('on');$('scrim').classList.add('on');
  document.querySelectorAll('.pk').forEach(e=>e.classList.remove('sel'));
@@ -1156,7 +1156,7 @@ function openReview(id){
 }
 function scrollDrawerToBottom(){
  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-  const body=document.querySelector('#dw .dw-b');
+  const body=document.querySelector('#dw .dw-artifact-comments .sub-l')||document.querySelector('#dw .dw-b');
   if(body)body.scrollTop=body.scrollHeight;
  }));
 }
@@ -1426,8 +1426,70 @@ else if(a.mode==='csa'){
      :a.st==='run'?`<span style="font-size:var(--fs-sm);color:var(--t2)">Agent 还在生成，完成后会回到待审批。</span>`
      :''}
   </div>`;
+ mountDrawerCommentSplit(a,{tabs,planIndex,directionIndex,isStandaloneDirection});
  if(window.lucide)lucide.createIcons({root:$('dw'),attrs:{width:16,height:16,'stroke-width':1.8}});
  syncDrawerExpandControl();
+}
+
+function drawerSupportsCommentSplit(a){
+ if(!a)return false;
+ if(a.mode==='options')return !!(a.independent||a.seoFlow||a.id==='a1'||a.id==='a4-direction');
+ return !['items','seo-intake','adtable'].includes(a.mode);
+}
+function mountDrawerCommentSplit(a,context){
+ const drawer=$('dw');if(!drawerSupportsCommentSplit(a)||S.cr!==null&&S.cr!==undefined||S.brief!==null&&S.brief!==undefined)return;
+ const {tabs,planIndex,directionIndex,isStandaloneDirection}=context;
+ if(a.mode==='roster'&&(S.dtab!==0||Number.isInteger(S.auditCreator)))return;
+ if(/版本|^评论/.test(tabs[S.dtab]||''))return;
+ const header=drawer.querySelector(':scope>.dw-h'),body=drawer.querySelector(':scope>.dw-b'),nav=drawer.querySelector(':scope>.dw-tabs'),footer=drawer.querySelector(':scope>.dw-f');if(!header||!body||!nav||!footer)return;
+ const split=document.createElement('div');split.className='dw-artifact-split'+(S.pc?'':' comments-hidden');
+ const content=document.createElement('section');content.className='dw-artifact-content';content.setAttribute('aria-label','产出内容');
+ drawer.appendChild(split);split.appendChild(content);content.append(header,nav,body,footer);
+ const existing=[...footer.querySelectorAll('button')].find(button=>button.textContent.includes('评论'));
+ if(!existing){const toggle=document.createElement('button');toggle.type='button';toggle.className='btn ghost sm';toggle.textContent=S.pc?'收起评论':'评论';toggle.setAttribute('aria-expanded',String(!!S.pc));toggle.onclick=()=>{S.pc=!S.pc;drawDw()};footer.appendChild(toggle)}
+ if(!S.pc)return;
+ const comments=document.createElement('aside');comments.className='dw-artifact-comments';comments.setAttribute('aria-label','当前产出评论');
+ const personPane=a.mode==='roster'&&Number.isInteger(S.or)?body.querySelector('.pk .sub-w'):null;
+ let pane=a.mode==='roster'?(personPane||body.querySelector('.roster-overall-comments .sub-w')):body.querySelector('.sub-w');
+ if(personPane)body.querySelector('.roster-overall-comments')?.remove();
+ if(!pane){
+  const scope=a.mode==='plans'?planIndex:isStandaloneDirection?directionIndex:a.listing?0:null;
+  comments.innerHTML=subPane(a,scope);pane=comments.querySelector('.sub-w');
+ }else{
+  const wrapper=pane.parentElement;comments.appendChild(pane);
+  if(wrapper!==body&&!wrapper.children.length&&!wrapper.textContent.trim())wrapper.remove();
+ }
+ const resize=document.createElement('div');resize.className='dw-comment-resize';resize.tabIndex=0;resize.setAttribute('role','separator');resize.setAttribute('aria-orientation','vertical');resize.setAttribute('aria-label','调整评论宽度，左右方向键可微调');resize.title='拖动调整评论宽度，双击恢复默认';
+ comments.id='dw-artifact-comment-pane';resize.setAttribute('aria-controls',comments.id);
+ split.append(resize,comments);mountDrawerCommentResize(split,resize);
+}
+function drawerCommentWidth(total,requested){return Math.max(300,Math.min(Math.max(300,total-486),requested))}
+function mountDrawerCommentResize(split,handle){
+ const apply=width=>{
+  const total=split.getBoundingClientRect().width;if(total<786)return;
+  const next=drawerCommentWidth(total,width);S.drawerCommentRatio=next/total;
+  split.style.setProperty('--dw-comment-width',next/total*100+'%');
+  handle.setAttribute('aria-valuemin','300');handle.setAttribute('aria-valuemax',String(Math.max(300,Math.floor(total-486))));
+  handle.setAttribute('aria-valuenow',String(Math.round(next)));handle.setAttribute('aria-valuetext',Math.round(next)+' 像素');
+ };
+ requestAnimationFrame(()=>apply(split.getBoundingClientRect().width*(S.drawerCommentRatio||.34)));
+ let drag=null;
+ const finish=()=>{drag=null;document.body.classList.remove('dw-comment-resizing')};
+ handle.addEventListener('pointerdown',event=>{
+  if(event.button!==0||split.getBoundingClientRect().width<786)return;
+  event.preventDefault();const comments=split.querySelector('.dw-artifact-comments');
+  drag={id:event.pointerId,x:event.clientX,width:comments.getBoundingClientRect().width};
+  handle.setPointerCapture(event.pointerId);document.body.classList.add('dw-comment-resizing');handle.focus();
+ });
+ handle.addEventListener('pointermove',event=>{if(drag&&drag.id===event.pointerId)apply(drag.width+drag.x-event.clientX)});
+ handle.addEventListener('pointerup',event=>{if(drag?.id===event.pointerId){if(handle.hasPointerCapture(event.pointerId))handle.releasePointerCapture(event.pointerId);finish()}});
+ handle.addEventListener('pointercancel',finish);handle.addEventListener('lostpointercapture',finish);
+ handle.addEventListener('dblclick',()=>apply(split.getBoundingClientRect().width*.34));
+ handle.addEventListener('keydown',event=>{
+  if(!['ArrowLeft','ArrowRight','Home'].includes(event.key))return;
+  event.preventDefault();const width=split.querySelector('.dw-artifact-comments').getBoundingClientRect().width;
+  apply(event.key==='Home'?split.getBoundingClientRect().width*.34:width+(event.key==='ArrowLeft'?24:-24));
+ });
 }
 
 function csaAnswerFor(q){
