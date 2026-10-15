@@ -12,7 +12,7 @@ function subMsgs(arr){
       ${m.k==='chg'?'<span class="chip mut">对Ai说</span>':''}
       ${isAg?'<span class="chip dom">Agent</span>':''}
       <span class="tm">${m.at}</span></div>
-      <div class="tx">${mHTML(m.tx)}</div></div></div>`;
+      <div class="tx">${mHTML(m.tx)}</div>${caMessageHTML(m)}</div></div>`;
  }).join('')||'<div style="font-size:var(--fs-sm);color:var(--t3);padding:var(--sp-3) 0;text-align:center">还没有评论记录。有判断就写在这里——它只属于这个产出。</div>';
 }
 function scopeNote(a,oi){
@@ -42,13 +42,15 @@ function subPane(a,oi,options={}){
      <label class="collab-field"><span>负责人</span><select onchange="setCreatorField('${a.id}',${oi},'commOwner',this.value,'负责人')">${['待分配','jack','dudu','Sophie','Sam'].map(s=>`<option ${s===(x.commOwner||'待分配')?'selected':''}>${s}</option>`).join('')}</select></label>
    </div>`:''}
    ${peopleOnly&&a.workflow==='douyin'?dSampleShippingForm(a,oi)+dDouyinContractForm(a,oi):''}
-   <div class="sub-c">
+   <div class="sub-c" ${caDropAttrs('sub',a.id,oi)}>
      <div style="position:relative"><div id="m-si"></div>
-       <textarea id="si" oninput="onKey(event,'si',${peopleOnly})" placeholder="${peopleOnly?'填写备注。输入 @ 提到人。':'写给同事看 → 对同事说；写给 Ai 改 → 对Ai说。输入 @ 提到人。'}"></textarea></div>
+       <textarea id="si" oninput="onKey(event,'si',${peopleOnly});caRemember('sub','${a.id}',this.value,${oi===undefined?null:oi})" placeholder="${peopleOnly?'填写备注。输入 @ 提到人。':'写给同事看 → 对同事说；写给 Ai 改 → 对Ai说。输入 @ 提到人。'}">${esc(caGet('sub',a.id,oi).text)}</textarea></div>
+     ${caComposerHTML('sub',a.id,oi)}
      <div class="row2">
        ${peopleOnly?'':a.mode==='csa'&&S.dtab===0?`<button class="btn sm" onclick="subSend('ask','${a.id}',${oi===undefined?null:oi})">对Ai说</button>`:`<button class="btn sm" onclick="subSend('chg','${a.id}',${oi===undefined?null:oi})">对Ai说</button>`}
        <button class="btn ghost sm" onclick="subSend('note','${a.id}',${oi===undefined?null:oi})">${peopleOnly?'添加备注':'对同事说'}</button>
       <button class="btn ghost sm" data-mention-toggle onclick="showMent('si',${peopleOnly},this)" title="提到某人">@</button>
+      ${caAttachButton('sub',a.id,oi)}
      </div></div></div>`;
 }
 function setCreatorField(id,oi,key,value,label){
@@ -56,7 +58,9 @@ function setCreatorField(id,oi,key,value,label){
  a.rows[oi][key]=value;toast(a.rows[oi].n+' · '+label+'：'+value);
 }
 function subSend(kind,id,oi){
- const i=$('si');if(!i||!i.value.trim()){toast('先写点什么');return;}
+ const i=$('si'),draft=caGet('sub',id,oi);if(!i)return;
+ if(!caReady(draft))return;
+ const attachments=caFiles(draft);if(!i.value.trim()&&!attachments.length){toast('先写点什么或添加附件');return;}
  const [,a]=findArt(id);const kids=a.opts||a.rows||a.plans;const activeEmail=a.mode==='csa'&&S.dtab===1?activeCSAEmail(a):null;const x=activeEmail?(activeEmail.thread=activeEmail.thread||{t:a.csa.customer+' · 客户邮件',sub:[]}):((oi===null)?a:kids[oi]);
  const hasShipping=a.mode==='roster'&&a.workflow==='douyin'&&!!sampleShippingDraftFor(a,oi);
  const hasContract=a.mode==='roster'&&a.workflow==='douyin'&&!!douyinContractDraftFor(a,oi);
@@ -64,9 +68,10 @@ function subSend(kind,id,oi){
  if(hasContract&&!validateDouyinContract(a,oi))return;
  x.sub=x.sub||[];
  const tx=i.value.trim(),workflowMessage=hasShipping?sampleShippingMessage(sampleShippingDraftFor(a,oi)):hasContract?douyinContractMessage(a,oi):'',sentText=workflowMessage?tx+'\n\n'+workflowMessage:tx;
- x.sub.push({w:'du',k:kind==='chg'?'chg':undefined,tx:sentText,at:'刚刚'});
+ x.sub.push({w:'du',k:kind==='chg'?'chg':undefined,tx:sentText,attachments,at:'刚刚'});caClear(draft);
  if(hasShipping){commitSampleShipping(a,oi);render();drawDw();const l=$('sl');if(l)l.scrollTop=l.scrollHeight;requestAnimationFrame(()=>requestAnimationFrame(()=>focusSampleShippingForm(oi)));toast('寄样信息与评论已保存');return;}
  if(hasContract){commitDouyinContract(a,oi);render();drawDw();const l=$('sl');if(l)l.scrollTop=l.scrollHeight;requestAnimationFrame(()=>requestAnimationFrame(()=>focusDouyinContractForm(oi)));toast('合同信息与评论已保存');return;}
+ if(attachments.length){render();drawDw();scrollDrawerToBottom();toast('附件消息已发送（演示），未读取文件内容。');return;}
  if(a.mode==='csa'){
   if(S.dtab===1){drawDw();const l=$('sl');if(l)l.scrollTop=l.scrollHeight;toast(kind==='chg'?'邮件修改要求已记录':'已留言');return;}
   if(kind==='note'){drawDw();const l=$('sl');if(l)l.scrollTop=l.scrollHeight;toast('已留言');return;}
@@ -126,6 +131,7 @@ function subSend(kind,id,oi){
 /* ============ new thread ============ */
 function newTaskCampaignLabelHTML(c){return c?`<span class="new-task-campaign-name">${esc(c.n)}</span><span class="new-task-campaign-date">（${esc(c.from||'—')}–${esc(c.to||'—')}）</span>`:'<span class="new-task-campaign-name">日常（不归属活动）</span>';}
 function openNew(agid,prefill,campaignId){
+ taReset();
  S.newAgent=agid||null;
  const a=S.newAgent?REG.find(x=>x.id===S.newAgent):null;
  const requestedCampaign=campaignId===undefined?S.cid:campaignId;
@@ -135,6 +141,7 @@ function openNew(agid,prefill,campaignId){
   <div class="mbd">
     <div class="fld"><label>意图</label>
       <textarea id="ni" rows="6" placeholder="例如：围绕 11.11 主题做一组小红书内容，先给方向不要直接写稿">${esc(prefill||'')}</textarea></div>
+    ${taUploadHTML()}
     <div class="fld"><label>所属活动 <span style="color:var(--t3);font-weight:400">（选填）</span></label>
       <div class="new-task-campaign-picker"><input id="new-task-campaign" type="hidden" value="${esc(currentCampaign)}">
        <button type="button" class="new-task-campaign-trigger" onclick="toggleNewTaskCampaignMenu(event)" aria-haspopup="listbox" aria-expanded="false"><span id="new-task-campaign-label">${newTaskCampaignLabelHTML(CAMPS.find(c=>c.id===currentCampaign))}</span><i data-lucide="chevron-down"></i></button>
@@ -287,16 +294,17 @@ function openContentData(i){
  </div>`;
  $('mod').classList.add('on');
 }
-function closeMod(){if(typeof closePermissionFocus==='function')closePermissionFocus();S.manualFallback=false;S.campSync=null;S.newCampaignId=null;$('mod').classList.remove('on','plan-mode','asset-mode','permission-modal-wrap');}
+function closeMod(){if(document.querySelector('#mod .new-task-modal'))taReset();if(typeof closePermissionFocus==='function')closePermissionFocus();S.manualFallback=false;S.campSync=null;S.newCampaignId=null;$('mod').classList.remove('on','plan-mode','asset-mode','permission-modal-wrap');}
 function mkThread(){
  const v=$('ni').value.trim();if(!v){toast('先写一句你想做什么');return;}
+ if(!taReady())return;
  if(v.includes('人工')){createManualPendingThread();return;}
  const dualDemo=v==='2';
  const taskIntent=dualDemo?'生成天猫详情页内容，并在详情页产出批准后由店铺巡检检查商品资料、页面信息与上架风险。':v;
  const meta=inferNewTaskMeta(taskIntent),c=meta.c,d=meta.d,ag=dualDemo?'pdp':S.newAgent||meta.a||'orch';
  if(ag==='ana'){
   const id='n'+Date.now(),preset=prestartPlanPreset('ana');
-  T.unshift({cr:{s:'h',w:'du'},trig:'manual',id,t:v.split('\n')[0].slice(0,30),camp:c,dom:d,ag:'ana',own:'du',st:'todo',up:'刚刚',day:0,lv:'M2',cost:'¥0.20',outputCount:0,prestartDemo:true,
+  T.unshift({attachments:taSnapshot(),cr:{s:'h',w:'du'},trig:'manual',id,t:v.split('\n')[0].slice(0,30),camp:c,dom:d,ag:'ana',own:'du',st:'todo',up:'刚刚',day:0,lv:'M2',cost:'¥0.20',outputCount:0,prestartDemo:true,
    intent:{who:'du',tx:v,at:'刚刚'},plan:{v:1,status:'pending',startedAt:null,...preset},arts:[],cmts:[]});
   S.newAgent=null;closeMod();S.view='thread';S.tid=id;renderNav();render();$('view').scrollTo(0,0);toast('任务已创建 · 数据分析 Agent 计划待确认');return;
  }
@@ -304,18 +312,19 @@ function mkThread(){
   const id='n'+Date.now(),plan=prestartPlanPreset('pdp');
   plan.tx=dualDemo?'详情页生成 Agent 先整理规划并生成内容，Brooks 批准后由店铺巡检 Agent 检查商品资料、页面信息与上架风险。两份产出分别经 Brooks 批准后，再交 dudu 统一验收、分别评分。':'详情页生成 Agent 先整理详情页规划并生成内容。M1 产出先交 Brooks 审批，再交 dudu 验收打分。';
   if(dualDemo)plan.steps.splice(plan.steps.length-1,0,{l:'店铺巡检检查页面与上架风险',m:'等待详情页产出经 Brooks 批准',s:'todo',r:'未开始'});
-  T.unshift({cr:{s:'h',w:'du'},trig:'manual',id,t:dualDemo?'天猫详情页生成与店铺巡检':v.slice(0,26)+(v.length>26?'…':''),camp:c,dom:'电商',ag:'pdp',agents:dualDemo?['pdp','insp']:['pdp'],agentLabels:dualDemo?{pdp:'详情页生成',insp:'店铺巡检'}:{pdp:'详情页生成'},agentStates:dualDemo?{pdp:'待确认',insp:'等待详情页批准'}:{pdp:'待确认'},own:'br',st:'todo',up:'刚刚',day:0,lv:'M1',cost:'¥0.20',outputCount:0,prestartDemo:true,demoM1Pdp:true,demoDualAgents:dualDemo,
+  T.unshift({attachments:taSnapshot(),cr:{s:'h',w:'du'},trig:'manual',id,t:dualDemo?'天猫详情页生成与店铺巡检':v.slice(0,26)+(v.length>26?'…':''),camp:c,dom:'电商',ag:'pdp',agents:dualDemo?['pdp','insp']:['pdp'],agentLabels:dualDemo?{pdp:'详情页生成',insp:'店铺巡检'}:{pdp:'详情页生成'},agentStates:dualDemo?{pdp:'待确认',insp:'等待详情页批准'}:{pdp:'待确认'},own:'br',st:'todo',up:'刚刚',day:0,lv:'M1',cost:'¥0.20',outputCount:0,prestartDemo:true,demoM1Pdp:true,demoDualAgents:dualDemo,
    intent:{who:'du',tx:taskIntent,at:'刚刚'},plan:{v:1,status:'pending',startedAt:null,...plan},
    ask:{agentLabel:'详情页生成',tx:'开始生成前，请确认目标平台、页面数量和关联产品。',platforms:['天猫','京东','抖音电商'],products:['A80 修护精华 30ml','A80 修护安瓶精华 15ml','Evo1.1 轻盈营养体验','Clean Glow 修护霜 50g'],channels:[{platform:'天猫',qty:'1',products:['A80 修护精华 30ml']}]},arts:[],cmts:[]});
   S.newAgent=null;closeMod();S.view='thread';S.tid=id;renderNav();render();$('view').scrollTo(0,0);toast(dualDemo?'任务已创建 · 已推荐 2 个 Agent，计划待确认':'任务已创建 · 已推荐详情页生成 Agent，计划待确认');return;
  }
- T.unshift({cr:{s:'h',w:'du'},trig:'manual',id:'n'+Date.now(),t:v.slice(0,26)+(v.length>26?'…':''),camp:c,dom:d,ag,own:'du',st:'run',up:'刚刚',day:0,lv:'M2',cost:'¥0.20'});
+ T.unshift({attachments:taSnapshot(),cr:{s:'h',w:'du'},trig:'manual',id:'n'+Date.now(),t:v.slice(0,26)+(v.length>26?'…':''),camp:c,dom:d,ag,own:'du',st:'run',up:'刚刚',day:0,lv:'M2',cost:'¥0.20'});
  S.newAgent=null;
  closeMod();S.dom=d;go('work');toast('已开线程 · Agent 正在起草计划');
 }
 function createManualPendingThread(){
+ if(!taReady())return;
  const v=$('ni').value.trim(),meta=inferNewTaskMeta(v),c=meta.c,d=meta.d,id='n'+Date.now();
- T.unshift({cr:{s:'h',w:'du'},trig:'manual',id,t:v==='人工'?'人工处理任务':v.slice(0,26)+(v.length>26?'…':''),camp:c,dom:d,ag:'orch',own:'du',manualPending:true,st:'todo',up:'刚刚',day:0,lv:'M1',cost:'—',outputCount:0,
+ T.unshift({attachments:taSnapshot(),cr:{s:'h',w:'du'},trig:'manual',id,t:v==='人工'?'人工处理任务':v.slice(0,26)+(v.length>26?'…':''),camp:c,dom:d,ag:'orch',own:'du',manualPending:true,st:'todo',up:'刚刚',day:0,lv:'M1',cost:'—',outputCount:0,
   intent:{who:'du',tx:v,at:'刚刚'},arts:[],cmts:[]});
  S.newAgent=null;S.manualAssignOpen=false;S.manualTemplate='文件交付';S.manualPerson='br';S.manualDeadline='2026-08-28T18:00';
  closeMod();S.view='thread';S.tid=id;renderNav();render();$('view').scrollTo(0,0);toast('任务已创建 · 暂未匹配到合适的 Agent');

@@ -14,9 +14,10 @@ function drawGeneralAgentDrawer(){
  $('dw').innerHTML=`<div class="dw-h general-agent-head"><button class="ib" onclick="closeDw()" aria-label="关闭"><i data-lucide="x"></i></button><div><div class="ty">通用 Agent</div><h3>${esc(t.t)}</h3></div></div>
   ${confirmed?`<div class="dw-tabs general-agent-tabs"><button class="on">对话</button><button>产出 ${t.outputCount||0}</button></div>`:''}
   <div class="dw-b general-agent-body">
-   ${confirmed?`<div class="general-chat-message agent"><div class="general-chat-bubble general-chat-output"><b>${esc(artifact?.ttl||'好评返现文案 · v1')}</b><span>${esc(artifact?.body||'')}</span></div></div>${messages.map(m=>`<div class="general-chat-message ${m.role}"><div class="general-chat-bubble ${m.role==='agent'?'general-chat-output':''}">${m.title?`<b>${esc(m.title)}</b>`:''}<span>${esc(m.text)}</span></div></div>`).join('')}`:''}
+   ${confirmed?`<div class="general-chat-message agent"><div class="general-chat-bubble general-chat-output"><b>${esc(artifact?.ttl||'好评返现文案 · v1')}</b><span>${esc(artifact?.body||'')}</span></div></div>${messages.map(m=>`<div class="general-chat-message ${m.role}"><div class="general-chat-bubble ${m.role==='agent'?'general-chat-output':''}">${m.title?`<b>${esc(m.title)}</b>`:''}<span>${esc(m.text)}</span>${caMessageHTML(m)}</div></div>`).join('')}`:''}
   </div>
-  <div class="dw-f general-agent-foot">${confirmed?`<button class="general-agent-attach" aria-label="添加附件" onclick="toast('可添加图片或文件')"><i data-lucide="paperclip"></i></button><textarea id="general-agent-input" rows="1" placeholder="继续补充或修改要求…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendGeneralAgentMessage('${t.id}')}"></textarea><button class="btn" onclick="sendGeneralAgentMessage('${t.id}')">发送</button>`:`<button class="btn ghost" onclick="toast('可从已授权 Agent 中重新选择')">更换 Agent</button><span></span><button class="btn" onclick="confirmGeneralAgentRecommendation('${t.id}')">确认并开始</button>`}</div>`;
+  ${confirmed?`<div class="general-agent-attachments">${caComposerHTML('general',t.id)}</div>`:''}
+  <div class="dw-f general-agent-foot" ${confirmed?caDropAttrs('general',t.id):''}>${confirmed?`${caAttachButton('general',t.id)}<textarea id="general-agent-input" rows="1" oninput="caRemember('general','${t.id}',this.value)" placeholder="继续补充或修改要求…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendGeneralAgentMessage('${t.id}')}">${esc(caGet('general',t.id).text)}</textarea><button class="btn" onclick="sendGeneralAgentMessage('${t.id}')">发送</button>`:`<button class="btn ghost" onclick="toast('可从已授权 Agent 中重新选择')">更换 Agent</button><span></span><button class="btn" onclick="confirmGeneralAgentRecommendation('${t.id}')">确认并开始</button>`}</div>`;
  if(window.lucide)lucide.createIcons();
 }
 function confirmGeneralAgentRecommendation(id){
@@ -29,7 +30,16 @@ function finishGeneralAgentDemo(id){
 }
 function generalAgentQuickReply(id,text){const input=$('general-agent-input');if(input){input.value=text;input.focus();}else sendGeneralAgentMessage(id,text);}
 function sendGeneralAgentMessage(id,preset){
- const t=T.find(item=>item.id===id),input=$('general-agent-input'),text=(preset||input?.value||'').trim();if(!t||!text)return;t.generalMessages=t.generalMessages||[];t.generalMessages.push({role:'user',text,at:'刚刚'});const artifact=t.arts?.find(a=>a.mode==='general-session');if(artifact){artifact.v+=1;artifact.ttl='好评返现文案 · v'+artifact.v;artifact.ex='已根据本次会话补充要求更新。';artifact.body=generalAgentDemoBody();artifact.st='review';t.generalMessages.push({role:'agent',title:artifact.ttl,text:artifact.body,at:'刚刚'});}t.st='review';t.up='刚刚';render();drawGeneralAgentDrawer();const body=$('dw')?.querySelector('.dw-b');if(body)body.scrollTop=body.scrollHeight;
+ const t=T.find(item=>item.id===id),input=$('general-agent-input'),text=(preset||input?.value||'').trim();if(!t)return;
+ const draft=caGet('general',id);if(!caReady(draft))return;
+ const attachments=caFiles(draft);if(!text&&!attachments.length)return;
+ t.generalMessages=t.generalMessages||[];t.generalMessages.push({role:'user',text,attachments,at:'刚刚'});caClear(draft);
+ const artifact=t.arts?.find(a=>a.mode==='general-session');
+ if(!attachments.length){
+  if(artifact){artifact.v+=1;artifact.ttl='好评返现文案 · v'+artifact.v;artifact.ex='已根据本次会话补充要求更新。';artifact.body=generalAgentDemoBody();artifact.st='review';t.generalMessages.push({role:'agent',title:artifact.ttl,text:artifact.body,at:'刚刚'})}
+  t.st='review';
+ }
+ t.up='刚刚';render();drawGeneralAgentDrawer();const body=$('dw')?.querySelector('.dw-b');if(body)body.scrollTop=body.scrollHeight;
 }
 function toggleThreadManualPerson(id,checked){
  const list=Array.isArray(S.manualPeople)?[...S.manualPeople]:[S.manualPerson||'br'];
@@ -157,7 +167,7 @@ function vThread(){
   <div class="th-meta" style="margin-top:var(--sp-3)"><span class="st ${t.st}">${STN[t.st]}</span>
     <span class="chip dom">${t.dom}</span>
     <span class="crbadge ${crInfo(t).s}">${crInfo(t).av} 由 <b>${crInfo(t).nm}</b> 发起</span></div></div>
-  <div class="empty"><div class="h">这条线程还没铺内容</div><div style="font-size:var(--fs-md);margin-bottom:var(--sp-4)">原型里详细展开了 4 条线程，分别演示不同的产出类型。</div><button class="btn" onclick="go('work')">回到工作</button></div></div>`;
+  ${taTaskHTML(t)}<div class="empty"><div class="h">这条线程还没铺内容</div><div style="font-size:var(--fs-md);margin-bottom:var(--sp-4)">原型里详细展开了 4 条线程，分别演示不同的产出类型。</div><button class="btn" onclick="go('work')">回到工作</button></div></div>`;
  return `<div class="wrap thread-wrap">
   <div class="th-hd">
     <div class="crumb"><button onclick="go('work')">工作</button> › ${t.camp?`<button onclick="goCamp('${t.camp}')">${t.camp}</button>`:'日常'} › <span>任务</span></div>
@@ -186,7 +196,7 @@ function vThread(){
     <div class="node ok"><div class="nlab">意图 · INTENT</div>
       <div class="bub me"><div class="who"><span class="avs" style="background:${intentAuthor?intentAuthor.c:'#9490B8'}">${intentAuthor?intentAuthor.s:'SYS'}</span>
         <span class="nm">${intentAuthor?intentAuthor.n:'系统事件'}</span><span class="tm">${t.intent.at}</span></div>
-        ${esc(t.intent.tx)}</div></div>
+        ${esc(t.intent.tx)}${taTaskHTML(t)}</div></div>
 
     ${t.standing?`<div class="node ok"><div class="nlab">${t.standing==='ana'?'本次提问':'本次运行 · '+((RECIPES.find(r=>r.id===t.standing)||{}).cad||'')}</div>
       <div class="bub" style="background:#F0FDFF;border-color:#A5F3FC">
@@ -263,13 +273,15 @@ function vThread(){
   <div class="card" style="margin-top:var(--sp-5)">
     <div class="card-t">对话 <span class="chip mut">${(t.cmts||[]).length}</span></div>
     <div id="cl">${convList(t)}</div>
-    <div class="cbox">
+    <div class="cbox" ${caDropAttrs('task',t.id)}>
       <span class="avs" style="background:${U.du.c}">DU</span>
       <div style="flex:1;min-width:0;position:relative">
         <div id="m-ci"></div>
-        <textarea id="ci" rows="3" oninput="onKey(event,'ci')" placeholder="${t.prestartDemo?'补充任务需求或留言…':'线程级的事：范围、优先级、要不要砍掉某个方向…&#10;输入 @ 可以提到团队成员'}"></textarea>
+        <textarea id="ci" rows="3" oninput="onKey(event,'ci');caRemember('task','${t.id}',this.value)" placeholder="${t.prestartDemo?'补充任务需求或留言…':'线程级的事：范围、优先级、要不要砍掉某个方向…&#10;输入 @ 可以提到团队成员'}">${esc(caGet('task',t.id).text)}</textarea>
+        ${caComposerHTML('task',t.id)}
         <div class="cbar">
           <button class="btn ghost sm" data-mention-toggle onclick="showMent('ci',false,this)">@ 提到</button>
+          ${caAttachButton('task',t.id)}
           ${t.prestartDemo?'':'<span class="hintline">@ 团队成员 = 留言给他</span>'}
           <button class="btn sm" onclick="addC()">发送</button></div></div>
     </div>
@@ -709,16 +721,17 @@ if(a.mode==='roster'||a.mode==='items'){
  if(a.mode==='plans'){
   return `<div class="pk" id="pk-${a.id}">
    <div class="pk-h"><span class="ty">产出 · ${a.id==='a2'?'活动策划':'社媒内容'}</span><span class="chip plat">小红书</span>
+    ${a.plans.length===1?`<span class="st ${a.plans[0].s}">${a.plans[0].s==='done'?'已批准':'待审批'}</span>`:''}
     ${artifactRunLink(a.by)}</div>
-   <div style="padding:var(--sp-3)"><div class="opts">${a.plans.map((p,i)=>`
+   <div style="padding:var(--sp-3)"><div class="opts${a.plans.length===1?' single-output':''}">${a.plans.map((p,i)=>`
      <div class="optwrap"><button class="opt ${p.s==='done'?'win':''}" onclick="openDw('${a.id}',${i})" style="width:100%">
        <div class="im" style="${p.img?`background-image:url('${p.img}');background-size:cover;background-position:center`:grad(p.g[0],p.g[1])}"></div>
        <div class="bd"><div class="ot">${esc(p.t)}</div><div class="oe">${esc(p.e)}</div>
-         <div class="of"><span class="st ${p.s}">${p.s==='done'?'已批准':'待审批'}</span>
-           ${subCount(p)?`<span class="chip mut">评论 ${subCount(p)}</span>`:''}</div></div>
+         ${a.plans.length>1?`<div class="of"><span class="st ${p.s}">${p.s==='done'?'已批准':'待审批'}</span>
+           ${subCount(p)?`<span class="chip mut">评论 ${subCount(p)}</span>`:''}</div>`:''}</div>
      </button>
      </div>`).join('')}</div></div>
-   ${a.id==='a2-label-copy'?`<div class="pk-a">${a.socialReturning?`<div class="listing-reject-inline"><input id="social-return-${a.id}" type="text" aria-label="退回原因" placeholder="填写退回原因" value="${esc(a.socialReturnDraft||'')}" oninput="setSocialReturnDraft('${a.id}',this.value)"><button class="btn sm" onclick="confirmSocialReturn('${a.id}')">确认</button><button class="btn ghost sm" onclick="cancelSocialReturn('${a.id}')">取消</button></div>`:`${a.plans.some(p=>p.s==='review')?`<button class="btn sm" onclick="openSocialApproval('${a.id}')">批准</button><button class="btn ghost sm" onclick="startSocialReturn('${a.id}')">退回</button>`:''}<span class="v">v${a.v} · 2小时前</span>`}</div>`:`<div class="vals">${a.vals.map(v=>`<span class="val ${v.s}">${v.s==='ok'?'✓':v.s==='warn'?'!':'✕'} ${v.l} <span class="m">${v.v}</span></span>`).join('')}</div>
+   ${a.id==='a2-label-copy'?`<div class="pk-a">${a.socialReturning?`<div class="listing-reject-inline"><input id="social-return-${a.id}" type="text" aria-label="退回原因" placeholder="填写退回原因" value="${esc(a.socialReturnDraft||'')}" oninput="setSocialReturnDraft('${a.id}',this.value)"><button class="btn sm" onclick="confirmSocialReturn('${a.id}')">确认</button><button class="btn ghost sm" onclick="cancelSocialReturn('${a.id}')">取消</button></div>`:`${a.plans.some(p=>p.s==='review')?`<button class="btn sm" onclick="openSocialApproval('${a.id}')">批准</button><button class="btn ghost sm" onclick="startSocialReturn('${a.id}')">退回</button>`:''}${a.plans.length===1?`<button class="rvb" onclick="openDw('${a.id}',0)">评论 ${subCount(a.plans[0])?`<span class="n">${subCount(a.plans[0])}</span>`:''}</button>`:''}<span class="v">v${a.v} · 2小时前</span>`}</div>`:`<div class="vals">${a.vals.map(v=>`<span class="val ${v.s}">${v.s==='ok'?'✓':v.s==='warn'?'!':'✕'} ${v.l} <span class="m">${v.v}</span></span>`).join('')}</div>
     <div class="pk-a"${a.hideMeta?' style="display:none"':''}><button class="btn ghost sm" onclick="openDw('${a.id}')">编辑 ↗</button>
      ${a.id==='a4-direction'||subCount(a)?`<button class="rvb" onclick="openReview('${a.id}')">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''}</button>`:''}
      <span class="v">v${a.v} · 2小时前</span></div>`}
@@ -1048,11 +1061,12 @@ function act(id,w){
  render();
 }
 function addC(){
- const i=$('ci');if(!i.value.trim())return;
- const tx=i.value.trim(),t=T.find(x=>x.id===S.tid);
- (t.cmts=t.cmts||[]).push({w:'du',tx,at:'刚刚'});
+ const i=$('ci'),t=T.find(x=>x.id===S.tid);if(!i||!t)return;
+ const draft=caGet('task',t.id);if(!caReady(draft))return;
+ const tx=i.value.trim(),attachments=caFiles(draft);if(!tx&&!attachments.length)return;
+ (t.cmts=t.cmts||[]).push({w:'du',tx,attachments,at:'刚刚'});caClear(draft);
  const hit=REG.find(a=>a.b==='live'&&ONLINE[a.id]&&tx.includes('@'+a.nick));
- if(hit&&!t.prestartDemo){dispatchFrom(hit.id,tx);return;}
+ if(hit&&!t.prestartDemo&&!attachments.length){dispatchFrom(hit.id,tx);return;}
  render();toast('已发送');
 }
 function dispatchFrom(agid,tx){

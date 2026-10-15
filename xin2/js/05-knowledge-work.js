@@ -955,38 +955,14 @@ const BRAND_FILES=[
  {id:'bf1',name:'品牌生态位分析源数据.pdf',type:'PDF',size:'2.4 MB',date:'2026-07-30',by:'S',color:'#F97316'},
  {id:'bf2',name:'竞品评论样本.xlsx',type:'表格',size:'860 KB',date:'2026-07-30',by:'S',color:'#10B981'},
  {id:'bf3',name:'用户访谈摘录.docx',type:'文档',size:'1.1 MB',date:'2026-07-29',by:'S',color:'#F97316'},
- {id:'bf4',name:'产品矩阵截图.png',type:'图片',size:'420 KB',date:'2026-07-29',by:'S',color:'#3B82F6'},
  {id:'bf5',name:'渠道资源分配表.csv',type:'表格',size:'188 KB',date:'2026-07-28',by:'S',color:'#10B981'},
  {id:'bf6',name:'USP 候选陈述.md',type:'文档',size:'96 KB',date:'2026-07-28',by:'S',color:'#F97316'},
  {id:'bf7',name:'SWOT 复核记录.pdf',type:'PDF',size:'1.8 MB',date:'2026-07-27',by:'S',color:'#3B82F6'},
- {id:'bf8',name:'定位锚点图.png',type:'图片',size:'516 KB',date:'2026-07-27',by:'S',color:'#10B981'},
  {id:'bf9',name:'行业趋势摘要.pdf',type:'PDF',size:'1.3 MB',date:'2026-07-26',by:'S',color:'#F97316'},
  {id:'bf10',name:'行业术语与品牌语言.docx',type:'文档',size:'740 KB',date:'2026-07-26',by:'S',color:'#3B82F6'}
 ];
 function kBrandFiles(){
- const type=S.brandFileType||'全部',mode=S.brandFileMode||'grid';
- if(S.brandFileSearch===undefined)S.brandFileSearch='';
- const query=S.brandFileSearch.trim().toLowerCase();
- const list=BRAND_FILES.filter(f=>(type==='全部'||f.type===type)&&(!query||`${f.name} ${f.type}`.toLowerCase().includes(query)));
- const icons={PDF:['pdf','PDF'],文档:['doc','DOC'],表格:['sheet','XLS'],图片:['image','IMG']};
- return `<div class="bf-toolbar">
-  <label class="kc-search bf-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input id="brand-file-search" type="text" aria-label="搜索品牌文件" placeholder="搜索文件名或类型" value="${esc(S.brandFileSearch)}" oninput="if(!event.isComposing)searchBrandFiles(this)" oncompositionend="searchBrandFiles(this)"></label>
-  <div class="seg" role="group" aria-label="品牌文件类型">${['全部','PDF','文档','表格','图片'].map(t=>`<button class="${t===type?'on':''}" aria-pressed="${t===type}" onclick="S.brandFileType='${t}';render()">${t}</button>`).join('')}</div>
-  <span class="spacer"></span>
-  <div class="seg bf-view" role="group" aria-label="文件展示方式"><button class="${mode==='list'?'on':''}" onclick="S.brandFileMode='list';render()">列表</button><button class="${mode==='grid'?'on':''}" onclick="S.brandFileMode='grid';render()">图标</button></div>
-  <button class="btn ghost sm" onclick="$('brand-file-upload').click()"><i data-lucide="upload"></i><span>上传文件</span></button>
-  <input id="brand-file-upload" type="file" multiple hidden accept=".pdf,.doc,.docx,.md,.txt,.rtf,.xls,.xlsx,.csv,.png,.jpg,.jpeg,.webp,.gif" onchange="uploadBrandFiles(this)">
- </div>
- <div class="bf-count">${list.length} / ${BRAND_FILES.length}</div>
- <div class="${mode==='grid'?'bf-grid':'bf-list'}">${list.map(f=>{const icon=icons[f.type];return `<article class="bf-card">
-  <div class="bf-top"><span class="bf-kind ${icon[0]}">${icon[1]}</span><div class="bf-tools">
-   <button class="bf-icon" onclick="downloadBrandFile('${f.id}')" title="下载 ${esc(f.name)}" aria-label="下载 ${esc(f.name)}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 15v5h16v-5"/></svg></button>
-   <button class="bf-icon" onclick="manageBrandFile('${f.id}')" title="更多操作" aria-label="${esc(f.name)}的更多操作">⋯</button>
-  </div></div>
-  <div class="bf-info"><button class="bf-title" onclick="previewBrandFile('${f.id}')">${esc(f.name)}</button><div class="bf-desc">${f.type} · ${esc(f.size)}</div></div>
-  <div class="bf-bottom"><time>${esc(f.date)}</time><span class="bf-uploader" style="background:${f.color}" title="上传者 ${esc(f.by)}">${esc(f.by)}</span></div>
- </article>`;}).join('')}</div>
- ${list.length?'':'<div class="allclear">暂无此类型文件，可通过“上传文件”添加。</div>'}`;
+ return kbFilesHTML();
 }
 function searchBrandFiles(input){
  const start=input.selectionStart,end=input.selectionEnd;
@@ -994,13 +970,15 @@ function searchBrandFiles(input){
  const next=$('brand-file-search');if(next){next.focus({preventScroll:true});next.setSelectionRange(start,end);}
 }
 function uploadBrandFiles(input){
- const types={pdf:'PDF',doc:'文档',docx:'文档',md:'文档',txt:'文档',rtf:'文档',xls:'表格',xlsx:'表格',csv:'表格',png:'图片',jpg:'图片',jpeg:'图片',webp:'图片',gif:'图片'};
+ if(!kbCanUpload()){input.value='';toast('没有当前品牌的文件上传权限');return;}
+ const types={pdf:'PDF',doc:'文档',docx:'文档',md:'文档',txt:'文档',rtf:'文档',xls:'表格',xlsx:'表格',csv:'表格',ppt:'PPT',pptx:'PPT'};
  const now=new Date(),date=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
  let added=0,skipped=0;
  for(const file of Array.from(input.files||[])){
   const type=types[file.name.split('.').pop().toLowerCase()];if(!type){skipped++;continue;}
   const size=file.size>=1048576?(file.size/1048576).toFixed(1)+' MB':file.size>=1024?Math.ceil(file.size/1024)+' KB':file.size+' B';
-  BRAND_FILES.unshift({id:'bf-'+Date.now()+'-'+added,name:file.name,type,size,date,by:'DU',color:'#7C3AED',url:URL.createObjectURL(file)});added++;
+  const record={id:'bf-'+Date.now()+'-'+added,name:file.name,type,size,date,by:'DU',color:'#7C3AED',url:URL.createObjectURL(file)};
+  BRAND_FILES.unshift(record);kbRegisterUpload(record);added++;
  }
  input.value='';
  if(added){S.brandFileType='全部';render();}
@@ -1008,25 +986,12 @@ function uploadBrandFiles(input){
 }
 function downloadBrandFile(id){
  const file=BRAND_FILES.find(f=>f.id===id);if(!file)return;
+ const doc=KB_DOCS.get(id);if(doc&&(!kbScopeAllowed(doc)||['denied','removed'].includes(doc.health))){toast('文件不可访问，无法下载');return;}
  if(!file.url){toast('这是示例文件记录，请上传原文件后下载');return;}
  const link=document.createElement('a');link.href=file.url;link.download=file.name;document.body.appendChild(link);link.click();link.remove();
 }
 function previewBrandFile(id){
- const file=BRAND_FILES.find(f=>f.id===id);if(!file)return;
- $('mod').innerHTML=`<div class="mbox"><div class="mhd"><div class="e">知识库 · 品牌文件</div><h3>${esc(file.name)}</h3></div>
-  <div class="mbd"><div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:var(--sp-4)">${file.type} · ${esc(file.size)} · ${esc(file.date)}</div>
-  ${file.url&&file.type==='图片'?`<img src="${file.url}" alt="${esc(file.name)}" style="display:block;max-width:100%;max-height:50vh;object-fit:contain;margin:auto">`:`<div class="allclear">${file.url?'此格式暂不支持在线预览，请下载查看。':'这是示例文件记录，尚未提供原文件。'}</div>`}</div>
-  <div class="mft"><button class="btn ghost sm" onclick="closeMod()">关闭</button><button class="btn sm" onclick="downloadBrandFile('${id}')">下载文件</button></div></div>`;
- $('mod').classList.add('on');
-}
-function manageBrandFile(id){
- const file=BRAND_FILES.find(f=>f.id===id);if(!file)return;
- kpDialog('删除文件',`确认删除 <strong>${esc(file.name)}</strong>？删除后无法在本页恢复。`,`<button class="btn ghost" onclick="closeMod()">取消</button><button class="btn danger" onclick="removeBrandFile('${id}')">删除</button>`);
-}
-function removeBrandFile(id){
- const index=BRAND_FILES.findIndex(f=>f.id===id);if(index<0)return;
- const [file]=BRAND_FILES.splice(index,1);if(file.url)URL.revokeObjectURL(file.url);
- closeMod();render();toast('文件已删除');
+ return kbShowFile(id);
 }
 function assetFilteredEntries(){
  const query=String(S.assetSearch||'').trim().toLowerCase();
@@ -1481,7 +1446,7 @@ function fpill(key,label,opts){
 function setDom(d){S.dom=d;render();}
 function setMode(m){S.mode=m;render();}
 function kanban(L){
- const preferredOrder=['t5','t-douyin-creators','t-general-agent-demo','t-ppt-form-demo','t-seo-flow-demo'];
+ const preferredOrder=['t1-label-copy','t-ppt-form-demo','t5','t-douyin-creators','t-general-agent-demo','t-seo-flow-demo'];
  return `<div class="kb">${COLS.map(c=>{
   const it=L.filter(t=>t.st===c.k||(c.k==='review'&&t.st==='ask')).sort((a,b)=>{
    const ai=preferredOrder.indexOf(a.id),bi=preferredOrder.indexOf(b.id);

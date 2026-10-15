@@ -298,7 +298,7 @@ function convList(t){
    +(c.k==='chg'?'<span class="chip" style="background:var(--warn-bg);color:var(--warn-fg);border:1px solid var(--warn-bd)">要求修改</span>':'')
    +(c.sc?'<button class="scchip" onclick="scopeJump('+JSON.stringify(c.sc).replace(/"/g,'&quot;')+')">关于 '+esc(c.sc.label)+' ↗</button>':'')
    +'<span class="tm">'+(c.at||'')+'</span></div>'
-   +'<div class="tx">'+mHTML(c.tx)+'</div></div></div>';
+   +'<div class="tx">'+mHTML(c.tx)+'</div>'+caMessageHTML(c)+'</div></div>';
  }).join('');
 }
 
