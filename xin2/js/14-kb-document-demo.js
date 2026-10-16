@@ -29,7 +29,7 @@ function kbEnsure(){
  }});
 }
 function kbScopeAllowed(doc,member=permissionCurrentMember()){
- if(!member||member.status==='disabled'||!permissionHasPage('know.src'))return false;
+ if(!member||member.status==='disabled'||!permissionHasPage(doc.sourceTaskId?'know.out':'know.src'))return false;
  if(member.role==='super')return true;
  if(permissionIsBrandAdminMember(member))return permissionCurrentTenantAdmin()?.accountId===doc.client;
  return (member.projects||[]).includes(doc.project)&&permissionAccountParts(member).prefix===doc.client;
@@ -74,10 +74,9 @@ function kbPaint(){
   const next=$('kb-file-detail');if(next){next.closest('.dw-b').scrollTop=scroll;if(focused)$(focused)?.focus({preventScroll:true});}
  }
 }
-function kbFilesHTML(){
- const files=kbVisibleDocs(),type=S.brandFileType||'全部',mode=S.brandFileMode||'grid',query=String(S.brandFileSearch||'').trim().toLowerCase();
- const origin=S.brandFileOrigin||'全部';
- const list=files.filter(file=>(origin==='全部'||(origin==='系统生成'?!!KB_DOCS.get(file.id).sourceTaskId:!KB_DOCS.get(file.id).sourceTaskId))&&(type==='全部'||file.type===type)&&(!query||`${file.name} ${file.type}`.toLowerCase().includes(query)));
+function kbFilesHTML(systemOnline=S.kgrp==='out'&&S.ktab===1){
+ const files=kbVisibleDocs().filter(file=>!!KB_DOCS.get(file.id).sourceTaskId===systemOnline),type=S.brandFileType||'全部',mode=S.brandFileMode||'grid',query=String(S.brandFileSearch||'').trim().toLowerCase();
+ const list=files.filter(file=>(type==='全部'||file.type===type)&&(!query||`${file.name} ${file.type}`.toLowerCase().includes(query)));
  const pending=files.filter(file=>KB_DOCS.get(file.id).storage==='legacy').length;
  const migrating=files.some(file=>KB_DOCS.get(file.id).migrating);
  const activeJob=KB_MIGRATION&&!KB_MIGRATION.finished&&KB_MIGRATION.ids.some(id=>files.some(file=>file.id===id));
@@ -85,13 +84,12 @@ function kbFilesHTML(){
  const icons={PDF:['pdf','PDF'],文档:['doc','DOC'],表格:['sheet','XLS'],PPT:['doc','PPT']};
  return `<section id="kb-files">${pending||migrating?`<div class="kb-storage"><span role="status">${progress?`正在迁移 · ${progress.percent}%（${progress.completed}/${progress.total}）`:migrating?'正在迁移至 SharePoint…':`${pending} 个文件待迁移至 SharePoint`}</span>${progress?`<progress class="kb-inline-progress" max="100" value="${progress.percent}" aria-label="迁移进度"></progress>`:''}<button class="btn ghost sm" ${migrating||activeJob?'disabled':''} onclick="kbMigration()">${migrating||activeJob?'迁移中…':`迁移文件（${pending}）`}</button></div>`:''}
  <div class="bf-toolbar"><label class="kc-search bf-search"><i data-lucide="search"></i><input id="brand-file-search" aria-label="搜索品牌文件" placeholder="搜索文件名或类型" value="${esc(S.brandFileSearch||'')}" oninput="if(!event.isComposing)searchBrandFiles(this)" oncompositionend="searchBrandFiles(this)"></label>
- <div class="seg kb-origin-filter" role="group" aria-label="文件来源">${['全部','系统生成','上传文件'].map(value=>`<button class="${origin===value?'on':''}" aria-pressed="${origin===value}" onclick="S.brandFileOrigin='${value}';render()">${value}</button>`).join('')}</div>
  <div class="seg" aria-label="品牌文件类型">${['全部','PDF','文档','表格','PPT'].map(t=>`<button class="${t===type?'on':''}" aria-pressed="${t===type}" onclick="S.brandFileType='${t}';render()">${t}</button>`).join('')}</div><span class="spacer"></span>
  <div class="seg bf-view"><button class="${mode==='list'?'on':''}" onclick="S.brandFileMode='list';render()">列表</button><button class="${mode==='grid'?'on':''}" onclick="S.brandFileMode='grid';render()">图标</button></div>
- <button class="btn ghost sm" ${kbCanUpload()?'': 'disabled'} onclick="$('brand-file-upload').click()"><i data-lucide="upload"></i>上传文件</button><input id="brand-file-upload" type="file" multiple hidden accept=".pdf,.doc,.docx,.md,.txt,.rtf,.xls,.xlsx,.csv,.ppt,.pptx" onchange="uploadBrandFiles(this)"></div>
+ ${systemOnline?'':`<button class="btn ghost sm" ${kbCanUpload()?'': 'disabled'} onclick="$('brand-file-upload').click()"><i data-lucide="upload"></i>上传文件</button><input id="brand-file-upload" type="file" multiple hidden accept=".pdf,.doc,.docx,.md,.txt,.rtf,.xls,.xlsx,.csv,.ppt,.pptx" onchange="uploadBrandFiles(this)">`}</div>
  <div class="bf-count" role="status">${list.length} / ${files.length} · 自动维护已开启（演示）</div>
  <div class="${mode==='grid'?'bf-grid':'bf-list'}">${list.map(file=>{const doc=KB_DOCS.get(file.id),icon=icons[file.type],state=kbCardStatusHTML(doc);return `<article class="bf-card"><div class="bf-top"><span class="bf-kind ${icon[0]}">${icon[1]}</span>${mode==='grid'?state:''}<div class="bf-tools">${kbFileActionHTML(file,doc,true)}</div></div><div class="bf-info"><button class="bf-title" onclick="kbShowFile('${file.id}')">${esc(file.name)}</button><div class="bf-desc"><span>${file.systemOutputDemo?'系统产出 · ':''}${file.type} · ${esc(file.size)}${doc.storage==='sharepoint'?` · v${doc.version}`:''}</span>${mode==='list'?state:''}</div></div><div class="bf-bottom"><time>${esc(file.date)}</time><span class="bf-uploader" style="background:${file.color}">${esc(file.by)}</span></div></article>`;}).join('')}</div>
- ${!list.length?'<div class="allclear">暂无符合条件的文件，可调整来源、类型或搜索关键词。</div>':''}</section>`;
+ ${!list.length?'<div class="allclear">暂无符合条件的文件，可调整类型或搜索关键词。</div>':''}</section>`;
 }
 function kbMigration(){
  const files=kbVisibleDocs().filter(file=>KB_DOCS.get(file.id).storage==='legacy');
@@ -174,7 +172,7 @@ function kbShowFile(id,tab){
  const brand=KNOWLEDGE_BRANDS.find(item=>item.id===doc.brand)?.name||doc.brand;
  drawer.innerHTML=`<section class="kb-file-drawer" role="dialog" aria-modal="true" aria-label="${esc(file.name)}"><header class="dw-h">
   <button class="ib" id="kb-file-close" onclick="closeDw()" aria-label="关闭文件详情"><i data-lucide="x"></i></button>
-  <div style="flex:1;min-width:0"><div class="ty">品牌文件 · ${esc(brand)}</div><h3>${esc(file.name)}</h3></div><span class="st ${stateClass}">${kbStatus(doc)}</span></header>
+  <div style="flex:1;min-width:0"><div class="ty">${doc.sourceTaskId?'在线文档':'品牌文件'} · ${esc(brand)}</div><h3>${esc(file.name)}</h3></div><span class="st ${stateClass}">${kbStatus(doc)}</span></header>
  <div class="dw-tabs" role="tablist" aria-label="品牌文件详情">${['文件信息','操作日志'].map((label,index)=>`<button id="kb-file-tab-${index}" role="tab" aria-selected="${kbFileTab===index}" aria-controls="kb-file-detail" class="${kbFileTab===index?'on':''}" onclick="kbShowFile('${id}',${index});$('kb-file-tab-${index}').focus()">${label}</button>`).join('')}</div>
  <div class="dw-b"><div id="kb-file-detail" data-file="${id}" role="tabpanel" aria-labelledby="kb-file-tab-${kbFileTab}">${kbFileTab===0?kbFileInfoHTML(file,doc):kbFileAuditHTML(doc)}</div></div>
  <footer class="dw-f">${kbFileActionHTML(file,doc)}<span class="kb-footer-note">Demo · 仅本次会话有效</span></footer></section>`;

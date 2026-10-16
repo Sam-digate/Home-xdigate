@@ -255,7 +255,7 @@ function openDSBulkTaskForm(){
 }
 
 const KGRP={src:{n:'来源',d:'Agent 读的东西',tabs:['品牌','产品','素材','品牌文件','达人','热点','数据源']},
- out:{n:'产出',d:'Agent 写的东西',tabs:['已保存产出','模板']}};
+ out:{n:'产出',d:'Agent 写的东西',tabs:['已保存产出','在线文档','模板']}};
 function knowledgeActiveBrand(){
  if(!S.kbrand||!KNOWLEDGE_BRANDS.some(brand=>brand.id===S.kbrand))S.kbrand=KNOWLEDGE_BRANDS[0].id;
  return KNOWLEDGE_BRANDS.find(brand=>brand.id===S.kbrand)||KNOWLEDGE_BRANDS[0];
@@ -297,7 +297,7 @@ function vKnow(){
   </div>
   <div class="bar" style="margin:var(--sp-4) 0 14px;gap:var(--sp-2);flex-wrap:wrap">
     <div class="seg">${G.tabs.map((t,i)=>`<button class="${S.ktab===i?'on':''}" onclick="S.ktab=${i};render()">${t}${t==='数据源'&&dsAlerts?`<span class="kb-tab-alert num">${dsAlerts}</span>`:''}</button>`).join('')}</div>
-    ${S.kgrp==='out'?`<div class="seg">${KDOMS.map(d=>`<button class="${S.kdom===d?'on':''}" onclick="S.kdom='${d}';render()">${d}</button>`).join('')}</div>`:''}
+    ${S.kgrp==='out'&&G.tabs[S.ktab]!=='在线文档'?`<div class="seg">${KDOMS.map(d=>`<button class="${S.kdom===d?'on':''}" onclick="S.kdom='${d}';render()">${d}</button>`).join('')}</div>`:''}
   </div>
   ${S.kgrp==='src'&&S.ktab===0?`<div class="kcomp">
     <div style="flex:1;min-width:220px">
@@ -325,6 +325,7 @@ function kBody(){
  if(t==='热点')return kHots();
  if(t==='数据源')return kDataSources();
  if(t==='已保存产出')return kSavedOutputs();
+ if(t==='在线文档')return kbFilesHTML(true);
  if(t==='模板')return kTpl();
  return `<div class="allclear">「${t}」不在本次原型范围内。</div>`;
 }

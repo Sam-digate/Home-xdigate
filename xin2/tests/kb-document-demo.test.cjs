@@ -25,7 +25,7 @@ check('one system output example includes source task, approval and illustrative
  assert.match(html,/审批状态（演示）/);assert.match(html,/已批准/);assert.match(html,/预置示例/);
  assert.match(html,/class="row kb-origin-task"/);assert.match(html,/kbOpenSourceTask/);
  assert.doesNotMatch(html,/知识库引用|解析内容|kb-file-tab-2/);
- assert.match(run('kbFilesHTML()'),/系统产出 · 文档/);run('closeDw()');
+ assert.match(run('kbFilesHTML(true)'),/系统产出 · 文档/);run('closeDw()');
 });
 check('system output has exactly three labelled illustrative audit records without duplication',()=>{
  assert.equal(run(`KB_DOCS.get('bf-output-demo').history.length`),3);
@@ -185,11 +185,13 @@ check('background migration does not close a different modal when it finishes',(
  node('mod').innerHTML='<div>Another dialog</div>';node('mod').classList.add('on');finish();
  assert.equal(node('mod').classList.contains('on'),true);assert.equal(run('KB_MIGRATION'),null);
 });
-check('origin filters combine with type and search without changing migration scope',()=>{
- run(`S.brandFileOrigin='系统生成';S.brandFileType='全部';S.brandFileSearch=''`);
- let html=run('kbFilesHTML()');assert.match(html,/新品上市品牌生态位复核.docx/);assert.doesNotMatch(html,/品牌生态位分析源数据.pdf/);assert.match(html,/1 \/ 10|1 \/ 9|1 \/ 11/);
- run(`S.brandFileType='PDF'`);assert.match(run('kbFilesHTML()'),/暂无符合条件的文件/);
- run(`S.brandFileOrigin='上传文件';S.brandFileType='全部'`);html=run('kbFilesHTML()');assert.match(html,/品牌生态位分析源数据.pdf/);assert.doesNotMatch(html,/新品上市品牌生态位复核.docx/);
- run(`S.brandFileOrigin='系统生成';S.brandFileType='文档';S.brandFileSearch='新品'`);assert.match(run('kbFilesHTML()'),/新品上市品牌生态位复核.docx/);
- run(`S.brandFileOrigin='全部';S.brandFileType='全部';S.brandFileSearch=''`);
+check('system online documents live under outputs and brand files contain only uploads',()=>{
+ run(`S.brandFileType='全部';S.brandFileSearch=''`);
+ const brand=run('kbFilesHTML(false)'),online=run('kbFilesHTML(true)');
+ assert.match(brand,/品牌生态位分析源数据.pdf/);assert.doesNotMatch(brand,/新品上市品牌生态位复核.docx|文件来源|系统生成/);
+ assert.match(online,/新品上市品牌生态位复核.docx/);assert.doesNotMatch(online,/品牌生态位分析源数据.pdf|brand-file-upload|kbMigration\(/);
+ assert.equal(run(`KGRP.out.tabs.join(',')`),'已保存产出,在线文档,模板');
+ run(`S.brandFileType='PDF'`);assert.match(run('kbFilesHTML(true)'),/暂无符合条件的文件/);
+ run(`S.brandFileType='文档';S.brandFileSearch='新品'`);assert.match(run('kbFilesHTML(true)'),/新品上市品牌生态位复核.docx/);
+ run(`S.brandFileType='全部';S.brandFileSearch=''`);
 });
