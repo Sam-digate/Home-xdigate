@@ -1,6 +1,7 @@
 /* E1–E4: session-only fixtures, never a real SharePoint upload, parser or permission service. */
 const KB_DOCS=new Map();
 const KB_DEMO_TEXT={
+ 'bf-output-demo':'新品上市品牌生态位复核\n\n目标：围绕新品日常修护场景，明确用户需求与内容表达边界。\n\n复核结论：以真实使用体验为内容主线，突出使用便利性、肤感和持续使用场景；未经验证的功效不进入正式传播。\n\n执行建议：先整理产品证据与使用素材，再用于渠道内容策划。\n\n以上为系统产出预置示例，并非真实任务运行结果。',
  bf1:'品牌定位：聚焦日常修护场景，围绕产品体验与用户需求组织内容。',
  bf2:'竞品评论：按肤感、使用频率、包装体验三个维度整理反馈。',
  bf3:'用户访谈：购买决策关注肤感、使用便利性与持续使用意愿。',
@@ -18,7 +19,14 @@ function kbEnsure(){
   fileId:'',link:'',health:'unchecked',state:'legacy',kind:['bf6','bf7'].includes(file.id)?'output':'source',
   approval:file.id==='bf6'?'pending':file.id==='bf7'?'approved':null,
   text:KB_DEMO_TEXT[file.id]||'',indexedText:'',generation:0,history:[],checkedAt:null
- });});
+ });const doc=KB_DOCS.get(file.id);if(file.systemOutputDemo&&!doc.seededOutput){
+  Object.assign(doc,{seededOutput:true,kind:'output',approval:'approved',sourceTaskId:file.sourceTaskId,storage:'sharepoint',fileId:'sp-demo-'+file.id,link:'xdigate://demo/kb/'+file.id,state:'ready',health:'available',indexVersion:1,indexedText:KB_DEMO_TEXT[file.id],checkedAt:null});
+  doc.history=[
+   {at:'2026-10-15T18:20:00+09:00',message:'创建在线文档',actor:'系统',actorId:'system',source:'X-Digate 系统事件（预置演示）'},
+   {at:'2026-10-15T18:18:00+09:00',message:'批准产出',actor:'Sophie',actorId:'so',source:'X-Digate 审批记录（预置演示）'},
+   {at:'2026-10-15T18:10:00+09:00',message:'创建产出',actor:'品牌统筹 Agent',actorId:'orch',source:'X-Digate Agent 事件（预置演示）'}
+  ].map(log=>({...log,version:1,fileId:doc.fileId,m365:null,result:'成功（演示）'}));
+ }});
 }
 function kbScopeAllowed(doc,member=permissionCurrentMember()){
  if(!member||member.status==='disabled'||!permissionHasPage('know.src'))return false;
@@ -46,7 +54,13 @@ function kbCardStatusHTML(doc){
  const tone=doc.state==='ready'?'ready':['removed','denied'].includes(doc.state)?'error':['saving','indexing','unparsed'].includes(doc.state)?'pending':'idle';
  return `<span class="kb-file-state ${tone}" title="${esc(kbStatus(doc))}">${esc(label)}</span>`;
 }
-function kbLog(doc,message){doc.history.unshift({at:new Date().toLocaleTimeString('zh-CN',{hour12:false}),message});doc.history=doc.history.slice(0,8);}
+let kbFileTab=0;
+function kbLog(doc,message,actor=null){
+ doc.history.unshift({at:new Date().toISOString(),message,version:doc.version,fileId:doc.fileId||doc.id,actor:actor?.name||'系统',actorId:actor?.id||'system',source:actor?'X-Digate 用户操作':'X-Digate 系统事件（模拟）',m365:null});
+}
+function kbFileAuditHTML(doc){
+ return `<p class="kb-audit-notice">日志仅保留本次会话；标注“预置演示”的条目为示例记录。未接入 M365 审计，无法确认在线编辑或保存；原任务审批记录仍保留在任务中。</p>${doc.history.length?`<div class="ds-run-list">${doc.history.map(log=>`<article class="ds-run-item"><span class="ds-run-dot" aria-hidden="true"></span><div class="ds-run-main"><div class="ds-run-line"><b>${esc(log.message)}</b><span class="kb-audit-version">v${log.version}</span></div><div class="kb-audit-meta"><span>${esc(log.actor)} · ${esc(log.source)}</span><time datetime="${esc(log.at)}">${esc(new Date(log.at).toLocaleString('zh-CN',{timeZone:'Asia/Tokyo',hour12:false}))}</time>${log.result?`<span>结果：${esc(log.result)}</span>`:''}<span>文件：${esc(log.fileId)} · M365 账号：${esc(log.m365||'未关联')}</span></div></div></article>`).join('')}</div>`:'<div class="allclear">暂无操作日志</div>'}`;
+}
 function kbPaint(){
  kbUpdateMigrationProgress();
  const root=$('kb-files'),active=document.activeElement;
@@ -62,18 +76,22 @@ function kbPaint(){
 }
 function kbFilesHTML(){
  const files=kbVisibleDocs(),type=S.brandFileType||'全部',mode=S.brandFileMode||'grid',query=String(S.brandFileSearch||'').trim().toLowerCase();
- const list=files.filter(file=>(type==='全部'||file.type===type)&&(!query||`${file.name} ${file.type}`.toLowerCase().includes(query)));
+ const origin=S.brandFileOrigin||'全部';
+ const list=files.filter(file=>(origin==='全部'||(origin==='系统生成'?!!KB_DOCS.get(file.id).sourceTaskId:!KB_DOCS.get(file.id).sourceTaskId))&&(type==='全部'||file.type===type)&&(!query||`${file.name} ${file.type}`.toLowerCase().includes(query)));
  const pending=files.filter(file=>KB_DOCS.get(file.id).storage==='legacy').length;
  const migrating=files.some(file=>KB_DOCS.get(file.id).migrating);
+ const activeJob=KB_MIGRATION&&!KB_MIGRATION.finished&&KB_MIGRATION.ids.some(id=>files.some(file=>file.id===id));
+ const progress=activeJob?kbMigrationProgress(KB_MIGRATION):null;
  const icons={PDF:['pdf','PDF'],文档:['doc','DOC'],表格:['sheet','XLS'],PPT:['doc','PPT']};
- return `<section id="kb-files">${pending||migrating?`<div class="kb-storage"><div><strong>品牌文件 · SharePoint</strong><p>原文件存于 SharePoint，知识库保留引用与索引。更新和链接状态由系统自动维护。</p><small>Demo：迁移、解析及链接状态均为模拟，仅本次会话有效，不会移动原文件。</small></div><button class="btn ghost sm" ${pending?'':'disabled'} onclick="kbMigration()">${pending?`迁移现有文件 (${pending})`:'正在迁移…'}</button></div>`:''}
+ return `<section id="kb-files">${pending||migrating?`<div class="kb-storage"><span role="status">${progress?`正在迁移 · ${progress.percent}%（${progress.completed}/${progress.total}）`:migrating?'正在迁移至 SharePoint…':`${pending} 个文件待迁移至 SharePoint`}</span>${progress?`<progress class="kb-inline-progress" max="100" value="${progress.percent}" aria-label="迁移进度"></progress>`:''}<button class="btn ghost sm" ${migrating||activeJob?'disabled':''} onclick="kbMigration()">${migrating||activeJob?'迁移中…':`迁移文件（${pending}）`}</button></div>`:''}
  <div class="bf-toolbar"><label class="kc-search bf-search"><i data-lucide="search"></i><input id="brand-file-search" aria-label="搜索品牌文件" placeholder="搜索文件名或类型" value="${esc(S.brandFileSearch||'')}" oninput="if(!event.isComposing)searchBrandFiles(this)" oncompositionend="searchBrandFiles(this)"></label>
+ <div class="seg kb-origin-filter" role="group" aria-label="文件来源">${['全部','系统生成','上传文件'].map(value=>`<button class="${origin===value?'on':''}" aria-pressed="${origin===value}" onclick="S.brandFileOrigin='${value}';render()">${value}</button>`).join('')}</div>
  <div class="seg" aria-label="品牌文件类型">${['全部','PDF','文档','表格','PPT'].map(t=>`<button class="${t===type?'on':''}" aria-pressed="${t===type}" onclick="S.brandFileType='${t}';render()">${t}</button>`).join('')}</div><span class="spacer"></span>
  <div class="seg bf-view"><button class="${mode==='list'?'on':''}" onclick="S.brandFileMode='list';render()">列表</button><button class="${mode==='grid'?'on':''}" onclick="S.brandFileMode='grid';render()">图标</button></div>
  <button class="btn ghost sm" ${kbCanUpload()?'': 'disabled'} onclick="$('brand-file-upload').click()"><i data-lucide="upload"></i>上传文件</button><input id="brand-file-upload" type="file" multiple hidden accept=".pdf,.doc,.docx,.md,.txt,.rtf,.xls,.xlsx,.csv,.ppt,.pptx" onchange="uploadBrandFiles(this)"></div>
  <div class="bf-count" role="status">${list.length} / ${files.length} · 自动维护已开启（演示）</div>
- <div class="${mode==='grid'?'bf-grid':'bf-list'}">${list.map(file=>{const doc=KB_DOCS.get(file.id),icon=icons[file.type],state=kbCardStatusHTML(doc);return `<article class="bf-card"><div class="bf-top"><span class="bf-kind ${icon[0]}">${icon[1]}</span>${mode==='grid'?state:''}<div class="bf-tools">${kbFileActionHTML(file,doc,true)}</div></div><div class="bf-info"><button class="bf-title" onclick="kbShowFile('${file.id}')">${esc(file.name)}</button><div class="bf-desc"><span>${file.type} · ${esc(file.size)}${doc.storage==='sharepoint'?` · v${doc.version}`:''}</span>${mode==='list'?state:''}</div></div><div class="bf-bottom"><time>${esc(file.date)}</time><span class="bf-uploader" style="background:${file.color}">${esc(file.by)}</span></div></article>`;}).join('')}</div>
- ${!list.length?'<div class="allclear">没有可访问的文件，可上传当前品牌的参考资料。</div>':''}</section>`;
+ <div class="${mode==='grid'?'bf-grid':'bf-list'}">${list.map(file=>{const doc=KB_DOCS.get(file.id),icon=icons[file.type],state=kbCardStatusHTML(doc);return `<article class="bf-card"><div class="bf-top"><span class="bf-kind ${icon[0]}">${icon[1]}</span>${mode==='grid'?state:''}<div class="bf-tools">${kbFileActionHTML(file,doc,true)}</div></div><div class="bf-info"><button class="bf-title" onclick="kbShowFile('${file.id}')">${esc(file.name)}</button><div class="bf-desc"><span>${file.systemOutputDemo?'系统产出 · ':''}${file.type} · ${esc(file.size)}${doc.storage==='sharepoint'?` · v${doc.version}`:''}</span>${mode==='list'?state:''}</div></div><div class="bf-bottom"><time>${esc(file.date)}</time><span class="bf-uploader" style="background:${file.color}">${esc(file.by)}</span></div></article>`;}).join('')}</div>
+ ${!list.length?'<div class="allclear">暂无符合条件的文件，可调整来源、类型或搜索关键词。</div>':''}</section>`;
 }
 function kbMigration(){
  const files=kbVisibleDocs().filter(file=>KB_DOCS.get(file.id).storage==='legacy');
@@ -85,7 +103,7 @@ function kbStartMigration(){
  const ids=Array.from(document.querySelectorAll('input[name="kb-migrate"]:checked')).map(input=>input.value).filter(id=>{const doc=KB_DOCS.get(id);return doc&&kbScopeAllowed(doc)&&doc.storage==='legacy';});
  if(!ids.length){$('kb-migration-error').textContent='请至少选择一个文件';return;}
  KB_MIGRATION={ids,finished:false};
- ids.forEach((id,index)=>kbIngest(KB_DOCS.get(id),'已核对文件清单，开始模拟迁移',index*220));
+ ids.forEach((id,index)=>{const doc=KB_DOCS.get(id);kbLog(doc,'确认迁移文件',permissionCurrentMember());kbIngest(doc,'开始模拟迁移',index*220);});
  kpDialog('迁移现有品牌文件',`<div class="kb-migration-progress"><div class="kb-progress-heading"><span id="kb-migration-status">正在迁移…</span><strong id="kb-migration-percent">0%</strong></div><progress id="kb-migration-bar" max="100" value="0" aria-label="品牌文件迁移进度"></progress><p id="kb-migration-count" role="status">已完成 0 / ${ids.length} 个文件</p></div>`,`<span class="kb-muted">演示进度，不会移动原文件。</span><button class="btn ghost sm" onclick="closeMod()">后台运行</button>`);
  kbPaint();
 }
@@ -117,18 +135,25 @@ function kbRegisterUpload(file){
 function kbFileRows(rows){return `<div class="ctx">${rows.map(([label,value])=>`<div class="ctxr"><span class="k">${label}</span><span class="v">${esc(String(value))}</span></div>`).join('')}</div>`;}
 function kbFileInfoHTML(file,doc){
  const brand=KNOWLEDGE_BRANDS.find(item=>item.id===doc.brand)?.name||doc.brand;
- const unavailable=['removed','denied'].includes(doc.health),readable=doc.health==='available'&&doc.state==='ready';
- const content=readable?doc.indexedText:unavailable?'文件不可访问，解析内容与引用已停用。':doc.state==='legacy'?'迁移后自动解析并建立索引。':doc.state==='saving'||doc.state==='indexing'?'正在自动处理，请稍候。':'此 Demo 未解析上传文件。';
- return `${unavailable?`<div class="note kb-access-note">${doc.health==='denied'?'SharePoint 访问权限已撤销。':'SharePoint 原文件已不存在。'}相关索引与引用已自动停用。</div>`:''}
+ const unavailable=['removed','denied'].includes(doc.health);
+ const task=doc.sourceTaskId?T.find(item=>item.id===doc.sourceTaskId):null;
+ const approval=doc.approval==='approved'?'已批准':doc.approval==='pending'?'待审批':'未批准';
+ const provenance=file.systemOutputDemo?`<section class="kb-info-section"><h4 class="kb-section-title">产出来源</h4><div class="kb-origin-meta"><span>系统产出 <span class="kb-muted">· 预置示例</span></span><span class="st ${doc.approval==='approved'?'done':'review'}" title="审批状态（演示）">${approval}</span></div>${task?`<button class="row kb-origin-task" onclick="kbOpenSourceTask('${file.id}')" aria-label="打开来源任务 ${esc(task.t)}"><span class="st ${task.st}">${STN[task.st]||task.st}</span><span class="tt">${esc(task.t)}</span><span class="up">${esc(task.up||'')}</span></button>`:'<div class="allclear">来源任务不可用</div>'}</section>`:'';
+ return `${unavailable?`<div class="note kb-access-note">${doc.health==='denied'?'SharePoint 访问权限已撤销。':'SharePoint 原文件已不存在。'}相关索引与引用已自动停用。</div>`:''}${provenance}
  <section class="kb-info-section"><h4 class="kb-section-title">基本信息</h4>${kbFileRows([
   ['文件类型',file.type],['文件大小',file.size],['上传日期',file.date],['存储位置',doc.storage==='legacy'?'现有知识库（待迁移）':'SharePoint（演示）']
  ])}</section>
  <section class="kb-info-section"><h4 class="kb-section-title">知识库信息</h4>${kbFileRows([
   ['品牌',brand],['权限范围',`客户 ${doc.client} · 项目 ${doc.project}`],['资料属性',doc.kind==='source'?'参考资料':doc.approval==='approved'?'已批准产出（演示）':'未批准产出（演示）'],
   ['文件版本','v'+doc.version],['索引版本',doc.indexVersion?'v'+doc.indexVersion:'未建立'],['自动检查',doc.checkedAt?new Date(doc.checkedAt).toLocaleTimeString('zh-CN',{hour12:false})+'（模拟）':'尚未检查'],
-  ['文件 ID',doc.fileId||'迁移后生成'],['知识库引用',doc.link||'迁移后关联']
+  ['文件 ID',doc.fileId||'迁移后生成']
  ])}</section>
- <section class="kb-info-section"><h4 class="kb-section-title">解析内容${readable?'（预置演示）':''}</h4><div class="ctx"><p class="kb-file-content ${readable?'':'kb-muted'}">${esc(content)}</p></div></section>`;
+ `;
+}
+function kbOpenSourceTask(id){
+ const doc=KB_DOCS.get(id);if(!doc||!kbScopeAllowed(doc)||!permissionHasPage('work')){toast('没有来源任务访问权限');return;}
+ const task=T.find(item=>item.id===doc.sourceTaskId);if(!task){toast('来源任务不可用');return;}
+ closeDw();go('thread',task.id);
 }
 function kbOpenFile(id,edit=false){
  kbEnsure();const file=BRAND_FILES.find(item=>item.id===id),doc=KB_DOCS.get(id);
@@ -138,18 +163,20 @@ function kbOpenFile(id,edit=false){
  const example=typeof DL_OFFICE_EXAMPLE==='string'?DL_OFFICE_EXAMPLE:'';
  const url=String(file.sharepointUrl||(edit?example:file.url)||'');
  if(!(edit?/^https:\/\//i:/^(https:\/\/|blob:)/i).test(url)){toast('此示例尚未提供真实文件链接，暂不可跳转');return;}
- try{window.open(url,'_blank','noopener,noreferrer');}catch(error){toast('无法打开文件，请稍后重试');}
+ try{window.open(url,'_blank','noopener,noreferrer');kbLog(doc,edit?'请求打开在线编辑页面':'请求打开文件',permissionCurrentMember());kbPaint();}catch(error){toast('无法打开文件，请稍后重试');}
 }
-function kbShowFile(id){
+function kbShowFile(id,tab){
  kbEnsure();const file=BRAND_FILES.find(f=>f.id===id),doc=KB_DOCS.get(id);if(!file||!doc||!kbScopeAllowed(doc)){toast('没有权限访问此文件');return;}
  const drawer=$('dw'),detail=$('kb-file-detail'),opening=!detail||detail.dataset.file!==id||!drawer.classList.contains('on');
- if(opening){closeDw();drawer.classList.remove('focus','expanded');}
+ if(opening){closeDw();kbFileTab=0;drawer.classList.remove('focus','expanded');}
+ if(tab===0||tab===1)kbFileTab=tab;
  const bad=['removed','denied'].includes(doc.health),stateClass=bad?'review':doc.state==='ready'?'done':'hold';
  const brand=KNOWLEDGE_BRANDS.find(item=>item.id===doc.brand)?.name||doc.brand;
  drawer.innerHTML=`<section class="kb-file-drawer" role="dialog" aria-modal="true" aria-label="${esc(file.name)}"><header class="dw-h">
   <button class="ib" id="kb-file-close" onclick="closeDw()" aria-label="关闭文件详情"><i data-lucide="x"></i></button>
   <div style="flex:1;min-width:0"><div class="ty">品牌文件 · ${esc(brand)}</div><h3>${esc(file.name)}</h3></div><span class="st ${stateClass}">${kbStatus(doc)}</span></header>
- <div class="dw-b"><div id="kb-file-detail" data-file="${id}">${kbFileInfoHTML(file,doc)}</div></div>
+ <div class="dw-tabs" role="tablist" aria-label="品牌文件详情">${['文件信息','操作日志'].map((label,index)=>`<button id="kb-file-tab-${index}" role="tab" aria-selected="${kbFileTab===index}" aria-controls="kb-file-detail" class="${kbFileTab===index?'on':''}" onclick="kbShowFile('${id}',${index});$('kb-file-tab-${index}').focus()">${label}</button>`).join('')}</div>
+ <div class="dw-b"><div id="kb-file-detail" data-file="${id}" role="tabpanel" aria-labelledby="kb-file-tab-${kbFileTab}">${kbFileTab===0?kbFileInfoHTML(file,doc):kbFileAuditHTML(doc)}</div></div>
  <footer class="dw-f">${kbFileActionHTML(file,doc)}<span class="kb-footer-note">Demo · 仅本次会话有效</span></footer></section>`;
  drawer.classList.add('on');$('scrim').classList.add('on');kpIcons();
  if(typeof syncDrawerExpandControl==='function')syncDrawerExpandControl();

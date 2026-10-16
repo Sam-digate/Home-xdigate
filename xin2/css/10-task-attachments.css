@@ -18,6 +18,10 @@
 .ca-attach{display:inline-flex;align-items:center;justify-content:center;width:36px;min-width:36px;height:30px;padding:0;line-height:1;box-shadow:none}
 .ca-attach>svg,.ca-attach>i{display:block;width:13px;height:13px;flex:0 0 13px;stroke-width:1.8}
 .ca-attach:focus-visible{outline:2px solid var(--primary-lt);outline-offset:2px}
+.ca-source-menu{position:fixed;z-index:150;width:164px;padding:var(--sp-1);border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface);box-shadow:var(--sh-md)}
+.ca-source-menu button{display:flex;align-items:center;gap:var(--sp-2);width:100%;padding:var(--sp-2) var(--sp-3);border-radius:6px;text-align:left;font-size:var(--fs-sm);font-weight:500;color:var(--t1)}
+.ca-source-menu button>svg,.ca-source-menu button>i{width:15px;height:15px;flex-shrink:0;color:var(--primary)}
+.ca-source-menu button:hover,.ca-source-menu button:focus-visible{background:var(--primary-bg);outline:none}
 .ca-files{max-height:150px;overflow-y:auto;overscroll-behavior:contain}
 .ca-message-files{margin-top:8px}.ca-message-files .ta-file{padding:7px 0}.ca-message-files .ta-file:last-child{border-bottom:0}
 .general-agent-attachments{padding:0 18px;flex-shrink:0;max-height:210px;overflow-y:auto}

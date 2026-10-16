@@ -295,7 +295,11 @@ function vKnow(){
   <div class="bar">
     <div class="seg">${Object.keys(KGRP).filter(k=>permissionHasPage(`know.${k}`)).map(k=>`<button class="${S.kgrp===k?'on':''}" onclick="S.kgrp='${k}';S.ktab=0;S.kdom='全部';render()">${KGRP[k].n} · ${KGRP[k].d}</button>`).join('')}</div>
   </div>
-  ${S.kgrp==='src'?`<div class="kcomp">
+  <div class="bar" style="margin:var(--sp-4) 0 14px;gap:var(--sp-2);flex-wrap:wrap">
+    <div class="seg">${G.tabs.map((t,i)=>`<button class="${S.ktab===i?'on':''}" onclick="S.ktab=${i};render()">${t}${t==='数据源'&&dsAlerts?`<span class="kb-tab-alert num">${dsAlerts}</span>`:''}</button>`).join('')}</div>
+    ${S.kgrp==='out'?`<div class="seg">${KDOMS.map(d=>`<button class="${S.kdom===d?'on':''}" onclick="S.kdom='${d}';render()">${d}</button>`).join('')}</div>`:''}
+  </div>
+  ${S.kgrp==='src'&&S.ktab===0?`<div class="kcomp">
     <div style="flex:1;min-width:220px">
       <div style="display:flex;align-items:baseline;gap:var(--sp-2);margin-bottom:var(--sp-1)">
         <span class="num" style="font-size:var(--fs-2xl);font-weight:800">${c.p}%</span>
@@ -308,10 +312,6 @@ function vKnow(){
       ${entries.filter(x=>!x.filled).map(x=>`<button class="gapchip" onclick="openKB('${x.id}')">缺 ${x.n} ↗</button>`).join('')}
       ${entries.filter(x=>x.stale).map(x=>`<button class="gapchip warn" onclick="openKB('${x.id}')">${x.n} 已过期 ↗</button>`).join('')}
     </div></div>`:''}
-  <div class="bar" style="margin:var(--sp-4) 0 14px;gap:var(--sp-2);flex-wrap:wrap">
-    <div class="seg">${G.tabs.map((t,i)=>`<button class="${S.ktab===i?'on':''}" onclick="S.ktab=${i};render()">${t}${t==='数据源'&&dsAlerts?`<span class="kb-tab-alert num">${dsAlerts}</span>`:''}</button>`).join('')}</div>
-    ${S.kgrp==='out'?`<div class="seg">${KDOMS.map(d=>`<button class="${S.kdom===d?'on':''}" onclick="S.kdom='${d}';render()">${d}</button>`).join('')}</div>`:''}
-  </div>
   ${kBody()}
  </div>`;
 }
@@ -952,6 +952,7 @@ function kpConfirmImport(){
  kpPrepareProducts();PRODS.unshift(...products);S.kpImportRows=null;closeMod();kpRefresh(true);toast(`已导入 ${products.length} 个产品`);
 }
 const BRAND_FILES=[
+ {id:'bf-output-demo',name:'新品上市品牌生态位复核.docx',type:'文档',size:'128 KB',date:'2026-10-15',by:'SO',color:'#E11D48',sourceTaskId:'t8',systemOutputDemo:true},
  {id:'bf1',name:'品牌生态位分析源数据.pdf',type:'PDF',size:'2.4 MB',date:'2026-07-30',by:'S',color:'#F97316'},
  {id:'bf2',name:'竞品评论样本.xlsx',type:'表格',size:'860 KB',date:'2026-07-30',by:'S',color:'#10B981'},
  {id:'bf3',name:'用户访谈摘录.docx',type:'文档',size:'1.1 MB',date:'2026-07-29',by:'S',color:'#F97316'},

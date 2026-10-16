@@ -16,9 +16,38 @@ function caComposerHTML(kind,id,scope=null){
  return '<div class="ca-compose" id="'+key+'"><input id="'+key+'-input" type="file" multiple accept="'+TA_EXTENSIONS.map(ext=>'.'+ext).join(',')+'" hidden onchange="caSelect(\''+key+'\',this.files);this.value=\'\'"><div id="'+key+'-pending">'+caPendingHTML(draft)+'</div></div>';
 }
 function caAttachButton(kind,id,scope=null){
- const key=caGet(kind,id,scope).id;
- return '<button type="button" class="btn ghost sm ca-attach" title="添加附件" aria-label="添加附件" onclick="document.getElementById(\''+key+'-input\').click()"><i data-lucide="paperclip" aria-hidden="true"></i></button>';
+ return '<button type="button" class="btn ghost sm ca-attach" title="添加附件" aria-label="添加附件" aria-haspopup="menu" aria-expanded="false" onclick="caToggleMenu(event,this)"><i data-lucide="paperclip" aria-hidden="true"></i></button>';
 }
+let caMenuTrigger=null;
+function caCloseMenu(restoreFocus=false){
+ const trigger=caMenuTrigger;document.getElementById('ca-source-menu')?.remove();
+ trigger?.setAttribute('aria-expanded','false');caMenuTrigger=null;if(restoreFocus)trigger?.focus();
+}
+function caSourceMenuHTML(){
+ return [['files','品牌文件'],['images','素材库'],['upload','本地上传']].map(([icon,label])=>`<button type="button" role="menuitem" onclick="caCloseMenu(true)"><i data-lucide="${icon}" aria-hidden="true"></i><span>${label}</span></button>`).join('');
+}
+function caToggleMenu(event,trigger){
+ event.stopPropagation();const wasOpen=caMenuTrigger===trigger;caCloseMenu();if(wasOpen)return;
+ const menu=document.createElement('div');menu.id='ca-source-menu';menu.className='ca-source-menu';menu.setAttribute('role','menu');menu.setAttribute('aria-label','附件来源');menu.innerHTML=caSourceMenuHTML();
+ document.body.appendChild(menu);caMenuTrigger=trigger;trigger.setAttribute('aria-expanded','true');
+ const box=trigger.getBoundingClientRect(),width=menu.offsetWidth,height=menu.offsetHeight;
+ menu.style.left=Math.max(8,Math.min(box.left,window.innerWidth-width-8))+'px';
+ menu.style.top=Math.max(8,box.top-height-8)+'px';
+ if(window.lucide)lucide.createIcons({root:menu,attrs:{width:15,height:15,'stroke-width':1.5}});
+ menu.querySelector('button')?.focus();
+}
+document.addEventListener('click',event=>{if(caMenuTrigger&&!event.target.closest('#ca-source-menu')&&!caMenuTrigger.contains(event.target))caCloseMenu();});
+document.addEventListener('keydown',event=>{
+ const menu=document.getElementById('ca-source-menu');if(!menu)return;
+ if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();caCloseMenu(true);return;}
+ if(event.key==='Tab'){caCloseMenu();return;}
+ if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){
+  event.preventDefault();const items=Array.from(menu.querySelectorAll('button')),index=items.indexOf(document.activeElement);
+  items[event.key==='Home'?0:event.key==='End'?items.length-1:(index+(event.key==='ArrowDown'?1:-1)+items.length)%items.length]?.focus();
+ }
+},true);
+window.addEventListener?.('resize',()=>caCloseMenu());
+document.addEventListener('scroll',event=>{if(caMenuTrigger&&!event.target.closest?.('#ca-source-menu'))caCloseMenu();},true);
 function caDropAttrs(kind,id,scope=null){
  const key=caGet(kind,id,scope).id;
  return 'ondragover="caDrag(event,\''+key+'\',true)" ondragleave="caDrag(event,\''+key+'\',false)" ondrop="caDrop(event,\''+key+'\')"';

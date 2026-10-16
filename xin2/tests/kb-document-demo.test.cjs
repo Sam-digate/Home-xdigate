@@ -14,11 +14,29 @@ check('existing files require migration and brand-file delete code is removed',(
  assert.equal(run(`KB_DOCS.get('bf1').state`),'legacy');
  const source=fs.readFileSync(path.join(root,'js/05-knowledge-work.js'),'utf8');
  assert.doesNotMatch(source,/manageBrandFile|removeBrandFile|legacyBrandFilesHTML|legacyPreviewBrandFile/);
- const html=run('kbFilesHTML()');assert.match(html,/迁移现有文件 \(8\)/);assert.doesNotMatch(html,/手动刷新|检查链接|删除文件|Agent 检索演示|kb-retrieval|kb-query-controls/);
+ const html=run('kbFilesHTML()');assert.match(html,/8 个文件待迁移至 SharePoint/);assert.match(html,/迁移文件/);assert.doesNotMatch(html,/品牌文件 · SharePoint|Demo：迁移|手动刷新|检查链接|删除文件|Agent 检索演示|kb-retrieval|kb-query-controls/);
+});
+check('one system output example includes source task, approval and illustrative content',()=>{
+ assert.equal(run('BRAND_FILES.filter(f=>f.systemOutputDemo).length'),1);
+ assert.equal(run(`KB_DOCS.get('bf-output-demo').approval`),'approved');
+ assert.equal(run(`KB_DOCS.get('bf-output-demo').state`),'ready');
+ run(`kbShowFile('bf-output-demo')`);const html=node('dw').innerHTML;
+ assert.match(html,/来源任务/);assert.match(html,/新品上市 · 品牌生态位复核/);
+ assert.match(html,/审批状态（演示）/);assert.match(html,/已批准/);assert.match(html,/预置示例/);
+ assert.match(html,/class="row kb-origin-task"/);assert.match(html,/kbOpenSourceTask/);
+ assert.doesNotMatch(html,/知识库引用|解析内容|kb-file-tab-2/);
+ assert.match(run('kbFilesHTML()'),/系统产出 · 文档/);run('closeDw()');
+});
+check('system output has exactly three labelled illustrative audit records without duplication',()=>{
+ assert.equal(run(`KB_DOCS.get('bf-output-demo').history.length`),3);
+ run('kbEnsure();kbEnsure()');assert.equal(run(`KB_DOCS.get('bf-output-demo').history.length`),3);
+ run(`kbShowFile('bf-output-demo',1)`);const html=node('dw').innerHTML;
+ for(const text of ['创建在线文档','批准产出','创建产出','Sophie','预置演示','M365 账号：未关联','成功（演示）'])assert.ok(html.includes(text));
+ assert.equal((html.match(/class="ds-run-item"/g)||[]).length,3);assert.doesNotMatch(html,/已编辑|已保存/);run('closeDw()');
 });
 check('migration preserves originals and progresses automatically to reference and index',()=>{
  run(`kbIngest(KB_DOCS.get('bf1'),'开始演示')`);
- assert.equal(run(`KB_DOCS.get('bf1').state`),'saving');assert.equal(run('BRAND_FILES.length'),8);
+ assert.equal(run(`KB_DOCS.get('bf1').state`),'saving');assert.equal(run('BRAND_FILES.length'),9);
  finish();assert.equal(run(`KB_DOCS.get('bf1').state`),'ready');assert.equal(run(`KB_DOCS.get('bf1').indexVersion`),1);
  assert.match(run(`KB_DOCS.get('bf1').fileId`),/sp-demo/);assert.match(run(`KB_DOCS.get('bf1').indexedText`),/品牌定位/);
 });
@@ -58,7 +76,7 @@ check('upload enters the same ingestion pipeline but does not invent extracted t
 });
 check('details use the right drawer, escape filenames and never reopen after closing',()=>{
  run(`BRAND_FILES[0].name='<img src=x onerror=alert(1)>.pptx';kbShowFile(BRAND_FILES[0].id)`);
- assert.match(node('dw').innerHTML,/&lt;img/);assert.match(node('dw').innerHTML,/文件 ID/);assert.match(node('dw').innerHTML,/此 Demo 未解析上传文件/);
+ assert.match(node('dw').innerHTML,/&lt;img/);assert.match(node('dw').innerHTML,/文件 ID/);assert.doesNotMatch(node('dw').innerHTML,/解析内容|知识库引用/);
  assert.match(node('dw').innerHTML,/kb-file-drawer/);assert.match(node('dw').innerHTML,/aria-modal="true"/);
  assert.equal(node('dw').classList.contains('on'),true);assert.equal(node('scrim').classList.contains('on'),true);
  assert.equal(node('mod').classList.contains('on'),false);
@@ -68,10 +86,12 @@ check('brand selection isolates files and old citations',()=>{
  run(`S.kbrand='telosin'`);assert.equal(run('kbVisibleDocs().length'),0);assert.doesNotMatch(run('kbResultsHTML()'),/品牌定位复核/);
  run(`S.kbrand='a8oparis'`);
 });
-check('file drawer only shows file information, without logs or simulation controls',()=>{
+check('file drawer separates audit records from file information, without simulation controls',()=>{
  run(`kbShowFile('bf1')`);const info=node('dw').innerHTML;
  assert.match(info,/class="ty">品牌文件/);assert.match(info,/class="ctxr"/);
- assert.doesNotMatch(info,/运行记录|自动处理记录|模拟 SharePoint 变更|kb-file-event|role="tablist"/);
+ assert.match(info,/文件信息/);assert.match(info,/操作日志/);assert.doesNotMatch(info,/运行记录|自动处理记录|模拟 SharePoint 变更|kb-file-event/);
+ run(`kbShowFile('bf1',1)`);assert.match(node('dw').innerHTML,/未接入 M365 审计/);assert.match(node('dw').innerHTML,/X-Digate 系统事件（模拟）/);
+ assert.doesNotMatch(node('dw').innerHTML,/class="ctxr"/);
 });
 check('automatic drawer refresh preserves expansion, scroll and control focus',()=>{
  const detail=node('kb-file-detail'),body={scrollTop:230};detail.dataset={file:'bf1'};detail.closest=()=>body;
@@ -150,6 +170,7 @@ check('migration shows incremental progress, completed count and closes only aft
  context.document.querySelectorAll=()=>[{value:'bf1'},{value:'bf2'}];
  ['kb-migration-bar','kb-migration-percent','kb-migration-count','kb-migration-status'].forEach(node);
  run('kbStartMigration()');assert.match(node('mod').innerHTML,/<progress/);assert.equal(node('kb-migration-bar').value,0);
+ assert.match(run('kbFilesHTML()'),/正在迁移 · 0%/);assert.match(run('kbFilesHTML()'),/class="kb-inline-progress"/);
  const timerCount=timers.size;run('kbStartMigration()');assert.equal(timers.size,timerCount);
  let batch=[...timers.values()];timers.clear();batch.forEach(fn=>fn());
  assert.equal(node('kb-migration-bar').value,60);assert.match(node('kb-migration-count').textContent,/0 \/ 2/);
@@ -163,4 +184,12 @@ check('background migration does not close a different modal when it finishes',(
  context.document.querySelectorAll=()=>[{value:'bf1'}];run('kbStartMigration();closeMod()');
  node('mod').innerHTML='<div>Another dialog</div>';node('mod').classList.add('on');finish();
  assert.equal(node('mod').classList.contains('on'),true);assert.equal(run('KB_MIGRATION'),null);
+});
+check('origin filters combine with type and search without changing migration scope',()=>{
+ run(`S.brandFileOrigin='系统生成';S.brandFileType='全部';S.brandFileSearch=''`);
+ let html=run('kbFilesHTML()');assert.match(html,/新品上市品牌生态位复核.docx/);assert.doesNotMatch(html,/品牌生态位分析源数据.pdf/);assert.match(html,/1 \/ 10|1 \/ 9|1 \/ 11/);
+ run(`S.brandFileType='PDF'`);assert.match(run('kbFilesHTML()'),/暂无符合条件的文件/);
+ run(`S.brandFileOrigin='上传文件';S.brandFileType='全部'`);html=run('kbFilesHTML()');assert.match(html,/品牌生态位分析源数据.pdf/);assert.doesNotMatch(html,/新品上市品牌生态位复核.docx/);
+ run(`S.brandFileOrigin='系统生成';S.brandFileType='文档';S.brandFileSearch='新品'`);assert.match(run('kbFilesHTML()'),/新品上市品牌生态位复核.docx/);
+ run(`S.brandFileOrigin='全部';S.brandFileType='全部';S.brandFileSearch=''`);
 });
