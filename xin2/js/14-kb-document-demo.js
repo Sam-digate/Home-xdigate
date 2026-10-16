@@ -41,7 +41,7 @@ function kbAgentAllowed(agent){
 }
 function kbCanUpload(){return kbScopeAllowed({project:'a80',client:'u2c'});}
 function kbVisibleDocs(){kbEnsure();return BRAND_FILES.filter(file=>{const doc=KB_DOCS.get(file.id);return doc.brand===knowledgeActiveBrand().id&&kbScopeAllowed(doc);});}
-function kbStatus(doc){return ({legacy:'待迁移',saving:'模拟保存中',indexing:'自动建立索引',ready:'已索引',unparsed:'待解析',removed:'原文件不存在',denied:'无访问权限'})[doc.state]||'待核对';}
+function kbStatus(doc){return ({legacy:'待迁移',saving:'模拟保存中',indexing:'自动建立索引',ready:'已迁移',unparsed:'待解析',removed:'原文件不存在',denied:'无访问权限'})[doc.state]||'待核对';}
 function kbIsOnline(doc){return doc.storage==='sharepoint'&&!doc.migrating&&!['saving','indexing'].includes(doc.state);}
 function kbFileActionHTML(file,doc,compact=false){
  const online=kbIsOnline(doc),blocked=['denied','removed'].includes(doc.health);
