@@ -51,6 +51,9 @@ const PERMISSION_PAGE_GROUPS=[
  {id:'agent',name:'Agents',pages:[
   {id:'agent.registry',name:'Agent 登记处'},{id:'agent.recipes',name:'配方'},{id:'agent.routines',name:'例行'},{id:'agent.prompts',name:'共享提示词'}
  ]},
+ {id:'connector',name:'Connector',pages:[
+  {id:'connector',name:'连接与授权'}
+ ]},
  {id:'permission',name:'权限管理',pages:[
   {id:'permission',name:'权限管理'}
  ]}
@@ -128,6 +131,7 @@ function permissionHasPage(id){
 function permissionCanAccessView(view){
  if(view==='thread')return permissionHasPage('work');
  const map={today:['today'],work:['work'],prop:['prop'],camp:['camp'],anal:['anal.data','anal.chat'],know:['know.src','know.out'],agent:['agent.registry','agent.recipes','agent.routines','agent.prompts'],permission:['permission']};
+ if(view==='connector')return permissionHasPage('connector');
  return !map[view]||map[view].some(permissionHasPage);
 }
 function permissionFirstView(){return ['today','work','prop','camp','anal','know','agent','permission'].find(permissionCanAccessView)||'today';}

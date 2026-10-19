@@ -41,6 +41,7 @@ const ICON={
  agent:'<circle cx="12" cy="7" r="3.5"/><path d="M5.5 21a6.5 6.5 0 0113 0"/>',
  permission:'<path d="M12 3 4.5 6.2v5.2c0 4.6 3 7.9 7.5 9.6 4.5-1.7 7.5-5 7.5-9.6V6.2L12 3Z"/><path d="M9.3 12.1 11 13.8l3.8-4"/>'
 };
+ICON.connector='<path d="M8 3v5M16 3v5M5 8h14v3a7 7 0 0 1-14 0V8ZM12 18v3"/>';
 const NAV=[
  {id:'today',n:'今日',i:'today'},
  {id:'work',n:'工作',i:'work',b:'live'},
@@ -51,6 +52,7 @@ const NAV=[
  {d:1},
  {id:'know',n:'知识库',i:'know'},
  {id:'agent',n:'Agents',i:'agent'},
+ {id:'connector',n:'Connector',i:'connector'},
  {d:1},
  {id:'permission',n:'权限管理',i:'permission'}
 ];
@@ -656,4 +658,4 @@ const STN={todo:'待开始',run:'进行中',review:'待审批',done:'已交付',
 const DOMS=['全部','内容','电商','用户运营','KOL','B2B'];
 const DAYN=['今天','昨天','本周早些时候'];
 
-let S={view:location.hash==='#permission'?'permission':'work',mode:'kanban',dom:'全部',approvalDom:'全部',tid:null,aid:null,focus:false,dtab:0,liveT:null,liveI:0,hist:[],currentUser:'br',accountOpen:false};
+let S={view:location.hash==='#permission'?'permission':'connector',mode:'kanban',dom:'全部',approvalDom:'全部',tid:null,aid:null,focus:false,dtab:0,liveT:null,liveI:0,hist:[],currentUser:'br',accountOpen:false};

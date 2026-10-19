@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>连接与授权 · XDIGATE 演示</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/connector-demo.css?v=4">
+  <script>if(new URLSearchParams(location.search).get('embedded')==='1')document.documentElement.classList.add('embedded');</script>
+</head>
+<body>
+  <aside class="sidebar" aria-label="平台导航">
+    <a class="brand" href="index.html"><span class="brand-symbol">×</span><span>XDIGATE<small>AGENT OS</small></span></a>
+    <div class="workspace"><span class="workspace-icon">A8</span><div>A8OPARIS<small>品牌工作空间</small></div><span class="workspace-caret">⌄</span></div>
+    <p class="nav-caption">工作空间</p>
+    <nav>
+      <a href="index.html#today" data-icon="house">今日</a>
+      <a href="index.html#work" data-icon="columns-3">工作</a>
+      <a href="index.html#agent" data-icon="bot">Agents</a>
+      <a href="index.html#knowledge" data-icon="book-open">知识库</a>
+      <a href="index.html#analytics" data-icon="chart-no-axes-combined">数据分析</a>
+    </nav>
+    <div class="nav-divider"></div><p class="nav-caption">管理</p>
+    <nav><span class="nav-parent" data-icon="settings-2">设置</span><a class="active" href="connector-demo.html" aria-current="page" data-icon="unplug">连接与授权</a></nav>
+    <div class="sidebar-bottom"><span class="demo-mark">DEMO</span><p>独立交互演示<small>不连接真实平台或保存凭证</small></p></div>
+    <div class="profile"><span class="avatar">DU</span><div>dudu<small>演示管理员</small></div></div>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar"><div class="breadcrumb">设置<span>/</span><b>连接与授权</b></div><div class="top-actions"><span class="prototype-label">交互演示 · 待评审</span><button class="btn quiet" id="role-toggle" title="切换演示权限"><span data-icon="shield-check"></span><span id="role-label">管理员</span></button><span class="avatar small">DU</span></div></header>
+    <main id="main-content" class="content">
+      <div class="page-heading"><div><p class="eyebrow">SETTINGS · CONNECTORS</p><h1>连接与授权</h1><p class="page-description">把平台账号连在一起，让每一次访问都有明确的授权边界。</p></div><button class="btn primary" id="new-connection"><span data-icon="plus"></span>新建连接</button></div>
+      <div class="demo-notice"><span data-icon="flask-conical"></span><p><b>仅演示连接与授权流程</b><span>所有账号、资源和日志均为示例。平台能力及授权方式待确认，不代表已支持接入。</span></p><a href="https://app.notion.com/p/3fbd855d0b2f81b8bc14c33095f7e100" target="_blank" rel="noopener noreferrer">查看 PRD <span data-icon="arrow-up-right"></span></a></div>
+      <section class="overview" aria-label="连接概览" id="overview"></section>
+      <div class="section-tools"><h2 class="list-heading">我的连接 <span id="connection-count">4</span></h2><button class="text-button" id="reset-demo"><span data-icon="rotate-ccw"></span>重置演示</button></div>
+      <section id="connections-view" aria-label="我的连接">
+        <div class="filterbar"><label class="search"><span data-icon="search"></span><input id="search" type="search" placeholder="搜索连接名称或账号" aria-label="搜索连接名称或账号"></label><select id="platform-filter" aria-label="筛选平台"><option value="all">全部平台</option></select><select id="status-filter" aria-label="筛选连接状态"><option value="all">全部状态</option><option value="connected">已连接</option><option value="reauth">需重新授权</option><option value="failed">连接失败</option><option value="disconnected">已断开</option></select><span id="result-count" class="result-count"></span></div>
+        <div id="connection-list" class="connection-table"></div>
+        <p class="table-footnote"><span data-icon="info"></span>“已连接”仅表示示例授权范围可用，不代表已同步数据或所有业务功能可用。</p>
+      </section>
+      <footer class="page-footer"><span>连接管理 · v0.1 演示</span><span>最小权限授权 · 明确归属 · 操作可追溯</span></footer>
+    </main>
+  </div>
+  <div id="drawer-backdrop" class="backdrop" hidden></div>
+  <aside id="detail-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden></aside>
+  <div id="modal-backdrop" class="modal-backdrop" hidden><section id="flow-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"></section></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="js/connector-demo.js"></script>
+  <script src="js/15-connector-shell.js?v=4"></script>
+</body>
+</html>

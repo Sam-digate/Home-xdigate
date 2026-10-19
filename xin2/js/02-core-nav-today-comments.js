@@ -73,6 +73,7 @@ function render(){
  else if(S.view==='anal')html=vAnal();
  else if(S.view==='prop')html=vProp();
  else if(S.view==='permission')html=vPermission();
+ else if(S.view==='connector')html='<iframe class="connector-frame" src="connector-demo.html?embedded=1" title="Connector · 连接与授权管理"></iframe>';
  else html=vSoon();
  v.innerHTML=withBackNav(html);
  if(S.view==='thread')afterThread();

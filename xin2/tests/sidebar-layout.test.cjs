@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const css=fs.readFileSync(path.join(root,'css/01-foundation-shell.css'),'utf8');
+assert.match(css,/#nav\{display:grid;gap:2px;flex:0 0 auto\}/);
+assert.match(css,/\.nv\{[^}]*height:36px;padding:8px 10px;line-height:20px/);
+assert.match(css,/\.brand-n\{[^}]*line-height:1\.15/);
+assert.match(css,/\.brand-s\{[^}]*line-height:1\.2/);
+assert.match(css,/\.brand\{[^}]*padding:0 4px 16px/);
+assert.match(css,/\.nv\.on\{background:var\(--sb-active\);color:#fff;font-weight:500\}/);
+console.log('PASS compact sidebar geometry retains typography, grouping and active style');
