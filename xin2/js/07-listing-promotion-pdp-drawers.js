@@ -176,6 +176,7 @@ function confirmListingStep(id,i){
  toast('商品上架结果已批准');
 }
 function finishListingGeneration(id,step){
+ const [task]=findArt(id);if(!task||task.deletedAt||task.executionCancelled)return;
  const [,a]=findArt(id);if(!a?.listing)return;const l=listingState(a);if(l.loading!==step)return;
  if(step===2){l.receipt.image=l.receipt.source;l.receipt.failed=false;}
  if(step===3){l.final.image=l.final.source||l.receipt.source;l.final.failed=false;}

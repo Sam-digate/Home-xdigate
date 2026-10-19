@@ -1256,7 +1256,7 @@ function kSavedOutputs(){
      ${t?`<span class="chip mut">${({manual:'手动',scheduled:'定时触发',event:'事件触发',proposal:'采纳提案'})[t.trig||'manual']||'手动'}</span>`:''}
     </div>
    </div>
-   <div class="pca"><button class="btn sm" onclick="openSavedOutput(${i})">查看内容 ↗</button><button class="btn ghost sm" onclick="openSavedSourceTask(${i})">打开来源任务 ↗</button>
+   <div class="pca"><button class="btn sm" onclick="openSavedOutput(${i})">查看内容 ↗</button><button class="btn ghost sm" onclick="openSavedSourceTask(${i})" ${t?.deletedAt?'disabled':''}>${t?.deletedAt?'来源任务已删除':'打开来源任务 ↗'}</button>
     <span class="saved-output-usage">被读 ${x.reads} 次 · ${x.using} 个 Agent 在用 · 最近使用 ${esc(x.last)}</span></div>
   </div>`}).join('')+(list.length?'':'<div class="allclear">当前领域还没有已保存产出。</div>');
 }
@@ -1264,6 +1264,7 @@ function openSavedSourceTask(i){
  const x=SAVED_OUTPUTS[i];if(!x)return;
  const [source]=findArt(x.aid),t=source||T.find(item=>item.id===x.tid);
  if(!t){toast('来源任务不存在或已移除');return;}
+ if(t.deletedAt){toast('来源任务已删除，已保存产出仍然保留');return;}
  go('thread',t.id);
  const card=$('pk-'+x.aid);
  if(card)card.scrollIntoView({block:'start'});
@@ -1396,7 +1397,7 @@ function openKCreator(i){
 function fil(){
  const own={'我':'du','Sophie':'so','Brooks':'br','Ariel':'ar'};
  return T.filter(t=>{
-  if(t.devHidden)return false;
+  if(t.devHidden||t.deletedAt)return false;
   if(S.dom!=='全部'&&t.dom!==S.dom)return false;
   const fc=S.fcamp||'全部';
   if(fc==='日常'&&t.camp)return false;
@@ -1429,6 +1430,7 @@ function vWork(){
     </div>
     <button class="btn ghost" onclick="openRecipeDrawer()">从配方开始</button>
     <button class="btn" onclick="openNew()">＋ 新建任务</button>
+    ${taskWorkMenuHTML()}
   </div>
   ${L.length?(S.mode==='kanban'?kanban(L):bydate(L)):
    `<div class="empty"><div class="h">这些条件下没有任务</div>
@@ -1461,7 +1463,8 @@ function kanban(L){
 }
 function kcard(t){
   const a=AG[t.ag]||{c:'#8B7FC7',s:'?',n:t.ag};
- return `<button class="kcard src${(t.cr||{s:'h'}).s} ${t.new?'hasnew':''}" onclick="go('thread','${t.id}')">
+ return `<div role="button" tabindex="0" class="kcard src${(t.cr||{s:'h'}).s} ${t.new?'hasnew':''}" onclick="go('thread','${t.id}')" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();go('thread','${t.id}')}">
+  ${taskMenuHTML(t)}
   <div class="tt">${t.new?'<span class="nd"></span>':''}${t.pin?'<span class="pinb">置顶</span>':''}${esc(t.t)}</div>
   <div class="meta">${t.camp?`<span class="chip camp">${t.camp}</span>`:'<span class="chip mut">日常</span>'}${t.platform?`<span class="chip plat">${esc(t.platform)}</span>`:''}<span class="chip dom">${t.dom}</span><span class="chip lv">${t.lv}</span>${t.generalAgentDemo&&!t.generalAgentConfirmed?'<span class="chip general-agent-wait">Agent 待确认</span>':t.generalAgentDemo?'<span class="chip general-agent-live">通用 Agent</span>':t.prestartDemo&&t.plan?.status==='rejected'?'<span class="chip" style="background:#FFF0F0;color:#C43232">计划未通过</span>':canAdjustPrestartPlan(t)&&!t.permissionBlocked?'<span class="chip mut">计划待确认</span>':''}</div>
   <div class="ft">
@@ -1469,7 +1472,7 @@ function kcard(t){
     <span class="byline">${crInfo(t).av} <b>${crInfo(t).nm}</b> 发起</span>
     <span style="margin-left:auto">${t.up}</span>
   </div>
- </button>`;
+ </div>`;
 }
 function requestTaskAgentPermission(id,event){
  event?.stopPropagation();const task=T.find(item=>item.id===id);if(!task||task.permissionRequest==='pending')return;task.permissionRequest='pending';render();toast('已向管理员申请“内容生成 Agent”权限');
@@ -1479,12 +1482,13 @@ function bydate(L){
   const it=L.filter(t=>t.day===d);if(!it.length)return '';
   return `<div class="dgrp">
    <div class="dgh"><span class="d">${DAYN[d]}</span><span class="ln"></span><span class="n">${it.length}</span></div>
-   ${it.map(t=>{const a=AG[t.ag];return `<button class="row src${(t.cr||{s:'h'}).s} ${t.new?'hasnew':''}" onclick="go('thread','${t.id}')">
+   ${it.map(t=>{const a=AG[t.ag];return `<div role="button" tabindex="0" class="row src${(t.cr||{s:'h'}).s} ${t.new?'hasnew':''}" onclick="go('thread','${t.id}')" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();go('thread','${t.id}')}">
+     ${taskMenuHTML(t)}
      <span class="st ${t.st}">${STN[t.st]}</span>
      <span class="tt">${t.new?'<span class="nd"></span>':''}${t.pin?'<span class="pinb">置顶</span>':''}${esc(t.t)}</span>
      <span class="mt">${t.new?`<span class="nchip">${t.new} 条新</span>`:''}${t.camp?`<span class="chip camp">${t.camp}</span>`:''}<span class="chip dom">${t.dom}</span></span>
      <span class="ag byline">${crInfo(t).av} <b>${crInfo(t).nm}</b> 发起</span>
      <span class="avs" style="background:${U[t.own].c}">${U[t.own].s}</span>
-     <span class="up">${t.up}</span></button>`;}).join('')}
+     <span class="up">${t.up}</span></div>`;}).join('')}
   </div>`;}).join('');
 }

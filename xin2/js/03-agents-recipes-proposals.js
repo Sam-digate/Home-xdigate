@@ -122,7 +122,7 @@ function startPrestartPlan(id){
  const assignedAgents=t.agents?.length?t.agents:[t.ag];
  if(t.generalAgentDemo){
   t.plan.confirmed={ag:t.ag,agents:[...assignedAgents],tx:t.plan.tx,expected:t.plan.expected,steps:t.plan.steps.map(s=>({l:s.l,m:s.m}))};
-  t.plan.startedAt=new Date().toISOString();t.plan.status='running';t.generalAgentConfirmed=true;t.st='run';t.up='刚刚';
+  t.plan.startedAt=new Date().toISOString();t.plan.status='running';t.generalAgentConfirmed=true;t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';
   t.plan.steps=t.plan.steps.map((s,i)=>({...s,s:i===0?'ok':i===1?'act':'todo',r:i===0?'已确认':i===1?'进行中':'未开始'}));
   t.live={t:'通用 Agent 正在生成好评返现文案',el:'刚刚',sub:['正在理解文案使用场景与表达要求…','正在生成文案内容…','正在检查平台合规风险…'],p:38,tk:260};t.arts=[];t.outputCount=0;
   S.prestartDraft=null;S.prestartManualTid=null;(t.cmts=t.cmts||[]).push({k:'sys',tx:'已确认计划 v'+t.plan.v+'，通用 Agent 开始执行。',at:'刚刚'});
@@ -139,7 +139,7 @@ function startPrestartPlan(id){
   S.prestartDraft=null;S.prestartManualTid=null;(t.cmts=t.cmts||[]).push({k:'sys',tx:'已确认计划 v'+t.plan.v+' 与 '+assignedAgents.map(agentLabel).join('、')+'，等待补充目标渠道信息。',at:'刚刚'});
   renderNav();render();toast('计划已确认 · 请补充生成信息');return;
  }
- t.plan.startedAt=new Date().toISOString();t.plan.status='running';t.st='run';t.up='刚刚';
+ t.plan.startedAt=new Date().toISOString();t.plan.status='running';t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';
  t.plan.steps[0].s='act';t.plan.steps[0].r='刚开始';S.prestartDraft=null;
  (t.cmts=t.cmts||[]).push({k:'sys',tx:'已确认计划 v'+t.plan.v+'，'+assignedAgents.map(agentLabel).join('、')+' 开始执行。',at:'刚刚'});
  renderNav();render();toast('计划已确认，任务已移到进行中');
@@ -360,7 +360,7 @@ function activate(agid,tid){
  t.plan=t.plan||{v:1,tx:'直接指派。',steps:[]};
  t.plan.v=(t.plan.v||1)+1;
  t.plan.steps.push({l:nick(agid)+' · 立即运行',m:(REG.find(y=>y.id===agid)||{}).n,s:'act',r:'刚开始'});
- t.st='run';t.new=(t.new||0)+1;
+ t.executionCancelled=false;t.restoredPending=false;t.st='run';t.new=(t.new||0)+1;
  closeMod();closeDw();go('thread',tid);toast(nick(agid)+' 已启动');
 }
 
@@ -843,7 +843,7 @@ function gateAct(id,ok){
  const r=RECIPES.find(x=>x.id===id);
  const t=T.find(x=>x.standing===r.id);
  if(ok){
-  if(t){t.st='run';t.new=(t.new||0)+1;t.up='刚刚';
+  if(t){t.executionCancelled=false;t.restoredPending=false;t.st='run';t.new=(t.new||0)+1;t.up='刚刚';
    t.plan.steps[1]={l:'⛒ 审批门 · dudu 已批准',m:'可逆 · 上线前可撤销报名',s:'ok',r:'—'};
    t.plan.steps[2]={l:'审批执行 · 在天猫完成报名',m:'进行中',s:'act',r:'刚开始'};}
   r.st='ok';r.attn=0;r.gate=null;r.next='9月1日';r.last='刚刚 · 已完成';
@@ -1251,7 +1251,7 @@ function drawAgent(){
     <span style="margin-left:auto;font-family:'Sora';font-size:var(--fs-xs);color:var(--t3)">${LV[a.lv].k}</span></div>`;
 }
 function agAdmin(a){
- const active=T.filter(t=>t.ag===a.id&&t.st!=='done').length;
+ const active=T.filter(t=>!t.deletedAt&&t.ag===a.id&&t.st!=='done').length;
  return {
    maturity:a.maturity||'M1',active,
    rating:a.rating||'0.0',returnRate:a.returnRate||(Math.round(a.ed/3)+'%'),ontime:a.ontime||'100%',
@@ -1381,7 +1381,7 @@ function agOut(a){
 }
 function agRuns(a){
  if(a.b!=='live')return `<div style="font-size:var(--fs-sm);color:var(--t3);padding:var(--sp-2) 0">还没上线。</div>`;
- const mine=T.filter(t=>t.ag===a.id||(t.arts||[]).some(x=>x.by===a.id));
+ const mine=T.filter(t=>!t.deletedAt&&(t.ag===a.id||(t.arts||[]).some(x=>x.by===a.id)));
  return `${mine.length?mine.map(t=>`<button class="row" onclick="closeDw();go('thread','${t.id}')">
    <span class="st ${t.st}">${STN[t.st]}</span><span class="tt">${esc(t.t)}</span><span class="up">${t.up}</span></button>`).join('')
   :'<div style="font-size:var(--fs-sm);color:var(--t3);padding:var(--sp-2) 0">本原型里没有这个 agent 的线程。</div>'}`;

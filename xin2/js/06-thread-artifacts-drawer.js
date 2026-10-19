@@ -21,9 +21,10 @@ function drawGeneralAgentDrawer(){
  if(window.lucide)lucide.createIcons();
 }
 function confirmGeneralAgentRecommendation(id){
- const t=T.find(item=>item.id===id);if(!t||t.generalAgentConfirmed)return;t.generalAgentConfirmed=true;t.st='run';t.up='刚刚';t.generalMessages=[];render();drawGeneralAgentDrawer();toast('已确认通用 Agent · 任务开始执行');
+ const t=T.find(item=>item.id===id);if(!t||t.generalAgentConfirmed)return;t.generalAgentConfirmed=true;t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';t.generalMessages=[];render();drawGeneralAgentDrawer();toast('已确认通用 Agent · 任务开始执行');
 }
 function finishGeneralAgentDemo(id){
+ if(T.find(x=>x.id===id)?.executionCancelled)return;
  const t=T.find(item=>item.id===id);if(!t||!t.generalAgentDemo||t.arts?.some(a=>a.mode==='general-session'))return;
  t.live=null;t.plan.status='completed';t.plan.steps=t.plan.steps.map(s=>({...s,s:'ok',r:'已完成'}));t.arts=[{id:'a-general-session-1',tid:t.id,mode:'general-session',ty:'会话产出',ttl:'好评返现文案 · v1',by:'general',v:1,st:'review',pv:'none',g:['#C4B5FD','#7C3AED'],ex:'由通用 Agent 根据本次会话生成。',body:generalAgentDemoBody(),vals:[],sub:[]}];t.outputCount=1;t.st='review';t.up='刚刚';
  if(S.view==='thread'&&S.tid===id)render();else{renderNav();render();}toast('通用 Agent 已生成 1 份本次会话产出');
@@ -153,7 +154,7 @@ function savePermissionBlockedPlan(id){
  renderNav();render();toast('已改用 '+agentLabel(agent.id)+' 重新规划，请确认后开始');
 }
 function vThread(){
- const t=T.find(x=>x.id===S.tid);if(!t)return vSoon();
+ const t=T.find(x=>x.id===S.tid);if(!t||t.deletedAt)return vSoon();
  const a=AG[t.ag];
  const threadAgents=t.agents?.length?t.agents:[t.ag];
  const manualReviewArt=t.arts?.find(x=>x.manualOutput&&x.manual?.submitted&&!x.manual?.reviewed);
@@ -163,7 +164,7 @@ function vThread(){
  const hasM1Delivery=!!m1Art;
  const hideM1Delivery=(hasM1Delivery&&m1Art.m1?.stage==='owner'&&!(m1Art.m1.reviewHistory||[]).length)||(t.demoDualAgents&&t.agentStates?.insp==='运行中');
  if(!t.arts&&!t.ask&&!t.standing&&!t.manualPending)return `<div class="wrap thread-wrap"><div class="th-hd"><div class="crumb"><button onclick="go('work')">工作</button> › ${t.camp||'日常'}</div>
-  <h2>${esc(t.t)}</h2>
+  ${taskMenuHTML(t,true)}<h2>${esc(t.t)}</h2>
   <div class="th-meta" style="margin-top:var(--sp-3)"><span class="st ${t.st}">${STN[t.st]}</span>
     <span class="chip dom">${t.dom}</span>
     <span class="crbadge ${crInfo(t).s}">${crInfo(t).av} 由 <b>${crInfo(t).nm}</b> 发起</span></div></div>
@@ -171,7 +172,7 @@ function vThread(){
  return `<div class="wrap thread-wrap">
   <div class="th-hd">
     <div class="crumb"><button onclick="go('work')">工作</button> › ${t.camp?`<button onclick="goCamp('${t.camp}')">${t.camp}</button>`:'日常'} › <span>任务</span></div>
-    <h2>${esc(t.t)}</h2>
+    ${taskMenuHTML(t,true)}<h2>${esc(t.t)}</h2>
     <div class="th-meta">
       <span class="st ${t.st}">${STN[t.st]}</span>
       ${t.camp?`<span class="chip camp">${t.camp}</span>`:'<span class="chip mut">日常</span>'}
@@ -336,7 +337,7 @@ function m1OwnerDecision(id,ok){
  m.ownerAt=at;m.ownerDecision=ok?'通过':'退回';m.reviewHistory.push({who:m.owner,role:'产品负责人',result:m.ownerDecision,at});
  if(ok){
   if(t.demoDualAgents&&m.kind==='pdp'){
-   m.stage='approved';a.st='done';t.st='run';t.up='刚刚';t.agentStates.pdp='已批准';t.agentStates.insp='运行中';
+   m.stage='approved';a.st='done';t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';t.agentStates.pdp='已批准';t.agentStates.insp='运行中';
    t.live={t:'店铺巡检正在检查页面与上架风险',el:'刚刚',sub:['正在核对商品资料、页面信息与上架要求'],p:38};
    if(t.plan?.steps){const step=t.plan.steps.find(s=>s.l.includes('店铺巡检'));if(step){step.s='act';step.r='运行中';}}
    toast('详情页已批准 · 店铺巡检开始运行');
@@ -352,7 +353,7 @@ function m1OwnerDecision(id,ok){
   toast('Brooks 已批准 · 等待 dudu 验收');
   }
  }else{
-  m.stage='returned';t.st='run';a.st='run';a.v++;t.up='刚刚';
+  m.stage='returned';t.executionCancelled=false;t.restoredPending=false;t.st='run';a.st='run';a.v++;t.up='刚刚';
   if(t.demoDualAgents){if(m.kind==='pdp'){t.agentStates.pdp='修改中';t.agentStates.insp='等待详情页批准';}else t.agentStates.insp='修改中';}
   if(t.plan?.steps){t.plan.steps[2].s='act';t.plan.steps[2].r='已退回修改';}
   toast(m.kind==='inspection'?'已退回给店铺巡检 Agent 修改':'已退回给详情页 Agent 修改');
@@ -565,7 +566,7 @@ function confirmDrawerReturn(id){
  const reason=(a.drawerReturnDraft||'').trim();
  if(!reason){toast('请填写退回原因');$('drawer-return-'+id)?.focus();return;}
  a.returnReason=reason;(a.sub=a.sub||[]).push({w:'du',k:'chg',tx:'退回原因：'+reason,at:'刚刚'});
- a.drawerReturning=false;a.drawerReturnDraft='';a.st='run';t.st='run';t.up='刚刚';
+ a.drawerReturning=false;a.drawerReturnDraft='';a.st='run';t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';
  closeDw();render();renderNav();toast('已退回，修改原因已记录');
 }
 function sentimentActions(a,inDrawer=true){
@@ -920,7 +921,7 @@ function confirmSocialReturn(id){
  const reason=(a.socialReturnDraft||'').trim();if(!reason){toast('请填写退回原因');$('social-return-'+id)?.focus();return;}
  const message={w:'du',k:'chg',tx:'退回原因：'+reason,at:'刚刚'};
  a.returnReason=reason;(a.sub=a.sub||[]).push({...message});
- a.socialReturning=false;a.socialReturnDraft='';a.st='run';t.st='run';t.up='刚刚';
+ a.socialReturning=false;a.socialReturnDraft='';a.st='run';t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';
  render();renderNav();toast('已退回，修改原因已记录');
 }
 function stepPlan(d){
@@ -978,7 +979,7 @@ function submitManualReview(id){
  }else{
   if(!m.reviewFeedback){toast('退回时请填写评价');return;}
   const feedback=m.reviewFeedback;m.submitted=false;m.reviewed=false;m.reviewResult='退回';m.reviewAt='刚刚';m.reviewDecision='';
-  a.st='run';a.v=(a.v||1)+1;t.st='run';t.up='刚刚';a.ex=`${manualPeopleLabel(manualArtifactPeople(m))} 正在根据主管审核意见修改人工产出。`;
+  a.st='run';a.v=(a.v||1)+1;t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';a.ex=`${manualPeopleLabel(manualArtifactPeople(m))} 正在根据主管审核意见修改人工产出。`;
   (m.records=m.records||[]).push({who:'dudu',at:'刚刚',tx:'主管退回：'+feedback});
   toast('已退回处理人修改');
  }
@@ -995,6 +996,7 @@ function explainInspectionInChat(id){
  a.inspection.explaining=true;
  refreshInspectionComments(id);syncInspectionConversation(t);
  setTimeout(()=>{
+  if(t.deletedAt||t.executionCancelled)return;
   const d=a.inspection;
   const metric=d.metric||'GMV';
   const answer=`【模拟解释】\n这条异常基于 ${d.date} 的${metric}：实际 ${d.actual}，低于预期范围 ${d.expected} 的下限。\n\n为何标记：${a.ex}\n\n预期依据：${d.basis}\n\n当前数据能说明销售规模低于近期水平，但不能单凭${metric}判断具体原因。${d.explanationHint||'建议继续核对流量、转化率、客单价及当日活动变化。'}确认是正常波动可忽略；若核实数据或判断规则有误，可标记为误报。`;
@@ -1042,7 +1044,7 @@ function confirmArtifactReturn(id){
  a.returnReason=reason;(a.sub=a.sub||[]).push({...message});
  // Keep approved directions and other artifacts unchanged; attach feedback to pending directions.
  if(a.opts)a.opts.filter(o=>o.s!=='done').forEach(o=>(o.sub=o.sub||[]).push({...message}));
- a.st='run';t.st='run';t.up='刚刚';
+ a.st='run';t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';
  closeMod();render();renderNav();
  if(S.aid===id&&$('dw').classList.contains('on'))drawDw();
  toast('已退回，修改原因已记录');
@@ -1057,7 +1059,7 @@ function act(id,w){
   render();toast(a.inspection.result);return;
  }
  if(w==='批准'){a.st='done';t.st='done';toast(a.inspection?'已标记为已解决':'已批准 · 线程收口');}
- else{a.st='run';t.st='run';a.v++;toast('已退回 · 已在同一线程中生成新一轮');}
+ else{a.st='run';t.executionCancelled=false;t.restoredPending=false;t.st='run';a.v++;toast('已退回 · 已在同一线程中生成新一轮');}
  render();
 }
 function addC(){
@@ -1077,13 +1079,14 @@ function dispatchFrom(agid,tx){
  t.plan.adj='dudu 在评论里直接 @了 '+a.nick+'（未走编排）';
  t.plan.steps.splice(Math.max(0,t.plan.steps.length-1),0,{l:a.nick+' · 被直接 @ 派活',m:tx.replace('@'+a.nick,'').trim().slice(0,26),s:'act',r:'刚开始'});
  t.cmts.push({w:agid,tx:'收到，我接了。这条会作为新一步跑在这条线程里，跑完回到待审批。',at:'刚刚'});
- t.st='run';render();toast(a.nick+' 接了活 · 已加进这条线程');
+ t.executionCancelled=false;t.restoredPending=false;t.st='run';render();toast(a.nick+' 接了活 · 已加进这条线程');
 }
 function afterThread(){
  if(S.liveT){clearInterval(S.liveT);S.liveT=null;}
- const t=T.find(x=>x.id===S.tid);if(!t||!t.live)return;
+ const t=T.find(x=>x.id===S.tid);if(!t||t.deletedAt||t.executionCancelled||!t.live)return;
  let p=t.live.p,i=0;
  S.liveT=setInterval(()=>{
+  if(t.deletedAt||t.executionCancelled){clearInterval(S.liveT);return;}
   p=p>=97?62:p+1;t.live.p=p;
   const lp=$('lp'),lpc=$('lpc'),lt=$('lt');if(!lp){clearInterval(S.liveT);return;}
   lp.style.width=p+'%';if(lpc)lpc.textContent=p+'%';
@@ -1130,11 +1133,12 @@ function togglePptComment(){const opening=!S.pc;S.pc=opening;drawDw();if(opening
 function toggleGeneralSessionComment(){const opening=!S.pc;S.pc=opening;drawDw();if(opening)scrollDrawerToBottom();}
 function confirmPptOutline(id){
  const [t,a]=findArt(id);if(!t||!a||a.outlineConfirmed)return;
- a.outlineConfirmed=true;a.st='done';a.drawerReturning=false;t.st='run';t.up='刚刚';
+ a.outlineConfirmed=true;a.st='done';a.drawerReturning=false;t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';
  t.pptLive={t:'PPT 生成正在制作演示文稿',sub:'正在根据已批准大纲生成页面内容与版式',p:43};
  if($('dw')?.classList.contains('on')&&S.aid===id)closeDw();
  render();renderNav();toast('大纲已批准 · PPT 正在生成');
  setTimeout(()=>{
+  if(t.deletedAt||t.executionCancelled)return;
   let file=t.arts.find(x=>x.mode==='pptfile');
   if(!file){file={id:'a-ppt-file-demo',mode:'pptfile',ty:'PPT 文件',ttl:a.deckTitle,ex:'PPT 已生成完成',by:'ppt',v:1,st:'review',pv:'none',g:['#A78BFA','#7C3AED'],vals:[],pageCount:a.pages.length+1,credits:99,createdAt:'刚刚',sub:[]};t.arts.push(file);}
   delete t.pptLive;t.outputCount=t.arts.length;t.st='review';t.up='刚刚';render();renderNav();toast('PPT 已生成，等待审批');
@@ -1687,12 +1691,12 @@ function approvePdpDirection(id,i){
  a.discardedOptions=a.opts.filter((_,j)=>j!==i).map(o=>({...o,s:'archived'}));
  a.selectedOriginalIndex=i;chosen.originalIndex=i;chosen.s='review';chosen.planReady=false;chosen.planApproved=false;
  a.opts=[chosen];a.selected=0;a.flowStage='plan-generating';a.st='run';a.sum='已批准'+chosen.t.split('：')[0]+' · 规划表生成中';
- t.st='run';t.up='刚刚';t.live={t:'详情页生成正在整理完整规划表',el:'刚刚',sub:['正在根据已批准方向生成屏次、卖点顺序与画面要求'],p:46,tk:620};
+ t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';t.live={t:'详情页生成正在整理完整规划表',el:'刚刚',sub:['正在根据已批准方向生成屏次、卖点顺序与画面要求'],p:46,tk:620};
  if(t.plan?.steps?.[3])t.plan.steps[3]={l:'批准一个创意方向',m:chosen.t.replace(/^方向[一二三]：/,''),s:'ok',r:'刚刚'};
  if(t.plan?.steps?.[4])t.plan.steps[4]={l:'生成并批准规划表',m:'正在一次性生成完整规划表',s:'act',r:'进行中'};
  S.oi=0;closeDw();render();toast('方向已批准 · 其他两个方向已作废');
  setTimeout(()=>{
-  const [currentTask,current]=findArt(id),selected=current?.opts?.[0];if(!currentTask||!selected)return;
+  const [currentTask,current]=findArt(id),selected=current?.opts?.[0];if(!currentTask||currentTask.deletedAt||currentTask.executionCancelled||!selected)return;
   ensureDirectionPlan(current,0);selected.planApproved=false;current.flowStage='plan-review';current.st='review';current.sum='完整规划表已生成 · 待审批';
   currentTask.live=null;currentTask.st='review';currentTask.up='刚刚';
   if(currentTask.plan?.steps?.[4])currentTask.plan.steps[4]={l:'生成并批准规划表',m:`完整规划表 · ${selected.plan.length} 屏`,s:'act',r:'待审批'};
@@ -1702,13 +1706,13 @@ function approvePdpDirection(id,i){
 function approvePdpPlan(id){
  const [t,a]=findArt(id),o=a?.opts?.[0];if(!t||id!=='a4-direction'||a.flowStage!=='plan-review'||!o?.planReady)return;
  o.planApproved=true;o.s='done';o.imagesGenerating=true;a.st='done';a.flowStage='detail-generating';a.sum='规划表已批准 · 详情页生成中';S.detailImagesComplete=false;S.dtab=0;
- t.st='run';t.up='刚刚';t.live={t:'详情页生成正在生成页面内容',el:'刚刚',sub:['正在根据已批准规划表生成详情页图片与内容模块'],p:52,tk:980};
+ t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';t.live={t:'详情页生成正在生成页面内容',el:'刚刚',sub:['正在根据已批准规划表生成详情页图片与内容模块'],p:52,tk:980};
  if(t.plan?.steps?.[4])t.plan.steps[4]={l:'生成并批准规划表',m:`完整规划表 · ${o.plan.length} 屏 · 已批准`,s:'ok',r:'刚刚'};
  if(t.plan?.steps?.[5])t.plan.steps[5]={l:'生成详情页',m:'正在生成图片与内容模块',s:'act',r:'进行中'};
  render();if(S.aid===id&&$('dw')?.classList.contains('on'))drawDw();toast('规划表已批准 · 开始生成详情页');
  setTimeout(()=>{
   const current=T.find(x=>x.id===t.id),directions=current?.arts?.find(x=>x.id===id),detail=current?.arts?.find(x=>x.id==='a4'),selected=directions?.opts?.[0];
-  if(!current||!directions||!detail||!selected)return;
+  if(!current||current.deletedAt||current.executionCancelled||!directions||!detail||!selected)return;
   selected.imagesGenerating=false;selected.imagesGenerated=true;S.detailImagesComplete=true;
   const sourceDirection=directions.selectedOriginalIndex??0,directionHistory={selected:{...selected},discarded:[...(directions.discardedOptions||[])]};
   Object.assign(directions,{mode:'pdpseq',stage:1,sourceDirection,ty:'详情页',plat:detail.plat,ttl:detail.ttl,by:detail.by,v:detail.v,st:'review',pv:detail.pv,g:selected.g||detail.g,img:directionGeneratedCover(sourceDirection),

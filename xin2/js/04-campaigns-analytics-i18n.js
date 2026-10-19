@@ -202,7 +202,7 @@ function campaignPlanDoc(){
 function vCamp(){
  if(!S.cid)return campList();
  const c=CAMPS.find(x=>x.id===S.cid);if(!c)return campList();
- const th=T.filter(t=>t.camp===c.n);
+ const th=T.filter(t=>!t.deletedAt&&t.camp===c.n);
  const Q=queue().filter(q=>q.t.camp===c.n);
  const doms=[...new Set(th.map(t=>t.dom))];
  const cd=S.cdom&&doms.includes(S.cdom)?S.cdom:'全部';
@@ -274,7 +274,7 @@ function campList(){
   <div class="eyebrow">上下文 · 活动</div><h1>活动</h1>
   <div class="sub">活动是项目里的项目：把跨领域的任务放在同一个基准下。审批仍然在「今日」，这里看的是整体走到哪了。</div>
   <div class="bar"><div class="seg"><button class="on">进行中</button><button onclick="toast('本原型没有已结束的活动')">已结束</button></div></div>
-  ${CAMPS.map(c=>{const th=T.filter(t=>t.camp===c.n);
+  ${CAMPS.map(c=>{const th=T.filter(t=>!t.deletedAt&&t.camp===c.n);
    return `<button class="campcard" onclick="S.cid='${c.id}';render()">
     <div style="display:flex;align-items:flex-start;gap:var(--sp-3)">
       <div style="flex:1;min-width:0">
@@ -576,7 +576,7 @@ function anaB(own){
 }
 
 /* ---- D: analysis is a thread ---- */
-function anaThreads(){return T.filter(t=>t.dom==='数据分析');}
+function anaThreads(){return T.filter(t=>!t.deletedAt&&t.dom==='数据分析');}
 function askThread(seed){
  const q=seed||($('qi2')||{value:''}).value.trim();
  if(!q){toast('先问一句');return;}

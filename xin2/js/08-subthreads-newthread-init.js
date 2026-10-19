@@ -343,7 +343,7 @@ document.addEventListener('click',e=>{
  if(S.kfilterOpen&&!e.target.closest('.roster-filterarea')){S.kfilterOpen=null;if($('dw').classList.contains('on'))drawDw();}
 });
 function syncLive(){
- const running=T.filter(t=>t.st==='run').length;
+ const running=T.filter(t=>!t.deletedAt&&t.st==='run').length;
  const on=REG.filter(a=>ONLINE[a.id]&&a.b==='live').length;
  const n=$('lcn'),o=$('lco');if(n)n.textContent=running;if(o)o.textContent=on+' 在线';
 }

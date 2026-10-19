@@ -2,7 +2,7 @@
 function renderNav(){
  const visible=[];NAV.forEach(item=>{if(item.d){if(visible.length&&!visible.at(-1).d)visible.push(item);}else if(permissionCanAccessView(item.id))visible.push(item);});while(visible.at(-1)?.d)visible.pop();
  $('nav').innerHTML=visible.map(x=>{if(x.d)return '<div class="nv-div"></div>';
-  const badge=x.id==='know'?dsAttentionCount():x.id==='agent'?(typeof agentAttentionCount==='function'?agentAttentionCount():0):(x.b?(x.b==='live'?T.filter(t=>t.st!=='done').length:x.b):0);
+  const badge=x.id==='know'?dsAttentionCount():x.id==='agent'?(typeof agentAttentionCount==='function'?agentAttentionCount():0):(x.b?(x.b==='live'?T.filter(t=>!t.deletedAt&&t.st!=='done').length:x.b):0);
   return `<button class="nv ${S.view===x.id?'on':''}" onclick="go('${x.id}',null,{nav:true})">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICON[x.i]}</svg>
     ${x.n}${badge?`<span class="bdg num">${badge}</span>`:''}</button>`}).join('');
@@ -37,6 +37,7 @@ function goBack(){
  go(prev.view,prev.tid,{back:true});
 }
 function go(v,id,opt){closeSb();S.fopen=null;
+ if(v==='thread'&&T.find(t=>t.id===id)?.deletedAt){toast('来源任务已删除，可从「已删除任务」中恢复');return;}
  if(!permissionCanAccessView(v)){toast('你没有访问该页面的权限');const fallback=permissionFirstView();if(S.view!==fallback){S.view=fallback;S.tid=null;S.hist=[];renderNav();render();$('view').scrollTo(0,0);}return;}
  const from=navState(),to={view:v,tid:id||null};
  if(opt?.nav)S.hist=[];
@@ -45,7 +46,7 @@ function go(v,id,opt){closeSb();S.fopen=null;
  }
  if(S.liveT){clearInterval(S.liveT);S.liveT=null;}
  S.view=v;S.tid=id||null;if(id){const _t=T.find(x=>x.id===id);if(_t)_t.new=0;}closeDw();function syncLive(){
- const running=T.filter(t=>t.st==='run').length;
+ const running=T.filter(t=>!t.deletedAt&&t.st==='run').length;
  const on=REG.filter(a=>ONLINE[a.id]&&a.b==='live').length;
  const n=$('lcn'),o=$('lco');if(n)n.textContent=running;if(o)o.textContent=on+' 在线';
 }
@@ -93,6 +94,7 @@ function queue(){
  const q=[];
  const me=currentUser();
  T.forEach(t=>{
+  if(t.deletedAt||t.restoredPending)return;
   if(me==='du'&&t.ask&&!t.answered){const askN=t.ask.channels||t.ask.ppt?1:t.ask.qs.length;q.push({t,a:{id:'ask-'+t.id,by:t.ag},oi:null,ttl:t.ask.ppt?'PPT 生成设置待补充':t.ask.channels?'目标渠道待你补充':askN+' 个问题待你回答',
     g:['#C4B5FD','#7C3AED'],ty:'待补充',plat:null,vals:[{l:'信息缺口',v:t.ask.ppt?'PPT 生成设置':t.ask.channels?'渠道配置':askN+' 项',s:'bad'}],wait:8,sla:null,ask:1});}
   if(!t.arts)return;t.arts.forEach(a=>{
@@ -146,7 +148,7 @@ function todaySubtitle(q){
  return `${t.t} · ${detail}`;
 }
 const RUNP={t5:{p:38,s:'筛选候选池 · 已评估 112/300 位达人'}};
-function RUNS(){return T.filter(t=>t.st==='run').map(t=>{
+function RUNS(){return T.filter(t=>!t.deletedAt&&t.st==='run').map(t=>{
  if(!RUNP[t.id])RUNP[t.id]={p:8,s:'刚开始 · '+((t.plan&&t.plan.steps[0])?t.plan.steps[0].l:'执行中')};
  return {id:t.id,p:RUNP[t.id].p,s:RUNP[t.id].s};});}
 const STALL=[{id:'t6',w:'等蓄水期预算确认',who:'Brooks',h:'1 小时未动'},{id:'t7',w:'等天猫版本先定稿',who:'Brooks',h:'3 小时未动'}];
@@ -157,7 +159,7 @@ function vToday(){
  const Q=approvalDom==='全部'?ALLQ:ALLQ.filter(x=>x.t.dom===approvalDom);
  const late=ALLQ.filter(x=>x.sla&&x.wait>x.sla).length,
    near=ALLQ.filter(x=>x.sla&&x.wait<=x.sla&&x.wait>x.sla*.6).length;
- const done=T.filter(t=>t.st==='done');
+ const done=T.filter(t=>!t.deletedAt&&t.st==='done');
  return `<div class="wrap">
   <div class="eyebrow">今日</div>
   <h1>需要你的地方</h1>
@@ -186,9 +188,9 @@ function vToday(){
         <button class="ib" onclick="go('thread','${r.id}')">›</button></div>`;}).join('')}
     </div>
     <div>
-      <div class="sech"><span class="t">停住了</span><span class="n num">${STALL.length}</span><span class="bar2"></span>
+      <div class="sech"><span class="t">停住了</span><span class="n num">${STALL.filter(x=>!T.find(t=>t.id===x.id)?.deletedAt).length}</span><span class="bar2"></span>
         <span class="hint">在等人</span></div>
-      ${STALL.map(x=>{const t=T.find(y=>y.id===x.id);return `<div class="rrow">
+      ${STALL.filter(x=>!T.find(t=>t.id===x.id)?.deletedAt).map(x=>{const t=T.find(y=>y.id===x.id);return `<div class="rrow">
         <div class="bd"><div class="tt">${esc(t.t)}</div>
           <div class="rmeta"><span>${x.w} · ${x.who}</span><span>·</span><span>${x.h}</span></div></div>
         <button class="btn ghost sm" onclick="nudge('${x.id}','${x.who}','${esc(x.w)}')">催</button></div>`;}).join('')}
@@ -384,7 +386,7 @@ function sendAns(){
   const languageLabel=cfg.language==='en'?'GB English（英文）':'CN 中文';
   const themeLabel=({auto:'AI 自动选用',business:'简约商务',brand:'品牌创意',data:'数据报告'})[cfg.theme]||cfg.theme;
   const templateLabel=({none:'不使用模板',a80:'A80PARIS 品牌模板',review:'月度复盘模板'})[cfg.template]||cfg.template;
-  t.pptConfig=cfg;t.answered=[`PPT 语言：${languageLabel}`,`视觉主题：${themeLabel}`,`版式模板：${templateLabel}`];t.st='run';t.up='刚刚';
+  t.pptConfig=cfg;t.answered=[`PPT 语言：${languageLabel}`,`视觉主题：${themeLabel}`,`版式模板：${templateLabel}`];t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';
   t.plan.steps[1]={l:'确认 PPT 生成设置',m:`${languageLabel} · ${themeLabel} · ${templateLabel}`,s:'ok',r:'刚刚'};
   t.plan.steps[2]={l:'生成并确认 PPT 大纲',m:'正在整理逐页标题、内容要点与配图意向',s:'act',r:'进行中'};
   t.live={t:'PPT Agent 正在生成大纲',el:'刚刚',sub:['正在整理创意主轴与页面结构…','正在生成逐页内容要点…','正在补充配图意向…'],p:48,tk:860};
@@ -400,7 +402,7 @@ function sendAns(){
   const qtyUnit=t.demoM1Pdp?'页':'篇';
   const summary=rows.map(r=>`${r.platform} ${r.qty} ${qtyUnit}${r.products.length?' · '+r.products.join('、'):' · 不关联产品'}`);
   if(t.demoM1Pdp){
-   t.answered=summary;t.answeredChannels=rows.map(r=>({...r,products:[...r.products]}));t.st='run';t.up='刚刚';
+   t.answered=summary;t.answeredChannels=rows.map(r=>({...r,products:[...r.products]}));t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';
    if(t.demoDualAgents){t.agentStates.pdp='运行中';t.agentStates.insp='等待详情页批准';}
    t.plan={...t.plan,v:(t.plan.v||1)+1,status:'running',tx:t.demoDualAgents?'目标平台、页面数量与关联产品已确认。详情页生成正在整理规划并生成内容；Brooks 批准后，店铺巡检再开始检查。':'目标平台、页面数量与关联产品已确认，详情页 Agent 正在整理当前规划表并生成详情页内容。',steps:[
     {l:'读取产品资料与天猫规则',m:'产品中心 · 详情页规范 · 11.11 活动',s:'ok',r:'6秒'},
@@ -414,7 +416,7 @@ function sendAns(){
    setTimeout(()=>finishM1PdpDemo(t.id),3000);return;
   }
   if(t.demoSocial){
-   t.answered=summary;t.answeredChannels=rows.map(r=>({...r,products:[...r.products]}));t.st='run';t.up='刚刚';
+   t.answered=summary;t.answeredChannels=rows.map(r=>({...r,products:[...r.products]}));t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';
    t.plan={...t.plan,v:(t.plan.v||1)+1,status:'running',tx:'目标渠道与内容数量已确认，直接生成社媒文章。',steps:[
     {l:'读取品牌智库与关联产品',m:'品牌规范 · 产品资料 · 禁用词',s:'ok',r:'6秒'},
     {l:'确认目标渠道配置',m:summary.join('；'),s:'ok',r:'刚刚'},
@@ -424,7 +426,7 @@ function sendAns(){
    S.askProductRow=null;render();toast('信息已补齐 · 正在生成社媒内容');
    setTimeout(()=>finishSocialDemo(t.id),3000);return;
   }
-  t.answered=summary;t.answeredChannels=rows.map(r=>({...r,products:[...r.products]}));t.st='run';
+  t.answered=summary;t.answeredChannels=rows.map(r=>({...r,products:[...r.products]}));t.executionCancelled=false;t.restoredPending=false;t.st='run';
   t.plan={v:2,tx:'目标渠道已补齐：'+summary.join('；')+'。',steps:[
    {l:'读取品牌智库与产品中心',m:'渠道规范与关联产品已读取',s:'ok',r:'6秒'},
    {l:'确认目标渠道配置',m:summary.join('；'),s:'ok',r:'刚刚'},
@@ -437,7 +439,7 @@ function sendAns(){
  S.ans=S.ans||{};
  if(Object.keys(S.ans).length<n){toast('还有 '+(n-Object.keys(S.ans).length)+' 个没选');return;}
  const a=t.ask.qs.map((q,i)=>q.o[S.ans[i]]);
- t.answered=a;t.st='run';t.plan={v:2,tx:'信息已补齐。按「'+a[0]+'」在「'+a[1]+'」出 '+a[3]+'，目标是'+a[2]+'。',steps:[
+ t.answered=a;t.executionCancelled=false;t.restoredPending=false;t.st='run';t.plan={v:2,tx:'信息已补齐。按「'+a[0]+'」在「'+a[1]+'」出 '+a[3]+'，目标是'+a[2]+'。',steps:[
   {l:'读取品牌智库与产品中心',m:a[0],s:'ok',r:'6秒'},
  {l:'识别信息缺口',m:'已由你补齐 4 项',s:'ok',r:'2秒'},
  {l:'生成 3 个创意方向',m:a[1]+' · 目标 '+a[2],s:'act',r:'进行中'},
@@ -447,6 +449,7 @@ function sendAns(){
 }
 
 function finishPptOutlineDemo(tid){
+ if(T.find(x=>x.id===tid)?.executionCancelled)return;
  const t=T.find(x=>x.id===tid);if(!t||t.arts?.some(a=>a.mode==='pptoutline'))return;
  const pages=[
   {title:'项目背景与传播命题',chapter:'开篇',points:'品牌：A80PARIS 抖音首营，美妆造型工具品类\n活动周期：2026-07-27—2026-08-31，预算 ¥20,000\n核心命题：让 A80PARIS 被认知为「拍照友好的潮流造型器」\n执行阵地以抖音品牌官号为主，无达人合作',visual:''},
@@ -467,6 +470,7 @@ function finishPptOutlineDemo(tid){
  if(S.view==='thread'&&S.tid===tid)render();else syncAppr();toast('PPT 大纲已生成 · 等待确认');
 }
 function finishSocialDemo(id){
+ if(T.find(x=>x.id===id)?.executionCancelled)return;
  const t=T.find(x=>x.id===id);if(!t||!t.demoSocial||t.arts?.length)return;
  const product=t.answeredChannels?.flatMap(x=>x.products||[])[0]||'Evo1.1 轻盈营养体验';
  const aid='social-'+Date.now();
@@ -484,6 +488,7 @@ function finishSocialDemo(id){
  if(S.view==='thread'&&S.tid===id)render();else syncAppr();toast('3 篇社媒内容已生成 · 等待逐篇审批');
 }
 function finishM1PdpDemo(id){
+ if(T.find(x=>x.id===id)?.executionCancelled)return;
  const t=T.find(x=>x.id===id);if(!t||!t.demoM1Pdp||t.arts?.length)return;
  const aid='m1-pdp-'+Date.now();
  t.live=null;t.st='review';t.up='刚刚';t.outputCount=1;
@@ -504,6 +509,7 @@ function finishM1PdpDemo(id){
  if(S.view==='thread'&&S.tid===id)render();else syncAppr();toast('详情页内容已生成 · 等待 Brooks 审批');
 }
 function finishDualInspection(id){
+ if(T.find(x=>x.id===id)?.executionCancelled)return;
  const t=T.find(x=>x.id===id);if(!t?.demoDualAgents||t.arts?.some(a=>a.m1?.kind==='inspection'))return;
  const aid='m1-inspection-'+Date.now();
  t.live=null;t.st='review';t.up='刚刚';t.outputCount=2;t.agentStates.insp='待 Brooks 审批';
