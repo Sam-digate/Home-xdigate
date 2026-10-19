@@ -213,9 +213,10 @@ function vThread(){
           <button class="btn ghost sm" onclick="promoteThread()">变成例行 ↗</button></div>`}
       </div></div>`}
 
+    ${t.demoDouyinRecommendation?creatorIntakeNode(t):''}
     ${t.supplement?renderThreadSupplement(t):''}
 
-    ${t.ask&&!t.answered&&(!t.prestartDemo||t.plan.status!=='pending')?`<div class="node wait"><div class="nlab">需要你补充 · CLARIFY</div>
+    ${!t.demoDouyinRecommendation&&t.ask&&!t.answered&&(!t.prestartDemo||t.plan.status!=='pending')?`<div class="node wait"><div class="nlab">需要你补充 · CLARIFY</div>
       <div class="bub"><div class="who agent-run-hit" role="button" tabindex="0" onclick="openTrace('${t.ag}','${t.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTrace('${t.ag}','${t.id}')}" title="查看运行状态"><span class="avs" style="background:${a.c}">${a.s}</span><span class="nm">${esc(t.ask.agentLabel||a.n)}</span>
         <span class="chip mut">${t.ask.ppt?'PPT 生成设置':t.ask.channels?'目标渠道':t.ask.qs.length+' 个问题'}</span><span class="tm">8分钟前</span></div>
         <div style="margin-bottom:var(--sp-3);color:var(--t2)">${esc(t.ask.tx)}</div>
@@ -247,6 +248,7 @@ function vThread(){
       ${hasM1Delivery?m1Delivery(t):manualReviewArt?manualReviewHistory(manualReviewArt)+manualReviewForm(manualReviewArt):manualAuditArt?manualReviewHistory(manualAuditArt)+manualReviewRecord(manualAuditArt):`<div class="bub" style="color:var(--t2)">
         ${t.standing==='ana'?'常驻分析线程不收口——它是你问数据的地方。<b>结论要变成活儿，得另开一条</b>：在产出上点「建单去做」。'
          :t.standing?'常驻线程没有"最终交付物"——它按排期一直跑。每次产出单独审批，批完就归档，线程继续。'
+         :t.demoDouyinRecommendation&&t.creatorIntake.stage==='form'?'请先提交达人筛选表单，再生成推荐名单。'
          :t.prestartDemo&&!t.arts.length?(t.plan?.status==='rejected'?'计划未通过，未开始执行。':canAdjustPrestartPlan(t)?'计划待确认，尚未开始执行。':'执行中，尚未生成产出。')
          :t.permissionBlocked&&t.plan?.status==='rejected'?'计划未通过，未开始执行。'
          :t.permissionBlocked?'等待获得内容生成 Agent 权限，尚未开始执行。'

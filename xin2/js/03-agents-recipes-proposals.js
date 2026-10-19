@@ -4,6 +4,7 @@ function canAdjustPrestartPlan(t){return !!(t?.plan&&(t.prestartDemo||t.permissi
 function generalAgentDemoBody(){return '感谢您的支持！完成订单后，欢迎分享真实的使用体验。提交评价截图即可领取店铺准备的小礼遇；评价内容请以实际感受为准，无需指定为好评。具体领取方式请联系在线客服。';}
 function prestartAgents(){return REG.filter(a=>prestartPlanPreset(a.id)&&a.b==='live'&&a.enabled!==false&&ONLINE[a.id]);}
 function prestartPlanNode(t){
+ if(t.demoDouyinRecommendation)return creatorAgentNode(t);
  const pending=canAdjustPrestartPlan(t),a=AG[t.ag]||{},p=t.plan,d=S.prestartDraft?.tid===t.id?S.prestartDraft:null;
  const agentIds=t.agents?.length?t.agents:[t.ag];
  const manual=S.prestartManualTid===t.id;
@@ -116,6 +117,7 @@ function savePrestartPlan(id){
 }
 function startPrestartPlan(id){
  const t=T.find(x=>x.id===id);if(!canAdjustPrestartPlan(t)){toast('计划已启动，无需重复确认');return;}
+ if(t.demoDouyinRecommendation){confirmCreatorAgent(id);return;}
  if(S.prestartDraft?.tid===id){toast('请先保存或取消正在调整的计划');return;}
  if(S.prestartManualTid===id){toast('请先保存或取消手动调整');return;}
  if(S.prestartReject?.tid===id){toast('请先确定或取消不通过原因');return;}

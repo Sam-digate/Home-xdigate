@@ -41,7 +41,7 @@ function subPane(a,oi,options={}){
      <label class="collab-field"><span>配合度</span><select onchange="setCreatorField('${a.id}',${oi},'coop',this.value,'配合度')">${['高','中','低'].map(s=>`<option ${s===(x.coop||'中')?'selected':''}>${s}</option>`).join('')}</select></label>
      <label class="collab-field"><span>负责人</span><select onchange="setCreatorField('${a.id}',${oi},'commOwner',this.value,'负责人')">${['待分配','jack','dudu','Sophie','Sam'].map(s=>`<option ${s===(x.commOwner||'待分配')?'selected':''}>${s}</option>`).join('')}</select></label>
    </div>`:''}
-   ${peopleOnly&&a.workflow==='douyin'?dSampleShippingForm(a,oi)+dDouyinContractForm(a,oi):''}
+   ${peopleOnly&&a.workflow==='douyin'&&Number.isInteger(oi)&&a.rows?.[oi]?dSampleShippingForm(a,oi)+dDouyinContractForm(a,oi):''}
    <div class="sub-c" ${caDropAttrs('sub',a.id,oi)}>
      <div style="position:relative"><div id="m-si"></div>
        <textarea id="si" oninput="onKey(event,'si',${peopleOnly});caRemember('sub','${a.id}',this.value,${oi===undefined?null:oi})" placeholder="${peopleOnly?'填写备注。输入 @ 提到人。':'写给同事看 → 对同事说；写给 Ai 改 → 对Ai说。输入 @ 提到人。'}">${esc(caGet('sub',a.id,oi).text)}</textarea></div>
@@ -299,6 +299,7 @@ function mkThread(){
  const v=$('ni').value.trim();if(!v){toast('先写一句你想做什么');return;}
  if(!taReady())return;
  if(v.includes('人工')){createManualPendingThread();return;}
+ if(typeof createCreatorRecommendation==='function'&&((/抖音/.test(v)&&/达人/.test(v))||S.newAgent==='kol')){createCreatorRecommendation(v);return;}
  const dualDemo=v==='2';
  const taskIntent=dualDemo?'生成天猫详情页内容，并在详情页产出批准后由店铺巡检检查商品资料、页面信息与上架风险。':v;
  const meta=inferNewTaskMeta(taskIntent),c=meta.c,d=meta.d,ag=dualDemo?'pdp':S.newAgent||meta.a||'orch';

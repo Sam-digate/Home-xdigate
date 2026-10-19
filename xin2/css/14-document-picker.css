@@ -1,0 +1,25 @@
+.mbox.ca-doc-modal{width:min(920px,100%);max-height:calc(100dvh - 64px);display:flex;flex-direction:column;animation:none}
+.ca-doc-modal .mhd{padding-bottom:var(--sp-4)}
+.ca-doc-modal .mhd p{margin-top:var(--sp-1);font-size:var(--fs-sm);color:var(--t3)}
+.ca-doc-tabs{display:flex;gap:var(--sp-5);padding:0 22px;background:var(--surface-tint);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.ca-doc-tabs button{padding:12px 0;font-size:var(--fs-sm);color:var(--t2);border-bottom:2px solid transparent}
+.ca-doc-tabs button.on{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.ca-doc-body{min-height:280px;overflow:auto;padding:var(--sp-4) 22px;flex:1}
+.ca-doc-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-3)}
+.ca-doc-card{position:relative;display:flex;flex-direction:column;gap:6px;padding:var(--sp-3);cursor:pointer}
+.ca-doc-card.selected{border-color:var(--primary);background:var(--primary-tint)}
+.ca-doc-card:focus-within{outline:2px solid var(--primary-bd);outline-offset:2px}
+.ca-doc-card.disabled{cursor:default;opacity:.6}
+.ca-doc-card .bf-top{width:100%;margin-bottom:0;padding-right:24px}
+.ca-doc-card .bf-kind{width:30px;height:30px;border-radius:8px;font-size:10px}
+.ca-doc-card .bf-desc{margin-top:0}
+.ca-doc-card input{position:absolute;top:12px;right:12px;width:16px;height:16px;margin:0;accent-color:var(--primary)}
+.ca-doc-card .bf-bottom{margin-top:auto}
+.ca-doc-card .bf-bottom>span{font-size:var(--fs-xs);color:var(--t3)}
+.ca-doc-count{font-size:var(--fs-sm);color:var(--t2)}
+.ca-doc-error{color:var(--danger-fg);font-size:var(--fs-sm);padding:0 22px var(--sp-2)}
+.ca-doc-error:empty{display:none}
+.ca-doc-empty{text-align:center;padding:50px var(--sp-4);color:var(--t3)}
+@media(max-width:850px){.ca-doc-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){.ca-doc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ca-doc-modal .bf-toolbar{flex-wrap:wrap}.ca-doc-modal .bf-search{flex-basis:100%}.ca-doc-modal .seg{flex-wrap:wrap}}
+@media(max-width:420px){.ca-doc-grid{grid-template-columns:1fr}}

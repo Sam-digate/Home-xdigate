@@ -28,7 +28,8 @@ check('composer provides multiple file selection, drag/drop and remove',()=>{
  assert.match(run(`caDropAttrs('task',task.id)`),/ondrop="caDrop/);
  const icon=run(`caAttachButton('task',task.id)`);assert.match(icon,/aria-label="添加附件"/);assert.match(icon,/data-lucide="paperclip"/);assert.doesNotMatch(icon,/>添加附件</);
  assert.match(icon,/caToggleMenu/);assert.doesNotMatch(icon,/-input.*click/);
- const menu=run('caSourceMenuHTML()');for(const label of ['品牌文件','素材库','本地上传'])assert.ok(menu.includes(label));
+ const menu=run('caSourceMenuHTML()');for(const label of ['在线文档','素材库','本地上传'])assert.ok(menu.includes(label));
+ assert.match(menu,/caOpenDocumentPicker/);assert.doesNotMatch(menu,/品牌文件/);
  assert.equal((menu.match(/role="menuitem"/g)||[]).length,3);assert.doesNotMatch(menu,/caSelect|type="file"|\.click\(/);
  add('task','chat-test');assert.match(run(`caPendingHTML(caGet('task',task.id))`),/模拟上传中/);
  run(`caRemove(caGet('task',task.id).id,caGet('task',task.id).files[0].id)`);

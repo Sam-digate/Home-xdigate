@@ -687,11 +687,13 @@ function ensureSampleShippingDraft(a,i){
  r.sampleShippingDraft=draft;S.sampleShipping=draft;return draft;
 }
 function douyinContractDraftFor(a,i){
- const r=a?.rows?.[i],status=rosterStatus(a,r);if(a?.workflow!=='douyin'||!r||!['合同确认','已上播'].includes(status))return null;
+ const r=a?.rows?.[i];if(a?.workflow!=='douyin'||!r)return null;
+ const status=rosterStatus(a,r);if(!['合同确认','已上播'].includes(status))return null;
  const draft=S.douyinContract;return draft&&draft.aid===a.id&&draft.i===i?draft:(r.douyinContractDraft||null);
 }
 function ensureDouyinContractDraft(a,i){
- const r=a?.rows?.[i],status=rosterStatus(a,r);if(a?.workflow!=='douyin'||!r||!['合同确认','已上播'].includes(status))return null;
+ const r=a?.rows?.[i];if(a?.workflow!=='douyin'||!r)return null;
+ const status=rosterStatus(a,r);if(!['合同确认','已上播'].includes(status))return null;
  const draft=douyinContractDraftFor(a,i)||r.douyinContractDraft||{aid:a.id,i,fee:'',roi:'',feeNote:'',guaranteedGmv:'',currentGmv:'',start:'',end:'',status:'生效中'};
  r.douyinContractDraft=draft;S.douyinContract=draft;return draft;
 }

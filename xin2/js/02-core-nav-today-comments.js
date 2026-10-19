@@ -95,8 +95,8 @@ function queue(){
  const me=currentUser();
  T.forEach(t=>{
   if(t.deletedAt||t.restoredPending)return;
-  if(me==='du'&&t.ask&&!t.answered){const askN=t.ask.channels||t.ask.ppt?1:t.ask.qs.length;q.push({t,a:{id:'ask-'+t.id,by:t.ag},oi:null,ttl:t.ask.ppt?'PPT 生成设置待补充':t.ask.channels?'目标渠道待你补充':askN+' 个问题待你回答',
-    g:['#C4B5FD','#7C3AED'],ty:'待补充',plat:null,vals:[{l:'信息缺口',v:t.ask.ppt?'PPT 生成设置':t.ask.channels?'渠道配置':askN+' 项',s:'bad'}],wait:8,sla:null,ask:1});}
+  if(me==='du'&&t.ask&&!t.answered){const askN=t.ask.creator||t.ask.channels||t.ask.ppt?1:t.ask.qs.length;q.push({t,a:{id:'ask-'+t.id,by:t.ag},oi:null,ttl:t.ask.creator?'达人筛选条件待填写':t.ask.ppt?'PPT 生成设置待补充':t.ask.channels?'目标渠道待你补充':askN+' 个问题待你回答',
+    g:['#C4B5FD','#7C3AED'],ty:'待补充',plat:null,vals:[{l:'信息缺口',v:t.ask.creator?'达人筛选表单':t.ask.ppt?'PPT 生成设置':t.ask.channels?'渠道配置':askN+' 项',s:'bad'}],wait:8,sla:null,ask:1});}
   if(!t.arts)return;t.arts.forEach(a=>{
   if(a.deferred)return;
   if(a.m1){

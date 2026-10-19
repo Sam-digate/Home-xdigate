@@ -16,18 +16,19 @@ function caComposerHTML(kind,id,scope=null){
  return '<div class="ca-compose" id="'+key+'"><input id="'+key+'-input" type="file" multiple accept="'+TA_EXTENSIONS.map(ext=>'.'+ext).join(',')+'" hidden onchange="caSelect(\''+key+'\',this.files);this.value=\'\'"><div id="'+key+'-pending">'+caPendingHTML(draft)+'</div></div>';
 }
 function caAttachButton(kind,id,scope=null){
- return '<button type="button" class="btn ghost sm ca-attach" title="添加附件" aria-label="添加附件" aria-haspopup="menu" aria-expanded="false" onclick="caToggleMenu(event,this)"><i data-lucide="paperclip" aria-hidden="true"></i></button>';
+ return '<button type="button" class="btn ghost sm ca-attach" data-ca-key="'+caGet(kind,id,scope).id+'" title="添加附件" aria-label="添加附件" aria-haspopup="menu" aria-expanded="false" onclick="caToggleMenu(event,this)"><i data-lucide="paperclip" aria-hidden="true"></i></button>';
 }
-let caMenuTrigger=null;
+let caMenuTrigger=null,caMenuDraftKey=null;
 function caCloseMenu(restoreFocus=false){
  const trigger=caMenuTrigger;document.getElementById('ca-source-menu')?.remove();
  trigger?.setAttribute('aria-expanded','false');caMenuTrigger=null;if(restoreFocus)trigger?.focus();
 }
 function caSourceMenuHTML(){
- return [['files','品牌文件'],['images','素材库'],['upload','本地上传']].map(([icon,label])=>`<button type="button" role="menuitem" onclick="caCloseMenu(true)"><i data-lucide="${icon}" aria-hidden="true"></i><span>${label}</span></button>`).join('');
+ return [['files','在线文档'],['images','素材库'],['upload','本地上传']].map(([icon,label],i)=>`<button type="button" role="menuitem" onclick="${i===0?'caOpenDocumentPicker(caMenuDraftKey)':'caCloseMenu(true)'}"><i data-lucide="${icon}" aria-hidden="true"></i><span>${label}</span></button>`).join('');
 }
 function caToggleMenu(event,trigger){
  event.stopPropagation();const wasOpen=caMenuTrigger===trigger;caCloseMenu();if(wasOpen)return;
+ caMenuDraftKey=trigger.getAttribute('data-ca-key');
  const menu=document.createElement('div');menu.id='ca-source-menu';menu.className='ca-source-menu';menu.setAttribute('role','menu');menu.setAttribute('aria-label','附件来源');menu.innerHTML=caSourceMenuHTML();
  document.body.appendChild(menu);caMenuTrigger=trigger;trigger.setAttribute('aria-expanded','true');
  const box=trigger.getBoundingClientRect(),width=menu.offsetWidth,height=menu.offsetHeight;
@@ -53,7 +54,11 @@ function caDropAttrs(kind,id,scope=null){
  return 'ondragover="caDrag(event,\''+key+'\',true)" ondragleave="caDrag(event,\''+key+'\',false)" ondrop="caDrop(event,\''+key+'\')"';
 }
 function caPendingHTML(draft){
- return '<div class="ta-feedback" role="alert">'+esc(draft.errors||'')+'</div><ul class="ta-files ca-files" aria-label="待发送附件">'+draft.files.map(item=>'<li class="ta-file">'+taIcon()+'<div class="ta-file-copy"><span class="ta-file-name">'+esc(item.name)+'</span><span class="ta-file-meta">'+taSize(item.size)+' · '+(item.status==='ready'?'待发送（演示）':'模拟上传中 '+item.progress+'%')+'</span>'+(item.status==='ready'?'':'<progress max="100" value="'+item.progress+'" aria-label="'+esc(item.name)+' 模拟上传进度"></progress>')+'</div><button type="button" class="ta-remove" onclick="caRemove(\''+draft.id+'\','+item.id+')" aria-label="移除 '+esc(item.name)+'">移除</button></li>').join('')+'</ul>';
+ return '<div class="ta-feedback" role="alert">'+esc(draft.errors||'')+'</div><ul class="ta-files ca-files" aria-label="待发送附件">'+draft.files.map(item=>'<li class="ta-file">'+taIcon()+'<div class="ta-file-copy"><span class="ta-file-name">'+esc(item.name)+'</span><span class="ta-file-meta">'+caAttachmentMeta(item,true)+'</span>'+(item.status==='ready'?'':'<progress max="100" value="'+item.progress+'" aria-label="'+esc(item.name)+' 模拟上传进度"></progress>')+'</div><button type="button" class="ta-remove" onclick="caRemove(\''+draft.id+'\','+item.id+')" aria-label="移除 '+esc(item.name)+'">移除</button></li>').join('')+'</ul>';
+}
+function caAttachmentMeta(item,pending=false){
+ if(item.reference)return (item.reference.source==='online'?'在线文档':'品牌文件')+'引用 · v'+Number(item.reference.version||1)+(pending?' · 待发送':' · 演示引用，未读取正文');
+ return taSize(item.size)+' · '+(pending?(item.status==='ready'?'待发送（演示）':'模拟上传中 '+item.progress+'%'):'演示附件，未上传或解析');
 }
 function caRender(draft){const el=$(draft.id+'-pending');if(el)el.innerHTML=caPendingHTML(draft)}
 function caSelect(key,files){const draft=CA_BY_ID.get(key);if(draft)taQueueFiles(draft,files,()=>caRender(draft))}
@@ -69,11 +74,12 @@ function caDrag(event,key,over){
 }
 function caDrop(event,key){event.preventDefault();event.currentTarget?.classList.remove('drag-over');caSelect(key,event.dataTransfer?.files)}
 function caReady(draft){
+ if(draft.files.some(item=>item.reference&&typeof caDocumentReferenceAllowed==='function'&&!caDocumentReferenceAllowed(item.reference))){toast('引用文件已不可用或权限已变更，请移除后重新选择。');return false}
  if(draft.files.some(item=>item.status!=='ready')){toast('附件仍在模拟上传中，请稍等或移除后再发送。');return false}return true;
 }
-function caFiles(draft){return draft.files.filter(item=>item.status==='ready').map(({name,size,extension,lastModified})=>({name,size,extension,lastModified,demo:true}))}
+function caFiles(draft){return draft.files.filter(item=>item.status==='ready').map(({name,size,extension,lastModified,reference})=>({name,size,extension,lastModified,demo:true,...(reference?{reference:{...reference}}:{})}))}
 function caClear(draft){draft.timers.forEach(clearTimeout);draft.timers.clear();draft.files=[];draft.errors='';draft.text=''}
 function caMessageHTML(message){
  if(!message.attachments?.length)return '';
- return '<div class="ca-message-files"><ul class="ta-files">'+message.attachments.map(item=>'<li class="ta-file">'+taIcon()+'<div class="ta-file-copy"><span class="ta-file-name">'+esc(item.name)+'</span><span class="ta-file-meta">'+taSize(item.size)+' · 演示附件，未上传或解析</span></div></li>').join('')+'</ul></div>';
+ return '<div class="ca-message-files"><ul class="ta-files">'+message.attachments.map(item=>'<li class="ta-file">'+taIcon()+'<div class="ta-file-copy"><span class="ta-file-name">'+esc(item.name)+'</span><span class="ta-file-meta">'+caAttachmentMeta(item,false)+'</span></div></li>').join('')+'</ul></div>';
 }
