@@ -2,11 +2,12 @@
 const TA_MAX_FILES=5,TA_MAX_BYTES=20*1024*1024;
 const TA_EXTENSIONS=['pdf','docx','xlsx','pptx','txt','csv','png','jpg','jpeg','webp'];
 let taDraft={files:[],timers:new Map()},taNextId=0;
-function taReset(){taDraft.cancelled=true;taDraft.timers.forEach(clearTimeout);taDraft={files:[],timers:new Map()}}
+function taReset(){if(typeof taCloseSourcePicker==='function')taCloseSourcePicker();if(typeof caCloseMenu==='function')caCloseMenu();taDraft.cancelled=true;taDraft.timers.forEach(clearTimeout);taDraft={files:[],timers:new Map()}}
 function taSize(bytes){return bytes>=1024*1024?(bytes/1024/1024).toFixed(1)+' MB':Math.max(1,Math.ceil(bytes/1024))+' KB'}
+function taFileMeta(item,pending=false){if(item.reference&&typeof caAttachmentMeta==='function')return caAttachmentMeta(item,pending);return taSize(item.size)+' · '+(pending?(item.status==='ready'?'已添加（演示）':'模拟上传中 '+item.progress+'%'):'本地演示附件');}
 function taIcon(){return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>'}
 function taUploadHTML(){
- return '<section class="ta-upload" aria-labelledby="ta-title"><div class="ta-heading"><span id="ta-title">参考附件</span><span>（选填）</span></div><div id="ta-drop" class="ta-drop" ondragover="taDrag(event,true)" ondragleave="taDrag(event,false)" ondrop="taDrop(event)"><input id="ta-input" type="file" multiple accept="'+TA_EXTENSIONS.map(ext=>'.'+ext).join(',')+'" hidden onchange="taSelect(this.files);this.value=\'\'"><button type="button" class="btn ghost sm ta-add" onclick="document.getElementById(\'ta-input\').click()">'+taIcon()+'添加附件</button><span>或将文件拖到这里</span></div><div id="ta-feedback" class="ta-feedback" role="alert"></div><ul id="ta-files" class="ta-files" aria-label="已选附件"></ul></section>';
+ return '<section class="ta-upload" aria-labelledby="ta-title"><div class="ta-heading"><span id="ta-title">参考附件</span><span>（选填）</span></div><div id="ta-drop" class="ta-drop" ondragover="taDrag(event,true)" ondragleave="taDrag(event,false)" ondrop="taDrop(event)"><input id="ta-input" type="file" multiple accept="'+TA_EXTENSIONS.map(ext=>'.'+ext).join(',')+'" hidden onchange="taSelect(this.files);this.value=\'\'"><button type="button" id="ta-source-trigger" class="btn ghost sm ta-add" aria-haspopup="menu" aria-expanded="false" onclick="taToggleSourceMenu(event,this)">'+taIcon()+'添加附件</button><span>或将文件拖到这里</span></div><div id="ta-feedback" class="ta-feedback" role="alert"></div><ul id="ta-files" class="ta-files" aria-label="已选附件"></ul></section>';
 }
 function taDrag(event,over){
  if(!Array.from(event.dataTransfer?.types||[]).includes('Files'))return;
@@ -47,16 +48,17 @@ function taRemove(id){
 function taRender(){
  const list=$('ta-files');if(!list)return;
  if($('ta-feedback'))$('ta-feedback').textContent=taDraft.errors||'';
- list.innerHTML=taDraft.files.map(item=>'<li class="ta-file">'+taIcon()+'<div class="ta-file-copy"><span class="ta-file-name" title="'+esc(item.name)+'">'+esc(item.name)+'</span><span class="ta-file-meta">'+taSize(item.size)+' · '+(item.status==='ready'?'已添加（演示）':'模拟上传中 '+item.progress+'%')+'</span>'+(item.status==='ready'?'':'<progress max="100" value="'+item.progress+'" aria-label="'+esc(item.name)+' 模拟上传进度"></progress>')+'</div><button type="button" class="ta-remove" aria-label="移除 '+esc(item.name)+'" onclick="taRemove('+item.id+')">移除</button></li>').join('');
+ list.innerHTML=taDraft.files.map(item=>'<li class="ta-file">'+taIcon()+'<div class="ta-file-copy"><span class="ta-file-name" title="'+esc(item.name)+'">'+esc(item.name)+'</span><span class="ta-file-meta">'+taFileMeta(item,true)+'</span>'+(item.status==='ready'?'':'<progress max="100" value="'+item.progress+'" aria-label="'+esc(item.name)+' 模拟上传进度"></progress>')+'</div><button type="button" class="ta-remove" aria-label="移除 '+esc(item.name)+'" onclick="taRemove('+item.id+')">移除</button></li>').join('');
  const busy=taDraft.files.some(item=>item.status!=='ready');list.setAttribute('aria-busy',String(busy));
  const submit=document.querySelector('#new-task-footer > .btn');if(submit){submit.disabled=busy;submit.textContent=busy?'附件准备中…':'开始'}
 }
 function taReady(){
+ if(taDraft.files.some(item=>item.reference&&typeof caDocumentReferenceAllowed==='function'&&!caDocumentReferenceAllowed(item.reference))){toast('参考附件不可用或权限已变更，请移除后重新选择。');return false}
  if(taDraft.files.some(item=>item.status!=='ready')){toast('附件仍在模拟上传中，请稍等或移除后再开始。');return false}
  return true;
 }
-function taSnapshot(){return taDraft.files.filter(item=>item.status==='ready').map(({name,size,extension,lastModified})=>({name,size,extension,lastModified,demo:true}))}
+function taSnapshot(){return taDraft.files.filter(item=>item.status==='ready').map(({name,size,extension,lastModified,reference})=>({name,size,extension,lastModified,demo:true,...(reference?{reference:{...reference}}:{})}))}
 function taTaskHTML(task){
  if(!task.attachments?.length)return '';
- return '<section class="ta-task" aria-label="任务参考附件"><h4>参考附件 <span>'+task.attachments.length+' 个</span></h4><ul class="ta-files">'+task.attachments.map(item=>'<li class="ta-file">'+taIcon()+'<div class="ta-file-copy"><span class="ta-file-name" title="'+esc(item.name)+'">'+esc(item.name)+'</span><span class="ta-file-meta">'+taSize(item.size)+' · 本地演示附件</span></div></li>').join('')+'</ul><p class="ta-demo-note">附件清单仅用于演示，文件未上传，Agent 尚未读取。</p></section>';
+ return '<section class="ta-task" aria-label="任务参考附件"><h4>参考附件 <span>'+task.attachments.length+' 个</span></h4><ul class="ta-files">'+task.attachments.map(item=>'<li class="ta-file">'+taIcon()+'<div class="ta-file-copy"><span class="ta-file-name" title="'+esc(item.name)+'">'+esc(item.name)+'</span><span class="ta-file-meta">'+taFileMeta(item,false)+'</span></div></li>').join('')+'</ul><p class="ta-demo-note">附件清单仅用于演示，文件未上传，Agent 尚未读取。</p></section>';
 }

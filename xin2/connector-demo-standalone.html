@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>连接与授权 · XDIGATE 单文件演示</title>
+  <!-- Standalone export: CSS and JavaScript embedded; original source files unchanged. -->
+  <style>
+:root{--primary:#7c3aed;--primary-hover:#6d28d9;--primary-bg:#ede9fe;--bg:#f3f1fc;--surface:#fff;--border:#e5e0f8;--text:#1e1440;--secondary:#5b5585;--muted:#81799f;--green:#047857;--green-bg:#ecfdf5;--gold:#b45309;--gold-bg:#fffbeb;--red:#b91c1c;--red-bg:#fef2f2;--radius:12px;--shadow:0 1px 4px rgba(100,80,180,.06)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.65 'Noto Sans SC',system-ui,sans-serif;-webkit-font-smoothing:antialiased}button,input,select{font:inherit;color:inherit}button,a,input,select{-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.5}button{border:0;background:none}a{color:inherit;text-decoration:none}[hidden]{display:none!important}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--primary);outline-offset:3px}svg.icon{width:18px;height:18px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:middle}h1,h2,h3,p{margin:0}h1{font-size:27px;line-height:1.35;letter-spacing:-.5px}h2{font-size:17px}h3{font-size:15px}.sidebar{position:fixed;inset:0 auto 0 0;width:228px;background:linear-gradient(170deg,#190c58,#241480);color:#cfc6f0;padding:25px 15px 16px;display:flex;flex-direction:column;z-index:20}.brand{display:flex;align-items:center;gap:10px;padding:0 10px 28px;font:700 16px 'Sora',sans-serif;letter-spacing:2px;color:#fff}.brand small{display:block;font-size:9px;font-weight:400;letter-spacing:3px;color:#a89bd6;margin-top:5px}.brand-symbol{background:linear-gradient(135deg,#a78bfa,#7c3aed);border-radius:9px;width:33px;height:33px;font:400 32px/30px system-ui;text-align:center}.workspace{display:flex;align-items:center;gap:10px;border:1px solid #ffffff1c;border-radius:9px;padding:11px 10px;font-size:12px;color:white;margin-bottom:23px}.workspace small,.profile small{display:block;font-size:11px;color:#a99dd5}.workspace-icon{border:1px solid #ffffff2b;border-radius:7px;padding:5px;font:600 11px 'Sora';color:#d2c4ff}.workspace-caret{margin-left:auto}.nav-caption{font-size:10px;letter-spacing:1px;color:#a79bcc;padding:0 12px 8px}.sidebar nav{display:grid;gap:4px}.sidebar nav a,.nav-parent{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;font-size:13px}.sidebar nav a:hover{background:#ffffff0b;color:white}.sidebar nav .active{color:white;background:#a78bfa2e;font-weight:500;box-shadow:inset 2px 0 #b79bff}.nav-divider{height:1px;background:#ffffff15;margin:20px 10px}.nav-parent{color:#a99dd5}.sidebar-bottom{margin-top:auto;padding:20px 10px;display:flex;align-items:flex-start;gap:8px;font-size:11px;color:#c7bfea}.sidebar-bottom small{display:block;color:#a79bcc;font-size:10px;margin-top:4px}.demo-mark{border:1px solid #a78bfa66;padding:1px 4px;border-radius:4px;font:500 8px/18px 'Sora';letter-spacing:1px}.profile{display:flex;align-items:center;gap:10px;padding:14px 10px 0;border-top:1px solid #ffffff1a;font-size:12px;color:#fff}.avatar{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#7c3aed;color:#fff;font:600 10px 'Sora';flex:none}.avatar.small{width:29px;height:29px}.main-shell{margin-left:228px}.topbar{height:64px;background:#ffffffd9;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px}.breadcrumb{font-size:12px;color:var(--muted);display:flex;gap:14px;align-items:center}.breadcrumb b{font-weight:500;color:var(--secondary)}.top-actions{display:flex;align-items:center;gap:17px}.prototype-label{font-size:11px;color:var(--muted)}.content{max-width:1240px;margin:auto;padding:36px 36px 20px}.page-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:25px}.eyebrow{font:600 10px 'Sora',sans-serif;letter-spacing:1.6px;color:var(--primary);margin-bottom:9px}.page-description{font-size:13px;color:var(--secondary);margin-top:8px}.btn{border:1px solid var(--border);border-radius:8px;background:#fff;min-height:35px;padding:7px 13px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:12px;font-weight:500;white-space:nowrap;transition:background .15s,border-color .15s}.btn:hover{background:#faf9ff;border-color:#c4b5fd}.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 3px 9px #7c3aed25}.btn.primary:hover{background:var(--primary-hover)}.btn.quiet{background:transparent;border-color:transparent;color:var(--secondary)}.btn.danger{background:var(--red-bg);border-color:#fecaca;color:var(--red)}.btn svg{width:16px;height:16px}.demo-notice{display:flex;align-items:center;gap:12px;padding:12px 15px;background:var(--gold-bg);border:1px solid #fde8a8;border-radius:9px;color:#9a6218;margin-bottom:24px;font-size:11px}.demo-notice p{flex:1}.demo-notice b{font-size:12px;font-weight:500}.demo-notice p span{margin-left:12px;color:#987342}.demo-notice a{display:flex;align-items:center;gap:4px;white-space:nowrap}.demo-notice a svg{width:14px}.overview{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:30px}.metric{padding:17px 19px;border:1px solid var(--border);border-radius:var(--radius);background:white;box-shadow:var(--shadow)}.metric-label{display:flex;align-items:center;justify-content:space-between;color:var(--secondary);font-size:12px}.metric-label svg{width:16px;height:16px;color:#a199b8}.metric-value{font:600 27px 'Sora';margin-top:8px;letter-spacing:-1px}.metric-note{color:var(--muted);font-size:11px;margin-top:6px}.metric.warn .metric-value{color:var(--gold)}.section-tools{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);margin-bottom:20px}.tabs{display:flex;gap:25px}.tabs button{padding:0 1px 13px;color:var(--secondary);font-size:13px;border-bottom:2px solid transparent;display:flex;gap:8px;align-items:center}.tabs button.selected{color:var(--primary);font-weight:600;border-bottom-color:var(--primary)}.tabs button span{font:500 10px 'Sora';padding:2px 6px;border-radius:5px;background:#e9e5f5;color:var(--muted)}.tabs .selected span{background:var(--primary-bg);color:var(--primary)}.text-button{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;padding-bottom:13px}.text-button svg{width:13px;height:13px}.filterbar{display:flex;align-items:center;gap:10px;margin-bottom:15px}.search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:0 12px;width:280px;height:37px}.search svg{color:var(--muted);width:15px;height:15px}.search input{outline:none!important;border:0;min-width:0;width:100%;font-size:12px;background:none}.search input::placeholder{color:var(--muted)}select{height:37px;border:1px solid var(--border);border-radius:8px;background:#fff;padding:0 28px 0 12px;font-size:12px;max-width:100%}.result-count{margin-left:auto;color:var(--muted);font-size:11px}.connection-table{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}.table-header,.connection-row{display:grid;grid-template-columns:minmax(230px,2.3fr) minmax(110px,1fr) minmax(110px,1fr) minmax(130px,1.1fr) 90px;gap:16px;align-items:center;padding:13px 20px}.table-header{background:#fcfbff;color:var(--muted);font-size:11px;border-bottom:1px solid var(--border)}.connection-row{padding-top:22px;padding-bottom:22px;border-bottom:1px solid #f1eef8;transition:background .15s}.connection-row:last-child{border-bottom:0}.connection-row:hover{background:#fdfcff}.account-cell{display:flex;align-items:center;gap:12px;min-width:0}.platform-logo{width:40px;height:40px;display:inline-grid;place-items:center;flex:none;border-radius:10px;font-family:'Sora',sans-serif;font-size:20px;font-weight:700}.platform-logo.meta{background:#eff6ff;color:#1877f2;font-size:29px}.platform-logo.xhs{background:#fff0f3;color:#ed174c;font:700 10px 'Noto Sans SC'}.platform-logo.tmall{background:#fff1f2;color:#e11d48;font-size:11px}.platform-logo.jd{background:#fff1f2;color:#d92525;font-size:18px}.platform-logo.shopify{background:#f1f8e8;color:#5e8e2b;font-size:23px}.platform-logo.douyin{background:#eff0f6;color:#171224;font-size:27px}.connection-title{text-align:left;display:block;font-size:13px;font-weight:600;padding:0;max-width:100%;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.connection-title:hover{color:var(--primary)}.account-text{min-width:0}.account-sub{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cell-main{font-size:12px}.cell-sub{font-size:11px;color:var(--muted);margin-top:4px}.pill{display:inline-flex;align-items:center;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:500;white-space:nowrap;gap:5px}.pill.connected{color:var(--green);background:var(--green-bg)}.pill.reauth{color:var(--gold);background:var(--gold-bg)}.pill.failed{color:var(--red);background:var(--red-bg)}.pill.disconnected,.neutral-pill{color:var(--secondary);background:#f2f0f8}.neutral-pill{font-size:11px;padding:4px 9px;border-radius:20px}.pill-dot{width:5px;height:5px;background:currentColor;border-radius:50%}.row-action{color:var(--primary);font-size:12px;text-align:left;padding:3px 0}.row-action svg{width:14px}.table-footnote{font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center;margin-top:13px}.table-footnote svg{width:13px;height:13px}.page-footer{display:flex;justify-content:space-between;gap:15px;padding-top:30px;margin-top:30px;border-top:1px solid var(--border);font-size:10px;color:var(--muted)}.catalog-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.catalog-heading p{color:var(--muted);font-size:12px;margin-top:5px}.catalog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.platform-card{border:1px solid var(--border);border-radius:12px;background:white;padding:21px;display:flex;flex-direction:column;gap:15px;box-shadow:var(--shadow)}.platform-card-head{display:flex;justify-content:space-between;align-items:center}.platform-card h3{font-size:15px}.platform-card p{font-size:12px;color:var(--secondary);min-height:40px}.platform-card-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #f1eef8;padding-top:13px;font-size:11px;color:var(--muted)}.platform-card .btn{min-height:30px;font-size:11px;padding:5px 10px}.empty-state{text-align:center;padding:65px 20px}.empty-state>svg{width:30px;height:30px;color:#b0a3d4;margin-bottom:12px}.empty-state p{color:var(--muted);font-size:12px;margin-top:7px}.empty-state button{margin-top:17px}.backdrop,.modal-backdrop{position:fixed;inset:0;background:rgba(30,20,64,.32);z-index:50}.drawer{position:fixed;inset:0 0 0 auto;width:min(600px,100vw);background:white;z-index:60;box-shadow:-10px 0 45px #190c5818;display:flex;flex-direction:column;animation:slidein .2s ease}.drawer-header{padding:23px 25px 18px;border-bottom:1px solid var(--border)}.drawer-title-row{display:flex;align-items:center;gap:12px}.drawer-title-row h2{font-size:17px}.drawer-title-row p{color:var(--muted);font-size:11px;margin-top:3px}.icon-button{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:7px;color:var(--muted)}.icon-button:hover{background:var(--bg);color:var(--primary)}.close-drawer{margin-left:auto}.drawer-tabs{display:flex;gap:24px;padding:17px 25px 0;border-bottom:1px solid var(--border)}.drawer-tabs button{font-size:12px;color:var(--secondary);padding:0 0 12px;border-bottom:2px solid transparent}.drawer-tabs button.selected{color:var(--primary);border-color:var(--primary);font-weight:600}.drawer-body{overflow:auto;flex:1;padding:23px 25px}.drawer-footer{border-top:1px solid var(--border);padding:16px 25px;display:flex;gap:10px;align-items:center;background:#fdfcff}.drawer-footer small{margin-left:auto;font-size:10px;color:var(--muted)}.status-box{border:1px solid var(--border);background:#faf9fe;border-radius:9px;padding:15px;display:flex;gap:11px;margin-bottom:25px}.status-box svg{color:var(--primary);margin-top:3px}.status-box.reauth{background:var(--gold-bg);border-color:#fde8a8}.status-box.reauth svg{color:var(--gold)}.status-box p{font-size:12px;color:var(--secondary);margin-top:5px}.detail-section{margin-bottom:25px}.detail-section h3{font-size:12px;color:var(--secondary);margin-bottom:10px}.detail-kv{border:1px solid var(--border);border-radius:9px;padding:5px 13px}.kv-row{display:flex;justify-content:space-between;gap:22px;padding:10px 0;border-bottom:1px solid #f3f0fa;font-size:12px}.kv-row:last-child{border:0}.kv-row>span:first-child{color:var(--muted)}.kv-row>span:last-child{text-align:right;overflow-wrap:anywhere}.scope-item{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px}.scope-item svg{width:15px;height:15px;color:var(--green);margin-top:2px}.scope-item b{font-size:12px;font-weight:500}.scope-item p{font-size:11px;color:var(--muted);margin-top:4px}.small-note{font-size:11px;color:var(--muted);line-height:1.8}.log-item{display:flex;gap:13px;padding:17px 0;border-bottom:1px solid #f0edf8}.log-marker{height:28px;width:28px;background:var(--bg);border-radius:50%;display:grid;place-items:center;color:var(--primary);flex:none}.log-marker svg{width:14px;height:14px}.log-item h3{font-size:13px}.log-item p{font-size:12px;color:var(--secondary);margin-top:5px}.log-item small{font-size:11px;color:var(--muted);display:block;margin-top:5px}.log-item .pill{margin-left:auto;align-self:flex-start}.modal-backdrop{z-index:70;display:flex;align-items:center;justify-content:center;padding:22px}.modal{background:white;border-radius:14px;width:560px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 70px #190c5830}.modal-header{padding:21px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}.modal-header h2{font-size:17px}.modal-header p{color:var(--muted);font-size:11px;margin-top:3px}.modal-body{padding:22px 24px;overflow:auto}.modal-footer{border-top:1px solid var(--border);padding:15px 24px;display:flex;justify-content:flex-end;gap:9px}.stepper{display:flex;gap:8px;margin-bottom:23px}.stepper span{font-size:11px;flex:1;color:var(--muted);border-top:3px solid var(--border);padding-top:8px}.stepper span.on{color:var(--primary);border-color:var(--primary)}.platform-options{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.platform-option{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:9px;text-align:left;padding:12px}.platform-option:hover,.platform-option.chosen{border-color:var(--primary);background:#faf8ff}.platform-option .platform-logo{width:32px;height:32px;font-size:16px}.platform-option .platform-logo.xhs{font-size:9px}.platform-option b{font-size:12px;font-weight:500}.platform-option small{display:block;color:var(--muted);font-size:10px}.form-field{display:block;margin-bottom:17px;font-size:12px;font-weight:500}.form-field input,.form-field select{display:block;width:100%;margin-top:7px;border:1px solid var(--border);border-radius:8px;padding:9px 11px;min-height:39px;background:#fff;font-size:12px}.inline-note{font-size:11px;color:var(--gold);background:var(--gold-bg);border:1px solid #fde8a8;border-radius:8px;padding:11px 13px;margin:13px 0}.check-label{display:flex;gap:9px;font-size:12px;color:var(--secondary);padding:9px 0;align-items:flex-start}.check-label input{accent-color:var(--primary);margin-top:4px}.resource-choice{padding:11px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px}.result-icon{width:56px;height:56px;border-radius:50%;background:var(--green-bg);color:var(--green);display:grid;place-items:center;margin:12px auto 16px}.result-icon svg{width:25px;height:25px}.flow-result{text-align:center;padding:6px 8px 15px}.flow-result h3{font-size:18px}.flow-result p{font-size:12px;color:var(--secondary);margin-top:9px}.flow-result .detail-kv{margin-top:22px;text-align:left}.error-message{background:var(--red-bg);color:var(--red);border:1px solid #fecaca;padding:10px;border-radius:7px;font-size:12px;margin-top:12px}.progress{height:5px;background:var(--primary-bg);border-radius:5px;overflow:hidden;margin-top:17px}.progress>span{display:block;height:100%;width:100%;background:var(--primary);animation:progress 1s ease-out}.split-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px}.split-actions button{font-size:11px;color:var(--muted);text-decoration:underline}#toast{position:fixed;bottom:28px;left:calc(50% + 114px);transform:translateX(-50%);z-index:90;background:#251648;color:white;padding:10px 17px;border-radius:9px;font-size:12px;box-shadow:0 4px 20px #190c5820;display:none}#toast.visible{display:block}body.overlay-open{overflow:hidden}@keyframes slidein{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}@keyframes progress{from{width:0}to{width:100%}}@media(min-width:1550px){.content{padding-top:44px}}@media(max-width:1150px){.content{padding:28px 24px}.table-header,.connection-row{grid-template-columns:minmax(180px,2fr) 95px 100px 65px;gap:12px;padding-left:16px;padding-right:16px}.verified-cell{display:none}.demo-notice p span{display:block;margin-left:0;margin-top:3px}.catalog-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:900px){.sidebar{width:76px;padding:23px 10px}.brand{padding:0 10px 25px}.brand>span:last-child,.workspace,.nav-caption,.nav-parent,.sidebar-bottom,.profile>div{display:none}.sidebar nav a{font-size:0;padding:12px 19px;gap:0}.sidebar nav a svg{width:18px}.profile{margin-top:auto;padding:15px 10px}.main-shell{margin-left:76px}.topbar{padding:0 24px}.prototype-label{display:none}.metric{padding:14px}.metric-note{font-size:10px}.filterbar{flex-wrap:wrap}.search{flex:1;min-width:180px}.result-count{display:none}#toast{left:calc(50% + 38px)}}@media(max-width:650px){.content{padding:24px 16px}.topbar{padding:0 16px;height:56px}.top-actions{gap:5px}.top-actions .avatar{display:none}.page-heading{align-items:flex-start;gap:12px}.page-heading h1{font-size:23px}.page-description{font-size:12px}.page-heading>.btn{padding:7px 9px}.overview{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:24px}.demo-notice{align-items:flex-start}.demo-notice>a{font-size:0}.demo-notice>a svg{width:15px}.demo-notice p span{font-size:10px}.connection-table{overflow:visible;background:none;border:0;box-shadow:none}.table-header{display:none}.connection-row{grid-template-columns:1fr auto;background:#fff;border:1px solid var(--border);border-radius:10px;margin-bottom:10px;padding:16px;gap:13px}.ownership-cell{grid-row:2;grid-column:1}.status-cell{grid-column:2;grid-row:1}.action-cell{grid-column:2;grid-row:2;text-align:right}.catalog-grid{grid-template-columns:1fr}.catalog-heading{align-items:flex-start;gap:10px}.catalog-heading .neutral-pill{font-size:9px}.page-footer{flex-direction:column;gap:3px}.drawer-header,.drawer-body{padding:20px}.drawer-footer{padding:14px 20px}.drawer-footer small{display:none}.table-footnote{align-items:flex-start}.platform-options{grid-template-columns:1fr 1fr}.modal-backdrop{padding:12px}.modal-body{padding:20px}.modal-header,.modal-footer{padding:17px 20px}.breadcrumb{gap:9px}.filterbar select{flex:1}}
+.platform-logo.website{background:var(--primary-bg);color:var(--primary);font-size:29px;font-weight:400}.website-card{border-color:#d8cdf5}.pill.unconnected,.pill.pending{background:#f2f0f8;color:var(--secondary)}.site-intro{display:flex;align-items:flex-start;gap:11px;padding:14px;border:1px solid var(--border);background:#faf8ff;border-radius:9px;margin-bottom:22px}.site-intro>svg{color:var(--primary);margin-top:3px}.site-intro b{font-size:13px;font-weight:500}.site-intro p{font-size:11px;color:var(--secondary);margin-top:4px}.site-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}.required{color:var(--red)}.form-field textarea{display:block;width:100%;margin-top:7px;border:1px solid var(--border);border-radius:8px;padding:10px 12px;resize:vertical;font:12px/1.8 'Noto Sans SC',system-ui,sans-serif;color:var(--text);background:white}.form-field textarea:disabled{background:#faf9fe}.site-config-label{margin-top:22px}.form-field small{display:block;font-weight:400;margin-top:5px}@media(max-width:650px){.site-form-grid{grid-template-columns:1fr}}
+.list-heading{font-size:14px;font-weight:600;padding-bottom:14px}.list-heading span{font:500 11px 'Sora';color:var(--muted);margin-left:8px}.selected-platform{display:flex;gap:12px;align-items:center;margin-bottom:22px}.selected-platform p{font-size:11px;color:var(--muted);margin-top:3px}.platform-option>.icon{margin-left:auto;width:14px;height:14px;color:var(--muted)}.modal.site-modal{width:780px;max-height:92vh}.site-fieldset{border:1px solid var(--border);border-radius:12px;margin:0 0 20px;padding:15px 17px 8px;min-width:0}.site-fieldset legend{padding:0 7px;font-size:12px;font-weight:600;color:var(--muted)}.site-fieldset .form-field{font-weight:400;font-size:13px}.site-fieldset .small-note{font-size:11px;line-height:1.8}.site-fieldset>p{margin-bottom:10px}.site-fieldset .form-field>span.small-note{display:inline}.field-counter{font-size:11px;color:var(--muted);margin-left:8px}.site-modal .modal-header{padding:22px 25px}.site-modal .modal-body{padding:18px 24px 4px}.site-modal .modal-footer{padding:16px 25px}.site-modal .form-field input{font-size:13px;height:40px}.site-modal .form-field textarea{font-size:13px}.site-modal .required{margin-left:3px}@media(max-width:650px){.modal.site-modal{max-height:93vh}.site-modal .modal-body{padding:15px}.site-fieldset{padding:13px 12px 4px}}
+/* Embedded mode shares index's shell; keep all demo styles inside this document. */
+html.embedded .sidebar,html.embedded .topbar{display:none}
+html.embedded .main-shell{margin-left:0;min-height:100vh}
+html.embedded .content{max-width:1156px;margin:0 auto;padding:24px 28px 40px}
+html.embedded .page-heading h1{font-size:24px;font-weight:700;letter-spacing:-.025em}
+html.embedded .page-heading .eyebrow{font-size:11px;letter-spacing:1.4px;color:var(--primary)}
+html.embedded #toast{left:50%}
+html.embedded .page-footer{display:none}
+html.embedded.shell-mounted body{background:transparent;overflow:hidden}
+html.embedded.shell-mounted .main-shell{position:fixed;left:var(--connector-host-left,0px);top:var(--connector-host-top,0px);width:var(--connector-host-width,100%);height:var(--connector-host-height,100%);min-height:0;margin:0;padding:0;overflow:auto;scrollbar-gutter:stable;background:var(--bg)}
+html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
+@media(max-width:650px){html.embedded .content{padding:24px 16px}}
+/* Shared geometry for platform badges in picker, list, and drawer. */
+.platform-logo{width:40px;height:40px;min-width:40px;min-height:40px;flex:0 0 40px;overflow:hidden;line-height:1;border-radius:10px}
+.platform-artwork{display:block;width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.platform-logo.website{background:var(--primary-bg);color:var(--primary)}
+.platform-logo.pdd{background:#fff1f2;color:#e02e24}
+.platform-logo.youzan{background:#fff1f2;color:#e83b4c}
+.platform-logo.kuaishou{background:#fff3e8;color:#f57c20}
+.platform-option{min-width:0;gap:12px;padding:13px}
+.platform-option .platform-logo{width:36px;height:36px;min-width:36px;min-height:36px;flex-basis:36px;border-radius:9px}
+.platform-option .platform-artwork{width:23px;height:23px}
+.platform-option>span:not(.platform-logo){min-width:0;flex:1}
+.platform-option b{display:block;line-height:1.5}
+.platform-option small{line-height:1.5;margin-top:3px}
+/* Audit log: shared context, compact outcomes, one consistent reading column. */
+.audit-notice{display:flex;align-items:flex-start;gap:8px;padding:11px 13px;background:#faf9fe;border:1px solid var(--border);border-radius:8px;margin-bottom:20px}
+.audit-notice>.icon{width:14px;height:14px;color:var(--muted);margin-top:3px}
+.audit-notice p{font-size:11px;line-height:1.8;color:var(--muted)}
+.audit-context{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:12px;row-gap:3px;padding-bottom:17px;border-bottom:1px solid var(--border);margin-bottom:3px;font-size:12px}
+.audit-context>span{color:var(--muted)}.audit-context b{font-weight:500;overflow-wrap:anywhere}.audit-context small{grid-column:2;font-size:11px;color:var(--muted)}
+.audit-list .audit-item{position:relative;align-items:flex-start;gap:12px;padding:20px 0;border:0}
+.audit-item:not(:last-child)::after{content:'';position:absolute;left:13px;top:49px;bottom:-9px;width:1px;background:var(--border)}
+.audit-item .log-marker{width:28px;height:28px;margin-top:1px;background:#f5f2fd;position:relative;z-index:1}
+.audit-body{flex:1;min-width:0;padding-bottom:17px;border-bottom:1px solid #f1eef8}
+.audit-item:last-child .audit-body{border:0;padding-bottom:0}
+.audit-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;min-height:25px}
+.audit-heading h3{font-size:14px;line-height:1.7;font-weight:600;overflow-wrap:anywhere}
+.audit-result{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;align-self:flex-start;height:24px;padding:0 9px;border-radius:6px;white-space:nowrap;font-size:11px;font-weight:500;line-height:1}
+.audit-result.success{background:var(--green-bg);color:var(--green)}.audit-result.error{background:var(--red-bg);color:var(--red)}.audit-result.warning{background:var(--gold-bg);color:var(--gold)}.audit-result.neutral{background:#f2f0f8;color:var(--secondary)}
+.audit-meta{display:flex;align-items:baseline;flex-wrap:wrap;gap:7px;font-size:12px;color:var(--muted);line-height:1.8;margin-top:5px}.audit-separator{color:#b4abc9}
+.audit-item p.audit-description{margin-top:9px;color:var(--secondary);font-size:13px;line-height:1.85;overflow-wrap:anywhere}
+.audit-empty{padding:28px 0;text-align:center}
+@media(max-width:420px){.audit-heading{gap:8px}.audit-heading h3{font-size:13px}.audit-result{font-size:10px;padding:0 7px}.audit-item p.audit-description{font-size:12px}.audit-context{column-gap:8px}}
+/* Website workspace: give ranking data room without altering platform drawers. */
+.drawer.website-drawer{width:min(940px,100vw)}
+.website-drawer .drawer-header{padding:21px 28px 18px}.website-drawer .drawer-title-row h2{font-size:20px}.website-drawer .drawer-title-row .website-eyebrow{color:var(--primary);font-size:10px;margin:0 0 4px;letter-spacing:.7px}.website-header-status{margin-left:auto}.website-header-status+.close-drawer{margin-left:10px}.website-drawer .website-tabs{padding:0 28px;gap:27px;overflow-x:auto;flex-shrink:0}.website-tabs button{white-space:nowrap;padding:15px 0 13px;font-size:12px}.website-body{padding:24px 28px;background:#fdfcff}.website-body>.detail-section .detail-kv{display:grid;grid-template-columns:1fr 1fr;column-gap:24px;background:white}.website-body .kv-row{min-width:0}.website-body>.detail-section .kv-row>span:last-child{max-width:70%}.website-body>.detail-section .kv-row:last-child{border-bottom:1px solid #f3f0fa}
+.site-data-notice{display:flex;align-items:flex-start;gap:8px;background:#f5f2fd;border:1px solid var(--border);padding:10px 12px;border-radius:8px;color:var(--secondary);font-size:11px;line-height:1.8;margin-bottom:22px}.site-data-notice .icon{width:14px;height:14px;margin-top:3px;color:var(--primary)}
+.site-data-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:21px}.site-data-heading .eyebrow{font-size:9px;letter-spacing:1.5px;margin-bottom:6px}.site-data-heading h2{font-size:21px;line-height:1.4}.site-data-heading p:not(.eyebrow){font-size:12px;color:var(--muted);margin-top:5px}.site-data-heading .btn{flex-shrink:0;font-size:11px}
+.site-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}.site-metrics>div{background:white;border:1px solid var(--border);border-radius:10px;padding:15px 18px}.site-metrics span{display:block;font-size:11px;color:var(--secondary)}.site-metrics strong{display:block;font:600 25px 'Sora',sans-serif;margin:6px 0;color:var(--text)}.site-metrics small{display:block;font-size:10px;color:var(--muted)}
+.site-data-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 13px}.site-data-toolbar .search{width:270px;flex-shrink:1}.site-data-toolbar>span{font-size:10px;color:var(--muted);text-align:right}.site-table-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:white}.site-data-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px;text-align:left}.site-data-table th{font-size:10px;font-weight:500;color:var(--muted);background:#faf9fe;border-bottom:1px solid var(--border);padding:12px 14px;white-space:nowrap}.site-data-table th abbr{text-decoration:none;cursor:help}.site-data-table td{padding:14px;border-bottom:1px solid #f1eef8;vertical-align:middle;color:var(--secondary);overflow-wrap:anywhere}.site-data-table tbody tr:last-child td{border-bottom:0}.site-data-table tbody tr:hover{background:#fdfcff}.keyword-data th:first-child{width:40%}.keyword-data th:nth-child(2){width:16%}.keyword-data th:nth-child(3){width:10%}.keyword-data th:nth-child(4),.keyword-data th:nth-child(5){width:17%}.keyword-term{font-size:12px;font-weight:500;color:var(--text)}.keyword-intents{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}.keyword-intents span{padding:0 5px;border-radius:3px;background:#f3f0fa;color:#81729f;font-size:9px;line-height:1.8}.numeric{font-family:'Sora',sans-serif;font-size:11px;font-variant-numeric:tabular-nums}.rank-number{font:600 12px 'Sora',sans-serif;white-space:nowrap;color:var(--text)}.rank-missing{color:#b5aacd}.rank-change{font-size:10px;margin-left:6px;white-space:nowrap}.rank-change.up{color:var(--green)}.rank-change.down{color:var(--gold)}.kd-score{font:500 11px 'Sora',sans-serif}.kd-score.competitive{color:var(--gold)}.kd-score.moderate{color:var(--green)}.site-table-count{padding:10px 2px;color:var(--muted);font-size:10px}.site-data-footnote{font-size:10px;color:var(--muted);line-height:1.9;margin-top:5px}.site-data-table td.site-table-empty{text-align:center;padding:45px 18px;font-size:12px;color:var(--muted)}
+.published-site-context{display:flex;align-items:center;gap:9px;margin-bottom:18px;color:var(--secondary);font-size:12px}.published-site-context .icon{color:var(--primary);width:16px;height:16px}.published-site-context small{margin-left:auto;font-size:10px;color:var(--muted)}.published-data th:first-child{width:44%}.published-data th:nth-child(2),.published-data th:nth-child(3){width:28%}.published-data td{padding:18px 14px;vertical-align:top}.article-title{font-size:13px;font-weight:500;line-height:1.8;text-align:left;padding:0;display:block;color:var(--text)}.article-title:hover{color:var(--primary)}.article-title .icon{width:12px;height:12px;margin-left:4px;color:var(--muted)}.article-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:9px;font-size:10px;color:var(--muted)}.article-meta>span{color:var(--green);background:var(--green-bg);padding:1px 5px;border-radius:4px}.article-keyword{display:block;line-height:1.8;margin-bottom:8px}.site-post-preview h3{font-size:18px;line-height:1.7;margin:15px 0 8px}.site-post-preview>p:not(.small-note){font-size:13px;line-height:1.9;margin:20px 0}.site-post-preview .detail-kv{margin:15px 0}.visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(max-width:650px){.website-drawer .drawer-header{padding:17px}.website-drawer .drawer-title-row{gap:9px}.website-drawer .drawer-title-row h2{font-size:15px}.website-header-status .pill{font-size:10px;padding:2px 7px}.website-drawer .website-tabs{padding:0 17px;gap:20px}.website-tabs button{font-size:11px}.website-body{padding:18px 15px}.site-data-heading{align-items:flex-start;gap:8px}.site-data-heading h2{font-size:18px}.site-data-heading .btn{padding:6px 8px;min-height:32px;font-size:10px}.site-metrics{gap:7px}.site-metrics>div{padding:12px 10px}.site-metrics strong{font-size:21px}.site-metrics span{font-size:10px}.site-metrics small{font-size:9px}.site-data-toolbar{align-items:flex-start;flex-direction:column;gap:8px}.site-data-toolbar .search{width:100%}.site-data-table.keyword-data{min-width:570px}.site-data-table.published-data{min-width:620px}.site-data-table td,.site-data-table th{padding:12px 10px}.published-site-context{flex-wrap:wrap}.published-site-context small{width:100%;margin-left:25px}.website-body>.detail-section .detail-kv{grid-template-columns:1fr}}
+/* Keep data visible above the fold rather than letting the summary dominate. */
+.website-body .site-data-notice{padding:8px 11px;margin-bottom:16px;font-size:10px}
+.site-data-heading{margin-bottom:16px}.site-data-heading .eyebrow{display:none}.site-data-heading h2{font-size:19px}.site-data-heading p:not(.eyebrow){font-size:11px;margin-top:3px}
+.site-metrics{margin-bottom:16px;gap:10px}.site-metrics>div{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;padding:11px 14px;align-items:center}.site-metrics strong{grid-column:2;grid-row:1 / span 2;font-size:23px;margin:0}.site-metrics small{margin-top:3px}
+.keyword-data td{padding-top:11px;padding-bottom:11px}.keyword-intents{margin-top:3px}
+@media(max-width:650px){.site-metrics{gap:7px}.site-metrics>div{padding:10px 8px;column-gap:6px}.site-metrics strong{font-size:20px}.site-metrics small{font-size:8px}.site-data-heading h2{font-size:18px}}
+.connector-run-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.connector-run-head>div{display:flex;flex-direction:column;gap:3px}
+.connector-run-head b{font-size:13px;font-weight:600;color:var(--text)}
+.connector-run-head span{font-size:11px;color:var(--muted)}
+.connector-run-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--border);border-radius:8px;background:#fcfbff;margin-bottom:24px;overflow:hidden}
+.connector-run-summary>div{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-left:1px solid #f4f2fb;text-align:center}
+.connector-run-summary>div:first-child{border-left:0}
+.connector-run-summary span{font-size:11px;color:var(--muted)}
+.connector-run-summary b{font:700 20px/1 'Sora',sans-serif;color:var(--text)}
+.connector-run-summary>div:first-child b{color:var(--primary)}
+.connector-run-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px;font-size:12px;font-weight:700}
+.connector-run-title>span{font-size:11px;font-weight:400;color:var(--muted)}
+.connector-run-list{border:1px solid var(--border);border-radius:8px;background:#fff;overflow:hidden}
+.connector-run-item{display:grid;grid-template-columns:10px minmax(0,1fr);gap:12px;padding:12px;border-top:1px solid #f4f2fb}
+.connector-run-item:first-child{border-top:0}
+.connector-run-dot{width:8px;height:8px;margin-top:6px;border-radius:50%;background:var(--muted)}
+.connector-run-dot.success{background:#10b981}.connector-run-dot.error{background:#ef4444}.connector-run-dot.warning{background:#f59e0b}
+.connector-run-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.connector-run-line>b{font:600 11px/1.6 'Sora','Noto Sans SC',sans-serif}
+.connector-run-status{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:600;background:#f2f0f8;color:var(--secondary)}
+.connector-run-status.success{background:var(--green-bg);color:var(--green)}.connector-run-status.error{background:var(--red-bg);color:var(--red)}.connector-run-status.warning{background:var(--gold-bg);color:var(--gold)}
+.connector-run-kind{font-size:11px;color:var(--muted)}
+.connector-run-action{margin-top:5px;font-size:12px;color:var(--text);overflow-wrap:anywhere}
+.connector-run-note{margin-top:5px;font-size:12px;line-height:1.6;color:var(--secondary);overflow-wrap:anywhere}
+@media(max-width:420px){.connector-run-head{flex-direction:column;gap:6px}}
+.site-overview{margin:0 0 20px}
+.site-overview-note{font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.8}
+.site-overview-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.site-overview-card{padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff;min-width:0}
+.site-overview-card>span{display:block;color:var(--muted);font-size:11px;line-height:1.6}
+.site-overview-card>strong{display:block;margin:6px 0 8px;font:700 22px/1.3 'Sora',sans-serif;color:var(--text);font-variant-numeric:tabular-nums}
+.site-overview-card>small{display:block;color:var(--muted);font-size:10px;line-height:1.6;overflow-wrap:anywhere}
+@media(max-width:600px){.site-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.site-overview-card:last-child{grid-column:1 / -1}}
+/* Match index's dw-h / dw-tabs / dw-b / dw-f drawer conventions. */
+.drawer,.drawer.website-drawer{
+  width:min(760px,calc(46vw + 200px),calc(100vw - 56px));
+  max-width:100%;background:#fff;box-shadow:0 12px 44px rgba(60,30,140,.24);
+}
+.drawer .drawer-header{padding:12px 18px;flex:0 0 auto;border-bottom:1px solid var(--border)}
+.drawer .drawer-title-row{display:flex;align-items:center;gap:8px;min-height:36px}
+.drawer .drawer-title-row>.platform-logo{display:none}
+.drawer .drawer-title-row>div:not(.website-header-status){display:flex;flex-direction:column;min-width:0;flex:1}
+.drawer .drawer-title-row h2{font-family:'Sora','Noto Sans SC',sans-serif;font-size:15px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.drawer .drawer-title-row p,.drawer .drawer-title-row .website-eyebrow{order:-1;margin:0 0 2px;color:var(--primary);font:600 11px/1.5 'Sora','Noto Sans SC',sans-serif;letter-spacing:.11em}
+.drawer.website-drawer .drawer-title-row p:not(.website-eyebrow){display:none}
+.drawer .drawer-title-row .close-drawer{order:-2;margin:0;width:29px;height:29px;min-width:29px;flex:0 0 29px;padding:0;border-radius:7px;color:var(--secondary);display:grid;place-items:center}
+.drawer .close-drawer .icon{width:16px;height:16px}
+.drawer .close-drawer:hover{background:var(--bg);color:var(--text)}
+.drawer .website-header-status{margin-left:auto;flex:0 0 auto}
+.drawer .drawer-width-toggle{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;height:29px;padding:0 10px;border:1px solid transparent;border-radius:7px;background:var(--primary-bg);color:var(--primary);font-size:11px;font-weight:600;white-space:nowrap}
+.drawer .drawer-width-toggle svg{width:14px;height:14px;flex:0 0 14px}
+.drawer .drawer-width-toggle:hover{background:#f5f3ff;border-color:#c4b5fd}
+.drawer.drawer-expanded,.drawer.website-drawer.drawer-expanded{width:min(1160px,calc(46vw + 600px),calc(100vw - 56px))}
+.drawer.drawer-expanded .drawer-width-toggle{background:var(--primary);color:#fff}
+.drawer .drawer-width-toggle+.website-header-status{margin-left:0}
+.drawer .drawer-tabs{display:flex;gap:4px;padding:0 18px;border-bottom:1px solid var(--border);background:#fcfbff;flex:0 0 auto;overflow-x:auto;overflow-y:hidden}
+.drawer .drawer-tabs button{padding:8px 13px;margin-bottom:-1px;min-height:37px;font-size:12px;font-weight:400;line-height:1.6;white-space:nowrap;color:var(--secondary);border-bottom:2px solid transparent}
+.drawer .drawer-tabs button:hover{color:var(--text)}
+.drawer .drawer-tabs button.selected{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.drawer .drawer-body{flex:1;min-height:0;overflow-y:auto;padding:16px;background:#fff;overscroll-behavior:contain}
+.drawer .drawer-footer{flex:0 0 auto;padding:12px 18px;gap:8px;border-top:1px solid var(--border);background:#fcfbff;display:flex;align-items:center;flex-wrap:wrap}
+.drawer .drawer-footer .btn{min-height:32px;padding:6px 12px;font-size:12px;border-radius:8px}
+.drawer .drawer-footer small{margin-left:auto;font-size:11px;color:var(--muted)}
+.drawer .detail-section{margin-bottom:16px}
+.drawer .detail-section>h3{font-size:12px;margin-bottom:8px}
+.drawer .audit-notice{margin-bottom:16px;padding:8px 12px}
+.drawer .audit-list .audit-item{padding:16px 0}
+.drawer .audit-heading h3{font-size:13px}
+.drawer .audit-item p.audit-description{font-size:13px}
+@media(max-width:650px){
+  .drawer,.drawer.website-drawer{width:calc(100vw - 16px)}
+  .drawer.drawer-expanded,.drawer.website-drawer.drawer-expanded{width:calc(100vw - 16px)}
+  .drawer .drawer-width-toggle{display:none}
+  .drawer .drawer-header,.drawer .drawer-footer{padding:12px}
+  .drawer .drawer-tabs{padding:0 12px}
+  .drawer .drawer-tabs button{padding:8px 10px}
+  .drawer .drawer-body{padding:16px}
+  .drawer .drawer-footer small{display:none}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+  <script>if(new URLSearchParams(location.search).get('embedded')==='1')document.documentElement.classList.add('embedded');</script>
+</head>
+<body>
+  <aside class="sidebar" aria-label="平台导航">
+    <a class="brand" href="#main-content" onclick="return false" aria-disabled="true" title="此文件仅演示连接与授权模块"><span class="brand-symbol">×</span><span>XDIGATE<small>AGENT OS</small></span></a>
+    <div class="workspace"><span class="workspace-icon">A8</span><div>A8OPARIS<small>品牌工作空间</small></div><span class="workspace-caret">⌄</span></div>
+    <p class="nav-caption">工作空间</p>
+    <nav>
+      <a href="#main-content" onclick="return false" aria-disabled="true" title="此文件仅演示连接与授权模块" data-icon="house">今日</a>
+      <a href="#main-content" onclick="return false" aria-disabled="true" title="此文件仅演示连接与授权模块" data-icon="columns-3">工作</a>
+      <a href="#main-content" onclick="return false" aria-disabled="true" title="此文件仅演示连接与授权模块" data-icon="bot">Agents</a>
+      <a href="#main-content" onclick="return false" aria-disabled="true" title="此文件仅演示连接与授权模块" data-icon="book-open">知识库</a>
+      <a href="#main-content" onclick="return false" aria-disabled="true" title="此文件仅演示连接与授权模块" data-icon="chart-no-axes-combined">数据分析</a>
+    </nav>
+    <div class="nav-divider"></div><p class="nav-caption">管理</p>
+    <nav><span class="nav-parent" data-icon="settings-2">设置</span><a class="active" href="#main-content" aria-current="page" data-icon="unplug">连接与授权</a></nav>
+    <div class="sidebar-bottom"><span class="demo-mark">DEMO</span><p>独立交互演示<small>不连接真实平台或保存凭证</small></p></div>
+    <div class="profile"><span class="avatar">DU</span><div>dudu<small>演示管理员</small></div></div>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar"><div class="breadcrumb">设置<span>/</span><b>连接与授权</b></div><div class="top-actions"><span class="prototype-label">交互演示 · 待评审</span><button class="btn quiet" id="role-toggle" title="切换演示权限"><span data-icon="shield-check"></span><span id="role-label">管理员</span></button><span class="avatar small">DU</span></div></header>
+    <main id="main-content" class="content">
+      <div class="page-heading"><div><p class="eyebrow">SETTINGS · CONNECTORS</p><h1>连接与授权</h1><p class="page-description">把平台账号连在一起，让每一次访问都有明确的授权边界。</p></div><button class="btn primary" id="new-connection"><span data-icon="plus"></span>新建连接</button></div>
+      <div class="demo-notice"><span data-icon="flask-conical"></span><p><b>仅演示连接与授权流程</b><span>所有账号、资源和日志均为示例。平台能力及授权方式待确认，不代表已支持接入。</span></p><a href="https://app.notion.com/p/3fbd855d0b2f813d9457d1d705e8e426" target="_blank" rel="noopener noreferrer">查看 PRD <span data-icon="arrow-up-right"></span></a></div>
+      <section class="overview" aria-label="连接概览" id="overview"></section>
+      <div class="section-tools"><h2 class="list-heading">我的连接 <span id="connection-count">4</span></h2><button class="text-button" id="reset-demo"><span data-icon="rotate-ccw"></span>重置演示</button></div>
+      <section id="connections-view" aria-label="我的连接">
+        <div class="filterbar"><label class="search"><span data-icon="search"></span><input id="search" type="search" placeholder="搜索连接名称或账号" aria-label="搜索连接名称或账号"></label><select id="platform-filter" aria-label="筛选平台"><option value="all">全部平台</option></select><select id="status-filter" aria-label="筛选连接状态"><option value="all">全部状态</option><option value="connected">已连接</option><option value="reauth">需重新授权</option><option value="failed">连接失败</option><option value="disconnected">已断开</option></select><span id="result-count" class="result-count"></span></div>
+        <div id="connection-list" class="connection-table"></div>
+        <p class="table-footnote"><span data-icon="info"></span>“已连接”仅表示示例授权范围可用，不代表已同步数据或所有业务功能可用。</p>
+      </section>
+      <footer class="page-footer"><span>连接管理 · v0.1 演示</span><span>最小权限授权 · 明确归属 · 操作可追溯</span></footer>
+    </main>
+  </div>
+  <div id="drawer-backdrop" class="backdrop" hidden></div>
+  <aside id="detail-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden></aside>
+  <div id="modal-backdrop" class="modal-backdrop" hidden><section id="flow-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"></section></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script>
+'use strict';
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const paths = {
+    house:'M3 10l9-7 9 7v10H3z M9 20v-7h6v7', 'columns-3':'M3 4h18v16H3z M9 4v16 M15 4v16',bot:'M5 8h14v12H5z M12 8V4 M10 4h4 M8 13h.01 M16 13h.01 M9 17h6', 'book-open':'M12 5c-4-2-7-2-10-1v15c3-1 6-1 10 1 4-2 7-2 10-1V4c-3-1-6-1-10 1v15', 'chart-no-axes-combined':'M4 3v17h17 M7 15l4-5 4 2 5-7', 'settings-2':'M4 7h7 M15 7h5 M4 17h3 M11 17h9 M11 4v6 M7 14v6', unplug:'M8 3v5 M16 3v5 M5 8h14v3c0 4-3 6-7 6s-7-2-7-6z M12 17v4', 'shield-check':'M12 3l8 3v6c0 5-8 9-8 9s-8-4-8-9V6z M8 12l3 3 5-6',plus:'M12 5v14 M5 12h14', 'flask-conical':'M9 3h6 M10 3v7L4 20h16l-6-10V3 M7 15h10', 'arrow-up-right':'M6 18L18 6 M6 6h12v12',search:'M20 20l-5-5 M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0', 'rotate-ccw':'M3 10a9 9 0 1 1 2 8 M3 4v6h6',info:'M12 11v6 M12 7h.01 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',check:'M5 12l4 4L19 6',x:'M6 6l12 12 M6 18L18 6', 'circle-check':'M8 12l3 3 5-6 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0', 'triangle-alert':'M12 3L2 21h20z M12 9v5 M12 17h.01', 'clock-3':'M12 8v5l3 2 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',link:'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2 M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2', 'chevron-right':'M9 5l7 7-7 7', 'file-clock':'M14 2H4v20h16V8z M14 2v6h6 M12 12v4l3 1', 'shield':'M12 3l8 3v6c0 5-8 9-8 9s-8-4-8-9V6z', 'circle-x':'M9 9l6 6 M9 15l6-6 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0'
+  };
+  const icon = name => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name] || paths.link}"/></svg>`;
+  function icons(root = document) { root.querySelectorAll('[data-icon]').forEach(el => { if (!el.querySelector('svg')) el.insertAdjacentHTML('afterbegin', icon(el.dataset.icon)); }); }
+  const platforms = [
+    {id:'website',name:'SEO官方网站',mark:'◎',desc:'添加品牌官网，先登记站点，再按需连接后台。支持多个不同站点。',resources:[]},
+    {id:'meta',name:'Meta',mark:'∞',desc:'管理品牌的社交与广告账号连接。具体产品线与权限待确认。',resources:['A8OPARIS 品牌主页','A8OPARIS 广告账号']},
+    {id:'xhs',name:'小红书',mark:'小红书',desc:'连接品牌内容账号。商业业务、账号范围与接入方式待确认。',resources:['A8OPARIS 品牌账号','A8OPARIS 内容资源']},
+    {id:'tmall',name:'天猫',mark:'TMALL',desc:'集中管理店铺账号授权。店铺范围与服务场景待确认。',resources:['A8OPARIS 旗舰店','A8OPARIS 店铺资料']},
+    {id:'jd',name:'京东',mark:'JD',desc:'管理店铺连接及可访问资源。应用资质和权限待确认。',resources:['A8OPARIS 京东旗舰店','A8OPARIS 店铺资料']},
+    {id:'shopify',name:'Shopify',mark:'S',desc:'管理品牌店铺连接。应用接入范围与授权方式待确认。',resources:['a8oparis-demo.myshopify.com','A8OPARIS 店铺资料']},
+    {id:'douyin',name:'抖音',mark:'♪',desc:'连接内容或电商账号。具体业务线与开放平台待确认。',resources:['A8OPARIS 官方账号','A8OPARIS 内容资源']},
+    {id:'pdd',name:'拼多多',mark:'拼',desc:'管理品牌店铺的连接与授权，实际接入范围待确认。',resources:['A8OPARIS 拼多多店铺']},
+    {id:'youzan',name:'有赞',mark:'赞',desc:'管理品牌商城的连接与授权，实际接入范围待确认。',resources:['A8OPARIS 有赞商城']},
+    {id:'kuaishou',name:'快手',mark:'快',desc:'管理品牌内容或店铺账号，实际业务线及接入范围待确认。',resources:['A8OPARIS 快手账号']}
+  ];
+  const statusNames = {connected:'已连接',reauth:'需重新授权',failed:'连接失败',disconnected:'已断开',unconnected:'未连接',pending:'接入待确认'};
+  const state = {tab:'connections',role:'admin',query:'',platform:'all',status:'all',connections:[],drawer:null,drawerTab:'info',flow:null,returnFocus:null,drawerFocus:null,serial:0};
+  let flowTimer, toastTimer;
+  function initialConnections() { return [
+    {id:'meta-brand',platform:'meta',name:'Meta · 品牌主账号',account:'A8OPARIS Brand · 示例账号',status:'connected',reason:'最近一次模拟验证成功，示例授权范围可用。',resources:['A8OPARIS 品牌主页'],scope:['账号基本信息','已选资源的只读访问'],verified:'今天 10:42',authTime:'2026-10-12 14:30',expiry:'平台未提供（演示）'},
+    {id:'xhs-brand',platform:'xhs',name:'小红书 · 官方品牌账号',account:'A8OPARIS 官方 · 示例账号',status:'reauth',reason:'示例授权已失效，需要由管理员重新确认账号与授权范围。',resources:['A8OPARIS 品牌账号'],scope:['账号基本信息','已选资源的只读访问'],verified:'今天 09:18',authTime:'2026-09-16 09:00',expiry:'2026-10-15（模拟已到期）'},
+    {id:'shopify-store',platform:'shopify',name:'Shopify · 品牌独立站',account:'a8oparis-demo.myshopify.com · 示例',status:'connected',reason:'最近一次模拟验证成功，示例授权范围可用。',resources:['a8oparis-demo.myshopify.com'],scope:['账号基本信息','已选资源的只读访问'],verified:'今天 10:35',authTime:'2026-10-10 16:20',expiry:'未知（演示）'},
+    {id:'douyin-brand',platform:'douyin',name:'抖音 · 品牌内容账号',account:'A8OPARIS 抖音 · 示例账号',status:'failed',reason:'模拟资源验证失败，尚未形成可用连接。请核对账号并重新尝试。',resources:['A8OPARIS 官方账号'],scope:['账号基本信息'],verified:'今天 09:05',authTime:'未完成',expiry:'未知（演示）'},
+    {id:'website-brand',platform:'website',name:'A8OPARIS · 品牌官网',account:'https://a8oparis.example.com',address:'https://a8oparis.example.com',domain:'a8oparis.example.com',language:'中文',cms:'wordpress',status:'connected',reason:'预置官网连接成功示例：WordPress 授权已模拟完成，未连接真实官网、未获得真实权限。',resources:[],scope:['WordPress 后台访问（模拟，实际权限待确认）'],verified:'今天 10:40',authTime:'2026-10-19 10:30',expiry:'未知（演示）',wpAddress:'https://a8oparis.example.com',wpUser:'xdigate-demo',seo:'auto',config:{description:'A8OPARIS 品牌官网，面向消费者介绍品牌理念、产品信息与日常护肤内容。此内容为预置演示。',competitors:'',keywords:'品牌护肤\n日常护理'}}
+  ].map(c => ({...c,checks:initialChecks(c),...(c.id==='website-brand'?{analytics:siteDemoData()}:{}),owner:'A8OPARIS',client:'客户 u2c · 项目 a80',logs:[{action:c.status==='connected'?'模拟授权验证成功':c.status==='reauth'?'模拟授权失效':'模拟连接验证失败',actor:'系统',time:'今天 '+c.verified.split(' ').pop(),result:c.status==='connected'?'成功':c.status==='reauth'?'需处理':'失败',note:c.reason},{action:'发起模拟授权',actor:'dudu',time:c.authTime==='未完成'?'今天 09:04':c.authTime,result:'示例记录',note:'模拟授权流程；未发送真实平台请求。'}]})).sort((a,b)=>Number(b.id==='website-brand')-Number(a.id==='website-brand')); }
+  const platform = id => platforms.find(p => p.id === id);
+  const connection = id => state.connections.find(c => c.id === id);
+  // Fixed-viewBox artwork prevents long wordmarks and font glyphs from overflowing.
+  const platformArtwork = {
+    pdd:'<path d="M12 20 4 12C-2 5 7 1 12 7c5-6 14-2 8 5l-8 8Z"/><path d="M8 10h8M8 14h8M10 8v9M14 8v9"/>',
+    youzan:'<path d="M5 7h14l2 14H3L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2M8 14l3 3 5-5"/>',
+    kuaishou:'<rect x="3" y="7" width="14" height="14" rx="4"/><circle cx="7" cy="4" r="2"/><circle cx="13" cy="4" r="2"/><circle cx="10" cy="14" r="3"/><path d="m17 11 4-2v10l-4-2"/>',
+    meta:'<path d="M3 15c-2-6 2-11 5-8l8 10c3 3 7-2 5-7-2-5-5-5-8 0l-4 7c-3 4-7 2-6-2Z"/>',
+    xhs:'<text x="12" y="15" text-anchor="middle" fill="currentColor" stroke="none" font-size="8" font-weight="700" font-family="Noto Sans SC,system-ui,sans-serif">小红书</text>',
+    tmall:'<path d="M4 10V4l5 3a12 12 0 0 1 6 0l5-3v6c2 2 2 6 0 8-4 4-12 4-16 0-2-2-2-6 0-8Z" fill="currentColor" stroke="none"/><path d="M7 12v2m10-2v2" stroke="white" stroke-width="1.8"/>',
+    jd:'<text x="12" y="16" text-anchor="middle" fill="currentColor" stroke="none" font-size="13" font-weight="700" font-family="Sora,system-ui,sans-serif">JD</text>',
+    shopify:'<path d="M5 7h14l2 14H3L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/><path d="M14 11c-4-2-6 2-2 3s2 5-2 3"/>',
+    douyin:'<path d="M14 3v12.5a4 4 0 1 1-3-3.9V7h3c2 0 4 1 5 2V5c-2 0-4-1-5-2Z" fill="currentColor" stroke="none"/>',
+    website:'<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/>'
+  };
+  const logo = p => `<span class="platform-logo ${p.id}" role="img" aria-label="${esc(p.name)}"><svg class="platform-artwork" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${platformArtwork[p.id] || platformArtwork.website}</svg></span>`;
+  const pill = status => `<span class="pill ${status}"><span class="pill-dot"></span>${statusNames[status]}</span>`;
+  function now() { return new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date())+'（东京时间）'; }
+  function log(c,action,result,note,actor='dudu') { c.logs.unshift({action,actor,result,note,time:now()}); }
+  function toast(message) { clearTimeout(toastTimer); $('toast').textContent=message; $('toast').classList.add('visible'); toastTimer=setTimeout(()=>$('toast').classList.remove('visible'),3500); }
+  function canManage() { if(state.role==='admin') return true; toast('只读角色无法管理连接，请切换为演示管理员。'); return false; }
+  function render() {
+    state.connections.filter(c=>c.platform==='website'&&c.linkedConnection).forEach(c=>{c.status=effectiveSiteStatus(c);});
+    const counts = {all:state.connections.length,connected:state.connections.filter(c=>c.status==='connected').length,attention:state.connections.filter(c=>['reauth','failed'].includes(c.status)).length,platforms:new Set(state.connections.filter(c=>c.status!=='disconnected').map(c=>c.platform)).size};
+    $('overview').innerHTML = [['连接总数',counts.all,'全部示例连接记录','link'],['已连接',counts.connected,'示例范围内授权可用','circle-check'],['需要处理',counts.attention,'授权失效或连接失败','triangle-alert'],['已配置平台',counts.platforms,'仅为演示数据，非实际接入','unplug']].map(([label,n,note,i],idx)=>`<div class="metric ${idx===2?'warn':''}"><div class="metric-label">${label}${icon(i)}</div><div class="metric-value">${n}</div><p class="metric-note">${note}</p></div>`).join('');
+    $('connection-count').textContent=counts.all;
+    const visible=state.connections.filter(c=>(state.platform==='all'||c.platform===state.platform)&&(state.status==='all'||c.status===state.status)&&[c.name,c.account,platform(c.platform).name].some(v=>v.toLowerCase().includes(state.query.toLowerCase()))).sort((a,b)=>Number(b.id==='website-brand')-Number(a.id==='website-brand'));
+    $('result-count').textContent=`共 ${visible.length} 个连接`;
+    $('connection-list').innerHTML=visible.length?`<div class="table-header"><span>连接名称 / 账号</span><span>归属</span><span>授权状态</span><span class="verified-cell">最近验证</span><span>操作</span></div>`+visible.map(connectionRow).join(''):`<div class="empty-state">${icon('search')}<h3>没有符合条件的连接</h3><p>试试其他关键词，或清除筛选条件。</p><button class="btn" data-action="clear-filters">清除筛选</button></div>`;
+    $('role-label').textContent=state.role==='admin'?'管理员':'只读角色';
+    $('new-connection').disabled=state.role!=='admin';
+    $('role-toggle').setAttribute('aria-label',state.role==='admin'?'切换为只读角色':'切换为演示管理员');
+  }
+  function connectionRow(c) {
+    const account=['meta-brand','xhs-brand','shopify-store','douyin-brand'].includes(c.id)?c.account.replace(/\s*·\s*示例(?:账号)?$/,''):c.account;
+    return `<article class="connection-row"><div class="account-cell">${logo(platform(c.platform))}<div class="account-text"><button class="connection-title" data-action="detail" data-id="${c.id}">${esc(c.name)}</button><p class="account-sub">${esc(account)}</p></div></div><div class="ownership-cell"><div class="cell-main">${esc(c.owner)}</div></div><div class="status-cell">${pill(c.status)}</div><div class="verified-cell"><div class="cell-main">${esc(c.verified)}</div></div><div class="action-cell"><button class="row-action" data-action="detail" data-id="${c.id}">${c.status==='reauth'?'处理授权':c.status==='failed'?'查看原因':'查看详情'} ${icon('chevron-right')}</button></div></article>`;
+  }
+  function switchTab() { state.tab='connections'; }
+  function kv(rows) { return `<div class="detail-kv">${rows.map(([k,v])=>`<div class="kv-row"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('')}</div>`; }
+  function openDetail(id) { if(!connection(id))return;state.drawerFocus=document.activeElement;state.drawer=id;state.drawerExpanded=false;state.drawerTab='info';$('detail-drawer').hidden=false;$('drawer-backdrop').hidden=false;document.body.classList.add('overlay-open');renderDrawer();$('detail-drawer').querySelector('button').focus(); }
+  function renderDrawer() {
+    const c=connection(state.drawer);if(!c)return;const p=platform(c.platform);
+    $('detail-drawer').classList.toggle('website-drawer',c.platform==='website');
+    $('detail-drawer').classList.toggle('drawer-expanded',!!state.drawerExpanded);
+    if(c.platform==='website'){renderSiteDrawer(c);return;}
+    $('detail-drawer').innerHTML=`<div class="drawer-header"><div class="drawer-title-row">${logo(p)}<div><h2 id="drawer-title">${esc(c.name)}</h2><p>${p.name} · 示例连接</p></div>${drawerWidthButton()}<button class="icon-button close-drawer" data-action="close-drawer" aria-label="关闭详情">${icon('x')}</button></div></div><div class="drawer-tabs" role="tablist" aria-label="连接详情"><button role="tab" aria-selected="${state.drawerTab==='info'}" class="${state.drawerTab==='info'?'selected':''}" data-action="drawer-info">连接信息</button><button role="tab" aria-selected="${state.drawerTab==='logs'}" class="${state.drawerTab==='logs'?'selected':''}" data-action="drawer-logs">日志记录 <span>(${c.logs.length+(c.checks||[]).length})</span></button></div><div class="drawer-body">${state.drawerTab==='logs'?logsHTML(c):infoHTML(c)}</div><div class="drawer-footer">${c.status!=='disconnected'?`<button class="btn primary" data-action="reauth" data-id="${c.id}" ${state.role!=='admin'?'disabled':''}>${icon('rotate-ccw')}重新授权</button><button class="btn" data-action="disconnect" data-id="${c.id}" ${state.role!=='admin'?'disabled':''}>断开连接</button>`:`<button class="btn primary" data-action="reauth" data-id="${c.id}" ${state.role!=='admin'?'disabled':''}>重新连接（模拟）</button>`}<small>${state.role==='admin'?'仅为本次会话演示':'只读角色 · 无管理权限'}</small></div>`;
+  }
+  function infoHTML(c) { return `<div class="status-box ${c.status}">${icon(c.status==='reauth'?'triangle-alert':c.status==='connected'?'shield-check':'info')}<div>${pill(c.status)}<p>${esc(c.reason)}</p></div></div><section class="detail-section"><h3>基本信息</h3>${kv([['连接名称',c.name],['外部账号',c.account],['归属',c.client],['授权操作人','dudu · 演示管理员'],['授权时间',c.authTime],['有效期',c.expiry],['最近验证',c.verified+' · 模拟'],['接入方式','待确认；本页不执行真实授权']])}</section><section class="detail-section"><h3>授权范围 <span class="neutral-pill">示例，非平台正式权限</span></h3>${c.scope.map(s=>`<div class="scope-item">${icon('check')}<div><b>${esc(s)}</b><p>仅用于展示最小权限确认流程，不代表平台支持该权限。</p></div></div>`).join('')}</section><section class="detail-section"><h3>允许访问的资源</h3>${c.resources.map(s=>`<div class="scope-item">${icon('book-open')}<div><b>${esc(s)}</b><p>演示资源 · 已选范围</p></div></div>`).join('')}</section><p class="small-note">平台决定实际授权结果。连接状态不代表业务数据已同步；未知有效期不会被推定为永久授权。</p>`; }
+  function drawerWidthLabel() {
+    const path=state.drawerExpanded?'M13 5h6v6M19 5l-7 7M11 19H5v-6M5 19l7-7':'M9 4H4v5M4 4l7 7M15 20h5v-5M20 20l-7-7';
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${path}"/></svg><span>${state.drawerExpanded?'收起':'加宽'}</span>`;
+  }
+  function drawerWidthButton() {
+    return `<button type="button" id="drawer-width-toggle" class="drawer-width-toggle" data-action="toggle-drawer-width" aria-pressed="${!!state.drawerExpanded}" aria-label="${state.drawerExpanded?'恢复抽屉宽度':'加宽抽屉'}">${drawerWidthLabel()}</button>`;
+  }
+  function toggleDrawerWidth() {
+    if(!state.drawer)return;
+    state.drawerExpanded=!state.drawerExpanded;
+    $('detail-drawer').classList.toggle('drawer-expanded',state.drawerExpanded);
+    const button=$('drawer-width-toggle');
+    button.innerHTML=drawerWidthLabel();
+    button.setAttribute('aria-pressed',String(state.drawerExpanded));
+    button.setAttribute('aria-label',state.drawerExpanded?'恢复抽屉宽度':'加宽抽屉');
+  }
+  function logsHTML(c) {
+    const checks=c.checks||[],success=checks.filter(l=>l.result==='成功').length,failed=checks.filter(l=>l.result==='异常').length;
+    const rate=checks.length?Math.round(success/checks.length*100)+'%':'—';
+    const tone=result=>/失败|异常/.test(result)?'error':/成功|已保存|已创建|已登记|已停用/.test(result)?'success':/待确认|需处理/.test(result)?'warning':'neutral';
+    const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+    const stamp=l=>{const date=l.time.match(/\d{4}-\d{2}-\d{2}/)?.[0]||today;const time=l.time.match(/\d{2}:\d{2}(?::\d{2})?/)?.[0]||'00:00';return date+' '+time;};
+    const rows=[...checks.map(l=>({...l,kind:'每日检测'})),...c.logs.map(l=>({...l,kind:'授权操作'}))].sort((a,b)=>stamp(b).localeCompare(stamp(a)));
+    return `<div class="audit-notice">${icon('info')}<p>预置日志仅为演示，不代表平台审计记录。计划每天检测一次连接；尚未接入真实定时任务，新操作使用东京时间。</p></div><div class="connector-run-head"><div><b>连接检测概览</b><span>已展示 ${checks.length} 次检测 · 仅统计检测记录</span></div><span>检测周期 1d（计划）</span></div><div class="connector-run-summary" aria-label="连接检测统计"><div><span>成功率</span><b>${rate}</b></div><div><span>成功</span><b>${success}</b></div><div><span>异常</span><b>${failed}</b></div></div><h3 class="connector-run-title">日志记录 <span>共 ${rows.length} 条</span></h3><div class="connector-run-list" aria-label="日志记录">${rows.length?rows.map(l=>`<article class="connector-run-item"><span class="connector-run-dot ${tone(l.result)}" aria-hidden="true"></span><div><div class="connector-run-line"><b>${esc(l.time)}</b><span class="connector-run-status ${tone(l.result)}">${esc(l.result)}</span><span class="connector-run-kind">${l.kind}</span></div><p class="connector-run-action">${esc(l.action)} · ${esc(l.actor)}</p><p class="connector-run-note">${esc(l.note)}</p></div></article>`).join(''):'<p class="small-note audit-empty">暂无日志记录</p>'}</div>`;
+  }
+  function initialChecks(c) {
+    const count=c.platform==='website'?1:3;
+    return Array.from({length:count},(_,i)=>{
+      const failed=i===0&&['reauth','failed'].includes(c.status);
+      return {action:'每日连接检测',actor:'系统',time:`2026-10-${19-i} 10:00:00`,result:failed?'异常':'成功',note:failed?'模拟检测：授权校验异常，连接可能已失效，请重新确认授权。':'模拟检测：连接验证通过，示例授权范围可用。'};
+    });
+  }
+  function closeDrawer() { state.drawer=null;$('detail-drawer').hidden=true;$('drawer-backdrop').hidden=true;if($('modal-backdrop').hidden)document.body.classList.remove('overlay-open');state.drawerFocus?.focus(); }
+  function openModal() { state.returnFocus=document.activeElement;$('flow-modal').classList.remove('site-modal');$('modal-backdrop').hidden=false;document.body.classList.add('overlay-open'); }
+  function modalFrame(title,body,footer,subtitle='模拟流程 · 不跳转真实平台') { $('flow-modal').innerHTML=`<div class="modal-header"><div><h2 id="modal-title">${title}</h2><p>${subtitle}</p></div><button class="icon-button" data-action="close-modal" aria-label="关闭弹窗">${icon('x')}</button></div><div class="modal-body">${body}</div><div class="modal-footer">${footer}</div>`;$('flow-modal').querySelector('input,select,button')?.focus(); }
+  function closeModal(message) { clearTimeout(flowTimer);state.flow=null;$('flow-modal').innerHTML='';$('modal-backdrop').hidden=true;if(!state.drawer)document.body.classList.remove('overlay-open');if(state.returnFocus?.isConnected)state.returnFocus.focus();else if(state.drawer)$('detail-drawer').querySelector('button')?.focus();else $('new-connection').focus();if(message)toast(message); }
+  function startFlow(platformId=null,id=null) {
+    if(platformId==='website'||(id&&connection(id)?.platform==='website')){if(id)startSiteBackend(id);else startSite();return;}
+    if(!canManage())return;const c=id?connection(id):null;state.flow={type:'connect',step:platformId||c?1:0,platform:platformId||c?.platform||null,id,name:c?.name||'',account:c?.account||'',resources:c?[...c.resources]:[],error:null,created:null};openModal();renderFlow();
+  }
+  function renderFlow() {
+    const f=state.flow;if(!f||f.type!=='connect')return;
+    if(f.platform==='website'&&f.step>0){startSite();return;}
+    const p=platform(f.platform);const back=`<button class="btn" data-action="close-modal">取消</button>`;
+    if(f.step===0)modalFrame('新建连接',`<p class="small-note" style="margin-bottom:15px">选择平台，填写信息后即可模拟授权。SEO官方网站使用独立的站点表单。</p><div class="platform-options">${platforms.map(p=>`<button class="platform-option" data-action="choose-platform" data-platform="${p.id}">${logo(p)}<span><b>${p.name}</b><small>${p.id==='website'?'填写站点表单':'账号连接 · 模拟授权'}</small></span>${icon('chevron-right')}</button>`).join('')}</div>`,back);
+    if(f.step===1)modalFrame(f.id?'重新授权 · '+p.name:'连接 '+p.name,`<div class="selected-platform">${logo(p)}<div><b>${p.name}</b><p>默认归属 A8OPARIS · 项目 a80</p></div></div><label class="form-field">连接名称 <span class="required">*</span><input id="connection-name" maxlength="60" value="${esc(f.name||p.name+' · A8OPARIS')}" placeholder="为这个连接命名"></label><label class="form-field">平台账号 <span class="required">*</span><input id="platform-account" maxlength="100" autocomplete="off" value="${esc(f.account)}" placeholder="请输入演示账号"></label><label class="form-field">模拟密码 <span class="required">*</span><input id="platform-password" type="password" autocomplete="new-password" maxlength="100" placeholder="任意演示字符，请勿输入真实密码"></label><div class="inline-note">仅演示账号表单与授权过程，不连接真实平台。模拟密码不保存、不发送、不写入日志；正式授权方式待确认。</div>${f.error?`<p class="error-message" role="alert">${esc(f.error)}</p>`:''}`,`<button class="btn" data-action="close-modal">取消</button><button class="btn primary" data-action="authorize">模拟授权</button>`);
+    if(f.step===3)modalFrame('模拟授权结果',`<div class="flow-result"><div class="result-icon">${icon('check')}</div><h3>${f.id?'连接已更新':'连接已建立'}</h3><p>仅为演示结果，没有连接真实 ${p.name} 账号。</p>${kv([['连接名称',f.name],['授权资源',f.resources.length+' 个 · 示例'],['归属','A8OPARIS · 项目 a80'],['状态','已连接（模拟）']])}</div>`,`<button class="btn" data-action="finish-flow">完成</button><button class="btn primary" data-action="view-created">查看连接</button>`);
+  }
+  function authorize(fail=false) {
+    if(!canManage())return;const f=state.flow;if(!f||f.type!=='connect'||f.step!==1)return;
+    f.name=$('connection-name').value.trim();f.account=$('platform-account').value.trim();
+    if(!f.name||!f.account||!$('platform-password').value){f.error=!f.name?'请输入连接名称。':!f.account?'请输入平台账号。':'请输入任意演示密码，请勿使用真实密码。';$('platform-password').value='';renderFlow();return;}
+    $('platform-password').value='';f.error=null;f.step=2;
+    modalFrame('正在验证模拟授权',`<div class="flow-result"><div class="result-icon">${icon('shield-check')}</div><h3>正在验证账号与权限</h3><p>正在演示授权结果校验，不会请求真实平台。</p><div class="progress" role="progressbar" aria-label="模拟授权验证中"><span></span></div></div><div class="split-actions"><button data-action="authorization-denied">模拟用户拒绝</button><button data-action="authorization-failed">模拟验证失败</button></div>`,`<button class="btn" data-action="cancel-authorization">取消授权</button>`);
+    flowTimer=setTimeout(()=>{if(state.flow!==f)return;if(fail){f.step=1;f.error='模拟验证失败：未能确认账号授权，请重试。';renderFlow();return;}finishBinding();},1200);
+  }
+  function finishBinding() { if(!canManage())return;const f=state.flow;if(!f||f.type!=='connect'||f.step!==2)return;const duplicate=state.connections.find(c=>c.platform===f.platform&&c.account.toLowerCase()===f.account.toLowerCase()&&c.status!=='disconnected'&&c.id!==f.id);if(duplicate){f.step=1;f.error='该平台账号已有连接，请进入已有连接重新授权。';renderFlow();return;}let c=f.id?connection(f.id):null;if(!c){c={id:'demo-'+(++state.serial),platform:f.platform,owner:'A8OPARIS',client:'客户 u2c · 项目 a80',logs:[]};state.connections.unshift(c);}Object.assign(c,{name:f.name,account:f.account,status:'connected',reason:'模拟账号验证成功；没有连接真实平台。',resources:[...platform(f.platform).resources.slice(0,1)],scope:['账号基本信息（模拟）'],authTime:now(),expiry:'未知（演示）',verified:now()});log(c,f.id?'模拟重新授权':'模拟建立连接','成功','完成模拟账号验证；未发送真实请求，未保存密码。');f.resources=c.resources;f.created=c.id;f.step=3;render();if(state.drawer===c.id)renderDrawer();renderFlow(); }
+  function startDisconnect(id) { if(!canManage())return;const c=connection(id);if(!c||c.status==='disconnected')return;state.flow={type:'disconnect',id};openModal();modalFrame('断开连接',`<div class="status-box reauth">${icon('triangle-alert')}<div><h3>断开后，将停止该连接的后续使用</h3><p>${esc(c.name)}</p></div></div>${kv([['本地操作','停用此示例连接'],['平台侧授权','单独反馈撤销结果'],['影响范围','关联任务影响待确认；不保证外部在途动作已停止']])}<div class="inline-note">本地断开不等于平台授权已撤销，也不会删除外部数据。</div><label class="check-label"><input id="revoke-failure" type="checkbox" checked>模拟平台侧撤销失败（体验双结果反馈）</label>`,`<button class="btn" data-action="close-modal">取消</button><button class="btn danger" data-action="confirm-disconnect">确认断开（模拟）</button>`); }
+  function confirmDisconnect() { if(!canManage())return;const f=state.flow;if(!f||f.type!=='disconnect')return;const c=connection(f.id);const failed=$('revoke-failure').checked;c.status='disconnected';c.reason=failed?'本地已断开，平台授权撤销未确认（模拟）。真实接入时可能需要前往平台处理。':'本地已断开，平台撤销成功（模拟）；未执行真实撤销。';c.verified=now();log(c,'模拟断开连接','本地已停用',c.reason);log(c,'模拟平台侧撤销',failed?'失败':'成功',failed?'示例外部撤销失败；本地已停用，不自动恢复。':'仅模拟结果，未发送真实请求。','系统');render();if(state.drawer)renderDrawer();closeModal(c.reason); }
+  function clearFilters() { state.query='';state.platform='all';state.status='all';$('search').value='';$('platform-filter').value='all';$('status-filter').value='all';render(); }
+  function reset() { closeModal();closeDrawer();state.connections=initialConnections();state.role='admin';state.serial=0;clearFilters();switchTab('connections');toast('演示已重置；仅影响本页会话。'); }
+  const cmsNames={wordpress:'WordPress',shopify:'Shopify',custom:'其他／自建',unknown:'暂不清楚'};
+  function normalizeSiteAddress(raw) {
+    const value=raw.trim();
+    if(!value||/\s/.test(value))throw new Error('请输入有效的官网地址，例如 https://example.com。');
+    const url=new URL(/^[a-z][a-z\d+.-]*:/i.test(value)?value:'https://'+value);
+    if(!['http:','https:'].includes(url.protocol)||url.username||url.password||url.port||!url.hostname.includes('.')||url.hostname.endsWith('.')||/^[\d.]+$/.test(url.hostname)||url.hostname==='localhost')throw new Error('请填写公开官网域名，不要输入账号密码、端口或本机地址。');
+    const hostname=url.hostname.toLowerCase();
+    if(!hostname.split('.').every(label=>/^[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?$/i.test(label)))throw new Error('官网域名格式不正确，请检查后重试。');
+    return {address:'https://'+hostname,domain:hostname.replace(/^www\./,'')};
+  }
+  function startSite(id=null) {
+    if(!canManage())return;
+    const c=id?connection(id):null;
+    state.flow={type:'site',id,name:c?.name||'',address:c?.address||'',owner:c?.owner||'A8OPARIS',language:c?.language||'中文',cms:c?.cms||'wordpress',description:c?.config.description||'',competitors:c?.config.competitors||'',keywords:c?.config.keywords||'',wpAddress:c?.wpAddress||'',wpUser:c?.wpUser||'',seo:c?.seo||'auto',error:null};openModal();renderSiteForm();
+  }
+  function renderSiteForm() {
+    const f=state.flow;
+    $('flow-modal').classList.add('site-modal');
+    modalFrame(f.id?'编辑站点':'新建站点',`<form autocomplete="off" onsubmit="return false"><fieldset class="site-fieldset"><legend>基本信息</legend><div class="site-form-grid"><label class="form-field">站点名称<span class="required">*</span><input id="site-name" maxlength="60" value="${esc(f.name)}" placeholder="例如：Acme 官网"></label><label class="form-field">域名<span class="required">*</span><input id="site-address" maxlength="500" value="${esc(f.address)}" placeholder="acme.com"><small class="small-note">只保留域名本身；完整网址中的协议、路径与 www 前缀会在提交时去掉。</small></label><label class="form-field">主语言<select id="site-language">${['中文','英文','其他'].map(v=>`<option ${f.language===v?'selected':''}>${v}</option>`).join('')}</select></label><label class="form-field">CMS<select id="site-cms">${Object.entries(cmsNames).map(([k,v])=>`<option value="${k}" ${f.cms===k?'selected':''}>${v}</option>`).join('')}</select></label></div></fieldset><fieldset class="site-fieldset"><legend>站点专属说明（可选）</legend><label class="form-field">这个站点是做什么的 <span class="field-counter" id="site-description-count">${f.description.length}/2000</span><textarea id="site-description" maxlength="2000" rows="4" placeholder="例如：本站面向海外采购商，介绍品牌与产品。说明服务对象、主要市场，以及内容表达的边界。">${esc(f.description)}</textarea></label><p class="small-note">作为站点内容与分析的背景信息。只保存演示配置，不在本页执行 AI 分析。</p></fieldset><fieldset class="site-fieldset"><legend>分析配置（可选）</legend><div class="site-form-grid"><label class="form-field">竞品域名 <span class="small-note">（每行一个）</span><textarea id="site-competitors" maxlength="2000" rows="3" placeholder="competitor-a.com&#10;competitor-b.com">${esc(f.competitors)}</textarea><small class="small-note">用于展示关键词及外链分析配置，不执行实际分析。</small></label><label class="form-field">种子关键词 <span class="small-note">（每行一个）</span><textarea id="site-keywords" maxlength="2000" rows="3" placeholder="B2B 获客&#10;GEO 优化">${esc(f.keywords)}</textarea><small class="small-note">可补充站点相关的业务关键词，不生成分析结果。</small></label></div></fieldset><fieldset class="site-fieldset" id="site-wp-fields" ${f.cms!=='wordpress'?'hidden disabled':''}><legend>WORDPRESS 连接（可选，填写后模拟授权）</legend><div class="site-form-grid"><label class="form-field">站点地址<input id="site-wp-address" maxlength="500" value="${esc(f.wpAddress)}" placeholder="https://acme.com"><small class="small-note">与上方域名一致的 HTTPS 首页地址，不是 /wp-admin。</small></label><label class="form-field">用户名<input id="site-wp-user" maxlength="100" autocomplete="off" value="${esc(f.wpUser)}" placeholder="xdigate-demo"><small class="small-note">请输入演示用户名，不使用真实账号。</small></label><label class="form-field">应用密码（模拟）<input id="site-wp-password" type="password" maxlength="100" autocomplete="new-password" placeholder="任意演示字符，请勿输入真实密钥"><small class="small-note">不保存、不发送、不写入日志；错误或取消后请重新输入。</small></label><label class="form-field">SEO 插件<select id="site-seo">${[['auto','自动检测（模拟）'],['yoast','Yoast SEO'],['rankmath','Rank Math'],['none','无／其他']].map(([key,name])=>`<option value="${key}" ${f.seo===key?'selected':''}>${name}</option>`).join('')}</select><small class="small-note">只记录选择，不检测插件、不自动发布文章。</small></label></div></fieldset><p class="small-note">默认归属 ${esc(f.owner)} · 当前品牌项目。仅本次会话演示，所有真实接入能力待确认。</p><p id="site-form-error" class="error-message" role="alert" ${!f.error?'hidden':''}>${esc(f.error||'')}</p></form>`,`<button class="btn" data-action="close-modal">取消</button><button class="btn primary" data-action="save-site">${f.id?'保存站点':'创建站点'}</button>`,'SEO官方网站 · 表单与授权均为模拟');
+  }
+  function saveSite() {
+    if(!canManage()||state.flow?.type!=='site')return;
+    const f=state.flow;Object.assign(f,{name:$('site-name').value.trim(),address:$('site-address').value.trim(),language:$('site-language').value,cms:$('site-cms').value,description:$('site-description').value.trim().slice(0,2000),competitors:$('site-competitors').value.trim().slice(0,2000),keywords:$('site-keywords').value.trim().slice(0,2000),wpAddress:$('site-wp-address').value.trim(),wpUser:$('site-wp-user').value.trim(),seo:$('site-seo').value});
+    try{
+      if(!f.name)throw new Error('请填写站点名称。');
+      if(!cmsNames[f.cms])throw new Error('请选择有效的建站系统。');
+      const normalized=normalizeSiteAddress(f.address);
+      if(state.connections.some(c=>c.platform==='website'&&c.domain===normalized.domain&&c.id!==f.id))throw new Error('该域名已添加，请从已有官网编辑，避免重复登记。');
+      const wantsWP=f.cms==='wordpress'&&Boolean(f.wpAddress||f.wpUser||$('site-wp-password').value);
+      if(wantsWP){
+        if(!f.wpAddress||!f.wpUser||!$('site-wp-password').value)throw new Error('WordPress 连接为可选；如需模拟授权，请填齐站点地址、演示用户名和模拟应用密码。');
+        const wp=normalizeSiteAddress(f.wpAddress);
+        if(!/^https:\/\//i.test(f.wpAddress)||!/^(https:\/\/[^/?#]+)\/?$/i.test(f.wpAddress)||wp.domain!==normalized.domain)throw new Error('WordPress 地址需为与上方域名一致的 HTTPS 首页地址，不含路径或参数。');
+      }
+      $('site-wp-password').value='';f.error=null;f.submitting=true;
+      modalFrame(wantsWP?'正在模拟 WordPress 授权':'正在创建站点',`<div class="flow-result"><div class="result-icon">${icon('shield-check')}</div><h3>${wantsWP?'正在验证演示连接信息':'正在保存站点资料'}</h3><p>不访问真实官网，不检测插件，也不执行发布。</p><div class="progress" role="progressbar" aria-label="站点创建模拟进度"><span></span></div></div>${wantsWP?'<div class="split-actions"><button data-action="site-authorization-failed">模拟授权失败</button></div>':''}`,`<button class="btn" data-action="close-modal">取消</button>`);
+      flowTimer=setTimeout(()=>{if(state.flow===f&&canManage())completeSite(normalized,wantsWP);},1200);
+    }catch(error){$('site-wp-password').value='';f.error=error.message.includes('Invalid URL')?'官网地址格式不正确，请检查后重试。':error.message;$('site-form-error').textContent=f.error;$('site-form-error').hidden=false;$('site-form-error').scrollIntoView?.({block:'nearest'});}
+  }
+  function completeSite(normalized,wantsWP) {
+    const f=state.flow;if(!f||f.type!=='site'||!f.submitting)return;
+    let c=f.id?connection(f.id):null;const existing=Boolean(c);
+    if(!c){c={id:'site-'+(++state.serial),platform:'website',owner:f.owner,client:`品牌 ${f.owner} · 项目 a80（演示）`,logs:[]};state.connections.unshift(c);}
+    Object.assign(c,{name:f.name,account:'https://'+normalized.domain,address:'https://'+normalized.domain,domain:normalized.domain,language:f.language,cms:f.cms,status:wantsWP?'connected':['custom','unknown'].includes(f.cms)?'pending':'unconnected',reason:wantsWP?'WordPress 连接模拟成功；未获得真实权限，未执行发布。':'站点已创建，未配置后台授权；真实接入方式待确认。',resources:[],scope:wantsWP?['WordPress 后台访问（模拟，实际权限待确认）']:[],authTime:wantsWP?now():'未授权',expiry:wantsWP?'未知（演示）':'未授权',verified:wantsWP?now():'尚未验证',wpAddress:wantsWP?f.wpAddress:'',wpUser:wantsWP?f.wpUser:'',seo:f.seo,config:{description:f.description,competitors:f.competitors,keywords:f.keywords}});
+    delete c.linkedConnection;log(c,existing?'更新官网站点':'创建官网站点',wantsWP?'模拟授权成功':'已创建',wantsWP?'完成表单及模拟授权；未保存密码，未发送真实请求。':'完成表单登记；没有后台授权。');
+    const id=c.id;closeModal();clearFilters();if(state.drawer)closeDrawer();openDetail(id);toast(wantsWP?'站点已创建并完成模拟授权。':'站点资料已保存，尚未授权后台。');
+  }
+  function effectiveSiteStatus(c) {
+    if(c.linkedConnection){const linked=connection(c.linkedConnection);return linked?.status==='connected'?'connected':linked?.status==='reauth'?'reauth':'unconnected';}
+    return c.status;
+  }
+  function renderSiteDrawer(c) {
+    const status=effectiveSiteStatus(c), linked=c.linkedConnection?connection(c.linkedConnection):null;
+    let body=state.drawerTab==='logs'?logsHTML(c):`<div class="status-box">${icon('info')}<div>${pill(status)}<p>${esc(linked?(status==='connected'?'已关联有效的 Shopify 示例连接，无需重复授权。':'关联的 Shopify 连接当前不可用，请先处理原连接。'):c.reason)}</p></div></div><section class="detail-section"><h3>站点资料</h3>${kv([['站点名称',c.name],['官网地址',c.address],['所属品牌／项目',c.client],['主语言',c.language],['建站系统',cmsNames[c.cms]],['后台授权',linked?linked.name:status==='connected'?'已模拟授权':'尚未授权'],['授权时间',c.authTime],['最近验证',c.verified]])}</section>${linked?`<button class="btn" data-action="linked-detail" data-id="${linked.id}">查看关联 Shopify 连接 ${icon('arrow-up-right')}</button>`:''}<section class="detail-section"><h3>授权边界</h3><p class="small-note">登记网址不代表授权。真实接入方式、权限及所有权验证仍待确认。演示不索取任何密码或应用密钥，不抓取站点，也不执行自动发布。</p></section>`;
+    if(state.drawerTab==='info')body=body.replace('<section class="detail-section">',siteOverviewHTML(c)+'<section class="detail-section">');
+    if(state.drawerTab==='rankings')body=siteRankingsHTML(c);
+    if(state.drawerTab==='published')body=sitePublishedHTML(c);
+    const backend='编辑站点', data=siteAnalytics(c);
+    $('detail-drawer').innerHTML=`<div class="drawer-header"><div class="drawer-title-row">${logo(platform('website'))}<div><p class="website-eyebrow">SEO官方网站 · ${esc(cmsNames[c.cms])}</p><h2 id="drawer-title">${esc(c.name)}</h2><p>${esc(c.domain)}</p></div>${drawerWidthButton()}<div class="website-header-status">${pill(status)}</div><button class="icon-button close-drawer" data-action="close-drawer" aria-label="关闭详情">${icon('x')}</button></div></div><div class="drawer-tabs website-tabs" role="tablist" aria-label="官网详情">${[['info','站点信息'],['rankings',`关键词排名 (${data.keywords.length})`],['published',`已发布内容 (${data.posts.length})`],['logs',`日志记录 (${c.logs.length+(c.checks||[]).length})`]].map(([tab,label])=>`<button id="website-tab-${tab}" role="tab" aria-controls="website-tab-panel" aria-selected="${state.drawerTab===tab}" class="${state.drawerTab===tab?'selected':''}" data-action="drawer-${tab}">${label}</button>`).join('')}</div><div class="drawer-body website-body" id="website-tab-panel" role="tabpanel" aria-labelledby="website-tab-${state.drawerTab}">${body}</div><div class="drawer-footer"><button class="btn primary" data-action="site-backend" data-id="${c.id}" ${state.role!=='admin'?'disabled':''}>${backend}</button>${status==='connected'?`<button class="btn" data-action="${linked?'unlink-site':'disconnect'}" data-id="${c.id}" ${state.role!=='admin'?'disabled':''}>${linked?'解除站点关联':'断开连接'}</button>`:''}<small>本次会话演示 · 不连接真实官网</small></div>`;
+  }
+  function siteDemoData() {
+    const keywords=[
+      ['A8OPARIS 品牌',880,12,['品牌','导航'],1,1,1],['A8OPARIS 官网',720,8,['品牌','导航'],1,2,2],['A8OPARIS 护肤',590,18,['品牌','商业'],3,4,5],['日常护肤步骤',2400,42,['信息'],6,8,9],['护肤品怎么选择',1900,38,['信息','商业'],8,12,8],['护肤品使用顺序',3600,46,['信息'],11,15,14],['换季护肤指南',1300,31,['信息'],14,18,16],['旅行护肤清单',880,25,['信息','商业'],18,22,21],['护肤产品搭配',1600,37,['信息','商业'],23,27,24],['品牌护肤理念',480,22,['品牌','信息'],28,null,30],['护肤产品介绍',720,29,['商业'],35,41,33],['日常护肤常见问题',590,24,['信息'],null,null,null]
+    ].map(([term,volume,kd,intent,google,baidu,previous])=>({term,volume,kd,intent,google,baidu,previous}));
+    const posts=[
+      {id:'brand-story',title:'认识 A8OPARIS：品牌理念与日常护理',path:'/journal/brand-story',target:'A8OPARIS 品牌',best:'A8OPARIS 官网',date:'2026-10-18',excerpt:'品牌介绍页面示例，用于展示已发布内容与关键词之间的关联。'},
+      {id:'daily-routine',title:'日常护肤步骤：让护理更有条理',path:'/journal/daily-routine',target:'日常护肤步骤',best:'A8OPARIS 护肤',date:'2026-10-15',excerpt:'日常护理主题文章的示例摘要。本页只预览演示内容，不提供专业护理建议。'},
+      {id:'product-guide',title:'选购前先了解：产品信息阅读指南',path:'/journal/product-guide',target:'护肤品怎么选择',best:'护肤品怎么选择',date:'2026-10-12',excerpt:'产品信息说明文章的预置示例，非真实已发布页面。'},
+      {id:'season-guide',title:'换季护理指南：整理你的日常清单',path:'/journal/season-guide',target:'换季护肤指南',best:'换季护肤指南',date:'2026-10-09',excerpt:'演示文章条目，用于检查发布日期与排名字段的展示。'},
+      {id:'travel-checklist',title:'轻装出行：旅行护理清单',path:'/journal/travel-checklist',target:'旅行护理产品清单',best:null,date:'2026-10-06',excerpt:'尚无排名数据的示例，缺失排名以横线展示，不推定为零。'}
+    ];return {keywords,posts,summary:{health:99,dr:16,previousDR:16,referringDomainsAcquired:0}};
+  }
+  function siteAnalytics(c) { return c.analytics || {keywords:[],posts:[]}; }
+  function siteOverviewHTML(c) {
+    const data=siteAnalytics(c),summary=data.summary||{},hasData=!!c.analytics;
+    const top=engine=>hasData?data.keywords.filter(k=>Number.isInteger(k[engine])&&k[engine]>0&&k[engine]<=20).length:null;
+    const previous=hasData?data.keywords.filter(k=>Number.isInteger(k.previous)&&k.previous>0&&k.previous<=20).length:null;
+    const google=top('google'),delta=google===null?null:google-previous;
+    const rows=[['健康分数',summary.health,'满分 100 · 示例'],['域名评级（DR）',summary.dr,summary.dr===summary.previousDR&&summary.dr!=null?'较上期无变化 · 示例':'演示数据'],['Google Top 20',google,delta===null?'尚未接入':delta>0?'↑ '+delta+' · 较上期示例':delta<0?'↓ '+Math.abs(delta)+' · 较上期示例':'较上期无变化 · 示例'],['Baidu Top 20',top('baidu'),'排名关键词数 · 示例'],['新增引用域名',summary.referringDomainsAcquired,'RDs Acquired · 示例']];
+    return `<section class="site-overview" aria-label="站点统计"><p class="site-overview-note">站点统计 · ${hasData?'预置演示数据，非真实采集':'暂无数据，尚未接入统计服务'}</p><div class="site-overview-grid">${rows.map(([label,value,note])=>`<div class="site-overview-card"><span>${label}</span><strong>${value==null?'—':esc(value)}</strong><small>${value==null?'暂无数据':esc(note)}</small></div>`).join('')}</div></section>`;
+  }
+  function rankNumber(value) { return Number.isInteger(value)&&value>0?`<b class="rank-number">#${value}</b>`:'<span class="rank-missing" title="暂无示例排名">—</span>'; }
+  function siteDataNotice() { return `<div class="site-data-notice">${icon('flask-conical')}<span>预置演示数据 · 排名、搜索量及已发布文章均非真实采集，不代表实际站点表现。</span></div>`; }
+  function siteRankingsHTML(c) {
+    const data=siteAnalytics(c), top=engine=>data.keywords.filter(k=>k[engine]&&k[engine]<=20).length;
+    return `${siteDataNotice()}<div class="site-metrics"><div><span>自然搜索关键词</span><strong>${data.keywords.length}</strong><small>当前站点示例</small></div><div><span>Google Top 20</span><strong>${top('google')}</strong><small>前 20 名关键词</small></div><div><span>百度 Top 20</span><strong>${top('baidu')}</strong><small>前 20 名关键词</small></div></div><div id="keyword-table">${keywordTableHTML(c)}</div><p class="site-data-footnote">搜索量为月度估算示例；KD 表示关键词难度（0–100）；涨跌为 Google 排名与上次示例的对比。— 表示暂无示例排名。</p>`;
+  }
+  function keywordTableHTML(c) {
+    const data=siteAnalytics(c), query=(c.keywordQuery||'').trim().toLowerCase(), rows=data.keywords.filter(k=>k.term.toLowerCase().includes(query));
+    return `<div class="site-table-scroll"><table class="site-data-table keyword-data"><caption class="visually-hidden">关键词排名示例</caption><thead><tr><th scope="col">关键词 / 意图</th><th scope="col">搜索量</th><th scope="col"><abbr title="关键词难度，0 到 100">KD</abbr></th><th scope="col">Google</th><th scope="col">百度</th></tr></thead><tbody>${rows.length?rows.map(k=>{const delta=k.google&&k.previous?k.previous-k.google:0;return `<tr><td><b class="keyword-term">${esc(k.term)}</b><div class="keyword-intents">${k.intent.map(i=>`<span>${esc(i)}</span>`).join('')}</div></td><td class="numeric">${k.volume.toLocaleString('en-US')}</td><td><span class="kd-score ${k.kd>35?'competitive':'moderate'}">${k.kd}</span></td><td>${rankNumber(k.google)}${delta?`<span class="rank-change ${delta>0?'up':'down'}" aria-label="${delta>0?'上升':'下降'} ${Math.abs(delta)} 名">${delta>0?'↑':'↓'}${Math.abs(delta)}</span>`:''}</td><td>${rankNumber(k.baidu)}</td></tr>`;}).join(''):`<tr><td colspan="5" class="site-table-empty">${data.keywords.length?'没有匹配的关键词，试试其他关键词。':'暂无关键词数据。新站点未连接排名服务，不会自动生成排名。'}</td></tr>`}</tbody></table></div><div class="site-table-count">共 ${rows.length} / ${data.keywords.length} 个关键词 · 演示</div>`;
+  }
+  function sitePublishedHTML(c) {
+    const data=siteAnalytics(c);
+    return `${siteDataNotice()}<div id="published-table">${publishedTableHTML(c)}</div><p class="site-data-footnote">点击标题查看演示摘要；不打开真实文章、不执行发布或更新。目标词排名和最高排名词均取自本页关键词示例。</p>`;
+  }
+  function publishedTableHTML(c) {
+    const data=siteAnalytics(c),query=(c.publishedQuery||'').trim().toLowerCase(),rows=data.posts.filter(p=>[p.title,p.target,p.best||''].some(v=>v.toLowerCase().includes(query))),getRank=term=>data.keywords.find(k=>k.term===term)?.google;
+    return `<div class="site-table-scroll"><table class="site-data-table published-data"><caption class="visually-hidden">已发布内容示例</caption><thead><tr><th scope="col">文章 / 发布日期</th><th scope="col">目标关键词 / 排名</th><th scope="col">最高排名词 / 排名</th></tr></thead><tbody>${rows.length?rows.map(p=>`<tr><td><button class="article-title" data-action="preview-site-post" data-id="${esc(p.id)}">${esc(p.title)} ${icon('arrow-up-right')}</button><div class="article-meta"><span>示例已发布</span><time datetime="${esc(p.date)}">${esc(p.date)}</time></div></td><td><span class="article-keyword">${esc(p.target)}</span>${rankNumber(getRank(p.target))}</td><td><span class="article-keyword">${esc(p.best||'暂无排名词')}</span>${rankNumber(getRank(p.best))}</td></tr>`).join(''):`<tr><td colspan="3" class="site-table-empty">${data.posts.length?'没有匹配的文章，试试标题或关键词。':'暂无已发布内容。此站点尚未导入真实文章，本页不会代为发布。'}</td></tr>`}</tbody></table></div><div class="site-table-count">共 ${rows.length} / ${data.posts.length} 篇文章 · 演示</div>`;
+  }
+  function previewSitePost(id) {
+    const c=connection(state.drawer),post=c&&siteAnalytics(c).posts.find(p=>p.id===id);if(!post)return;
+    state.flow={type:'site-post',id};openModal();modalFrame('文章预览 · 演示',`<div class="site-post-preview"><span class="neutral-pill">预置示例 · 非真实发布</span><h3>${esc(post.title)}</h3><p class="small-note">${esc(c.domain)}${esc(post.path)} · ${esc(post.date)}</p><p>${esc(post.excerpt)}</p>${kv([['目标关键词',post.target],['最高排名词',post.best||'暂无示例数据']])}<p class="small-note">仅预览示例摘要，不访问官网、不发布文章。</p></div>`,`<button class="btn primary" data-action="close-modal">关闭预览</button>`);
+  }
+  function startSiteBackend(id) {
+    if(connection(id)?.platform==='website')startSite(id);
+  }
+  document.addEventListener('click',event=>{const el=event.target.closest('[data-action]');if(!el)return;const action=el.dataset.action;const f=state.flow;
+    if(action==='detail')openDetail(el.dataset.id);
+    if(action==='close-drawer')closeDrawer();
+    if(action==='toggle-drawer-width')toggleDrawerWidth();
+    if(action==='save-site')saveSite();
+    if(action==='site-backend')startSiteBackend(el.dataset.id);
+    if(action==='site-authorization-failed'&&f?.type==='site'){clearTimeout(flowTimer);f.submitting=false;f.error='模拟授权失败，未创建或修改站点。请检查演示信息后重试。';renderSiteForm();}
+    if(action==='drawer-rankings'||action==='drawer-published'){const c=connection(state.drawer);if(c?.platform==='website'){state.drawerTab=action==='drawer-rankings'?'rankings':'published';renderDrawer();$('detail-drawer').querySelector(`[data-action="${action}"]`).focus();}}
+    if(action==='preview-site-post')previewSitePost(el.dataset.id);
+    if(action==='linked-detail'){closeDrawer();openDetail(el.dataset.id);}
+    if(action==='unlink-site'&&canManage()){const c=connection(el.dataset.id);if(c?.linkedConnection){delete c.linkedConnection;c.status='unconnected';c.authTime='未授权';c.verified='尚未验证';c.reason='站点关联已解除，原 Shopify 连接及其授权不受影响。';log(c,'解除站点关联','成功','仅解除引用，不撤销 Shopify 原连接授权。');render();renderDrawer();toast('已解除站点关联，原 Shopify 授权保留。');}}
+    if(action==='drawer-info'||action==='drawer-logs'){state.drawerTab=action==='drawer-info'?'info':'logs';renderDrawer();$('detail-drawer').querySelector(`[data-action="${action}"]`).focus();}
+    if(action==='platform-demo')startFlow(el.dataset.platform);
+    if(action==='clear-filters')clearFilters();
+    if(action==='close-modal')closeModal();
+    if(action==='choose-platform'&&f){if(el.dataset.platform==='website')startSite();else{f.platform=el.dataset.platform;f.step=1;renderFlow();}}
+    if(action==='authorize')authorize();
+    if(['authorization-denied','authorization-failed','cancel-authorization'].includes(action)&&f){clearTimeout(flowTimer);f.step=1;f.error=action==='authorization-denied'?'模拟用户已拒绝授权，未创建连接。':action==='authorization-failed'?'模拟验证失败：未能确认账号授权，可以重试。':'授权已取消，未创建或更新连接。';renderFlow();}
+    if(action==='reauth')startFlow(null,el.dataset.id);
+    if(action==='disconnect')startDisconnect(el.dataset.id);
+    if(action==='confirm-disconnect')confirmDisconnect();
+    if(action==='finish-flow'){closeModal();switchTab('connections');clearFilters();}
+    if(action==='view-created'&&f?.created){const id=f.created;closeModal();switchTab('connections');clearFilters();if(state.drawer)closeDrawer();openDetail(id);}
+  });
+  document.addEventListener('change',event=>{if(event.target.id==='site-cms'&&state.flow?.type==='site'){const wp=event.target.value==='wordpress';$('site-wp-fields').hidden=!wp;$('site-wp-fields').disabled=!wp;if(!wp)$('site-wp-password').value='';}});
+  document.addEventListener('input',event=>{if(event.target.id==='site-description'&&state.flow?.type==='site')$('site-description-count').textContent=event.target.value.length+'/2000';});
+  document.addEventListener('keydown',event=>{const overlay=!$('modal-backdrop').hidden?$('flow-modal'):!$('detail-drawer').hidden?$('detail-drawer'):null;if(!overlay)return;if(event.key==='Escape'){event.preventDefault();if(!$('modal-backdrop').hidden)closeModal();else closeDrawer();}if(event.key==='Tab'){const focusable=[...overlay.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),a[href]')].filter(el=>el.getClientRects().length);if(!focusable.length)return;const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}});
+  $('search').addEventListener('input',e=>{state.query=e.target.value;render();});
+  $('status-filter').insertAdjacentHTML('beforeend','<option value="unconnected">未连接</option><option value="pending">接入待确认</option>');
+  $('platform-filter').innerHTML+=platforms.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  $('platform-filter').addEventListener('change',e=>{state.platform=e.target.value;render();});
+  $('status-filter').addEventListener('change',e=>{state.status=e.target.value;render();});
+  $('new-connection').addEventListener('click',()=>startFlow());
+  $('reset-demo').addEventListener('click',reset);
+  $('role-toggle').addEventListener('click',()=>{state.role=state.role==='admin'?'reader':'admin';render();if(state.drawer)renderDrawer();toast(state.role==='admin'?'已切换为演示管理员。':'已切换为只读角色；可以查看，不能管理连接。');});
+  $('drawer-backdrop').addEventListener('click',closeDrawer);
+  $('modal-backdrop').addEventListener('click',e=>{if(e.target===$('modal-backdrop'))closeModal();});
+  state.connections=initialConnections();icons();render();
+})();
+</script>
+  <script>
+/* Keep the embedded viewport stable; only change clipping for global overlays. */
+(() => {
+  const embedded=window.parent!==window&&new URLSearchParams(location.search).get('embedded')==='1';
+  if(embedded){
+    const notify=()=>window.parent.postMessage({type:'connector-overlay',open:document.body.classList.contains('overlay-open')},'*');
+    new MutationObserver(notify).observe(document.body,{attributes:true,attributeFilter:['class']});
+    window.addEventListener('message',event=>{
+      if(event.source!==window.parent||event.data?.type!=='connector-geometry')return;
+      for(const key of ['left','top','width','height']){
+        const value=event.data[key];
+        if(Number.isFinite(value))document.documentElement.style.setProperty('--connector-host-'+key,value+'px');
+      }
+      document.documentElement.classList.add('shell-mounted');
+      window.parent.postMessage({type:'connector-ready'},'*');
+    });
+    notify();
+    return;
+  }
+  let currentFrame=null;
+  const layout=frame=>{
+    const box=frame.parentElement.getBoundingClientRect();
+    frame.style.setProperty('--connector-clip-top',box.top+'px');
+    frame.style.setProperty('--connector-clip-left',box.left+'px');
+    frame.style.setProperty('--connector-clip-right',Math.max(0,window.innerWidth-box.right)+'px');
+    frame.style.setProperty('--connector-clip-bottom',Math.max(0,window.innerHeight-box.bottom)+'px');
+    frame.classList.add('connector-mounted');
+    frame.contentWindow.postMessage({type:'connector-geometry',left:box.left,top:box.top,width:box.width,height:box.height},'*');
+    currentFrame=frame;
+  };
+  const getFrame=()=>document.querySelector('iframe.connector-frame');
+  window.addEventListener('message',event=>{
+    const frame=getFrame();
+    if(!frame||event.source!==frame.contentWindow)return;
+    if(event.data?.type==='connector-ready'){
+      frame.classList.add('connector-ready');
+      return;
+    }
+    if(event.data?.type!=='connector-overlay'||typeof event.data.open!=='boolean')return;
+    if(currentFrame!==frame)layout(frame);
+    // No width, height, position or background changes on open/close.
+    frame.classList.toggle('connector-overlay-open',event.data.open);
+  });
+  document.addEventListener('load',event=>{
+    if(event.target.matches?.('iframe.connector-frame'))layout(event.target);
+  },true);
+  window.addEventListener('resize',()=>{
+    const frame=getFrame();
+    if(frame)layout(frame);
+  });
+})();
+</script>
+</body>
+</html>

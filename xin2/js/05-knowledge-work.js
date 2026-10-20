@@ -1430,7 +1430,6 @@ function vWork(){
     </div>
     <button class="btn ghost" onclick="openRecipeDrawer()">从配方开始</button>
     <button class="btn" onclick="openNew()">＋ 新建任务</button>
-    ${taskWorkMenuHTML()}
   </div>
   ${L.length?(S.mode==='kanban'?kanban(L):bydate(L)):
    `<div class="empty"><div class="h">这些条件下没有任务</div>

@@ -20,16 +20,16 @@ function caAttachButton(kind,id,scope=null){
 }
 let caMenuTrigger=null,caMenuDraftKey=null;
 function caCloseMenu(restoreFocus=false){
- const trigger=caMenuTrigger;document.getElementById('ca-source-menu')?.remove();
+ const trigger=caMenuTrigger;document.getElementById('ca-source-menu')?.remove?.();
  trigger?.setAttribute('aria-expanded','false');caMenuTrigger=null;if(restoreFocus)trigger?.focus();
 }
 function caSourceMenuHTML(){
  return [['files','在线文档'],['images','素材库'],['upload','本地上传']].map(([icon,label],i)=>`<button type="button" role="menuitem" onclick="${i===0?'caOpenDocumentPicker(caMenuDraftKey)':'caCloseMenu(true)'}"><i data-lucide="${icon}" aria-hidden="true"></i><span>${label}</span></button>`).join('');
 }
-function caToggleMenu(event,trigger){
+function caToggleMenu(event,trigger,customHTML=null){
  event.stopPropagation();const wasOpen=caMenuTrigger===trigger;caCloseMenu();if(wasOpen)return;
  caMenuDraftKey=trigger.getAttribute('data-ca-key');
- const menu=document.createElement('div');menu.id='ca-source-menu';menu.className='ca-source-menu';menu.setAttribute('role','menu');menu.setAttribute('aria-label','附件来源');menu.innerHTML=caSourceMenuHTML();
+ const menu=document.createElement('div');menu.id='ca-source-menu';menu.className='ca-source-menu';menu.setAttribute('role','menu');menu.setAttribute('aria-label','附件来源');menu.innerHTML=customHTML||caSourceMenuHTML();
  document.body.appendChild(menu);caMenuTrigger=trigger;trigger.setAttribute('aria-expanded','true');
  const box=trigger.getBoundingClientRect(),width=menu.offsetWidth,height=menu.offsetHeight;
  menu.style.left=Math.max(8,Math.min(box.left,window.innerWidth-width-8))+'px';
@@ -57,7 +57,7 @@ function caPendingHTML(draft){
  return '<div class="ta-feedback" role="alert">'+esc(draft.errors||'')+'</div><ul class="ta-files ca-files" aria-label="待发送附件">'+draft.files.map(item=>'<li class="ta-file">'+taIcon()+'<div class="ta-file-copy"><span class="ta-file-name">'+esc(item.name)+'</span><span class="ta-file-meta">'+caAttachmentMeta(item,true)+'</span>'+(item.status==='ready'?'':'<progress max="100" value="'+item.progress+'" aria-label="'+esc(item.name)+' 模拟上传进度"></progress>')+'</div><button type="button" class="ta-remove" onclick="caRemove(\''+draft.id+'\','+item.id+')" aria-label="移除 '+esc(item.name)+'">移除</button></li>').join('')+'</ul>';
 }
 function caAttachmentMeta(item,pending=false){
- if(item.reference)return (item.reference.source==='online'?'在线文档':'品牌文件')+'引用 · v'+Number(item.reference.version||1)+(pending?' · 待发送':' · 演示引用，未读取正文');
+ if(item.reference)return (item.reference.source==='assets'?'素材库':item.reference.source==='online'?'在线文档':'品牌文件')+'引用'+(item.reference.source==='assets'?'':' · v'+Number(item.reference.version||1))+(pending?' · 待发送':' · 演示引用，未读取正文');
  return taSize(item.size)+' · '+(pending?(item.status==='ready'?'待发送（演示）':'模拟上传中 '+item.progress+'%'):'演示附件，未上传或解析');
 }
 function caRender(draft){const el=$(draft.id+'-pending');if(el)el.innerHTML=caPendingHTML(draft)}
