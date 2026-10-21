@@ -148,6 +148,24 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
   .drawer .drawer-body{padding:16px}
   .drawer .drawer-footer small{display:none}
 }
+/* New connection uses the index full-height right drawer geometry. */
+.modal-backdrop.flow-drawer-backdrop{padding:0;align-items:stretch;justify-content:flex-end;overflow:hidden}
+.modal.connection-flow-drawer,.modal.connection-flow-drawer.site-modal{width:min(760px,calc(46vw + 200px),calc(100vw - 56px));height:100dvh;max-height:none;border-radius:0;border-left:1px solid var(--border);box-shadow:-8px 0 32px #190c5820;animation:slidein .18s ease;overflow:hidden}
+.connection-flow-drawer .modal-header,.connection-flow-drawer.site-modal .modal-header{padding:12px 18px;min-height:64px;flex-shrink:0;justify-content:flex-start;gap:12px}
+.connection-flow-drawer .modal-header{gap:8px}.connection-flow-drawer .flow-title-group{display:flex;flex-direction:column;flex:1;min-width:0}.connection-flow-drawer .modal-header h2{font-family:'Sora','Noto Sans SC',sans-serif;font-size:15px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}.connection-flow-drawer .modal-header .flow-eyebrow{margin:0 0 2px;color:var(--primary);font:600 11px/1.5 'Sora','Noto Sans SC',sans-serif;letter-spacing:.11em}
+.connection-flow-drawer .modal-header>.flow-close{order:-2;margin:0;width:29px;height:29px;min-width:29px;flex:0 0 29px;padding:0;border-radius:7px;color:var(--secondary);display:grid;place-items:center}.connection-flow-drawer .flow-close:hover{background:var(--primary-bg)}
+.connection-flow-drawer .drawer-width-toggle{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;height:29px;padding:0 10px;border:1px solid transparent;border-radius:7px;background:var(--primary-bg);color:var(--primary);font-size:11px;font-weight:600;white-space:nowrap}.connection-flow-drawer .drawer-width-toggle svg{width:14px;height:14px;flex:0 0 14px}.connection-flow-drawer .drawer-width-toggle:hover{background:#f5f3ff;border-color:#c4b5fd}
+.modal.connection-flow-drawer.flow-expanded,.modal.connection-flow-drawer.site-modal.flow-expanded{width:min(1160px,calc(46vw + 600px),calc(100vw - 56px))}.connection-flow-drawer.flow-expanded .drawer-width-toggle{background:var(--primary);color:#fff}
+.connection-flow-drawer .modal-body,.connection-flow-drawer.site-modal .modal-body{flex:1;min-height:0;overflow-y:auto;padding:16px;background:#fff}
+.connection-flow-drawer .modal-footer,.connection-flow-drawer.site-modal .modal-footer{padding:12px 18px;flex-shrink:0;background:#fcfbff;min-height:60px;flex-wrap:wrap}
+.connection-flow-drawer .modal-footer,.connection-flow-drawer.site-modal .modal-footer{justify-content:flex-start}
+.connection-flow-drawer .flow-back-row{margin-bottom:14px}.connection-flow-drawer .flow-back-button{display:inline-flex;align-items:center;gap:5px;min-height:28px;padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);font-size:11px;line-height:1.5}.connection-flow-drawer .flow-back-button:hover{color:var(--primary);background:var(--primary-bg);border-color:#c4b5fd}
+.platform-search-header{flex-shrink:0;padding:16px 18px 0;background:var(--surface)}.platform-picker-search{display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:8px;padding:0 10px;height:40px;color:var(--muted)}.platform-picker-search:focus-within{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-bg)}
+.platform-picker-search>svg{width:16px;height:16px;flex-shrink:0}.platform-picker-search input{flex:1;min-width:0;width:100%;height:100%;border:0;outline:none;background:transparent;font-size:13px;color:var(--text)}.platform-picker-search input:focus-visible{outline:none}.platform-picker-search input::-webkit-search-cancel-button{-webkit-appearance:none}
+.platform-picker-description{margin-bottom:14px}.platform-picker-count{font-size:11px;color:var(--muted);margin-bottom:10px}.platform-picker-drawer .platform-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.platform-picker-drawer .platform-option{min-height:72px;padding:12px;border-radius:8px;min-width:0}.platform-picker-drawer .platform-option b{font-size:13px;font-weight:500}.platform-picker-drawer .platform-option small{font-size:11px}.platform-picker-empty{padding:56px 12px}
+@media(max-width:650px){.modal.connection-flow-drawer,.modal.connection-flow-drawer.site-modal{width:calc(100vw - 16px)}.connection-flow-drawer .modal-body,.connection-flow-drawer.site-modal .modal-body{padding:16px}.platform-search-header{padding:16px 16px 0}}
+@media(max-width:650px){.modal.connection-flow-drawer.flow-expanded,.modal.connection-flow-drawer.site-modal.flow-expanded{width:calc(100vw - 16px)}.connection-flow-drawer .drawer-width-toggle{display:none}.connection-flow-drawer .modal-header,.connection-flow-drawer.site-modal .modal-header{padding:12px}}
+@media(max-width:460px){.platform-picker-drawer .platform-options{grid-template-columns:1fr}}
 /* SEO settings use the index drawer's compact typography and section rhythm. */
 .website-tabs{overflow-x:auto;flex-shrink:0}.website-tabs button{white-space:nowrap}
 .seo-settings{display:grid;gap:16px}
@@ -162,7 +180,13 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
 .seo-section textarea{display:block;width:100%;min-height:210px;resize:vertical;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font:12px/1.8 'Noto Sans SC',system-ui,sans-serif;color:var(--secondary);background:var(--surface)}
 .seo-section textarea:focus-visible{outline:2px solid var(--primary);outline-offset:2px}.seo-geo-note{font-size:11px;line-height:1.8}.seo-engines{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.seo-engines .btn{min-height:30px;padding:5px 12px;font-size:12px}.seo-schedules:disabled{opacity:.55}#seo-error:empty{display:none}
 @media(max-width:650px){.seo-section{padding:12px}.seo-check{flex-wrap:wrap}.seo-check small{max-width:65%}.seo-time{gap:6px}}
+.connector-intro-heading{display:flex;align-items:center;gap:12px;margin-bottom:20px}.connector-intro-heading h3{font-size:15px;margin:0 0 4px}.connector-intro-heading p{font-size:12px;color:var(--muted);margin:0}.connector-intro-heading>div{flex:1;min-width:0}.connector-intro-heading .connector-connect-action{margin-left:auto;flex-shrink:0}.connector-intro-description{font-size:13px;line-height:1.9;color:var(--secondary);margin-bottom:24px}.connector-intro .detail-kv{margin-top:24px}
+.auth-drawer-content .form-field{margin-bottom:20px}.auth-main-action{width:100%;justify-content:center;min-height:38px;margin-top:10px}.auth-account{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px;border:1px solid var(--border);border-radius:8px;overflow-wrap:anywhere;font-size:12px}.auth-account>span{color:var(--muted);font-size:11px}.auth-account button{margin-left:auto}
+.auth-consent{margin:22px 0}.auth-consent h3{font-size:13px;margin:0 0 12px}.auth-consent p{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--secondary)}.auth-consent svg{width:16px;height:16px;color:var(--primary)}.auth-consent small{display:block;color:var(--muted);font-size:11px;line-height:1.8;margin-top:12px}
+.platform-auth-safety{margin-top:24px;padding:12px;border-radius:8px;background:var(--bg);font-size:11px;line-height:1.8;color:var(--muted)}.auth-cancel{display:block;margin:16px auto 0;font-size:12px}
+@media(max-width:520px){.connector-intro-heading{flex-wrap:wrap}.connector-intro-heading>div{flex:1;min-width:160px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.auth-drawer-content{max-width:680px;margin:0 auto}.auth-drawer-heading{display:flex;align-items:center;gap:12px;margin:8px 0 28px}.auth-drawer-heading h3{font-size:15px;margin-bottom:4px}.auth-drawer-heading p{font-size:12px;color:var(--muted)}.auth-drawer-content .detail-kv{margin-bottom:20px}.auth-drawer-content .platform-auth-safety{margin-top:28px}
 </style>
   <script>if(new URLSearchParams(location.search).get('embedded')==='1')document.documentElement.classList.add('embedded');</script>
 </head>
@@ -214,15 +238,15 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
   function icons(root = document) { root.querySelectorAll('[data-icon]').forEach(el => { if (!el.querySelector('svg')) el.insertAdjacentHTML('afterbegin', icon(el.dataset.icon)); }); }
   const platforms = [
     {id:'website',name:'SEO官方网站',mark:'◎',desc:'添加品牌官网，先登记站点，再按需连接后台。支持多个不同站点。',resources:[]},
-    {id:'meta',name:'Meta',mark:'∞',desc:'管理品牌的社交与广告账号连接。具体产品线与权限待确认。',resources:['A8OPARIS 品牌主页','A8OPARIS 广告账号']},
-    {id:'xhs',name:'小红书',mark:'小红书',desc:'连接品牌内容账号。商业业务、账号范围与接入方式待确认。',resources:['A8OPARIS 品牌账号','A8OPARIS 内容资源']},
-    {id:'tmall',name:'天猫',mark:'TMALL',desc:'集中管理店铺账号授权。店铺范围与服务场景待确认。',resources:['A8OPARIS 旗舰店','A8OPARIS 店铺资料']},
-    {id:'jd',name:'京东',mark:'JD',desc:'管理店铺连接及可访问资源。应用资质和权限待确认。',resources:['A8OPARIS 京东旗舰店','A8OPARIS 店铺资料']},
-    {id:'shopify',name:'Shopify',mark:'S',desc:'管理品牌店铺连接。应用接入范围与授权方式待确认。',resources:['a8oparis-demo.myshopify.com','A8OPARIS 店铺资料']},
-    {id:'douyin',name:'抖音',mark:'♪',desc:'连接内容或电商账号。具体业务线与开放平台待确认。',resources:['A8OPARIS 官方账号','A8OPARIS 内容资源']},
-    {id:'pdd',name:'拼多多',mark:'拼',desc:'管理品牌店铺的连接与授权，实际接入范围待确认。',resources:['A8OPARIS 拼多多店铺']},
-    {id:'youzan',name:'有赞',mark:'赞',desc:'管理品牌商城的连接与授权，实际接入范围待确认。',resources:['A8OPARIS 有赞商城']},
-    {id:'kuaishou',name:'快手',mark:'快',desc:'管理品牌内容或店铺账号，实际业务线及接入范围待确认。',resources:['A8OPARIS 快手账号']}
+    {id:'meta',name:'Meta',mark:'∞',desc:'将品牌在 Meta 的社交与广告业务背景带入 Agent 的工作流程，围绕品牌传播、内容策划和营销复盘建立统一的账号上下文。面向多账号协作场景，可规划将经授权的主页资料、内容表现及广告信息用于整理运营摘要、梳理活动线索和辅助策略讨论，让团队减少在不同工作界面间反复查找资料的时间。正式接入的数据类型、可执行操作及账号范围以平台能力与实际授权为准；当前仅演示连接与授权流程，不读取真实数据，也不执行广告投放。',resources:['A8OPARIS 品牌主页','A8OPARIS 广告账号']},
+    {id:'xhs',name:'小红书',mark:'小红书',desc:'将品牌在小红书的内容运营背景带入 Agent 的工作流程，围绕种草笔记、产品沟通和达人合作建立更完整的账号上下文。面向日常运营与活动协作场景，可规划将经授权的账号资料、笔记信息和互动表现用于梳理内容方向、整理选题线索、准备合作 Brief，以及辅助活动后的内容复盘，让团队在同一工作空间中讨论品牌表达与后续行动。具体业务线、可访问数据和接入方式仍需确认；当前仅演示连接与授权流程，不读取真实笔记，也不自动发布内容或联系达人。',resources:['A8OPARIS 品牌账号','A8OPARIS 内容资源']},
+    {id:'tmall',name:'天猫',mark:'TMALL',desc:'将品牌在天猫的店铺经营背景带入 Agent 的工作流程，围绕商品沟通、活动筹备和店铺运营建立统一的业务上下文。面向新品上市、促销节点及日常经营协作，可规划将经授权的店铺资料、商品信息和经营指标用于整理商品卖点、准备活动素材、汇总运营问题，以及辅助阶段性复盘，让内容团队与电商团队围绕同一份业务背景协作。店铺范围、数据权限及操作能力以实际接入方案为准；当前仅演示连接与授权流程，不读取真实订单，不修改商品，也不执行交易操作。',resources:['A8OPARIS 旗舰店','A8OPARIS 店铺资料']},
+    {id:'jd',name:'京东',mark:'JD',desc:'将品牌在京东的店铺与商品经营背景带入 Agent 的工作流程，为商品内容准备、活动协作和运营复盘提供更清晰的业务上下文。面向新品推广、营销节点及日常经营沟通，可规划将经授权的店铺资料、商品信息和经营表现用于归纳商品卖点、梳理内容需求、整理活动进展，以及辅助团队分析后续优化方向，减少跨系统查找信息和重复整理的工作。具体应用资质、店铺范围及访问权限仍需确认；当前仅演示连接与授权流程，不读取真实经营数据，不修改商品或处理订单。',resources:['A8OPARIS 京东旗舰店','A8OPARIS 店铺资料']},
+    {id:'shopify',name:'Shopify',mark:'S',desc:'将品牌独立站的店铺背景带入 Agent 的工作流程，围绕商品介绍、站点内容和营销活动建立连贯的业务上下文。面向跨境品牌及独立站团队，可规划将经授权的店铺资料、商品目录和经营信息用于整理产品知识、准备页面文案、讨论活动主题，以及辅助内容与经营复盘，让品牌表达和店铺运营围绕同一份背景信息展开。正式接入的店铺范围、数据类型及操作权限取决于应用配置与实际授权；当前仅演示连接与授权流程，不读取真实客户信息，不修改店铺，也不自动发布内容。',resources:['a8oparis-demo.myshopify.com','A8OPARIS 店铺资料']},
+    {id:'douyin',name:'抖音',mark:'♪',desc:'将品牌在抖音的内容与电商业务背景带入 Agent 的工作流程，围绕短视频策划、直播协作和达人合作建立更完整的账号上下文。面向日常内容运营及营销活动，可规划将经授权的账号资料、内容表现和相关业务信息用于梳理选题方向、准备脚本与合作 Brief、整理达人筛选条件，以及辅助阶段性复盘，让团队将内容讨论与业务目标衔接起来。内容账号、电商账号及开放平台的接入范围仍需分别确认；当前仅演示连接与授权流程，不采集真实数据，不自动发布视频、开播或联系达人。',resources:['A8OPARIS 官方账号','A8OPARIS 内容资源']},
+    {id:'pdd',name:'拼多多',mark:'拼',desc:'将品牌在拼多多的店铺经营背景带入 Agent 的工作流程，围绕商品表达、营销活动和日常运营建立统一的协作上下文。面向商品上新、活动筹备及经营复盘，可规划将经授权的店铺资料、商品信息和相关经营指标用于整理商品卖点、归纳活动需求、准备沟通材料，以及辅助团队梳理运营问题与优化方向，减少不同岗位之间重复传递和整理信息的工作。实际数据范围、应用资质与授权方式仍需确认；当前仅演示连接与授权流程，不访问真实订单，不调整价格，也不执行店铺交易操作。',resources:['A8OPARIS 拼多多店铺']},
+    {id:'youzan',name:'有赞',mark:'赞',desc:'将品牌在有赞的商城与运营背景带入 Agent 的工作流程，围绕商品内容、营销活动和用户运营建立连贯的业务上下文。面向品牌商城及私域协作场景，可规划将经授权的商城资料、商品信息和活动表现用于整理产品知识、准备推广文案、梳理运营计划，以及辅助活动后的复盘讨论，让内容、商品与运营团队在同一工作空间中对齐信息和行动。可访问的数据类型、商城范围及操作权限以实际接入方案为准；当前仅演示连接与授权流程，不读取真实用户资料，不触达客户，也不修改商城配置。',resources:['A8OPARIS 有赞商城']},
+    {id:'kuaishou',name:'快手',mark:'快',desc:'将品牌在快手的内容与店铺运营背景带入 Agent 的工作流程，围绕短视频、直播及商品推广建立更清晰的业务上下文。面向内容策划、达人合作和营销活动协作，可规划将经授权的账号资料、内容信息和经营表现用于整理选题线索、准备脚本与合作要求、汇总活动进展，以及辅助团队复盘内容表达和运营方向，让日常讨论与品牌目标保持衔接。内容账号、店铺账号及具体业务线的接入范围仍需确认；当前仅演示连接与授权流程，不读取真实数据，不自动发布内容、开启直播或处理交易。',resources:['A8OPARIS 快手账号']}
   ];
   const statusNames = {connected:'已连接',reauth:'需重新授权',failed:'连接失败',disconnected:'已断开',unconnected:'未连接',pending:'接入待确认'};
   const state = {tab:'connections',role:'admin',query:'',platform:'all',status:'all',connections:[],drawer:null,drawerTab:'info',flow:null,returnFocus:null,drawerFocus:null,serial:0};
@@ -282,12 +306,18 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
     $('detail-drawer').innerHTML=`<div class="drawer-header"><div class="drawer-title-row">${logo(p)}<div><h2 id="drawer-title">${esc(c.name)}</h2><p>${p.name} · 示例连接</p></div>${drawerWidthButton()}<button class="icon-button close-drawer" data-action="close-drawer" aria-label="关闭详情">${icon('x')}</button></div></div><div class="drawer-tabs" role="tablist" aria-label="连接详情"><button role="tab" aria-selected="${state.drawerTab==='info'}" class="${state.drawerTab==='info'?'selected':''}" data-action="drawer-info">连接信息</button><button role="tab" aria-selected="${state.drawerTab==='logs'}" class="${state.drawerTab==='logs'?'selected':''}" data-action="drawer-logs">日志记录 <span>(${c.logs.length+(c.checks||[]).length})</span></button></div><div class="drawer-body">${state.drawerTab==='logs'?logsHTML(c):infoHTML(c)}</div><div class="drawer-footer">${c.status!=='disconnected'?`<button class="btn primary" data-action="reauth" data-id="${c.id}" ${state.role!=='admin'?'disabled':''}>${icon('rotate-ccw')}重新授权</button><button class="btn" data-action="disconnect" data-id="${c.id}" ${state.role!=='admin'?'disabled':''}>断开连接</button>`:`<button class="btn primary" data-action="reauth" data-id="${c.id}" ${state.role!=='admin'?'disabled':''}>重新连接（模拟）</button>`}<small>${state.role==='admin'?'仅为本次会话演示':'只读角色 · 无管理权限'}</small></div>`;
   }
   function infoHTML(c) { return `<div class="status-box ${c.status}">${icon(c.status==='reauth'?'triangle-alert':c.status==='connected'?'shield-check':'info')}<div>${pill(c.status)}<p>${esc(c.reason)}</p></div></div><section class="detail-section"><h3>基本信息</h3>${kv([['连接名称',c.name],['外部账号',c.account],['归属',c.client],['授权操作人','dudu · 演示管理员'],['授权时间',c.authTime],['有效期',c.expiry],['最近验证',c.verified+' · 模拟'],['接入方式','待确认；本页不执行真实授权']])}</section><section class="detail-section"><h3>授权范围 <span class="neutral-pill">示例，非平台正式权限</span></h3>${c.scope.map(s=>`<div class="scope-item">${icon('check')}<div><b>${esc(s)}</b><p>仅用于展示最小权限确认流程，不代表平台支持该权限。</p></div></div>`).join('')}</section><section class="detail-section"><h3>允许访问的资源</h3>${c.resources.map(s=>`<div class="scope-item">${icon('book-open')}<div><b>${esc(s)}</b><p>演示资源 · 已选范围</p></div></div>`).join('')}</section><p class="small-note">平台决定实际授权结果。连接状态不代表业务数据已同步；未知有效期不会被推定为永久授权。</p>`; }
-  function drawerWidthLabel() {
-    const path=state.drawerExpanded?'M13 5h6v6M19 5l-7 7M11 19H5v-6M5 19l7-7':'M9 4H4v5M4 4l7 7M15 20h5v-5M20 20l-7-7';
-    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${path}"/></svg><span>${state.drawerExpanded?'收起':'加宽'}</span>`;
+  function drawerWidthLabel(expanded=state.drawerExpanded) {
+    const path=expanded?'M13 5h6v6M19 5l-7 7M11 19H5v-6M5 19l7-7':'M9 4H4v5M4 4l7 7M15 20h5v-5M20 20l-7-7';
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${path}"/></svg><span>${expanded?'收起':'加宽'}</span>`;
   }
   function drawerWidthButton() {
     return `<button type="button" id="drawer-width-toggle" class="drawer-width-toggle" data-action="toggle-drawer-width" aria-pressed="${!!state.drawerExpanded}" aria-label="${state.drawerExpanded?'恢复抽屉宽度':'加宽抽屉'}">${drawerWidthLabel()}</button>`;
+  }
+  function flowWidthButton(){return `<button type="button" id="flow-width-toggle" class="drawer-width-toggle" data-action="toggle-flow-width" aria-pressed="${!!state.flowExpanded}" aria-label="${state.flowExpanded?'恢复抽屉宽度':'加宽抽屉'}">${drawerWidthLabel(state.flowExpanded)}</button>`;}
+  function toggleFlowWidth(){
+    if(!['connect','site'].includes(state.flow?.type) )return;
+    state.flowExpanded=!state.flowExpanded;$('flow-modal').classList.toggle('flow-expanded',state.flowExpanded);
+    const button=$('flow-width-toggle');button.innerHTML=drawerWidthLabel(state.flowExpanded);button.setAttribute('aria-pressed',String(state.flowExpanded));button.setAttribute('aria-label',state.flowExpanded?'恢复抽屉宽度':'加宽抽屉');
   }
   function toggleDrawerWidth() {
     if(!state.drawer)return;
@@ -316,29 +346,82 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
   }
   function closeDrawer() { state.drawer=null;$('detail-drawer').hidden=true;$('drawer-backdrop').hidden=true;if($('modal-backdrop').hidden)document.body.classList.remove('overlay-open');state.drawerFocus?.focus(); }
   function openModal() { state.returnFocus=document.activeElement;$('flow-modal').classList.remove('site-modal');$('modal-backdrop').hidden=false;document.body.classList.add('overlay-open'); }
-  function modalFrame(title,body,footer,subtitle='模拟流程 · 不跳转真实平台') { $('flow-modal').innerHTML=`<div class="modal-header"><div><h2 id="modal-title">${title}</h2><p>${subtitle}</p></div><button class="icon-button" data-action="close-modal" aria-label="关闭弹窗">${icon('x')}</button></div><div class="modal-body">${body}</div><div class="modal-footer">${footer}</div>`;$('flow-modal').querySelector('input,select,button')?.focus(); }
-  function closeModal(message) { clearTimeout(flowTimer);state.flow=null;$('flow-modal').innerHTML='';$('modal-backdrop').hidden=true;if(!state.drawer)document.body.classList.remove('overlay-open');if(state.returnFocus?.isConnected)state.returnFocus.focus();else if(state.drawer)$('detail-drawer').querySelector('button')?.focus();else $('new-connection').focus();if(message)toast(message); }
+  function modalFrame(title,body,footer,subtitle='模拟流程 · 不跳转真实平台') {
+    const f=state.flow,drawer=['connect','site'].includes(f?.type),picker=f?.type==='connect'&&f.step===0,back=drawer&&!f.id&&(f.type==='site'&&!f.submitting||f.type==='connect'&&f.step===1&&!f.authOpen);
+    $('modal-backdrop').classList.toggle('flow-drawer-backdrop',drawer);$('flow-modal').classList.toggle('connection-flow-drawer',drawer);$('flow-modal').classList.toggle('platform-picker-drawer',picker);$('flow-modal').classList.toggle('flow-expanded',drawer&&!!state.flowExpanded);
+    $('flow-modal').innerHTML=`<div class="modal-header"><div class="flow-title-group">${drawer?`<p class="flow-eyebrow">${f.type==='site'?'SEO官方网站 · WordPress':'连接与授权'}</p>`:''}<h2 id="modal-title">${title}</h2>${drawer?'':`<p>${subtitle}</p>`}</div>${drawer?flowWidthButton():''}<button class="icon-button flow-close" data-action="close-modal" aria-label="${drawer?'关闭抽屉':'关闭弹窗'}">${icon('x')}</button></div>${picker?`<div class="platform-search-header"><label class="platform-picker-search">${icon('search')}<input id="platform-picker-search" type="search" maxlength="100" value="${esc(f.platformQuery||'')}" placeholder="搜索平台名称，如小红书、Shopify" aria-label="搜索平台"><button class="icon-button" data-action="clear-platform-search" aria-label="清空平台搜索" id="clear-platform-search" ${f.platformQuery?'':'hidden'}>${icon('x')}</button></label></div>`:''}<div class="modal-body">${back?'<div class="flow-back-row"><button type="button" class="flow-back-button" data-action="back-platforms"><span aria-hidden="true">←</span> 返回选择平台</button></div>':''}${body}</div><div class="modal-footer">${footer}</div>`;
+    $('flow-modal').querySelector('input,select,button')?.focus();if(picker)$('platform-picker-search').focus();
+  }
+  function closeModal(message) { closePlatformAuth();clearTimeout(flowTimer);state.flow=null;state.flowExpanded=false;$('flow-modal').innerHTML='';$('modal-backdrop').hidden=true;if(!state.drawer)document.body.classList.remove('overlay-open');if(state.returnFocus?.isConnected)state.returnFocus.focus();else if(state.drawer)$('detail-drawer').querySelector('button')?.focus();else $('new-connection').focus();if(message)toast(message); }
   function startFlow(platformId=null,id=null) {
     if(platformId==='website'||(id&&connection(id)?.platform==='website')){if(id)startSiteBackend(id);else startSite();return;}
     if(!canManage())return;const c=id?connection(id):null;state.flow={type:'connect',step:platformId||c?1:0,platform:platformId||c?.platform||null,id,name:c?.name||'',account:c?.account||'',resources:c?[...c.resources]:[],error:null,created:null};openModal();renderFlow();
   }
   function renderFlow() {
     const f=state.flow;if(!f||f.type!=='connect')return;
+    if(f.authOpen){renderPlatformAuth();return;}
     if(f.platform==='website'&&f.step>0){startSite();return;}
     const p=platform(f.platform);const back=`<button class="btn" data-action="close-modal">取消</button>`;
-    if(f.step===0)modalFrame('新建连接',`<p class="small-note" style="margin-bottom:15px">选择平台，填写信息后即可模拟授权。SEO官方网站使用独立的站点表单。</p><div class="platform-options">${platforms.map(p=>`<button class="platform-option" data-action="choose-platform" data-platform="${p.id}">${logo(p)}<span><b>${p.name}</b><small>${p.id==='website'?'填写站点表单':'账号连接 · 模拟授权'}</small></span>${icon('chevron-right')}</button>`).join('')}</div>`,back);
-    if(f.step===1)modalFrame(f.id?'重新授权 · '+p.name:'连接 '+p.name,`<div class="selected-platform">${logo(p)}<div><b>${p.name}</b><p>默认归属 A8OPARIS · 项目 a80</p></div></div><label class="form-field">连接名称 <span class="required">*</span><input id="connection-name" maxlength="60" value="${esc(f.name||p.name+' · A8OPARIS')}" placeholder="为这个连接命名"></label><label class="form-field">平台账号 <span class="required">*</span><input id="platform-account" maxlength="100" autocomplete="off" value="${esc(f.account)}" placeholder="请输入演示账号"></label><label class="form-field">模拟密码 <span class="required">*</span><input id="platform-password" type="password" autocomplete="new-password" maxlength="100" placeholder="任意演示字符，请勿输入真实密码"></label><div class="inline-note">仅演示账号表单与授权过程，不连接真实平台。模拟密码不保存、不发送、不写入日志；正式授权方式待确认。</div>${f.error?`<p class="error-message" role="alert">${esc(f.error)}</p>`:''}`,`<button class="btn" data-action="close-modal">取消</button><button class="btn primary" data-action="authorize">模拟授权</button>`);
+    if(f.step===0)modalFrame('新建连接',`<p class="small-note platform-picker-description">选择平台，填写信息后即可模拟授权。SEO官方网站使用独立的站点表单。</p><div id="platform-picker-results">${platformPickerResults(f.platformQuery||'')}</div>`,back);
+    if(f.step===1)modalFrame(f.id?'重新授权 · '+p.name:'连接 '+p.name,`<div class="connector-intro"><div class="connector-intro-heading">${logo(p)}<div><h3>${p.name}</h3><p>连接品牌账号，让 Agent 在授权范围内使用平台信息。</p></div><button class="btn primary connector-connect-action" data-action="open-platform-auth">${f.id?'重新连接账号':'连接账号'}</button></div><p class="connector-intro-description">${esc(p.desc)}</p>${kv([['归属','A8OPARIS · 项目 a80'],['连接方式','抽屉内登录／授权（模拟）'],['授权范围','账号基本信息（模拟，实际权限待确认）']])}<div class="inline-note">点击连接账号后，在当前抽屉填写连接名称与演示账号，完成模拟登录与授权。本页不连接真实 ${p.name}，请勿输入真实账号密码。</div>${f.error?`<p class="error-message" role="alert">${esc(f.error)}</p>`:''}</div>`,`<button class="btn" data-action="close-modal">取消</button>`);
     if(f.step===3)modalFrame('模拟授权结果',`<div class="flow-result"><div class="result-icon">${icon('check')}</div><h3>${f.id?'连接已更新':'连接已建立'}</h3><p>仅为演示结果，没有连接真实 ${p.name} 账号。</p>${kv([['连接名称',f.name],['授权资源',f.resources.length+' 个 · 示例'],['归属','A8OPARIS · 项目 a80'],['状态','已连接（模拟）']])}</div>`,`<button class="btn" data-action="finish-flow">完成</button><button class="btn primary" data-action="view-created">查看连接</button>`);
   }
+  const platformSearchAliases={website:'官网 官方网站 seo wordpress 独立站',meta:'facebook instagram fb ins',xhs:'xiaohongshu red rednote 小红书',tmall:'天猫 tianmao',jd:'京东 jingdong',shopify:'shopify 独立站',douyin:'抖音 douyin',pdd:'拼多多 pinduoduo',youzan:'有赞 youzan',kuaishou:'快手 kuaishou ks'};
+  function platformPickerResults(query){
+    const words=query.trim().toLowerCase().split(/\s+/).filter(Boolean),list=platforms.filter(p=>words.every(word=>(p.name+' '+p.id+' '+(platformSearchAliases[p.id]||'')).toLowerCase().includes(word)));
+    return `<div class="platform-picker-count" role="status">${list.length} 个平台${words.length?'符合搜索条件':'可选择'}</div>${list.length?`<div class="platform-options">${list.map(p=>`<button class="platform-option" data-action="choose-platform" data-platform="${p.id}">${logo(p)}<span><b>${p.name}</b><small>${p.id==='website'?'填写站点表单':'账号连接 · 模拟授权'}</small></span>${icon('chevron-right')}</button>`).join('')}</div>`:`<div class="empty-state platform-picker-empty">${icon('search')}<h3>未找到相关平台</h3><p>试试平台中文名或英文名称。</p><button class="btn" data-action="clear-platform-search">清空搜索</button></div>`}`;
+  }
+  function searchPlatforms(value){
+    const f=state.flow;if(f?.type!=='connect'||f.step!==0)return;
+    f.platformQuery=String(value).slice(0,100);$('platform-picker-results').innerHTML=platformPickerResults(f.platformQuery);$('clear-platform-search').hidden=!f.platformQuery;
+  }
+  function openPlatformAuth(){
+    if(!canManage())return;const f=state.flow;if(f?.type!=='connect'||f.step!==1||f.authOpen)return;
+    if(!f.authVisited&&!f.name)f.name=platform(f.platform).name+' · A8OPARIS';f.authVisited=true;
+    f.error=null;f.authError=null;f.authOpen=true;f.authStage='login';renderPlatformAuth();
+  }
+  function renderPlatformAuth(){
+    const f=state.flow;if(f?.type!=='connect'||!f.authOpen)return;const p=platform(f.platform);
+    const error=f.authError?`<p class="error-message" role="alert">${esc(f.authError)}</p>`:'';
+    const heading=`<div class="auth-drawer-heading">${logo(p)}<div><h3>${p.name}</h3><p>将演示账号关联至 X-Digate</p></div></div>`;
+    let content='',footer='<button class="btn" data-action="close-modal">取消</button>';
+    if(f.authStage==='login'){
+      content=`<form onsubmit="return false" autocomplete="off"><label class="form-field">连接名称 <span class="required">*</span><input id="connection-name" maxlength="60" value="${esc(f.name)}" placeholder="为这个连接命名"></label><label class="form-field">演示账号 <span class="required">*</span><input id="platform-account" maxlength="100" autocomplete="off" value="${esc(f.account)}" placeholder="任意演示账号，请勿填写真实账号"></label><label class="form-field">模拟密码 <span class="required">*</span><input id="platform-password" type="password" maxlength="100" autocomplete="new-password" placeholder="任意演示字符，请勿输入真实密码"></label>${error}</form>`;
+      footer+='<button type="button" class="btn primary" data-action="platform-auth-login">模拟登录并继续</button>';
+    }
+    if(f.authStage==='consent'){
+      content=`${kv([['连接名称',f.name]])}<div class="auth-account"><b>${esc(f.account)}</b><span>演示账号</span><button class="text-button" data-action="platform-auth-switch">切换账号</button></div><div class="auth-consent"><h3>X-Digate 将获得以下模拟权限</h3><p>${icon('check')} 读取账号基本信息（示例）</p><small>仅用于连接流程展示。实际权限需按平台接入能力确认，不包含真实发布或数据同步。</small></div>${error}`;
+      footer+='<button class="btn" data-action="authorization-denied">拒绝授权</button><button class="btn primary" data-action="authorize">同意并模拟授权</button>';
+    }
+    if(f.authStage==='progress')content=`<div class="flow-result"><h3>正在验证模拟授权</h3><p>等待 ${p.name} 授权结果（演示）</p><div class="progress" role="progressbar" aria-label="模拟授权验证中"><span></span></div></div><div class="split-actions"><button data-action="authorization-failed">模拟验证失败</button><button data-action="authorization-denied">模拟用户拒绝</button></div>`;
+    const back='<div class="flow-back-row"><button type="button" class="flow-back-button" data-action="cancel-platform-auth"><span aria-hidden="true">←</span> 返回平台介绍</button></div>';
+    modalFrame((f.authStage==='login'?'连接账号 · ':f.authStage==='consent'?'确认授权 · ':'正在连接 · ')+p.name,back+`<div class="auth-drawer-content">${heading}${content}<div class="platform-auth-safety">仅为交互演示，不属于 ${p.name} 登录页面。密码不保存、不发送，不连接真实平台。</div></div>`,footer);
+    if(f.authStage==='login')$('connection-name').focus();
+  }
+  function platformAuthLogin(){
+    if(!canManage())return;const f=state.flow;if(f?.type!=='connect'||!f.authOpen||f.authStage!=='login')return;
+    f.name=$('connection-name').value.trim();f.account=$('platform-account').value.trim();const hasPassword=!!$('platform-password').value;$('platform-password').value='';
+    if(!f.name||!f.account||!hasPassword){f.authError=!f.name?'请输入连接名称。':!f.account?'请输入演示账号。':'请输入任意模拟密码，请勿使用真实密码。';renderPlatformAuth();return;}
+    f.authError=null;f.authStage='consent';renderPlatformAuth();
+  }
+  function closePlatformAuth(){
+    clearTimeout(flowTimer);if($('platform-password'))$('platform-password').value='';
+    const f=state.flow;if(f?.type==='connect'){f.authOpen=false;f.authStage=null;if(f.step===2)f.step=1;}
+  }
+  function cancelPlatformAuth(){
+    const f=state.flow;if(f?.type!=='connect'||!f.authOpen)return;
+    if(f.authStage==='login'){f.name=$('connection-name').value.trim();f.account=$('platform-account').value.trim();}
+    closePlatformAuth();renderFlow();$('flow-modal').querySelector('[data-action="open-platform-auth"]')?.focus();
+  }
+  function failPlatformAuth(message){const f=state.flow;if(f?.type!=='connect'||!f.authOpen)return;clearTimeout(flowTimer);f.step=1;f.authStage='login';f.authError=message;if($('platform-password'))$('platform-password').value='';renderPlatformAuth();}
   function authorize(fail=false) {
     if(!canManage())return;const f=state.flow;if(!f||f.type!=='connect'||f.step!==1)return;
-    f.name=$('connection-name').value.trim();f.account=$('platform-account').value.trim();
-    if(!f.name||!f.account||!$('platform-password').value){f.error=!f.name?'请输入连接名称。':!f.account?'请输入平台账号。':'请输入任意演示密码，请勿使用真实密码。';$('platform-password').value='';renderFlow();return;}
-    $('platform-password').value='';f.error=null;f.step=2;
-    modalFrame('正在验证模拟授权',`<div class="flow-result"><div class="result-icon">${icon('shield-check')}</div><h3>正在验证账号与权限</h3><p>正在演示授权结果校验，不会请求真实平台。</p><div class="progress" role="progressbar" aria-label="模拟授权验证中"><span></span></div></div><div class="split-actions"><button data-action="authorization-denied">模拟用户拒绝</button><button data-action="authorization-failed">模拟验证失败</button></div>`,`<button class="btn" data-action="cancel-authorization">取消授权</button>`);
-    flowTimer=setTimeout(()=>{if(state.flow!==f)return;if(fail){f.step=1;f.error='模拟验证失败：未能确认账号授权，请重试。';renderFlow();return;}finishBinding();},1200);
+    if(!f.authOpen||f.authStage!=='consent'||!f.name||!f.account)return;
+    if($('platform-password'))$('platform-password').value='';f.error=null;f.step=2;
+    f.authStage='progress';renderPlatformAuth();
+    flowTimer=setTimeout(()=>{if(state.flow!==f||!f.authOpen)return;if(fail){failPlatformAuth('模拟验证失败：未能确认账号授权，请重试。');return;}finishBinding();},1200);
   }
-  function finishBinding() { if(!canManage())return;const f=state.flow;if(!f||f.type!=='connect'||f.step!==2)return;const duplicate=state.connections.find(c=>c.platform===f.platform&&c.account.toLowerCase()===f.account.toLowerCase()&&c.status!=='disconnected'&&c.id!==f.id);if(duplicate){f.step=1;f.error='该平台账号已有连接，请进入已有连接重新授权。';renderFlow();return;}let c=f.id?connection(f.id):null;if(!c){c={id:'demo-'+(++state.serial),platform:f.platform,owner:'A8OPARIS',client:'客户 u2c · 项目 a80',logs:[]};state.connections.unshift(c);}Object.assign(c,{name:f.name,account:f.account,status:'connected',reason:'模拟账号验证成功；没有连接真实平台。',resources:[...platform(f.platform).resources.slice(0,1)],scope:['账号基本信息（模拟）'],authTime:now(),expiry:'未知（演示）',verified:now()});log(c,f.id?'模拟重新授权':'模拟建立连接','成功','完成模拟账号验证；未发送真实请求，未保存密码。');f.resources=c.resources;f.created=c.id;f.step=3;render();if(state.drawer===c.id)renderDrawer();renderFlow(); }
+  function finishBinding() { if(!canManage())return;const f=state.flow;if(!f||f.type!=='connect'||f.step!==2)return;const duplicate=state.connections.find(c=>c.platform===f.platform&&c.account.toLowerCase()===f.account.toLowerCase()&&c.status!=='disconnected'&&c.id!==f.id);if(duplicate){failPlatformAuth('该平台账号已有连接，请进入已有连接重新授权。');return;}let c=f.id?connection(f.id):null;if(!c){c={id:'demo-'+(++state.serial),platform:f.platform,owner:'A8OPARIS',client:'客户 u2c · 项目 a80',logs:[]};state.connections.unshift(c);}Object.assign(c,{name:f.name,account:f.account,status:'connected',reason:'模拟账号验证成功；没有连接真实平台。',resources:[...platform(f.platform).resources.slice(0,1)],scope:['账号基本信息（模拟）'],authTime:now(),expiry:'未知（演示）',verified:now()});log(c,f.id?'模拟重新授权':'模拟建立连接','成功','完成模拟账号验证；未发送真实请求，未保存密码。');f.resources=c.resources;f.created=c.id;closePlatformAuth();f.step=3;render();if(state.drawer===c.id)renderDrawer();renderFlow(); }
   function startDisconnect(id) { if(!canManage())return;const c=connection(id);if(!c||c.status==='disconnected')return;state.flow={type:'disconnect',id};openModal();modalFrame('断开连接',`<div class="status-box reauth">${icon('triangle-alert')}<div><h3>断开后，将停止该连接的后续使用</h3><p>${esc(c.name)}</p></div></div>${kv([['本地操作','停用此示例连接'],['平台侧授权','单独反馈撤销结果'],['影响范围','关联任务影响待确认；不保证外部在途动作已停止']])}<div class="inline-note">本地断开不等于平台授权已撤销，也不会删除外部数据。</div><label class="check-label"><input id="revoke-failure" type="checkbox" checked>模拟平台侧撤销失败（体验双结果反馈）</label>`,`<button class="btn" data-action="close-modal">取消</button><button class="btn danger" data-action="confirm-disconnect">确认断开（模拟）</button>`); }
   function confirmDisconnect() { if(!canManage())return;const f=state.flow;if(!f||f.type!=='disconnect')return;const c=connection(f.id);const failed=$('revoke-failure').checked;c.status='disconnected';c.reason=failed?'本地已断开，平台授权撤销未确认（模拟）。真实接入时可能需要前往平台处理。':'本地已断开，平台撤销成功（模拟）；未执行真实撤销。';c.verified=now();log(c,'模拟断开连接','本地已停用',c.reason);log(c,'模拟平台侧撤销',failed?'失败':'成功',failed?'示例外部撤销失败；本地已停用，不自动恢复。':'仅模拟结果，未发送真实请求。','系统');render();if(state.drawer)renderDrawer();closeModal(c.reason); }
   function clearFilters() { state.query='';state.platform='all';state.status='all';$('search').value='';$('platform-filter').value='all';$('status-filter').value='all';render(); }
@@ -490,6 +573,7 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
     if(action==='detail')openDetail(el.dataset.id);
     if(action==='close-drawer')closeDrawer();
     if(action==='toggle-drawer-width')toggleDrawerWidth();
+    if(action==='toggle-flow-width')toggleFlowWidth();
     if(action==='drawer-seo'){const c=connection(state.drawer);if(c?.platform==='website'){state.drawerTab='seo';renderDrawer();$('detail-drawer').querySelector('[data-action="drawer-seo"]').focus();}}
     if(['save-seo','reset-seo','reset-seo-prompt','seo-engine'].includes(action))seoAction(action,el);
     if(action==='save-site')saveSite();
@@ -503,9 +587,16 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
     if(action==='platform-demo')startFlow(el.dataset.platform);
     if(action==='clear-filters')clearFilters();
     if(action==='close-modal')closeModal();
+    if(action==='clear-platform-search'&&f?.type==='connect'&&f.step===0){$('platform-picker-search').value='';searchPlatforms('');$('platform-picker-search').focus();}
+    if(action==='back-platforms'&&f&&!f.id&&(f.type==='site'&&!f.submitting||f.type==='connect'&&f.step===1)){if(f.type==='connect')if($('platform-password'))$('platform-password').value='';startFlow();}
     if(action==='choose-platform'&&f){if(el.dataset.platform==='website')startSite();else{f.platform=el.dataset.platform;f.step=1;renderFlow();}}
+    if(action==='open-platform-auth')openPlatformAuth();
+    if(action==='platform-auth-login')platformAuthLogin();
+    if(action==='platform-auth-switch'&&f?.authOpen&&f.authStage==='consent'){f.authStage='login';f.authError=null;renderPlatformAuth();}
+    if(action==='cancel-platform-auth'||action==='cancel-authorization')cancelPlatformAuth();
     if(action==='authorize')authorize();
-    if(['authorization-denied','authorization-failed','cancel-authorization'].includes(action)&&f){clearTimeout(flowTimer);f.step=1;f.error=action==='authorization-denied'?'模拟用户已拒绝授权，未创建连接。':action==='authorization-failed'?'模拟验证失败：未能确认账号授权，可以重试。':'授权已取消，未创建或更新连接。';renderFlow();}
+    if(action==='authorization-failed'&&f?.authOpen)failPlatformAuth('模拟验证失败：未能确认账号授权，可以重试。');
+    if(action==='authorization-denied'&&f?.authOpen){closePlatformAuth();f.error='模拟用户已拒绝授权，未创建或更新连接。';renderFlow();}
     if(action==='reauth')startFlow(null,el.dataset.id);
     if(action==='disconnect')startDisconnect(el.dataset.id);
     if(action==='confirm-disconnect')confirmDisconnect();
@@ -513,9 +604,10 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
     if(action==='view-created'&&f?.created){const id=f.created;closeModal();switchTab('connections');clearFilters();if(state.drawer)closeDrawer();openDetail(id);}
   });
   document.addEventListener('change',event=>{if(event.target.id==='site-cms'&&state.flow?.type==='site'){const wp=event.target.value==='wordpress';$('site-wp-fields').hidden=!wp;$('site-wp-fields').disabled=!wp;if(!wp)$('site-wp-password').value='';}});
-  document.addEventListener('input',event=>{if(event.target.dataset?.seo)updateSEO(event.target);if(event.target.id==='site-description'&&state.flow?.type==='site')$('site-description-count').textContent=event.target.value.length+'/2000';});
+  document.addEventListener('input',event=>{if(event.target.id==='platform-picker-search'&&!event.isComposing)searchPlatforms(event.target.value);if(event.target.dataset?.seo)updateSEO(event.target);if(event.target.id==='site-description'&&state.flow?.type==='site')$('site-description-count').textContent=event.target.value.length+'/2000';});
+  document.addEventListener('compositionend',event=>{if(event.target.id==='platform-picker-search')searchPlatforms(event.target.value);});
   document.addEventListener('change',event=>{if(event.target.dataset?.seo)updateSEO(event.target);});
-  document.addEventListener('keydown',event=>{const overlay=!$('modal-backdrop').hidden?$('flow-modal'):!$('detail-drawer').hidden?$('detail-drawer'):null;if(!overlay)return;if(event.key==='Escape'){event.preventDefault();if(!$('modal-backdrop').hidden)closeModal();else closeDrawer();}if(event.key==='Tab'){const focusable=[...overlay.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href]')].filter(el=>el.getClientRects().length);if(!focusable.length)return;const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}});
+  document.addEventListener('keydown',event=>{const overlay=!$('modal-backdrop').hidden?$('flow-modal'):!$('detail-drawer').hidden?$('detail-drawer'):null;if(!overlay)return;if(event.key==='Escape'){event.preventDefault();if(state.flow?.authOpen)cancelPlatformAuth();else if(!$('modal-backdrop').hidden)closeModal();else closeDrawer();}if(event.key==='Tab'){const focusable=[...overlay.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href]')].filter(el=>el.getClientRects().length);if(!focusable.length)return;const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}});
   $('search').addEventListener('input',e=>{state.query=e.target.value;render();});
   $('status-filter').insertAdjacentHTML('beforeend','<option value="unconnected">未连接</option><option value="pending">接入待确认</option>');
   $('platform-filter').innerHTML+=platforms.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
