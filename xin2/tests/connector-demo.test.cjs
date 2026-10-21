@@ -5,6 +5,40 @@ const context=vm.createContext({console,Intl,Date,Set,URL,document:{getElementBy
 const source=fs.readFileSync(path.join(root,'js/connector-demo.js'),'utf8');
 vm.runInContext(source.replace(/\}\)\(\);\s*$/,'globalThis.testAPI={state,render,startFlow,authorize,closeModal,openDetail,renderDrawer,reset,clearFilters,startDisconnect,confirmDisconnect,startSite,saveSite,normalizeSiteAddress,esc};})();'),context);
 const a=context.testAPI,SEED_COUNT=5;
+function seoInput(key,value,checked){const target={id:'seo-'+key,dataset:{seo:key},value,checked};for(const fn of listeners.get('input')||[])fn({target});}
+check('SEO tab is website-only and matches the reference settings and defaults',()=>{
+ a.openDetail('website-brand');click('drawer-seo');const html=element('detail-drawer').innerHTML;
+ assert.doesNotMatch(html,/seo-heading|seo-session-note|调度、内容质量阈值与 GEO 引擎|刷新页面后恢复初始设置/);
+ const seoCSS=fs.readFileSync(path.join(root,'css/connector-demo.css'),'utf8');
+ assert.match(seoCSS,/\.seo-section>h3,\.seo-section-head h3\{font-size:13px/);
+ assert.match(seoCSS,/\.seo-section textarea\{[^}]*font:12px\/1.8/);
+ for(const label of ['SEO 设置','调度','启用自动调度','流程执行时间','外链分析时间','中国时间（UTC+8）','内容质量阈值','0.70','文章生成提示词','{{domain}}','{{locale}}','{{clusterName}}','{{keywords}}','{{gap}}','GEO 引擎','DeepSeek','Kimi','通义','尚未启用','保存设置'])assert.ok(html.includes(label),label);
+ assert.match(html,/id="seo-week-cron">0 8 \* \* 1/);assert.match(html,/id="seo-month-cron">0 7 1 \* \*/);
+ assert.match(html,/id="seo-retries"[^>]+value="3"/);assert.match(html,/id="seo-images"[^>]+checked/);
+ a.openDetail('meta-brand');click('drawer-seo');assert.doesNotMatch(element('detail-drawer').innerHTML,/data-action="drawer-seo"|seo-settings/);
+});
+check('SEO settings update previews, save per website, survive tab changes and log only a configuration action',()=>{
+ a.openDetail('website-brand');click('drawer-seo');const c=a.state.connections[0],count=c.logs.length;
+ seoInput('weekday','3');seoInput('hour','10');seoInput('minute','30');seoInput('monthday','15');seoInput('linkHour','09');seoInput('quality','0.85');seoInput('retries','2');seoInput('images','',false);seoInput('prompt','自定义提示词 {{domain}}');click('seo-engine',{engine:'Kimi'});
+ assert.equal(element('seo-week-cron').textContent,'30 10 * * 3');assert.equal(element('seo-quality-value').textContent,'0.85');
+ click('drawer-logs');click('drawer-seo');assert.match(element('detail-drawer').innerHTML,/自定义提示词/);assert.equal(c.seoSettings,undefined);
+ click('save-seo');assert.equal(c.seoSettings.quality,0.85);assert.equal(c.seoSettings.retries,2);assert.equal(c.seoSettings.images,false);assert.equal(c.seoSettings.engines.includes('Kimi'),false);assert.equal(c.logs.length,count+1);assert.match(c.logs[0].note,/未启动真实调度/);
+ a.openDetail('website-brand');click('drawer-seo');assert.match(element('detail-drawer').innerHTML,/value="0.85"/);
+ const other=addSite();click('drawer-seo');assert.match(element('detail-drawer').innerHTML,/value="0.7"/);assert.doesNotMatch(element('detail-drawer').innerHTML,/自定义提示词/);
+});
+check('SEO validation, default restoration and read-only permission protect stored settings',()=>{
+ a.openDetail('website-brand');click('drawer-seo');seoInput('prompt','');click('save-seo');assert.equal(a.state.connections[0].seoSettings,undefined);assert.match(element('seo-error').textContent,/非空提示词/);
+ click('reset-seo-prompt');seoInput('enabled','',false);assert.match(element('detail-drawer').innerHTML,/class="seo-schedules" disabled/);click('save-seo');assert.equal(a.state.connections[0].seoSettings.enabled,false);
+ click('reset-seo');assert.equal(a.state.connections[0].seoSettings.enabled,false);click('save-seo');assert.equal(a.state.connections[0].seoSettings.enabled,true);
+ a.state.role='reader';a.renderDrawer();const before=JSON.stringify(a.state.connections[0].seoSettings);assert.match(element('detail-drawer').innerHTML,/class="seo-fields" disabled/);
+ seoInput('quality','0.1');click('seo-engine',{engine:'DeepSeek'});click('reset-seo');click('save-seo');assert.equal(JSON.stringify(a.state.connections[0].seoSettings),before);
+ a.reset();a.openDetail('website-brand');click('drawer-seo');assert.match(element('detail-drawer').innerHTML,/value="0.7"/);
+});
+check('SEO prompt content is escaped and numeric validation rejects invalid schedules',()=>{
+ a.openDetail('website-brand');click('drawer-seo');seoInput('prompt','</textarea><img src=x onerror=alert(1)>');click('save-seo');
+ assert.match(element('detail-drawer').innerHTML,/&lt;\/textarea&gt;/);assert.doesNotMatch(element('detail-drawer').innerHTML,/<img src=x/);
+ seoInput('monthday','32');click('save-seo');assert.equal(a.state.connections[0].seoSettings.monthday,'1');
+});
 check('default website is connected with complete safe demo details and survives reset',()=>{const c=a.state.connections.find(c=>c.id==='website-brand');assert.ok(c);assert.equal(c.platform,'website');assert.equal(c.status,'connected');assert.equal(c.cms,'wordpress');assert.equal(c.domain,'a8oparis.example.com');assert.ok(c.config.description);assert.ok(c.logs.length);assert.match(c.reason,/未连接真实官网/);assert.doesNotMatch(JSON.stringify(c),/password|secret|token/i);assert.match(element('connection-list').innerHTML,/A8OPARIS · 品牌官网/);assert.equal(a.state.connections.filter(c=>c.status==='connected').length,3);a.openDetail(c.id);assert.match(element('detail-drawer').innerHTML,/已模拟授权/);assert.doesNotMatch(element('detail-drawer').innerHTML,/drawer-config|站点配置/);a.startSite(c.id);assert.equal(a.state.flow.description,c.config.description);a.closeModal();a.state.drawerTab='logs';a.renderDrawer();assert.match(element('detail-drawer').innerHTML,/模拟授权验证成功/);c.status='disconnected';a.reset();assert.equal(a.state.connections.find(c=>c.id==='website-brand').status,'connected');assert.equal(a.state.connections.filter(c=>c.platform==='website').length,1);});
 function check(name,fn){a.reset();fn();console.log('PASS',name);}
 function flush(){const jobs=[...timers.values()];timers.clear();jobs.forEach(fn=>fn());}

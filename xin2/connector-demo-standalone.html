@@ -148,6 +148,20 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
   .drawer .drawer-body{padding:16px}
   .drawer .drawer-footer small{display:none}
 }
+/* SEO settings use the index drawer's compact typography and section rhythm. */
+.website-tabs{overflow-x:auto;flex-shrink:0}.website-tabs button{white-space:nowrap}
+.seo-settings{display:grid;gap:16px}
+.seo-fields,.seo-schedules{min-width:0;padding:0;border:0;margin:0}.seo-fields{display:grid;gap:16px}.seo-fields:disabled{opacity:.65}
+.seo-section{border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:16px;min-width:0}
+.seo-section>h3,.seo-section-head h3{font-size:13px;font-weight:600;margin-bottom:14px}.seo-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.seo-section-head .text-button{font-size:11px;flex-shrink:0}
+.seo-check{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--secondary)}.seo-check input{margin-left:auto;width:16px;height:16px;accent-color:var(--primary);flex-shrink:0}.seo-check small{font-size:11px;color:var(--muted)}
+.seo-field{margin-top:18px}.seo-field>label{font-size:12px;color:var(--secondary);display:block}.seo-field p,.seo-section>p{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.7}
+.seo-time{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:12px}.seo-time select{border:1px solid var(--border);border-radius:6px;padding:5px 8px;background:var(--surface);font-size:12px;min-height:32px;color:var(--text)}.seo-time small{font-size:11px;color:var(--muted)}.seo-time code{color:var(--muted);font-size:10px}
+.seo-field .seo-value{display:flex;justify-content:space-between;gap:12px}.seo-value output{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}.seo-field input[type=range]{width:100%;margin:10px 0 0;accent-color:var(--primary)}
+.seo-section>.seo-check:last-child:not(:first-child){margin-top:18px}.seo-placeholders{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}.seo-placeholders code{background:var(--primary-tint,#f5f3ff);color:var(--primary);padding:1px 4px;border-radius:3px;font-size:10px}
+.seo-section textarea{display:block;width:100%;min-height:210px;resize:vertical;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font:12px/1.8 'Noto Sans SC',system-ui,sans-serif;color:var(--secondary);background:var(--surface)}
+.seo-section textarea:focus-visible{outline:2px solid var(--primary);outline-offset:2px}.seo-geo-note{font-size:11px;line-height:1.8}.seo-engines{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.seo-engines .btn{min-height:30px;padding:5px 12px;font-size:12px}.seo-schedules:disabled{opacity:.55}#seo-error:empty{display:none}
+@media(max-width:650px){.seo-section{padding:12px}.seo-check{flex-wrap:wrap}.seo-check small{max-width:65%}.seo-time{gap:6px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
   <script>if(new URLSearchParams(location.search).get('embedded')==='1')document.documentElement.classList.add('embedded');</script>
@@ -328,7 +342,7 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
   function startDisconnect(id) { if(!canManage())return;const c=connection(id);if(!c||c.status==='disconnected')return;state.flow={type:'disconnect',id};openModal();modalFrame('断开连接',`<div class="status-box reauth">${icon('triangle-alert')}<div><h3>断开后，将停止该连接的后续使用</h3><p>${esc(c.name)}</p></div></div>${kv([['本地操作','停用此示例连接'],['平台侧授权','单独反馈撤销结果'],['影响范围','关联任务影响待确认；不保证外部在途动作已停止']])}<div class="inline-note">本地断开不等于平台授权已撤销，也不会删除外部数据。</div><label class="check-label"><input id="revoke-failure" type="checkbox" checked>模拟平台侧撤销失败（体验双结果反馈）</label>`,`<button class="btn" data-action="close-modal">取消</button><button class="btn danger" data-action="confirm-disconnect">确认断开（模拟）</button>`); }
   function confirmDisconnect() { if(!canManage())return;const f=state.flow;if(!f||f.type!=='disconnect')return;const c=connection(f.id);const failed=$('revoke-failure').checked;c.status='disconnected';c.reason=failed?'本地已断开，平台授权撤销未确认（模拟）。真实接入时可能需要前往平台处理。':'本地已断开，平台撤销成功（模拟）；未执行真实撤销。';c.verified=now();log(c,'模拟断开连接','本地已停用',c.reason);log(c,'模拟平台侧撤销',failed?'失败':'成功',failed?'示例外部撤销失败；本地已停用，不自动恢复。':'仅模拟结果，未发送真实请求。','系统');render();if(state.drawer)renderDrawer();closeModal(c.reason); }
   function clearFilters() { state.query='';state.platform='all';state.status='all';$('search').value='';$('platform-filter').value='all';$('status-filter').value='all';render(); }
-  function reset() { closeModal();closeDrawer();state.connections=initialConnections();state.role='admin';state.serial=0;clearFilters();switchTab('connections');toast('演示已重置；仅影响本页会话。'); }
+  function reset() { closeModal();closeDrawer();seoDrafts.clear();state.connections=initialConnections();state.role='admin';state.serial=0;clearFilters();switchTab('connections');toast('演示已重置；仅影响本页会话。'); }
   const cmsNames={wordpress:'WordPress',shopify:'Shopify',custom:'其他／自建',unknown:'暂不清楚'};
   function normalizeSiteAddress(raw) {
     const value=raw.trim();
@@ -386,8 +400,45 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
     if(state.drawerTab==='info')body=body.replace('<section class="detail-section">',siteOverviewHTML(c)+'<section class="detail-section">');
     if(state.drawerTab==='rankings')body=siteRankingsHTML(c);
     if(state.drawerTab==='published')body=sitePublishedHTML(c);
+    if(state.drawerTab==='seo')body=siteSEOHTML(c);
     const backend='编辑站点', data=siteAnalytics(c);
-    $('detail-drawer').innerHTML=`<div class="drawer-header"><div class="drawer-title-row">${logo(platform('website'))}<div><p class="website-eyebrow">SEO官方网站 · ${esc(cmsNames[c.cms])}</p><h2 id="drawer-title">${esc(c.name)}</h2><p>${esc(c.domain)}</p></div>${drawerWidthButton()}<div class="website-header-status">${pill(status)}</div><button class="icon-button close-drawer" data-action="close-drawer" aria-label="关闭详情">${icon('x')}</button></div></div><div class="drawer-tabs website-tabs" role="tablist" aria-label="官网详情">${[['info','站点信息'],['rankings',`关键词排名 (${data.keywords.length})`],['published',`已发布内容 (${data.posts.length})`],['logs',`日志记录 (${c.logs.length+(c.checks||[]).length})`]].map(([tab,label])=>`<button id="website-tab-${tab}" role="tab" aria-controls="website-tab-panel" aria-selected="${state.drawerTab===tab}" class="${state.drawerTab===tab?'selected':''}" data-action="drawer-${tab}">${label}</button>`).join('')}</div><div class="drawer-body website-body" id="website-tab-panel" role="tabpanel" aria-labelledby="website-tab-${state.drawerTab}">${body}</div><div class="drawer-footer"><button class="btn primary" data-action="site-backend" data-id="${c.id}" ${state.role!=='admin'?'disabled':''}>${backend}</button>${status==='connected'?`<button class="btn" data-action="${linked?'unlink-site':'disconnect'}" data-id="${c.id}" ${state.role!=='admin'?'disabled':''}>${linked?'解除站点关联':'断开连接'}</button>`:''}<small>本次会话演示 · 不连接真实官网</small></div>`;
+    $('detail-drawer').innerHTML=`<div class="drawer-header"><div class="drawer-title-row">${logo(platform('website'))}<div><p class="website-eyebrow">SEO官方网站 · ${esc(cmsNames[c.cms])}</p><h2 id="drawer-title">${esc(c.name)}</h2><p>${esc(c.domain)}</p></div>${drawerWidthButton()}<div class="website-header-status">${pill(status)}</div><button class="icon-button close-drawer" data-action="close-drawer" aria-label="关闭详情">${icon('x')}</button></div></div><div class="drawer-tabs website-tabs" role="tablist" aria-label="官网详情">${[['info','站点信息'],['rankings',`关键词排名 (${data.keywords.length})`],['published',`已发布内容 (${data.posts.length})`],['logs',`日志记录 (${c.logs.length+(c.checks||[]).length})`],['seo','SEO 设置']].map(([tab,label])=>`<button id="website-tab-${tab}" role="tab" aria-controls="website-tab-panel" aria-selected="${state.drawerTab===tab}" class="${state.drawerTab===tab?'selected':''}" data-action="drawer-${tab}">${label}</button>`).join('')}</div><div class="drawer-body website-body" id="website-tab-panel" role="tabpanel" aria-labelledby="website-tab-${state.drawerTab}">${body}</div><div class="drawer-footer">${state.drawerTab==='seo'?`<button class="btn primary" data-action="save-seo" ${state.role!=='admin'?'disabled':''}>保存设置</button><button class="btn" data-action="reset-seo" ${state.role!=='admin'?'disabled':''}>恢复默认</button><small>仅本次会话保存 · 不执行真实调度</small>`:`<button class="btn primary" data-action="site-backend" data-id="${c.id}" ${state.role!=='admin'?'disabled':''}>${backend}</button>${status==='connected'?`<button class="btn" data-action="${linked?'unlink-site':'disconnect'}" data-id="${c.id}" ${state.role!=='admin'?'disabled':''}>${linked?'解除站点关联':'断开连接'}</button>`:''}<small>本次会话演示 · 不连接真实官网</small>`}</div>`;
+  }
+  const seoDrafts=new Map();
+  const seoPrompt='你是一名资深 SEO 内容策略专家，为 {{domain}} 撰稿。请结合下方品牌知识背景与关键词聚类，进行 {{locale}} 内容创作，目标是在 Google 等搜索引擎获得关键词与长尾词排名。\n\n聚类主题：{{clusterName}}\n关键词：{{keywords}}\n内容缺口：{{gap}}\n\n语气与语言\n使用自然的商务语言——自信且具体，避免学术腔调或过于随意。目标语言为英文时，按母语者的自然商务英语写。\n写作风格应体现实际从业经验，而非泛泛的博客写手风格。\n避免 AI 套路式表达，避免空泛开场、重复总结和未经核实的数据。\n\n围绕用户问题提供具体、有依据、可执行的内容，引用品牌已有资料，不编造事实。';
+  function defaultSEO(){return {enabled:true,weekday:'1',hour:'08',minute:'00',monthday:'1',linkHour:'07',linkMinute:'00',quality:0.70,retries:3,images:true,prompt:seoPrompt,engines:['DeepSeek','Kimi','通义']};}
+  function seoDraft(c){if(!seoDrafts.has(c.id))seoDrafts.set(c.id,JSON.parse(JSON.stringify(c.seoSettings||defaultSEO())));return seoDrafts.get(c.id);}
+  function seoSchedule(s,links=false){return links?`${Number(s.linkMinute)} ${Number(s.linkHour)} ${s.monthday} * *`:`${Number(s.minute)} ${Number(s.hour)} * * ${s.weekday}`;}
+  function siteSEOHTML(c){
+    const s=seoDraft(c),disabled=state.role!=='admin'?'disabled':'',options=(count,start=0)=>Array.from({length:count},(_,i)=>String(i+start).padStart(2,'0'));
+    const select=(key,values)=>`<select id="seo-${key}" data-seo="${key}" aria-label="${({weekday:'流程执行星期',hour:'流程执行小时',minute:'流程执行分钟',monthday:'外链分析日期',linkHour:'外链分析小时',linkMinute:'外链分析分钟'})[key]}">${values.map(v=>{const [value,label]=Array.isArray(v)?v:[v,v];return `<option value="${value}" ${String(s[key])===String(value)?'selected':''}>${label}</option>`;}).join('')}</select>`;
+    return `<div class="seo-settings">
+    <fieldset class="seo-fields" ${disabled}><section class="seo-section"><h3>调度</h3><label class="seo-check">启用自动调度<input type="checkbox" id="seo-enabled" data-seo="enabled" ${s.enabled?'checked':''}></label><fieldset class="seo-schedules" ${s.enabled?'':'disabled'}>
+    <div class="seo-field"><label>流程执行时间</label><p>每周跑一轮：审计／技术分析，并刷新排名与域名评级（DR）。</p><div class="seo-time">每 ${select('weekday',[['1','周一'],['2','周二'],['3','周三'],['4','周四'],['5','周五'],['6','周六'],['0','周日']])}${select('hour',options(24))}<span>:</span>${select('minute',options(60))}<small>中国时间（UTC+8）</small><code id="seo-week-cron">${seoSchedule(s)}</code></div></div>
+    <div class="seo-field"><label>外链分析时间</label><p>外链缺口分析为独立外部调用，与流程分开排期；默认每月一次。</p><div class="seo-time">每月 ${select('monthday',Array.from({length:31},(_,i)=>[String(i+1),String(i+1)]))} 日 ${select('linkHour',options(24))}<span>:</span>${select('linkMinute',options(60))}<small>中国时间（UTC+8）</small><code id="seo-month-cron">${seoSchedule(s,true)}</code></div><p>选择 29–31 日时，不存在该日期的月份跳过。</p></div></fieldset></section>
+    <section class="seo-section"><h3>内容质量阈值</h3><div class="seo-field"><label class="seo-value" for="seo-quality">中文质量阈值 <output id="seo-quality-value">${Number(s.quality).toFixed(2)}</output></label><p>低于此值提示 ZH quality flag。</p><input type="range" id="seo-quality" data-seo="quality" min="0" max="1" step="0.01" value="${s.quality}"></div><div class="seo-field"><label class="seo-value" for="seo-retries">自动重新生成次数上限 <output id="seo-retries-value">${s.retries}</output></label><p>仅限制系统自动重试，手动驳回重写或在讨论区要求再写一篇不受此限制。</p><input type="range" id="seo-retries" data-seo="retries" min="0" max="6" step="1" value="${s.retries}"></div><label class="seo-check">为每篇文章生成配图 <small>正文首图 + WordPress 特色图</small><input id="seo-images" type="checkbox" data-seo="images" ${s.images?'checked':''}></label></section>
+    <section class="seo-section"><div class="seo-section-head"><h3>文章生成提示词</h3><button type="button" class="text-button" data-action="reset-seo-prompt">恢复默认</button></div><p class="seo-placeholders">可用占位符：${['domain','locale','clusterName','keywords','gap'].map(key=>`<code>{{${key}}}</code>`).join(' ')}</p><textarea id="seo-prompt" data-seo="prompt" rows="10" maxlength="12000" aria-label="文章生成提示词">${esc(s.prompt)}</textarea><p class="small-note">输出字段要求（标题／正文／meta／FAQ／评分等）由系统自动追加，无需也无法在此改动。</p></section>
+    <section class="seo-section"><h3>GEO 引擎</h3><div class="inline-note seo-geo-note">GEO 引用采样当前尚未启用：结果不展示，也不参与定时调度。以下选择仅保存演示偏好，不触发引擎调用。正式启用需联系系统技术侧。</div><div class="seo-engines">${['DeepSeek','Kimi','通义'].map(name=>`<button type="button" class="btn ${s.engines.includes(name)?'primary':''}" aria-pressed="${s.engines.includes(name)}" data-action="seo-engine" data-engine="${name}">${name}</button>`).join('')}</div></section></fieldset><p id="seo-error" class="error-message" role="alert"></p></div>`;
+  }
+  function updateSEO(target){
+    const c=connection(state.drawer),key=target.dataset?.seo;if(!c||c.platform!=='website'||state.drawerTab!=='seo'||state.role!=='admin'||!key)return;
+    const s=seoDraft(c);if(!Object.hasOwn(s,key)||key==='engines')return;
+    s[key]=['enabled','images'].includes(key)?!!target.checked:['quality','retries'].includes(key)?Number(target.value):String(target.value);
+    if(key==='enabled'){renderDrawer();$('seo-enabled').focus();return;}
+    if(key==='quality')$('seo-quality-value').textContent=Number(s.quality).toFixed(2);
+    if(key==='retries')$('seo-retries-value').textContent=s.retries;
+    $('seo-week-cron').textContent=seoSchedule(s);$('seo-month-cron').textContent=seoSchedule(s,true);
+  }
+  function seoAction(action,el){
+    const c=connection(state.drawer);if(!c||c.platform!=='website'||state.drawerTab!=='seo'||!canManage())return;
+    const s=seoDraft(c);
+    if(action==='seo-engine'){const name=el.dataset.engine;if(!['DeepSeek','Kimi','通义'].includes(name))return;s.engines=s.engines.includes(name)?s.engines.filter(x=>x!==name):[...s.engines,name];renderDrawer();return;}
+    if(action==='reset-seo-prompt'){s.prompt=seoPrompt;renderDrawer();toast('提示词已恢复默认，保存后生效于本次会话。');return;}
+    if(action==='reset-seo'){seoDrafts.set(c.id,defaultSEO());renderDrawer();toast('已恢复默认，请保存设置。');return;}
+    if(action!=='save-seo')return;
+    const validInt=(value,min,max)=>Number.isInteger(Number(value))&&Number(value)>=min&&Number(value)<=max;
+    if(!s.prompt.trim()||s.prompt.length>12000||!Number.isFinite(s.quality)||s.quality<0||s.quality>1||!validInt(s.retries,0,6)||!validInt(s.weekday,0,6)||!validInt(s.monthday,1,31)||!validInt(s.hour,0,23)||!validInt(s.linkHour,0,23)||!validInt(s.minute,0,59)||!validInt(s.linkMinute,0,59)){$('seo-error').textContent='请填写有效的执行时间、质量阈值和非空提示词。';return;}
+    c.seoSettings=JSON.parse(JSON.stringify(s));log(c,'更新 SEO 设置','成功','已保存本次会话的调度、质量阈值、提示词与引擎偏好；未启动真实调度或外部调用。');renderDrawer();toast('SEO 设置已保存（本次会话）。');
   }
   function siteDemoData() {
     const keywords=[
@@ -439,6 +490,8 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
     if(action==='detail')openDetail(el.dataset.id);
     if(action==='close-drawer')closeDrawer();
     if(action==='toggle-drawer-width')toggleDrawerWidth();
+    if(action==='drawer-seo'){const c=connection(state.drawer);if(c?.platform==='website'){state.drawerTab='seo';renderDrawer();$('detail-drawer').querySelector('[data-action="drawer-seo"]').focus();}}
+    if(['save-seo','reset-seo','reset-seo-prompt','seo-engine'].includes(action))seoAction(action,el);
     if(action==='save-site')saveSite();
     if(action==='site-backend')startSiteBackend(el.dataset.id);
     if(action==='site-authorization-failed'&&f?.type==='site'){clearTimeout(flowTimer);f.submitting=false;f.error='模拟授权失败，未创建或修改站点。请检查演示信息后重试。';renderSiteForm();}
@@ -460,8 +513,9 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
     if(action==='view-created'&&f?.created){const id=f.created;closeModal();switchTab('connections');clearFilters();if(state.drawer)closeDrawer();openDetail(id);}
   });
   document.addEventListener('change',event=>{if(event.target.id==='site-cms'&&state.flow?.type==='site'){const wp=event.target.value==='wordpress';$('site-wp-fields').hidden=!wp;$('site-wp-fields').disabled=!wp;if(!wp)$('site-wp-password').value='';}});
-  document.addEventListener('input',event=>{if(event.target.id==='site-description'&&state.flow?.type==='site')$('site-description-count').textContent=event.target.value.length+'/2000';});
-  document.addEventListener('keydown',event=>{const overlay=!$('modal-backdrop').hidden?$('flow-modal'):!$('detail-drawer').hidden?$('detail-drawer'):null;if(!overlay)return;if(event.key==='Escape'){event.preventDefault();if(!$('modal-backdrop').hidden)closeModal();else closeDrawer();}if(event.key==='Tab'){const focusable=[...overlay.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),a[href]')].filter(el=>el.getClientRects().length);if(!focusable.length)return;const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}});
+  document.addEventListener('input',event=>{if(event.target.dataset?.seo)updateSEO(event.target);if(event.target.id==='site-description'&&state.flow?.type==='site')$('site-description-count').textContent=event.target.value.length+'/2000';});
+  document.addEventListener('change',event=>{if(event.target.dataset?.seo)updateSEO(event.target);});
+  document.addEventListener('keydown',event=>{const overlay=!$('modal-backdrop').hidden?$('flow-modal'):!$('detail-drawer').hidden?$('detail-drawer'):null;if(!overlay)return;if(event.key==='Escape'){event.preventDefault();if(!$('modal-backdrop').hidden)closeModal();else closeDrawer();}if(event.key==='Tab'){const focusable=[...overlay.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href]')].filter(el=>el.getClientRects().length);if(!focusable.length)return;const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}});
   $('search').addEventListener('input',e=>{state.query=e.target.value;render();});
   $('status-filter').insertAdjacentHTML('beforeend','<option value="unconnected">未连接</option><option value="pending">接入待确认</option>');
   $('platform-filter').innerHTML+=platforms.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
