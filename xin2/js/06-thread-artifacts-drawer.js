@@ -741,6 +741,7 @@ if(a.mode==='roster'||a.mode==='items'){
     ${a.nxt&&(a.id!=='a2-label-copy'||a.plans.every(p=>p.s==='done'))?`<div class="nxt"><span class="lb">接下来</span>${a.nxt.map(n=>n==='下载活动策划'
       ?`<span class="plan-download"><button class="na" onclick="event.stopPropagation();S.planDownloadOpen=!S.planDownloadOpen;render()">${n} →</button>${S.planDownloadOpen?`<span class="plan-download-menu"><button onclick="downloadActivityPlan('HTML')">HTML 格式</button><button onclick="downloadActivityPlan('Word')">Word 格式</button></span>`:''}</span>`
       :n==='同步到活动'&&a.id==='a2-label-copy'?`<button class="na" onclick="openCampaignSync('${a.id}')">${n} →</button>`
+      :n==='发布'&&a.ty==='社媒内容'&&typeof pubActionHTML==='function'?pubActionHTML(a)
       :`<button class="na" onclick="toast('已在同一线程中新增步骤：${n}')">${n} →</button>`).join('')}${a.id==='a2-label-copy'?campaignSyncLinks(a.id):''}</div>`:''}
    </div>`;
  }
