@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh" data-theme="sensica">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -22,6 +22,8 @@
 <link rel="stylesheet" href="css/13-creator-intake.css">
 <link rel="stylesheet" href="css/14-document-picker.css?v=3">
 <link rel="stylesheet" href="css/15-publish-demo.css">
+<link rel="stylesheet" href="css/sensica-theme.css?v=2">
+<script src="js/21-theme-switcher.js"></script>
 </head>
 <body>
 <div id="app">
@@ -51,6 +53,7 @@
         <i data-lucide="panel-right-open" aria-hidden="true"></i><span>Drawer 组件库</span><i class="drawer-top-external" data-lucide="external-link" aria-hidden="true"></i>
       </a>
       <div class="tb-r">
+        <button class="theme-switch" id="theme-switch" type="button" data-i18n-skip onclick="toggleAppTheme()" aria-label="切换配色" aria-pressed="true"><span class="theme-swatch" aria-hidden="true"></span><span id="theme-label">Sensica 配色</span></button>
         <button class="appr" id="apprb" onclick="go('today',null,{nav:true})">审批 <span class="c num">5</span></button>
         <div class="seg" data-i18n-skip style="padding:var(--sp-1)">
           <button id="lz" style="padding:var(--sp-1) 10px;font-size:var(--fs-xs)" onclick="setLang('zh')">中文</button>

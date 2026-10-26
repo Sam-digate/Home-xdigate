@@ -1,0 +1,78 @@
+/* Palette sampled from https://sensica.com/ on 2026-10-26:
+   hero background/button ink FBF8F4, hero button/title 24201C,
+   hero eyebrow/active dot 9A6B43, arrow border/inactive dot DED4C7,
+   hero secondary text 5C544B, site muted text 737373, accent C8836A.
+   App-only hover/selection states use transparent layers of these colors.
+   Shared by index and its isolated connector frame; semantic/platform colors stay intact. */
+.theme-switch{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface);color:var(--t2);font-size:var(--fs-sm);white-space:nowrap;flex-shrink:0}
+.theme-switch:hover{border-color:var(--primary-lt);color:var(--t1)}
+.theme-swatch{width:12px;height:12px;border-radius:50%;background:var(--primary);border:1px solid rgba(0,0,0,.08);flex-shrink:0}
+:root[data-theme="sensica"]{
+  --sb:#151515;--sb2:rgba(251,248,244,.06);
+  --primary:#9A6B43;--primary-h:#24201C;--primary-hover:#24201C;
+  --primary-lt:#9A6B43;--primary-bg:rgba(154,107,67,.12);
+  --primary-tint:#FBF8F4;--primary-bd:#DED4C7;
+  --surface:#fff;--bg:#FBF8F4;--border:#DED4C7;
+  --surface-tint:#FBF8F4;--hairline:#EBEBEB;
+  --t1:#24201C;--t2:#5C544B;--t3:#737373;
+  --text:#24201C;--secondary:#5C544B;--muted:#737373;
+  --sb-t:#FBF8F4;--sb-tm:#DED4C7;--sb-active:rgba(251,248,244,.12);
+  --sh-sm:0 1px 4px rgba(36,32,28,.06);
+  --sh-md:0 4px 20px rgba(36,32,28,.10);
+  --sh-lg:0 12px 44px rgba(36,32,28,.18);
+  --shadow:0 1px 4px rgba(36,32,28,.06);
+}
+html[data-theme="sensica"] #sb{border-right:1px solid rgba(251,248,244,.12)}
+html[data-theme="sensica"] .brand-n{color:var(--sb-t)}
+html[data-theme="sensica"] .brand-m{background:var(--primary)}
+html[data-theme="sensica"] .nv{position:relative}
+html[data-theme="sensica"] .nv:hover{background:var(--sb2);color:var(--sb-t)}
+html[data-theme="sensica"] .nv.on{background:var(--sb-active);color:var(--sb-t);font-weight:600;box-shadow:inset 3px 0 #C8836A}
+html[data-theme="sensica"] .nv .bdg{background:var(--sb-active);color:var(--sb-tm)}
+html[data-theme="sensica"] .nv.on .bdg{background:var(--primary);color:var(--sb-t)}
+html[data-theme="sensica"] .nv-div{background:var(--sb-active)}
+html[data-theme="sensica"] .livecount{background:var(--sb2)}
+html[data-theme="sensica"] .livecount .n,
+html[data-theme="sensica"] .sb-b .n{color:var(--sb-t)}
+html[data-theme="sensica"] .sb-b:hover{background:var(--sb-active)}
+html[data-theme="sensica"] .account-panel{background:var(--sb2);border-color:var(--sb-active);box-shadow:none}
+html[data-theme="sensica"] .account-panel button{color:var(--sb-t)}
+html[data-theme="sensica"] .account-panel button:hover{background:var(--sb2)}
+html[data-theme="sensica"] .account-panel button.on{background:var(--sb-active);color:var(--sb-t)}
+html[data-theme="sensica"] .account-panel .meta{color:var(--sb-tm)}
+html[data-theme="sensica"] .account-demo-note{color:var(--sb-tm);border-color:var(--sb-active)}
+html[data-theme="sensica"] .seg{background:var(--primary-bg)}
+html[data-theme="sensica"] .btn:not(.ghost):not(.danger):not(.quiet),
+html[data-theme="sensica"] .btn.primary{background:#24201C;color:#FBF8F4;border-color:#24201C;box-shadow:0 2px 8px rgba(36,32,28,.14)}
+html[data-theme="sensica"] .btn:not(.ghost):not(.danger):not(.quiet):hover,
+html[data-theme="sensica"] .btn.primary:hover{background:#5C544B;border-color:#5C544B}
+html[data-theme="sensica"] .btn.ghost:hover{border-color:var(--primary-lt)}
+html[data-theme="sensica"] .chip.dom{border-color:var(--border)}
+html[data-theme="sensica"] .st.todo{color:var(--t2)}
+html[data-theme="sensica"] .st.ask{color:var(--primary-h)}
+html[data-theme="sensica"] .kcard .ft,
+html[data-theme="sensica"] .th-stats{border-color:var(--hairline)}
+/* Agent-origin cards use the customer's terracotta accent. */
+html[data-theme="sensica"] .kcard.srca{border-left-color:#C8836A}
+html[data-theme="sensica"] .bub.me{background:var(--surface-tint);border-color:var(--border)}
+html[data-theme="sensica"] .prog{background:var(--primary-bg)}
+html[data-theme="sensica"] .drawer-top-link{border-color:var(--border)}
+html[data-theme="sensica"] :is(input,textarea,select):focus{box-shadow:0 0 0 3px rgba(154,107,67,.10)}
+html[data-theme="sensica"] :is(#scrim,#sbscrim,.scrim){background:rgba(36,32,28,.30)}
+/* Connector-specific neutral surfaces; platform logos are deliberately excluded. */
+html[data-theme="sensica"] :is(.table-header,.connection-row:hover){background:var(--surface-tint)}
+html[data-theme="sensica"] .connection-row{border-color:var(--hairline)}
+html[data-theme="sensica"] .neutral-pill{background:var(--hairline)}
+/* Neutral surfaces that predate the shared color tokens. */
+html[data-theme="sensica"] :is(.product-upload,.kp-thumb,.kp-upload,.asset-preview,.asset-info-head .ib,.plan-doc-body,.plan-info,.plan-timeline-title,.plan-timeline-event,.plan-exec-row.head,.seo-more-settings,.seo-preview-stage,.inspection-metric,.sentiment-analysis,.sentiment-source-comment){background:var(--surface-tint);border-color:var(--border)}
+html[data-theme="sensica"] :is(.manual-agent-row:hover,.asset-custom-tag:hover){background:var(--surface-tint)}
+html[data-theme="sensica"] :is(.manual-agent-row.on,.status-filter.on){box-shadow:0 0 0 1px rgba(154,107,67,.12)}
+html[data-theme="sensica"] :is(.kp-sync-scroll,.kp-scroll){scrollbar-color:var(--border) var(--surface-tint)}
+html[data-theme="sensica"] :is(.btn:hover,.flow-back-button:hover){border-color:var(--primary-lt)}
+html[data-theme="sensica"] :is(.backdrop,.modal-backdrop){background:rgba(36,32,28,.30)}
+html[data-theme="sensica"] .pub-note{box-shadow:0 5px 24px rgba(36,32,28,.04)}
+/* User identity stays unchanged; only dudu's theme-specific avatar paint changes. */
+html[data-theme="sensica"] :is(.av,.avs)[data-user="du"],
+/* Legacy thread/message templates still inline the default purple identity color.
+   Limit this fallback to compact identity badges, never platform logos or images. */
+html[data-theme="sensica"] .avs[style*="#7c3aed" i]{background:#9A6B43!important;color:#fff}

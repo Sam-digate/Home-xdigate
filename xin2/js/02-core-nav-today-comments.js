@@ -12,11 +12,11 @@ function currentUser(){return S.currentUser||'br';}
 function renderAccount(){
  const id=currentUser();
  const acct=$('acct');if(acct)acct.innerHTML=`<div class="account-panel">${['du','br'].map(k=>{const x=U[k],r=k==='br'?'产品负责人':'任务发起人';return `<button class="${id===k?'on':''}" onclick="switchAccount('${k}',event)" aria-pressed="${id===k}">
-  <span class="av" style="width:24px;height:24px;background:linear-gradient(135deg,${x.c}99,${x.c});font-size:var(--fs-xs)">${x.s}</span>
+  <span class="av" data-user="${k}" style="width:24px;height:24px;background:linear-gradient(135deg,${x.c}99,${x.c});font-size:var(--fs-xs)">${x.s}</span>
   <span><b>${x.n}</b><span class="meta">${r}${id===k?' · 当前身份':''}</span></span>
  </button>`}).join('')}<div class="account-demo-note">身份仅用于：M1 审批演示 · 提示词审核 · 天猫详情页内容和新建任务流程演示</div></div>`;
  const u=U[id]||U.du;
- const top=$('topav');if(top){top.textContent=u.s;top.style.background=`linear-gradient(135deg,${u.c}99,${u.c})`;}
+ const top=$('topav');if(top){top.dataset.user=id;top.textContent=u.s;top.style.background=`linear-gradient(135deg,${u.c}99,${u.c})`;}
 }
 function toggleAccount(event){if(event)event.stopPropagation();S.accountOpen=!S.accountOpen;renderAccount();}
 function switchAccount(id,event){if(event)event.stopPropagation();S.currentUser=id;S.accountOpen=false;if(!permissionCanAccessView(S.view)){S.view=permissionFirstView();S.tid=null;S.hist=[];}renderNav();render();toast('已切换为 '+U[id].n);}
@@ -65,7 +65,11 @@ renderNav();render();$('view').scrollTo(0,0);
 function connectorFrameHTML(){
  const template=document.getElementById('connector-page');
  if(!template)return '<div class="wrap"><h1>连接与授权</h1><p>连接页面未完整打包，请使用最新的 index.html。</p></div>';
- const source=JSON.parse(template.textContent);
+ let source=JSON.parse(template.textContent);
+ if(document.documentElement?.dataset.theme==='sensica'){
+  source=source.replace('<html lang="zh-CN" class="embedded">','<html lang="zh-CN" class="embedded" data-theme="sensica">')
+   .replace('</head>','<link rel="stylesheet" href="css/sensica-theme.css?v=2"></head>');
+ }
  return '<iframe class="connector-frame" srcdoc="'+esc(source)+'" title="Connector · 连接与授权管理"></iframe>';
 }
 function render(){

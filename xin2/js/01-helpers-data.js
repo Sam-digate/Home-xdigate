@@ -9,7 +9,7 @@ function crInfo(t){
  if(c.s==='a'){const r=REG.find(x=>x.id===c.w)||{};
   return {s:'a',nm:r.nick||c.w,sub:r.n||'',c:'var(--primary)',ic:'🤖',av:AV(c.w,18),lab:'Agent 发起'};}
  const u=U[c.w]||{n:c.w,c:'#8B7FC7',s:'?'};
- return {s:'h',nm:u.n,sub:'',c:'#0891B2',ic:'👤',av:`<span class="avs" style="background:${u.c};width:18px;height:18px;font-size:var(--fs-xs)">${u.s}</span>`,lab:'人发起'};
+ return {s:'h',nm:u.n,sub:'',c:'#0891B2',ic:'👤',av:`<span class="avs" data-user="${esc(c.w)}" style="background:${u.c};width:18px;height:18px;font-size:var(--fs-xs)">${u.s}</span>`,lab:'人发起'};
 }
 function nick(id){const r=REG.find(x=>x.id===id);return r?r.nick:'';}
 function agentLabel(id){const r=REG.find(x=>x.id===id),a=AG[id]||{};return r?.n||a.n||id;}
