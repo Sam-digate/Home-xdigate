@@ -34,5 +34,9 @@ console.log('PASS knowledge filters, table headers and dividers use scoped custo
 assert.ok(skin.includes('html[data-theme="sensica"] .bub.me.intent-card{background:var(--surface)}'));
 assert.ok(fs.readFileSync(require('node:path').join(__dirname,'../js/06-thread-artifacts-drawer.js'),'utf8').includes('class="bub me intent-card"'));
 console.log('PASS intent card uses a white surface in Sensica without changing other message bubbles');
+assert.ok(skin.includes('html[data-theme="sensica"] .chip.mut{background:#FDF5F3;color:#C8836A;border-color:rgba(200,131,106,.35)}'));
+const defaultChips=fs.readFileSync(require('node:path').join(__dirname,'../css/02-work-thread-artifacts.css'),'utf8');
+assert.ok(defaultChips.includes('.chip.mut{background:var(--hairline);color:var(--t2);border:1px solid var(--border)}'));
+console.log('PASS Sensica neutral chips match official blog article-tag colors while default chips stay unchanged');
 assert.ok(skin.includes('html[data-theme="sensica"] .nv .bdg{background:var(--sb-active);color:#fff}'));
 assert.ok(skin.includes('html[data-theme="sensica"] .nv.on .bdg{background:var(--primary);color:#fff}'));

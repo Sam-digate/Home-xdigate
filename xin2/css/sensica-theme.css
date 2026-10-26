@@ -49,6 +49,8 @@ html[data-theme="sensica"] .btn:not(.ghost):not(.danger):not(.quiet):hover,
 html[data-theme="sensica"] .btn.primary:hover{background:#5C544B;border-color:#5C544B}
 html[data-theme="sensica"] .btn.ghost:hover{border-color:var(--primary-lt)}
 html[data-theme="sensica"] .chip.dom{border-color:var(--border)}
+/* Blog article tags: /blogs/the-edit-by-sensica .blog-modern__card-tag. */
+html[data-theme="sensica"] .chip.mut{background:#FDF5F3;color:#C8836A;border-color:rgba(200,131,106,.35)}
 html[data-theme="sensica"] .st.todo{color:var(--t2)}
 html[data-theme="sensica"] .st.ask{color:var(--primary-h)}
 html[data-theme="sensica"] .kcard .ft,
