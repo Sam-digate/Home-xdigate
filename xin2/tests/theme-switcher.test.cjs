@@ -38,5 +38,9 @@ assert.ok(skin.includes('html[data-theme="sensica"] .chip.mut{background:#FDF5F3
 const defaultChips=fs.readFileSync(require('node:path').join(__dirname,'../css/02-work-thread-artifacts.css'),'utf8');
 assert.ok(defaultChips.includes('.chip.mut{background:var(--hairline);color:var(--t2);border:1px solid var(--border)}'));
 console.log('PASS Sensica neutral chips match official blog article-tag colors while default chips stay unchanged');
+assert.ok(skin.includes('html[data-theme="sensica"] .pm-filterbar{background:var(--primary-bg)}'));
+assert.ok(skin.includes('html[data-theme="sensica"] .pmrow.ref{background:var(--surface)}'));
+assert.ok(skin.includes('html[data-theme="sensica"] .pmrow:hover{background:var(--surface-tint)}'));
+console.log('PASS shared prompt filters and cards replace legacy lavender only in Sensica');
 assert.ok(skin.includes('html[data-theme="sensica"] .nv .bdg{background:var(--sb-active);color:#fff}'));
 assert.ok(skin.includes('html[data-theme="sensica"] .nv.on .bdg{background:var(--primary);color:#fff}'));

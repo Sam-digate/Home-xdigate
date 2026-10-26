@@ -67,6 +67,13 @@ html[data-theme="sensica"] :is(#scrim,#sbscrim,.scrim){background:rgba(36,32,28,
 html[data-theme="sensica"] :is(.table-header,.connection-row:hover){background:var(--surface-tint)}
 html[data-theme="sensica"] .connection-row{border-color:var(--hairline)}
 html[data-theme="sensica"] .neutral-pill{background:var(--hairline)}
+/* Prompt management still has legacy lavender surfaces outside .seg. */
+html[data-theme="sensica"] .pm-filterbar{background:var(--primary-bg)}
+html[data-theme="sensica"] .pm-filterbar button.on{background:var(--surface);color:var(--primary)}
+html[data-theme="sensica"] .pmrow.ref{background:var(--surface)}
+html[data-theme="sensica"] .pmrow:hover{background:var(--surface-tint)}
+html[data-theme="sensica"] :is(.pm-slot,.pm-prompt-block-group){background:var(--surface-tint)}
+html[data-theme="sensica"] :is(.pm-slot:hover,.pm-slot.used){background:var(--primary-bg)}
 /* Knowledge-library controls and tables previously hardcoded lavender. */
 html[data-theme="sensica"] :is(.kp-platform-nav,.kp-views,.roster-scope-tabs){background:var(--primary-bg)}
 html[data-theme="sensica"] :is(.kp-sync-table,.kp-table,.kc-table) th{background:var(--surface-tint);color:var(--t2)}
