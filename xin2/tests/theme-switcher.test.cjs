@@ -23,3 +23,7 @@ console.log('PASS Sensica covers legacy thread identity and plan badges without 
 for(const hex of ['#9A6B43','#24201C','#FBF8F4','#DED4C7','#5C544B','#737373','#C8836A'])assert.ok(skin.includes(hex),hex);
 assert.doesNotMatch(skin,/#(?:846247|26231F|F8F5F0|E7E0D7|705239|625B53|82766A)\b/i);
 console.log('PASS customer skin uses the verified official homepage palette instead of approximate colors');
+assert.ok(skin.includes('html[data-theme="sensica"] :is(.kp-platform-nav,.kp-views,.roster-scope-tabs){background:var(--primary-bg)}'));
+assert.ok(skin.includes('html[data-theme="sensica"] :is(.kp-sync-table,.kp-table,.kc-table) th{background:var(--surface-tint);color:var(--t2)}'));
+assert.ok(skin.includes('html[data-theme="sensica"] :is(.kp-sync-table,.kp-table,.kc-table) :is(th,td){border-color:var(--border)}'));
+console.log('PASS knowledge filters, table headers and dividers use scoped customer theme tokens');

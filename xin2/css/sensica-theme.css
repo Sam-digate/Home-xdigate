@@ -63,6 +63,10 @@ html[data-theme="sensica"] :is(#scrim,#sbscrim,.scrim){background:rgba(36,32,28,
 html[data-theme="sensica"] :is(.table-header,.connection-row:hover){background:var(--surface-tint)}
 html[data-theme="sensica"] .connection-row{border-color:var(--hairline)}
 html[data-theme="sensica"] .neutral-pill{background:var(--hairline)}
+/* Knowledge-library controls and tables previously hardcoded lavender. */
+html[data-theme="sensica"] :is(.kp-platform-nav,.kp-views,.roster-scope-tabs){background:var(--primary-bg)}
+html[data-theme="sensica"] :is(.kp-sync-table,.kp-table,.kc-table) th{background:var(--surface-tint);color:var(--t2)}
+html[data-theme="sensica"] :is(.kp-sync-table,.kp-table,.kc-table) :is(th,td){border-color:var(--border)}
 /* Neutral surfaces that predate the shared color tokens. */
 html[data-theme="sensica"] :is(.product-upload,.kp-thumb,.kp-upload,.asset-preview,.asset-info-head .ib,.plan-doc-body,.plan-info,.plan-timeline-title,.plan-timeline-event,.plan-exec-row.head,.seo-more-settings,.seo-preview-stage,.inspection-metric,.sentiment-analysis,.sentiment-source-comment){background:var(--surface-tint);border-color:var(--border)}
 html[data-theme="sensica"] :is(.manual-agent-row:hover,.asset-custom-tag:hover){background:var(--surface-tint)}
