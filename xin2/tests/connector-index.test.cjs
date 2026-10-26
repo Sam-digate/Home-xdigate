@@ -6,11 +6,22 @@ const root=path.resolve(__dirname,'..');
 const read=name=>fs.readFileSync(path.join(root,name),'utf8');
 
 // Exercise the real route rather than only checking the navigation label.
-const context=vm.createContext({S:{view:'connector',hist:[]},$:()=>context.view,view:{innerHTML:''}});
+const pageJSON=read('index.html').match(/<script id="connector-page" type="application\/json">\s*([\s\S]*?)\s*<\/script>/)[1],inlinePage=JSON.parse(pageJSON);
+const context=vm.createContext({S:{view:'connector',hist:[]},$:()=>context.view,view:{innerHTML:''},
+ document:{getElementById:id=>id==='connector-page'?{textContent:pageJSON}:null},
+ esc:value=>String(value).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))});
 vm.runInContext(read('js/02-core-nav-today-comments.js'),context);
 vm.runInContext('render()',context);
 assert.match(context.view.innerHTML,/title="Connector · 连接与授权管理"/);
-assert.match(context.view.innerHTML,/src="connector-demo.html\?embedded=1"/);
+assert.match(context.view.innerHTML,/srcdoc="/);
+assert.doesNotMatch(context.view.innerHTML,/\ssrc="connector-demo.html/);
+assert.match(inlinePage,/<html lang="zh-CN" class="embedded">/);
+assert.match(inlinePage,/src="js\/connector-demo.js"/);
+assert.match(inlinePage,/href="css\/connector-demo.css\?v=4"/);
+assert.doesNotMatch(inlinePage,/\bfetch\(|XMLHttpRequest/);
+for(const match of inlinePage.matchAll(/<(script|link)\b[^>]*\b(?:src|href)="((?:js|css)\/[^"]+)"/g)){
+ assert.ok(fs.existsSync(path.join(root,match[2].split('?')[0])),'shared js/css asset must be included: '+match[2]);
+}
 assert.doesNotMatch(context.view.innerHTML,/不在本次原型范围/);
 assert.match(read('js/01-helpers-data.js'),/id:'connector',n:'Connector',i:'connector'/);
 const initialState=read('js/01-helpers-data.js').match(/^let S=.*$/m)[0];
@@ -52,7 +63,7 @@ let onLoad,onMessage,onResize;
 const hostClasses=new Set(),childClasses=new Set(),properties={},sentGeometry=[];
 const rootClasses=new Set();
 const child={body:{classList:{contains:name=>childClasses.has(name)}},
-  documentElement:{style:{setProperty:(key,value)=>properties[key]=value},classList:{add:name=>rootClasses.add(name)}}};
+  documentElement:{style:{setProperty:(key,value)=>properties[key]=value},classList:{add:name=>rootClasses.add(name),contains:name=>rootClasses.has(name)}}};
 let box={left:248,top:49,width:1000,height:700,right:1248,bottom:749};
 const frame={matches:selector=>selector==='iframe.connector-frame',
   parentElement:{getBoundingClientRect:()=>box},
@@ -101,3 +112,13 @@ assert.equal(sent.at(-1).open,true);
 childClasses.delete('overlay-open');notifyOverlay();
 assert.equal(sent.at(-1).open,false);
 console.log('PASS Connector overlay clipping preserves background geometry and shell navigation');
+// srcdoc inherits the parent base URL, but has no ?embedded=1 query.
+rootClasses.add('embedded');sent.length=0;
+const srcdoc=vm.createContext({window:{parent:parentWindow,addEventListener:(name,fn)=>childMessage=fn},
+ location:{search:''},URLSearchParams,Number,document:child,
+ MutationObserver:class{constructor(fn){notifyOverlay=fn;}observe(){}}});
+vm.runInContext(read('js/15-connector-shell.js'),srcdoc);
+assert.equal(sent.at(-1).type,'connector-overlay');
+childMessage({source:parentWindow,data:{type:'connector-geometry',top:56,left:228,width:900,height:700}});
+assert.equal(sent.at(-1).type,'connector-ready');
+console.log('PASS Connector is carried by index and srcdoc works without a separate HTML file');

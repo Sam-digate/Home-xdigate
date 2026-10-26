@@ -62,6 +62,12 @@ try{
 }catch(e){}
 renderNav();render();$('view').scrollTo(0,0);
 }
+function connectorFrameHTML(){
+ const template=document.getElementById('connector-page');
+ if(!template)return '<div class="wrap"><h1>连接与授权</h1><p>连接页面未完整打包，请使用最新的 index.html。</p></div>';
+ const source=JSON.parse(template.textContent);
+ return '<iframe class="connector-frame" srcdoc="'+esc(source)+'" title="Connector · 连接与授权管理"></iframe>';
+}
 function render(){
  const v=$('view');
  let html;
@@ -74,7 +80,7 @@ function render(){
  else if(S.view==='anal')html=vAnal();
  else if(S.view==='prop')html=vProp();
  else if(S.view==='permission')html=vPermission();
- else if(S.view==='connector')html='<iframe class="connector-frame" src="connector-demo.html?embedded=1" title="Connector · 连接与授权管理"></iframe>';
+ else if(S.view==='connector')html=connectorFrameHTML();
  else html=vSoon();
  v.innerHTML=withBackNav(html);
  if(S.view==='thread')afterThread();

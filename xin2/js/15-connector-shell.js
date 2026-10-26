@@ -1,6 +1,6 @@
 /* Keep the embedded viewport stable; only change clipping for global overlays. */
 (() => {
-  const embedded=window.parent!==window&&new URLSearchParams(location.search).get('embedded')==='1';
+  const embedded=window.parent!==window&&(new URLSearchParams(location.search).get('embedded')==='1'||document.documentElement.classList.contains('embedded'));
   if(embedded){
     const notify=()=>window.parent.postMessage({type:'connector-overlay',open:document.body.classList.contains('overlay-open')},'*');
     new MutationObserver(notify).observe(document.body,{attributes:true,attributeFilter:['class']});
