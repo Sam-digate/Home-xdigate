@@ -1,6 +1,7 @@
 /* Palette sampled from https://sensica.com/ on 2026-10-26:
    hero background/button ink FBF8F4, hero button/title 24201C,
-   hero eyebrow/active dot 9A6B43, arrow border/inactive dot DED4C7,
+   primary accent now follows /pages/hair-removal step badges: C8836A;
+   arrow border/inactive dot DED4C7,
    hero secondary text 5C544B, site muted text 737373, accent C8836A.
    App-only hover/selection states use transparent layers of these colors.
    Shared by index and its isolated connector frame; semantic/platform colors stay intact. */
@@ -9,8 +10,8 @@
 .theme-swatch{width:12px;height:12px;border-radius:50%;background:var(--primary);border:1px solid rgba(0,0,0,.08);flex-shrink:0}
 :root[data-theme="sensica"]{
   --sb:#151515;--sb2:rgba(251,248,244,.06);
-  --primary:#9A6B43;--primary-h:#24201C;--primary-hover:#24201C;
-  --primary-lt:#9A6B43;--primary-bg:rgba(154,107,67,.12);
+  --primary:#C8836A;--primary-h:#24201C;--primary-hover:#24201C;
+  --primary-lt:#C8836A;--primary-bg:rgba(200,131,106,.12);
   --primary-tint:#FBF8F4;--primary-bd:#DED4C7;
   --surface:#fff;--bg:#FBF8F4;--border:#DED4C7;
   --surface-tint:#FBF8F4;--hairline:#EBEBEB;
@@ -28,8 +29,8 @@ html[data-theme="sensica"] .brand-m{background:var(--primary)}
 html[data-theme="sensica"] .nv{position:relative}
 html[data-theme="sensica"] .nv:hover{background:var(--sb2);color:var(--sb-t)}
 html[data-theme="sensica"] .nv.on{background:var(--sb-active);color:var(--sb-t);font-weight:600;box-shadow:inset 3px 0 #C8836A}
-html[data-theme="sensica"] .nv .bdg{background:var(--sb-active);color:var(--sb-tm)}
-html[data-theme="sensica"] .nv.on .bdg{background:var(--primary);color:var(--sb-t)}
+html[data-theme="sensica"] .nv .bdg{background:var(--sb-active);color:#fff}
+html[data-theme="sensica"] .nv.on .bdg{background:var(--primary);color:#fff}
 html[data-theme="sensica"] .nv-div{background:var(--sb-active)}
 html[data-theme="sensica"] .livecount{background:var(--sb2)}
 html[data-theme="sensica"] .livecount .n,
@@ -55,9 +56,10 @@ html[data-theme="sensica"] .th-stats{border-color:var(--hairline)}
 /* Agent-origin cards use the customer's terracotta accent. */
 html[data-theme="sensica"] .kcard.srca{border-left-color:#C8836A}
 html[data-theme="sensica"] .bub.me{background:var(--surface-tint);border-color:var(--border)}
+html[data-theme="sensica"] .bub.me.intent-card{background:var(--surface)}
 html[data-theme="sensica"] .prog{background:var(--primary-bg)}
 html[data-theme="sensica"] .drawer-top-link{border-color:var(--border)}
-html[data-theme="sensica"] :is(input,textarea,select):focus{box-shadow:0 0 0 3px rgba(154,107,67,.10)}
+html[data-theme="sensica"] :is(input,textarea,select):focus{box-shadow:0 0 0 3px rgba(200,131,106,.10)}
 html[data-theme="sensica"] :is(#scrim,#sbscrim,.scrim){background:rgba(36,32,28,.30)}
 /* Connector-specific neutral surfaces; platform logos are deliberately excluded. */
 html[data-theme="sensica"] :is(.table-header,.connection-row:hover){background:var(--surface-tint)}
@@ -70,7 +72,7 @@ html[data-theme="sensica"] :is(.kp-sync-table,.kp-table,.kc-table) :is(th,td){bo
 /* Neutral surfaces that predate the shared color tokens. */
 html[data-theme="sensica"] :is(.product-upload,.kp-thumb,.kp-upload,.asset-preview,.asset-info-head .ib,.plan-doc-body,.plan-info,.plan-timeline-title,.plan-timeline-event,.plan-exec-row.head,.seo-more-settings,.seo-preview-stage,.inspection-metric,.sentiment-analysis,.sentiment-source-comment){background:var(--surface-tint);border-color:var(--border)}
 html[data-theme="sensica"] :is(.manual-agent-row:hover,.asset-custom-tag:hover){background:var(--surface-tint)}
-html[data-theme="sensica"] :is(.manual-agent-row.on,.status-filter.on){box-shadow:0 0 0 1px rgba(154,107,67,.12)}
+html[data-theme="sensica"] :is(.manual-agent-row.on,.status-filter.on){box-shadow:0 0 0 1px rgba(200,131,106,.12)}
 html[data-theme="sensica"] :is(.kp-sync-scroll,.kp-scroll){scrollbar-color:var(--border) var(--surface-tint)}
 html[data-theme="sensica"] :is(.btn:hover,.flow-back-button:hover){border-color:var(--primary-lt)}
 html[data-theme="sensica"] :is(.backdrop,.modal-backdrop){background:rgba(36,32,28,.30)}
@@ -79,4 +81,10 @@ html[data-theme="sensica"] .pub-note{box-shadow:0 5px 24px rgba(36,32,28,.04)}
 html[data-theme="sensica"] :is(.av,.avs)[data-user="du"],
 /* Legacy thread/message templates still inline the default purple identity color.
    Limit this fallback to compact identity badges, never platform logos or images. */
-html[data-theme="sensica"] .avs[style*="#7c3aed" i]{background:#9A6B43!important;color:#fff}
+html[data-theme="sensica"] .avs[style*="#7c3aed" i]{background:#C8836A!important;color:#fff}
+/* Terracotta marks selection; compact labels stay dark on white/light surfaces. */
+html[data-theme="sensica"] :is(.eyebrow,.dw-h .ty,.kp-sync-link,.status-filter.on,.dw-expand-toggle),
+html[data-theme="sensica"] .tabs button.selected{color:var(--t1)}
+html[data-theme="sensica"] :is(.seg,.kp-platform-nav,.kp-views,.roster-scope-tabs,.dw-tabs) button.on{color:var(--primary)}
+html[data-theme="sensica"] .dw-expand-toggle{background:var(--primary-bg)}
+html[data-theme="sensica"] #dw.expanded .dw-expand-toggle{background:var(--primary);color:var(--t1)}

@@ -195,7 +195,7 @@ function vThread(){
   </div>
   <div class="spine">
     <div class="node ok"><div class="nlab">意图 · INTENT</div>
-      <div class="bub me"><div class="who"><span class="avs" style="background:${intentAuthor?intentAuthor.c:'#9490B8'}">${intentAuthor?intentAuthor.s:'SYS'}</span>
+      <div class="bub me intent-card"><div class="who"><span class="avs" style="background:${intentAuthor?intentAuthor.c:'#9490B8'}">${intentAuthor?intentAuthor.s:'SYS'}</span>
         <span class="nm">${intentAuthor?intentAuthor.n:'系统事件'}</span><span class="tm">${t.intent.at}</span></div>
         ${esc(t.intent.tx)}${taTaskHTML(t)}</div></div>
 
