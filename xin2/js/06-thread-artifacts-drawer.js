@@ -649,13 +649,13 @@ function openPptOutlineFromCard(event,id){
 }
 function pptFilePeek(a,outline=null){
  const ready=a.st!=='run';
- const outlineAction=outline?`<button class="btn ghost sm" onclick="openDw('${outline.id}')">查看大纲</button>`:'';
+ const outlineAction=outline?`<button class="btn ghost sm" onclick="openDw('${outline.id}')">查看产出</button>`:'';
  const documentAction=outline&&a.st==='done'&&typeof dlActionHTML==='function'?dlActionHTML(a,null):'';
  return `<div class="pk${outline?' ppt-outline-clickable':''}" id="pk-${a.id}"${outline?` onclick="openPptOutlineFromCard(event,'${outline.id}')"`:''}>
   <div class="pk-h"><span class="ty">产出 · PPT 文件</span><span class="chip plat">PPTX</span><span class="st ${a.st}">${a.st==='done'?'已批准':ready?'待审批':'生成中'}</span>${artifactRunLink(a.by)}</div>
-  <div class="manual-artifact-summary ppt-file-summary"${outline?` role="button" tabindex="0" aria-label="查看大纲" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openDw('${outline.id}')}"`:''}>
+  <div class="manual-artifact-summary ppt-file-summary"${outline?` role="button" tabindex="0" aria-label="${ready?'查看产出':'查看大纲'}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openDw('${outline.id}')}"`:''}>
    <div class="pk-t"><div class="tt">${esc(a.ttl)}</div><div class="ex">${ready?`PPT 已生成完成 · ${esc(a.createdAt)} · ${a.pageCount}页`:'PPT Agent 正在生成演示文稿，请稍候…'}</div></div>
-   ${ready?'<div class="ppt-file-hint">下载链接约 7 天有效，建议尽快保存。</div>':'<div class="pbar ppt-file-progress"><i style="width:68%"></i></div>'}
+   ${ready?'<div class="ppt-file-hint">下载链接约 7 天有效，建议及时保存。批准后可创建在线文档，长期保留并随时查看 PPT。</div>':'<div class="pbar ppt-file-progress"><i style="width:68%"></i></div>'}
   </div>
   ${ready?`<div class="pk-a">${a.drawerReturning?drawerReturnEditor(a):`${a.st==='review'?`<button class="btn sm" onclick="approvePptFile('${a.id}')">批准</button>`:''}${outlineAction}${documentAction}<button class="btn ghost sm" onclick="downloadPptFile('${a.id}')">下载 PPTX</button>${a.st==='review'?`<button class="btn ghost sm" onclick="startDrawerReturn('${a.id}')">退回</button>`:''}<button class="rvb" onclick="openReportComments('${a.id}')">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''}</button><span class="v num">v${a.v} · 刚刚</span>`}</div>${a.st==='done'?`<div class="nxt"><span class="lb">接下来</span><button class="na" onclick="toast('已同步到活动')">同步到活动 →</button></div>`:''}`:''}
  </div>`;
@@ -1112,33 +1112,35 @@ function togglePptPage(id,i){const [,a]=findArt(id);if(!a)return;a.pptOpenPages=
 function pptCoverIsOpen(a){return !!a.pptCoverOpen;}
 function togglePptCover(id){const [,a]=findArt(id);if(!a)return;a.pptCoverOpen=!pptCoverIsOpen(a);drawDw();}
 function setAllPptPages(id,open){const [,a]=findArt(id);if(!a)return;a.pptCoverOpen=open;a.pptOpenPages={};a.pages.forEach((_,i)=>a.pptOpenPages[i]=open);drawDw();}
-function updatePptOutlineField(id,key,value){const [,a]=findArt(id);if(a)a[key]=value;}
-function updatePptPageField(id,i,key,value){const [,a]=findArt(id);if(a?.pages?.[i])a.pages[i][key]=value;}
-function movePptPage(id,i,delta){const [,a]=findArt(id),j=i+delta;if(!a||j<0||j>=a.pages.length)return;[a.pages[i],a.pages[j]]=[a.pages[j],a.pages[i]];a.pptOpenPages={};a.pptOpenPages[j]=true;drawDw();}
-function deletePptPage(id,i){const [,a]=findArt(id);if(!a)return;if(a.pages.length<=1){toast('至少保留一页');return;}a.pages.splice(i,1);a.pptOpenPages={0:true};drawDw();toast('已删除这一页');}
-function addPptPage(id){const [,a]=findArt(id);if(!a)return;a.pages.push({title:'新增页面',chapter:'',points:'填写本页需要表达的内容要点',visual:''});const i=a.pages.length-1;a.pptOpenPages={};a.pptOpenPages[i]=true;drawDw();requestAnimationFrame(()=>requestAnimationFrame(()=>document.getElementById(`ppt-page-${id}-${i}`)?.scrollIntoView({block:'center',behavior:'smooth'})));}
+function pptOutlineLocked(a){return !!a&&(a.outlineConfirmed||!!pptOutlineFile(a));}
+function updatePptOutlineField(id,key,value){const [,a]=findArt(id);if(a&&!pptOutlineLocked(a))a[key]=value;}
+function updatePptPageField(id,i,key,value){const [,a]=findArt(id);if(a?.pages?.[i]&&!pptOutlineLocked(a))a.pages[i][key]=value;}
+function movePptPage(id,i,delta){const [,a]=findArt(id),j=i+delta;if(!a||pptOutlineLocked(a)||j<0||j>=a.pages.length)return;[a.pages[i],a.pages[j]]=[a.pages[j],a.pages[i]];a.pptOpenPages={};a.pptOpenPages[j]=true;drawDw();}
+function deletePptPage(id,i){const [,a]=findArt(id);if(!a||pptOutlineLocked(a))return;if(a.pages.length<=1){toast('至少保留一页');return;}a.pages.splice(i,1);a.pptOpenPages={0:true};drawDw();toast('已删除这一页');}
+function addPptPage(id){const [,a]=findArt(id);if(!a||pptOutlineLocked(a))return;a.pages.push({title:'新增页面',chapter:'',points:'填写本页需要表达的内容要点',visual:''});const i=a.pages.length-1;a.pptOpenPages={};a.pptOpenPages[i]=true;drawDw();requestAnimationFrame(()=>requestAnimationFrame(()=>document.getElementById(`ppt-page-${id}-${i}`)?.scrollIntoView({block:'center',behavior:'smooth'})));}
 function pptOutlineFile(a){const [t]=findArt(a.id);return t?.arts.find(x=>x.mode==='pptfile'&&!x.deferred);}
 function pptFileOutline(a){const [t]=findArt(a.id);return t?.arts.find(x=>x.mode==='pptoutline'&&!x.deferred);}
 function pptCompactFile(a){
- return `<div class="ppt-compact-file"><span class="ppt-file-icon" aria-hidden="true">PPT</span><div class="ppt-compact-copy"><b>${esc(a.ttl)}.pptx</b><div class="ppt-ask-help">PPT 已生成完成 · ${esc(a.createdAt)} · ${a.pageCount}页</div></div><div class="ppt-ask-help ppt-compact-hint">下载链接约 7 天有效，建议尽快下载保存。</div></div>`;
+ return `<div class="ppt-compact-file"><span class="ppt-file-icon" aria-hidden="true">PPT</span><div class="ppt-compact-copy"><b>${esc(a.ttl)}.pptx</b><div class="ppt-ask-help">PPT 已生成完成 · ${esc(a.createdAt)} · ${a.pageCount}页</div></div><div class="ppt-ask-help ppt-compact-hint">下载链接约 7 天有效，建议及时保存。批准后可创建在线文档，长期保留并随时查看 PPT。</div></div>`;
 }
 function dPptOutline(a){
  const coverOpen=pptCoverIsOpen(a);
  const file=pptOutlineFile(a);
+ const locked=pptOutlineLocked(a);
  return `<div class="ppt-outline-editor">
   ${file?`<section class="ppt-outline-file" aria-label="PPT 文件产出">${pptCompactFile(file)}</section>`:''}
   <div class="ppt-outline-toolbar"><span>共 ${a.pages.length+1} 页</span><span class="spacer"></span><button class="btn ghost sm" onclick="setAllPptPages('${a.id}',true)">全部展开</button><button class="btn ghost sm" onclick="setAllPptPages('${a.id}',false)">全部收起</button></div>
   <div class="ppt-outline-pages"><section class="pdp-screen-card ppt-cover-card ${coverOpen?'open':''}">
    <button class="pdp-screen-head" onclick="togglePptCover('${a.id}')" aria-expanded="${coverOpen}"><span class="screen">第1页</span><span class="module">PPT 标题与摘要</span><span class="chip mut">封面</span><span class="chevron"><i data-lucide="chevron-${coverOpen?'up':'down'}"></i></span></button>
    ${coverOpen?`<div class="pdp-screen-body ppt-cover-form">
-    <div class="fld"><label>PPT 总标题</label><input value="${esc(a.deckTitle)}" oninput="updatePptOutlineField('${a.id}','deckTitle',this.value)"></div>
-    <div class="fld"><label>一句话摘要 <span class="ct">可选</span></label><textarea rows="4" oninput="updatePptOutlineField('${a.id}','summary',this.value)">${esc(a.summary)}</textarea></div>
+    <div class="fld"><label>PPT 总标题</label><input ${locked?'readonly':''} value="${esc(a.deckTitle)}" oninput="updatePptOutlineField('${a.id}','deckTitle',this.value)"></div>
+    <div class="fld"><label>一句话摘要 <span class="ct">可选</span></label><textarea ${locked?'readonly':''} rows="4" oninput="updatePptOutlineField('${a.id}','summary',this.value)">${esc(a.summary)}</textarea></div>
    </div>`:''}</section>${a.pages.map((p,i)=>{const open=pptPageIsOpen(a,i);return `<section id="ppt-page-${a.id}-${i}" class="pdp-screen-card ${open?'open':''}">
    <button class="pdp-screen-head" onclick="togglePptPage('${a.id}',${i})" aria-expanded="${open}"><span class="screen">第${i+2}页</span><span class="module">${esc(p.title)}</span><span class="chip mut">${esc(p.chapter||'未分组')}</span><span class="chevron"><i data-lucide="chevron-${open?'up':'down'}"></i></span></button>
-   ${open?`<div class="pdp-screen-body ppt-page-form"><div class="ppt-page-actions"><button class="btn ghost sm" onclick="event.stopPropagation();movePptPage('${a.id}',${i},-1)" ${i===0?'disabled':''}>上移</button><button class="btn ghost sm" onclick="event.stopPropagation();movePptPage('${a.id}',${i},1)" ${i===a.pages.length-1?'disabled':''}>下移</button><button class="ppt-page-delete" onclick="event.stopPropagation();deletePptPage('${a.id}',${i})">删除</button></div>
-    <div class="ppt-page-grid"><label class="product-field"><span>页面标题</span><input value="${esc(p.title)}" oninput="updatePptPageField('${a.id}',${i},'title',this.value)"></label><label class="product-field"><span>所属章节 <small>（可选）</small></span><input value="${esc(p.chapter)}" oninput="updatePptPageField('${a.id}',${i},'chapter',this.value)"></label></div>
-    <label class="product-field"><span>内容要点 <small>（每行一条）</small></span><textarea rows="5" oninput="updatePptPageField('${a.id}',${i},'points',this.value)">${esc(p.points)}</textarea></label>
-    <details class="ppt-visual-collapse"><summary>配图意向 <small>（可选）</small></summary><label class="product-field ppt-visual-field"><textarea aria-label="第${i+2}页配图意向" rows="1" oninput="updatePptPageField('${a.id}',${i},'visual',this.value)">${esc(p.visual)}</textarea></label></details>
+   ${open?`<div class="pdp-screen-body ppt-page-form">${locked?'':`<div class="ppt-page-actions"><button class="btn ghost sm" onclick="event.stopPropagation();movePptPage('${a.id}',${i},-1)" ${i===0?'disabled':''}>上移</button><button class="btn ghost sm" onclick="event.stopPropagation();movePptPage('${a.id}',${i},1)" ${i===a.pages.length-1?'disabled':''}>下移</button><button class="ppt-page-delete" onclick="event.stopPropagation();deletePptPage('${a.id}',${i})">删除</button></div>`}
+    <div class="ppt-page-grid"><label class="product-field"><span>页面标题</span><input ${locked?'readonly':''} value="${esc(p.title)}" oninput="updatePptPageField('${a.id}',${i},'title',this.value)"></label><label class="product-field"><span>所属章节 <small>（可选）</small></span><input ${locked?'readonly':''} value="${esc(p.chapter)}" oninput="updatePptPageField('${a.id}',${i},'chapter',this.value)"></label></div>
+    <label class="product-field"><span>内容要点 <small>（每行一条）</small></span><textarea ${locked?'readonly':''} rows="5" oninput="updatePptPageField('${a.id}',${i},'points',this.value)">${esc(p.points)}</textarea></label>
+    <details class="ppt-visual-collapse"><summary>配图意向 <small>（可选）</small></summary><label class="product-field ppt-visual-field"><textarea ${locked?'readonly':''} aria-label="第${i+2}页配图意向" rows="1" oninput="updatePptPageField('${a.id}',${i},'visual',this.value)">${esc(p.visual)}</textarea></label></details>
    </div>`:''}</section>`;}).join('')}</div>
   ${S.pc?`<div style="margin-top:var(--sp-4)">${subPane(a)}</div>`:''}
  </div>`;
