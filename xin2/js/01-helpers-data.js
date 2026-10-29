@@ -658,4 +658,4 @@ const STN={todo:'待开始',run:'进行中',review:'待审批',done:'已交付',
 const DOMS=['全部','内容','电商','用户运营','KOL','B2B'];
 const DAYN=['今天','昨天','本周早些时候'];
 
-let S={view:location.hash==='#permission'?'permission':'connector',mode:'kanban',dom:'全部',approvalDom:'全部',tid:null,aid:null,focus:false,dtab:0,liveT:null,liveI:0,hist:[],currentUser:'br',accountOpen:false};
+let S={view:location.hash==='#permission'?'permission':'work',mode:'kanban',dom:'全部',approvalDom:'全部',tid:null,aid:null,focus:false,dtab:0,liveT:null,liveI:0,hist:[],currentUser:'br',accountOpen:false};

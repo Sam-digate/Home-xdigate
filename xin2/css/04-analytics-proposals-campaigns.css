@@ -339,6 +339,15 @@
 .ppt-page-form .product-field small{font-weight:400;color:var(--t3)}
 .ppt-page-form .product-field textarea{min-height:72px}
 .ppt-page-form .ppt-visual-field textarea{height:38px;min-height:38px}
+.ppt-visual-collapse summary{cursor:pointer;color:var(--t2);font-size:var(--fs-xs);font-weight:600;padding:4px 0}
+.ppt-visual-collapse summary small{color:var(--t3);font-weight:400}
+.ppt-visual-collapse[open] summary{margin-bottom:var(--sp-2)}
+.ppt-outline-file{margin-bottom:var(--sp-4)}
+.ppt-outline-file .pk{margin:0;width:100%}
+.ppt-compact-file>.ppt-compact-actions{flex-direction:column;align-items:stretch}
+.ppt-compact-file{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--surface-tint)}
+.ppt-file-icon{display:grid;place-items:center;width:34px;height:34px;flex-shrink:0;border-radius:8px;background:var(--primary-bg);color:var(--primary);font-size:var(--fs-xs);font-weight:700}
+.ppt-compact-copy{flex:1;min-width:180px;overflow-wrap:anywhere}.ppt-compact-copy>b{font-size:var(--fs-sm)}.ppt-compact-actions{display:flex;gap:8px;flex-wrap:wrap}.ppt-compact-hint{flex-basis:100%}
 .ppt-file-summary{display:flex;flex-direction:column;gap:var(--sp-3)}
 .ppt-file-meta{display:flex;align-items:center;gap:var(--sp-5);font-size:var(--fs-sm);color:var(--t2)}
 .ppt-file-meta b{color:var(--t1);font-weight:600}
@@ -669,3 +678,5 @@
 .creator-collab-articles .content-item{padding-right:0;padding-left:0}
 .creator-collab-articles .content-actions svg{width:14px;height:14px}
 @media(max-width:760px){.creator-collab-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.ppt-outline-clickable{cursor:pointer}.ppt-outline-clickable .pk-a,.ppt-outline-clickable .nxt{cursor:default}

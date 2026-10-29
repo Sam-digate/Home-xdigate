@@ -10,10 +10,13 @@ function setup(saved,blocked=false){
  vm.runInNewContext(code,context);events.DOMContentLoaded();
  return {context,root,childRoot,links,stored,label,attrs};
 }
-const a=setup(null);assert.equal(a.label.textContent,'Sensica 配色');
+assert.equal(setup(null).label.textContent,'原版配色');
+assert.equal(setup(null,true).root.dataset.theme,'default');
+assert.ok(code.includes("const storageKey='xdigate-app-theme-v2'"));
+const a=setup('sensica');assert.equal(a.label.textContent,'Sensica 配色');
 a.context.window.toggleAppTheme();assert.equal(a.root.dataset.theme,'default');assert.equal(a.childRoot.dataset.theme,'default');assert.equal(a.label.textContent,'原版配色');assert.equal(a.attrs['aria-pressed'],'false');assert.equal(a.stored.value,'default');assert.equal(a.links.length,1);
 a.context.window.toggleAppTheme();assert.equal(a.root.dataset.theme,'sensica');assert.equal(a.childRoot.dataset.theme,'sensica');assert.equal(a.links.length,1);
-assert.equal(setup('default').root.dataset.theme,'default');assert.equal(setup('invalid').root.dataset.theme,'sensica');
+assert.equal(setup('default').root.dataset.theme,'default');assert.equal(setup('invalid').root.dataset.theme,'default');
 const b=setup(null,true);assert.doesNotThrow(()=>b.context.window.toggleAppTheme());
 console.log('PASS theme toggle, persistence, iframe sync without reload, accessible label and blocked storage fallback');
 const skin=fs.readFileSync(require('node:path').join(__dirname,'../css/sensica-theme.css'),'utf8');

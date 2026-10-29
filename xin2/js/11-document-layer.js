@@ -5,7 +5,8 @@ let dlCreation=null;
 function dlActor(){return U[currentUser()]?.n||'当前用户'}
 function dlProject(task){return task?.project||task?.brand||document.querySelector('#top .proj .v')?.textContent.trim()||'任务未提供项目'}
 function dlSupported(a){
- return !!a&&!a.inspection&&!a.sentiment&&!a.listing&&a.st!=='run'&&
+ if(a?.mode==='pptfile'&&a.st!=='done')return false;
+ return !!a&&a.mode!=='pptoutline'&&!a.inspection&&!a.sentiment&&!a.listing&&a.st!=='run'&&
  (a.mode!=='plans'||!!a.plans?.length)&&
  (['plans','report','general-session','seq','adtable','items','pptoutline','pptfile'].includes(a.mode)||(!a.mode&&['文档','报告','活动策划','策划方案'].includes(a.ty)));
 }
@@ -36,7 +37,9 @@ closeMod=function(){if($('mod').classList.contains('on')&&document.querySelector
 const dlOriginalDrawDw=drawDw;
 drawDw=function(){
  dlOriginalDrawDw();
- const a=findArt(S.aid)?.[1];if(!dlSupported(a)||S.cr!=null||S.brief!=null)return;
+ let a=findArt(S.aid)?.[1];
+ if(a?.mode==='pptoutline')a=pptOutlineFile(a);
+ if(!dlSupported(a)||S.cr!=null||S.brief!=null)return;
  const footer=document.querySelector('#dw .dw-artifact-content > .dw-f')||document.querySelector('#dw > .dw-f');if(!footer)return;
  const scope=a.mode==='plans'?S.oi:null;
  footer.querySelector('.dl-entry')?.remove();

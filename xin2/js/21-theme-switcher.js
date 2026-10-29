@@ -1,7 +1,9 @@
 /* A visual-only theme change: never rerender a form or reload the connector. */
 (() => {
   const root=document.documentElement;
-  const storageKey='xdigate-app-theme';
+  // New default: ignore the previous Sensica-first preference once, then remember new choices.
+  const storageKey='xdigate-app-theme-v2';
+  root.dataset.theme='default';
   try{
     const saved=localStorage.getItem(storageKey);
     if(saved==='default'||saved==='sensica')root.dataset.theme=saved;

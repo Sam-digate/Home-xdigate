@@ -240,7 +240,7 @@ function vThread(){
       </div></div>`:''}
 
     ${t.arts&&t.arts.length?`<div class="node ${t.st==='review'?'wait':'ok'}"><div class="nlab">产出 · ARTIFACT</div>
-      ${t.arts.filter(a=>!a.deferred&&!(t.id==='t1'&&a.id==='a2')).map(peek).join('')}</div>`:''}
+      ${t.arts.filter(a=>!a.deferred&&!(t.id==='t1'&&a.id==='a2')&&!(a.mode==='pptfile'&&t.arts.some(x=>!x.deferred&&x.mode==='pptoutline'))).map(peek).join('')}</div>`:''}
 
     ${pptGeneratingNode(t)}
 
@@ -633,6 +633,8 @@ function csaPeek(a){
  </div>`;
 }
 function pptOutlinePeek(a){
+ const file=pptOutlineFile(a);
+ if(file)return pptFilePeek(file,a);
  return `<div class="pk" id="pk-${a.id}">
   <div class="pk-h"><span class="ty">产出 · PPT 大纲</span><span class="chip plat">中文</span><span class="st ${a.st==='done'?'done':'review'}">${a.st==='done'?'已批准':'待确认'}</span>${artifactRunLink(a.by)}</div>
   <div class="manual-artifact-summary" onclick="openDw('${a.id}')">
@@ -641,17 +643,24 @@ function pptOutlinePeek(a){
   <div class="pk-a">${a.drawerReturning?drawerReturnEditor(a):`${a.st==='done'?'':`<button class="btn sm" onclick="confirmPptOutline('${a.id}')">批准</button>`}<button class="btn ghost sm" onclick="openDw('${a.id}')">查看大纲</button>${a.st==='done'?'':`<button class="btn ghost sm" onclick="startDrawerReturn('${a.id}')">退回</button>`}<button class="rvb" onclick="openReportComments('${a.id}')">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''}</button><span class="v num">v${a.v} · 刚刚</span>`}</div>
  </div>`;
 }
-function pptFilePeek(a){
+function openPptOutlineFromCard(event,id){
+ if(event.target.closest('button,a,input,textarea,select,summary,[contenteditable],.pk-a'))return;
+ openDw(id);
+}
+function pptFilePeek(a,outline=null){
  const ready=a.st!=='run';
- return `<div class="pk" id="pk-${a.id}">
+ const outlineAction=outline?`<button class="btn ghost sm" onclick="openDw('${outline.id}')">查看大纲</button>`:'';
+ const documentAction=outline&&a.st==='done'&&typeof dlActionHTML==='function'?dlActionHTML(a,null):'';
+ return `<div class="pk${outline?' ppt-outline-clickable':''}" id="pk-${a.id}"${outline?` onclick="openPptOutlineFromCard(event,'${outline.id}')"`:''}>
   <div class="pk-h"><span class="ty">产出 · PPT 文件</span><span class="chip plat">PPTX</span><span class="st ${a.st}">${a.st==='done'?'已批准':ready?'待审批':'生成中'}</span>${artifactRunLink(a.by)}</div>
-  <div class="manual-artifact-summary ppt-file-summary">
-   <div class="pk-t"><div class="tt">${esc(a.ttl)}</div><div class="ex">${ready?`PPT 已生成完成 · ${esc(a.createdAt)}`:'PPT Agent 正在生成演示文稿，请稍候…'}</div></div>
-   ${ready?`<div class="ppt-file-meta"><span>页数：<b>${a.pageCount} 页</b></span><span>消耗积分：<b>${a.credits}</b></span></div><div class="ppt-file-hint">下载链接约 7 天有效，建议尽快保存。</div>`:'<div class="pbar ppt-file-progress"><i style="width:68%"></i></div>'}
+  <div class="manual-artifact-summary ppt-file-summary"${outline?` role="button" tabindex="0" aria-label="查看大纲" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openDw('${outline.id}')}"`:''}>
+   <div class="pk-t"><div class="tt">${esc(a.ttl)}</div><div class="ex">${ready?`PPT 已生成完成 · ${esc(a.createdAt)} · ${a.pageCount}页`:'PPT Agent 正在生成演示文稿，请稍候…'}</div></div>
+   ${ready?'<div class="ppt-file-hint">下载链接约 7 天有效，建议尽快保存。</div>':'<div class="pbar ppt-file-progress"><i style="width:68%"></i></div>'}
   </div>
-  ${ready?`<div class="pk-a">${a.drawerReturning?drawerReturnEditor(a):`${a.st==='review'?`<button class="btn sm" onclick="approvePptFile('${a.id}')">批准</button>`:''}<button class="btn ghost sm" onclick="openPptOnline('${a.id}')">在线编辑</button><button class="btn ghost sm" onclick="downloadPptFile('${a.id}')">下载 PPTX</button>${a.st==='review'?`<button class="btn ghost sm" onclick="startDrawerReturn('${a.id}')">退回</button>`:''}<button class="rvb" onclick="openReportComments('${a.id}')">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''}</button><span class="v num">v${a.v} · 刚刚</span>`}</div>${a.st==='done'?`<div class="nxt"><span class="lb">接下来</span><button class="na" onclick="toast('已同步到活动')">同步到活动 →</button></div>`:''}`:''}
+  ${ready?`<div class="pk-a">${a.drawerReturning?drawerReturnEditor(a):`${a.st==='review'?`<button class="btn sm" onclick="approvePptFile('${a.id}')">批准</button>`:''}${outlineAction}${documentAction}<button class="btn ghost sm" onclick="downloadPptFile('${a.id}')">下载 PPTX</button>${a.st==='review'?`<button class="btn ghost sm" onclick="startDrawerReturn('${a.id}')">退回</button>`:''}<button class="rvb" onclick="openReportComments('${a.id}')">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''}</button><span class="v num">v${a.v} · 刚刚</span>`}</div>${a.st==='done'?`<div class="nxt"><span class="lb">接下来</span><button class="na" onclick="toast('已同步到活动')">同步到活动 →</button></div>`:''}`:''}
  </div>`;
 }
+
 function peek(a){
  const g=AG[a.by];
  if(a.mode==='general-session')return generalSessionPeek(a);
@@ -1108,9 +1117,16 @@ function updatePptPageField(id,i,key,value){const [,a]=findArt(id);if(a?.pages?.
 function movePptPage(id,i,delta){const [,a]=findArt(id),j=i+delta;if(!a||j<0||j>=a.pages.length)return;[a.pages[i],a.pages[j]]=[a.pages[j],a.pages[i]];a.pptOpenPages={};a.pptOpenPages[j]=true;drawDw();}
 function deletePptPage(id,i){const [,a]=findArt(id);if(!a)return;if(a.pages.length<=1){toast('至少保留一页');return;}a.pages.splice(i,1);a.pptOpenPages={0:true};drawDw();toast('已删除这一页');}
 function addPptPage(id){const [,a]=findArt(id);if(!a)return;a.pages.push({title:'新增页面',chapter:'',points:'填写本页需要表达的内容要点',visual:''});const i=a.pages.length-1;a.pptOpenPages={};a.pptOpenPages[i]=true;drawDw();requestAnimationFrame(()=>requestAnimationFrame(()=>document.getElementById(`ppt-page-${id}-${i}`)?.scrollIntoView({block:'center',behavior:'smooth'})));}
+function pptOutlineFile(a){const [t]=findArt(a.id);return t?.arts.find(x=>x.mode==='pptfile'&&!x.deferred);}
+function pptFileOutline(a){const [t]=findArt(a.id);return t?.arts.find(x=>x.mode==='pptoutline'&&!x.deferred);}
+function pptCompactFile(a){
+ return `<div class="ppt-compact-file"><span class="ppt-file-icon" aria-hidden="true">PPT</span><div class="ppt-compact-copy"><b>${esc(a.ttl)}.pptx</b><div class="ppt-ask-help">PPT 已生成完成 · ${esc(a.createdAt)} · ${a.pageCount}页</div></div><div class="ppt-ask-help ppt-compact-hint">下载链接约 7 天有效，建议尽快下载保存。</div></div>`;
+}
 function dPptOutline(a){
  const coverOpen=pptCoverIsOpen(a);
+ const file=pptOutlineFile(a);
  return `<div class="ppt-outline-editor">
+  ${file?`<section class="ppt-outline-file" aria-label="PPT 文件产出">${pptCompactFile(file)}</section>`:''}
   <div class="ppt-outline-toolbar"><span>共 ${a.pages.length+1} 页</span><span class="spacer"></span><button class="btn ghost sm" onclick="setAllPptPages('${a.id}',true)">全部展开</button><button class="btn ghost sm" onclick="setAllPptPages('${a.id}',false)">全部收起</button></div>
   <div class="ppt-outline-pages"><section class="pdp-screen-card ppt-cover-card ${coverOpen?'open':''}">
    <button class="pdp-screen-head" onclick="togglePptCover('${a.id}')" aria-expanded="${coverOpen}"><span class="screen">第1页</span><span class="module">PPT 标题与摘要</span><span class="chip mut">封面</span><span class="chevron"><i data-lucide="chevron-${coverOpen?'up':'down'}"></i></span></button>
@@ -1122,7 +1138,7 @@ function dPptOutline(a){
    ${open?`<div class="pdp-screen-body ppt-page-form"><div class="ppt-page-actions"><button class="btn ghost sm" onclick="event.stopPropagation();movePptPage('${a.id}',${i},-1)" ${i===0?'disabled':''}>上移</button><button class="btn ghost sm" onclick="event.stopPropagation();movePptPage('${a.id}',${i},1)" ${i===a.pages.length-1?'disabled':''}>下移</button><button class="ppt-page-delete" onclick="event.stopPropagation();deletePptPage('${a.id}',${i})">删除</button></div>
     <div class="ppt-page-grid"><label class="product-field"><span>页面标题</span><input value="${esc(p.title)}" oninput="updatePptPageField('${a.id}',${i},'title',this.value)"></label><label class="product-field"><span>所属章节 <small>（可选）</small></span><input value="${esc(p.chapter)}" oninput="updatePptPageField('${a.id}',${i},'chapter',this.value)"></label></div>
     <label class="product-field"><span>内容要点 <small>（每行一条）</small></span><textarea rows="5" oninput="updatePptPageField('${a.id}',${i},'points',this.value)">${esc(p.points)}</textarea></label>
-    <label class="product-field ppt-visual-field"><span>配图意向 <small>（可选）</small></span><textarea rows="1" oninput="updatePptPageField('${a.id}',${i},'visual',this.value)">${esc(p.visual)}</textarea></label>
+    <details class="ppt-visual-collapse"><summary>配图意向 <small>（可选）</small></summary><label class="product-field ppt-visual-field"><textarea aria-label="第${i+2}页配图意向" rows="1" oninput="updatePptPageField('${a.id}',${i},'visual',this.value)">${esc(p.visual)}</textarea></label></details>
    </div>`:''}</section>`;}).join('')}</div>
   ${S.pc?`<div style="margin-top:var(--sp-4)">${subPane(a)}</div>`:''}
  </div>`;
@@ -1147,15 +1163,16 @@ function confirmPptOutline(id){
   delete t.pptLive;t.outputCount=t.arts.length;t.st='review';t.up='刚刚';render();renderNav();toast('PPT 已生成，等待审批');
  },1800);
 }
-function approvePptFile(id){const [t,a]=findArt(id);if(!t||!a)return;a.st='done';t.st=t.arts.every(x=>x.st==='done')?'done':'review';t.up='刚刚';render();renderNav();toast('PPT 文件已批准');}
-function openPptOnline(id){const [,a]=findArt(id);if(!a)return;toast('已打开 PPT 在线编辑 · 展示功能');}
+function approvePptFile(id){const [t,a]=findArt(id);if(!t||!a)return;a.st='done';t.st=t.arts.every(x=>x.st==='done')?'done':'review';t.up='刚刚';render();renderNav();if($('dw')?.classList.contains('on'))drawDw();toast('PPT 文件已批准');}
 function downloadPptFile(id){const [,a]=findArt(id);if(!a)return;toast('PPTX 下载已开始 · 展示功能');}
-function dPptFile(a){return `<div class="ppt-file-summary ppt-file-drawer-summary"><div class="pk-t"><div class="tt">${esc(a.ttl)}</div><div class="ex">PPT 已生成完成 · ${esc(a.createdAt)}</div></div><div class="ppt-file-meta"><span>页数：<b>${a.pageCount} 页</b></span><span>消耗积分：<b>${a.credits}</b></span></div><div class="ppt-file-hint">下载链接约 7 天有效，建议尽快保存。</div></div>${S.pc?`<div style="margin-top:var(--sp-4)">${subPane(a)}</div>`:''}`;}
-function pptFileFooter(a){if(a.drawerReturning)return drawerReturnEditor(a);return `${a.st==='review'?`<button class="btn" onclick="approvePptFile('${a.id}')">批准</button>`:''}<button class="btn ghost" onclick="openPptOnline('${a.id}')">在线编辑</button><button class="btn ghost" onclick="downloadPptFile('${a.id}')">下载 PPTX</button>${a.st==='review'?`<button class="btn ghost" onclick="startDrawerReturn('${a.id}')">退回</button>`:''}<button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;}
-function pptOutlineFooter(a){
+function dPptFile(a){return `${pptCompactFile(a)}${S.pc?`<div style="margin-top:var(--sp-4)">${subPane(a)}</div>`:''}`;}
+function pptFileFooter(a){if(a.drawerReturning)return drawerReturnEditor(a);return `${a.st==='review'?`<button class="btn" onclick="approvePptFile('${a.id}')">批准</button>`:''}<button class="btn ghost" onclick="downloadPptFile('${a.id}')">下载 PPTX</button>${a.st==='review'?`<button class="btn ghost" onclick="startDrawerReturn('${a.id}')">退回</button>`:''}<button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;}
+function pptOutlineFooter(a,commentArtifact=a){
+ const file=pptOutlineFile(a);
+ if(file)return `${file.st==='review'?`<button class="btn" onclick="approvePptFile('${file.id}')">批准</button>`:''}${file.st!=='run'?`<button class="btn ghost" onclick="downloadPptFile('${file.id}')">下载 PPTX</button>`:''}<button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(commentArtifact)?`<span class="n">${subCount(commentArtifact)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;
  if(a.drawerReturning)return drawerReturnEditor(a);
  if(a.st==='done')return `<span class="st done">已批准</span><button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;
- return `<button class="btn" onclick="confirmPptOutline('${a.id}')">批准</button><button class="btn ghost" onclick="addPptPage('${a.id}')">新增一页</button><button class="btn ghost" onclick="startDrawerReturn('${a.id}')">退回</button><button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;
+ return `<button class="btn" onclick="confirmPptOutline('${a.id}')">批准</button><button class="btn ghost" onclick="startDrawerReturn('${a.id}')">退回</button><button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;
 }
 function findArt(id){for(const t of T){if(!t.arts)continue;const a=t.arts.find(x=>x.id===id);if(a)return[t,a];}return[];}
 function openDw(id,oi){
@@ -1299,8 +1316,9 @@ else if(a.mode==='general-session'){
  body=[`<div class="general-session-drawer-doc"><h3>${esc(a.ttl)}</h3><div>${esc(a.body)}</div></div>${S.pc?`<div class="general-session-comments" style="margin-top:var(--sp-4)">${subPane(a)}</div>`:''}`,dVer(a)][S.dtab];
  }
 else if(a.mode==='pptfile'){
- tabs=['文件信息','版本'];
- body=[dPptFile(a),dVer(a)][S.dtab];
+ const outline=pptFileOutline(a);
+ tabs=[outline?'当前大纲':'文件信息','版本'];
+ body=[outline?dPptOutline(outline):dPptFile(a),dVer(a)][S.dtab];
  }
 else if(a.mode==='pptoutline'){
  tabs=['当前大纲','版本'];
@@ -1396,7 +1414,7 @@ else if(a.mode==='csa'){
   <div class="dw-f ${a.inspection||a.sentiment||a.listing?'inspection-actions':isStandaloneDirection?'direction-actions':''}">
     ${a.mode==='seo-intake'?seoIntakeFooter(a)
      :a.mode==='general-session'?`${a.st==='review'?`<button class="btn" onclick="act('${a.id}','批准');closeDw()">批准</button><button class="btn ghost" onclick="act('${a.id}','退回');closeDw()">退回</button>`:''}<button class="rvb ${S.pc?'on':''}" onclick="toggleGeneralSessionComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`
-     :a.mode==='pptfile'?pptFileFooter(a)
+     :a.mode==='pptfile'?(pptFileOutline(a)?pptOutlineFooter(pptFileOutline(a),a):pptFileFooter(a))
      :a.mode==='pptoutline'?pptOutlineFooter(a)
      :a.mode==='csa'?csaFooter(a)
      :a.listing?`<div id="listing-footer" style="display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap">${listingFooter(a)}</div>`

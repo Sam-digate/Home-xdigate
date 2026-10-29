@@ -25,7 +25,7 @@ for(const match of inlinePage.matchAll(/<(script|link)\b[^>]*\b(?:src|href)="((?
 assert.doesNotMatch(context.view.innerHTML,/不在本次原型范围/);
 assert.match(read('js/01-helpers-data.js'),/id:'connector',n:'Connector',i:'connector'/);
 const initialState=read('js/01-helpers-data.js').match(/^let S=.*$/m)[0];
-assert.equal(vm.runInNewContext(initialState+'S.view',{location:{hash:''}}),'connector');
+assert.equal(vm.runInNewContext(initialState+'S.view',{location:{hash:''}}),'work');
 assert.equal(vm.runInNewContext(initialState+'S.view',{location:{hash:'#permission'}}),'permission');
 
 // The new view must participate in the existing page-permission contract.

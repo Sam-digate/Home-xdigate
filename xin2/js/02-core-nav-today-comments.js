@@ -353,17 +353,63 @@ function onKey(e,inputId,peopleOnly=false){
 }
 /* ============ clarifying questions ============ */
 function pickAns(qi,oi){S.ans=S.ans||{};S.ans[qi]=oi;render();}
-function setPptAsk(key,value){const t=T.find(x=>x.id===S.tid);if(!t?.ask?.ppt)return;t.ask[key]=value;render();}
+function setPptAsk(key,value){const t=T.find(x=>x.id===S.tid);if(!t?.ask?.ppt||t.answered)return;t.ask[key]=value;if(key!=='requirements')render();}
+function togglePptProduct(index){
+ const t=T.find(x=>x.id===S.tid),p=PRODS[index];if(!t?.ask?.ppt||t.answered||!p)return;
+ const selected=t.ask.products||(t.ask.products=[]),at=selected.indexOf(p.n);
+ if(at<0)selected.push(p.n);else selected.splice(at,1);render();
+}
+function addPptAskFiles(files){
+ const t=T.find(x=>x.id===S.tid);if(!t?.ask?.ppt||t.answered)return;
+ const list=t.ask.attachments||(t.ask.attachments=[]),errors=[];
+ for(const f of Array.from(files||[])){
+  const name=String(f.name||''),extension=name.split('.').pop().toLowerCase(),size=Number(f.size);
+  if(!TA_EXTENSIONS.includes(extension)){errors.push(name+'：格式不支持');continue;}
+  if(!Number.isFinite(size)||size<=0||size>TA_MAX_BYTES){errors.push(name+'：文件需大于 0 且不超过 20 MB');continue;}
+  if(list.some(x=>x.name===name&&x.size===size)){errors.push(name+'：已添加');continue;}
+  if(list.length>=TA_MAX_FILES){errors.push('最多添加 5 个附件');break;}
+  list.push({name,size,extension,demo:true});
+ }
+ t.ask.fileError=errors.join('；');render();
+}
+function removePptAskFile(index){const t=T.find(x=>x.id===S.tid);if(!t?.ask?.ppt||t.answered)return;t.ask.attachments?.splice(index,1);t.ask.fileError='';render();}
+function pptAttachmentMenu(event,trigger){
+ caToggleMenu(event,trigger,[['files','在线文档','documents'],['images','素材库','assets'],['upload','本地上传','upload']].map(([icon,label,source])=>`<button type="button" role="menuitem" onclick="pptAttachmentSource('${source}')"><i data-lucide="${icon}" aria-hidden="true"></i><span>${label}</span></button>`).join(''));
+}
+function pptAttachmentSource(source){
+ caCloseMenu(true);const t=T.find(x=>x.id===S.tid);if(!t?.ask?.ppt||t.answered)return;
+ if(source==='upload'){$('ppt-ask-files')?.click();return;}
+ if(!['documents','assets'].includes(source))return;
+ taCloseSourcePicker();
+ const key='ppt-attachments-'+t.id,draft={files:(t.ask.attachments||[]).map((f,i)=>({...f,id:i,status:'ready',progress:100})),timers:new Map()};
+ const finish=()=>{
+  CA_BY_ID.delete(key);taSourcePicker=null;$('ta-source-overlay')?.remove();
+  if(!t.answered){t.ask.attachments=caFiles(draft);if(S.tid===t.id){render();$('ppt-attachment-trigger')?.focus();}}
+ };
+ taSourcePicker={source,draft,selected:new Set(),query:'',type:'全部',error:'',onClose:finish};
+ CA_BY_ID.set(key,draft);
+ const overlay=document.createElement('div');overlay.id='ta-source-overlay';overlay.className='ta-source-overlay';overlay.addEventListener('click',event=>{if(event.target===overlay)taCloseSourcePicker();});document.body.appendChild(overlay);
+ if(source==='documents')caOpenDocumentPicker(key,{mount:'ta-source-overlay',onClose:finish,targetLabel:'PPT 生成设置'});
+ else{taPaintAssetPicker();$('ta-asset-search')?.focus();}
+}
 function renderPptAsk(t){
  const a=t.ask;
  return `<div class="channel-ask ppt-ask">
+  <div class="ppt-ask-field ppt-products"><span class="ppt-ask-label" id="ppt-products-label">选择产品 <span>（选填，可多选）</span></span>
+   <details class="ppt-product-dropdown" ${a.productMenuOpen?'open':''} ontoggle="const t=T.find(x=>x.id===S.tid);if(t?.ask?.ppt)t.ask.productMenuOpen=this.open"><summary aria-labelledby="ppt-products-label ppt-products-value"><span id="ppt-products-value">${a.products?.length?esc(a.products.join('、')):'请选择产品'}</span><span aria-hidden="true">⌄</span></summary>
+   <div class="ppt-product-options">${PRODS.map((p,i)=>`<label><input type="checkbox" ${(a.products||[]).includes(p.n)?'checked':''} onchange="togglePptProduct(${i})"><span>${esc(p.n)}</span></label>`).join('')}</div></details></div>
+  <label class="ppt-ask-field"><span class="ppt-ask-label">详细要求 <span>（选填）</span></span><textarea rows="4" placeholder="例如：面向品牌负责人，重点说明抖音传播策略、内容方向和预算分配，希望控制在 15 页以内。" oninput="setPptAsk('requirements',this.value)">${esc(a.requirements||'')}</textarea></label>
+  <div class="ppt-ask-field"><span class="ppt-ask-label">上传附件 <span>（选填）</span></span>
+   <div class="ppt-attachment-upload"><button type="button" id="ppt-attachment-trigger" class="btn ghost sm" aria-haspopup="menu" aria-expanded="false" onclick="pptAttachmentMenu(event,this)">添加附件</button><input id="ppt-ask-files" type="file" multiple hidden accept="${TA_EXTENSIONS.map(x=>'.'+x).join(',')}" onchange="addPptAskFiles(this.files)"><span class="ppt-ask-help">最多 5 个，本地文件单个不超过 20 MB</span></div>
+   <ul class="ppt-attachment-list">${(a.attachments||[]).map((f,i)=>`<li><span>${esc(f.name)} <small>${f.reference?caAttachmentMeta(f):taSize(f.size)}</small></span><button type="button" onclick="removePptAskFile(${i})" aria-label="移除 ${esc(f.name)}">移除</button></li>`).join('')}</ul>
+   ${a.fileError?`<span role="alert" class="ppt-file-error">${esc(a.fileError)}</span>`:''}</div>
   <div class="ppt-ask-field"><div class="ppt-ask-label">PPT 语言 <span>（默认中文）</span></div>
    <div class="ppt-ask-options"><button class="${a.language==='zh'?'on':''}" onclick="setPptAsk('language','zh')">CN 中文</button><button class="${a.language==='en'?'on':''}" onclick="setPptAsk('language','en')">GB English（英文）</button></div>
-   <div class="ppt-ask-help">已选中文 · 大纲和最终生成的 PPT 内容均为中文。</div></div>
-  <label class="ppt-ask-field"><span class="ppt-ask-label">视觉主题 <span>（非必填，留空则由 AI 自动选用）</span></span>
+   <div class="ppt-ask-help">已选${a.language==='en'?'英文':'中文'} · 大纲和最终生成的 PPT 内容均为${a.language==='en'?'英文':'中文'}。</div></div>
+  <div class="ppt-ask-style-row"><label class="ppt-ask-field"><span class="ppt-ask-label">视觉主题 <span>（非必填，留空则由 AI 自动选用）</span></span>
    <select onchange="setPptAsk('theme',this.value)"><option value="auto" ${a.theme==='auto'?'selected':''}>AI 自动选用</option><option value="business" ${a.theme==='business'?'selected':''}>简约商务</option><option value="brand" ${a.theme==='brand'?'selected':''}>品牌创意</option><option value="data" ${a.theme==='data'?'selected':''}>数据报告</option></select></label>
   <label class="ppt-ask-field"><span class="ppt-ask-label">版式模板 <span>（非必填，留空则由 AI 自动选用）</span></span>
-   <select onchange="setPptAsk('template',this.value)"><option value="none" ${a.template==='none'?'selected':''}>不使用模板</option><option value="a80" ${a.template==='a80'?'selected':''}>A80PARIS 品牌模板</option><option value="review" ${a.template==='review'?'selected':''}>月度复盘模板</option></select></label>
+   <select onchange="setPptAsk('template',this.value)"><option value="none" ${a.template==='none'?'selected':''}>不使用模板</option><option value="a80" ${a.template==='a80'?'selected':''}>A80PARIS 品牌模板</option><option value="review" ${a.template==='review'?'selected':''}>月度复盘模板</option></select></label></div>
  </div>`;
 }
 function askChannelTask(){const t=T.find(x=>x.id===S.tid);return t?.ask?.channels?t:null;}
@@ -392,11 +438,13 @@ function renderChannelAsk(t){
 function sendAns(){
  const t=T.find(x=>x.id===S.tid);
  if(t.ask.ppt){
-  const cfg={language:t.ask.language,theme:t.ask.theme,template:t.ask.template};
+  const products=(t.ask.products||[]).filter(name=>PRODS.some(p=>p.n===name));
+  if((t.ask.attachments||[]).some(f=>f.reference&&(f.reference.source==='assets'?!taAssetReferenceAllowed(f.reference):!caDocumentReferenceAllowed(f.reference)))){toast('参考附件已不可用，请移除后重新选择');return;}
+  const cfg={language:t.ask.language,theme:t.ask.theme,template:t.ask.template,products:[...products],requirements:(t.ask.requirements||'').trim(),attachments:(t.ask.attachments||[]).map(f=>({...f,...(f.reference?{reference:{...f.reference}}:{})}))};
   const languageLabel=cfg.language==='en'?'GB English（英文）':'CN 中文';
   const themeLabel=({auto:'AI 自动选用',business:'简约商务',brand:'品牌创意',data:'数据报告'})[cfg.theme]||cfg.theme;
   const templateLabel=({none:'不使用模板',a80:'A80PARIS 品牌模板',review:'月度复盘模板'})[cfg.template]||cfg.template;
-  t.pptConfig=cfg;t.answered=[`PPT 语言：${languageLabel}`,`视觉主题：${themeLabel}`,`版式模板：${templateLabel}`];t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';
+  t.pptConfig=cfg;t.answered=[`选择产品：${products.join('、')||'不关联产品'}`,`详细要求：${cfg.requirements||'未填写'}`,`附件：${cfg.attachments.map(f=>f.name).join('、')||'未添加'}`,`PPT 语言：${languageLabel}`,`视觉主题：${themeLabel}`,`版式模板：${templateLabel}`];t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';
   t.plan.steps[1]={l:'确认 PPT 生成设置',m:`${languageLabel} · ${themeLabel} · ${templateLabel}`,s:'ok',r:'刚刚'};
   t.plan.steps[2]={l:'生成并确认 PPT 大纲',m:'正在整理逐页标题、内容要点与配图意向',s:'act',r:'进行中'};
   t.live={t:'PPT Agent 正在生成大纲',el:'刚刚',sub:['正在整理创意主轴与页面结构…','正在生成逐页内容要点…','正在补充配图意向…'],p:48,tk:860};
@@ -474,7 +522,7 @@ function finishPptOutlineDemo(tid){
   {title:'执行清单与时间节点',chapter:'落地',points:'确认创意与脚本\n完成场景、造型和拍摄准备\n集中拍摄并完成三版剪辑\n分阶段发布、观察并优化\n活动结束后一周完成复盘',visual:'带负责人和日期的任务清单'},
   {title:'总结与展望',chapter:'总结',points:'以「荧光色出片道具」创意主轴贯穿 3 条内容\n通过统一内容结构实现品牌认知快速建立\n低预算、单平台、精品化打法验证种草转化路径\n为后续内容迭代与达人矩阵积累经验',visual:''}
  ];
- const artifact={id:'a-ppt-outline-demo',mode:'pptoutline',ty:'PPT 大纲',ttl:'方向一：荧光出片，造型即内容',deckTitle:'A80PARIS 抖音种草传播方案：荧光出片，造型即内容',summary:'围绕「荧光出片，造型即内容」展开，以抖音品牌官号为核心阵地，形成从创意表达、内容节奏到预算与效果衡量的完整传播方案。',by:'ppt',v:1,st:'review',pv:'wd',g:['#A78BFA','#7C3AED'],ex:'围绕「荧光出片，造型即内容」展开，以抖音品牌官号为核心阵地，形成从创意表达、内容节奏到预算与效果衡量的完整传播方案。',pages,sub:[]};
+ const artifact={id:'a-ppt-outline-demo',mode:'pptoutline',ty:'PPT 大纲',ttl:'A80PARIS 抖音种草传播方案：荧光出片，造型即内容',deckTitle:'A80PARIS 抖音种草传播方案：荧光出片，造型即内容',summary:'围绕「荧光出片，造型即内容」展开，以抖音品牌官号为核心阵地，形成从创意表达、内容节奏到预算与效果衡量的完整传播方案。',by:'ppt',v:1,st:'review',pv:'wd',g:['#A78BFA','#7C3AED'],ex:'围绕「荧光出片，造型即内容」展开，以抖音品牌官号为核心阵地，形成从创意表达、内容节奏到预算与效果衡量的完整传播方案。',pages,sub:[]};
  t.live=null;t.arts=[artifact];t.outputCount=1;t.st='review';t.up='刚刚';
  t.plan.steps[2]={l:'生成并确认 PPT 大纲',m:'已生成 1 个创意方向 · 11 页大纲待确认',s:'act',r:'刚刚'};
  if(S.view==='thread'&&S.tid===tid)render();else syncAppr();toast('PPT 大纲已生成 · 等待确认');

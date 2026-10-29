@@ -16,6 +16,7 @@ function taChooseSource(source){
 function taCloseSourcePicker(){
  if(!taSourcePicker)return;
  if(caDocPicker?.mount==='ta-source-overlay'){caCloseDocumentPicker();return;}
+ if(taSourcePicker.onClose){taSourcePicker.onClose();return;}
  taSourcePicker=null;CA_BY_ID.delete('ta-new-task');$('ta-source-overlay')?.remove();$('mod').inert=false;taRender();$('ta-source-trigger')?.focus();
 }
 function taAssetKey(asset){return asset.img+'|'+asset.n;}
@@ -41,7 +42,7 @@ function taToggleAsset(index,checked){
  checked?p.selected.add(key):p.selected.delete(key);p.error='';taPaintAssetPicker();
 }
 function taConfirmAssets(){
- const p=taSourcePicker;if(!p||!p.selected.size||p.draft!==taDraft)return;
+ const p=taSourcePicker;if(!p||!p.selected.size||(!p.onClose&&p.draft!==taDraft))return;
  const assets=[...p.selected].map(key=>taVisibleAssets().find(asset=>taAssetKey(asset)===key));
  if(assets.some(asset=>!asset)||p.draft.files.length+assets.length>TA_MAX_FILES){p.error='素材不可用或附件数量超出限制，请重新选择';taPaintAssetPicker();return;}
  assets.forEach(asset=>p.draft.files.push({id:++taNextId,name:assetFileName(asset),size:0,extension:asset.type==='视频'?'mp4':'jpg',lastModified:0,status:'ready',progress:100,reference:{source:'assets',assetId:taAssetKey(asset),brand:knowledgeActiveBrand().id}}));
