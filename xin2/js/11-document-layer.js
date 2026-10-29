@@ -45,7 +45,7 @@ drawDw=function(){
  footer.querySelector('.dl-entry')?.remove();
  footer.querySelector('.dl-sync-note')?.remove();
  const comment=[...footer.querySelectorAll('button')].find(button=>button.textContent.includes('评论'));
- if(comment)comment.insertAdjacentHTML('afterend',dlActionHTML(a,scope));
+ if(comment)comment.insertAdjacentHTML(a.mode==='pptfile'?'beforebegin':'afterend',dlActionHTML(a,scope));
  else footer.insertAdjacentHTML('beforeend',dlActionHTML(a,scope));
  if(dlRecord(a,scope))footer.insertAdjacentHTML('beforeend','<span class="dl-sync-note">注: 系统与在线文档的修改不会自动同步</span>');
 };
