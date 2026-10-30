@@ -116,6 +116,8 @@ check('PPT default document opens the configured example without creating an ass
  assert.doesNotMatch(node('mod').innerHTML,/尚未关联|disabled/);
  assert.equal(run("dlDisplayRecord(findArt('ppt-default-file')[1],null).url"),run('DL_OFFICE_EXAMPLE'));
  assert.equal(run('DL_RECORDS.size'),count);
+ run("findArt('ppt-default-file')[1].st='done'");
+ assert.equal(run("dlActionHTML(findArt('ppt-default-file')[1],null)"),'');
  assert.match(fs.readFileSync(path.join(root,'css/09-document-layer.css'),'utf8'),/\.dl-document \.mhd>\.ib\{position:absolute;top:16px;right:18px/);
 });
 check('different plans keep their own association and source stays unchanged',()=>{

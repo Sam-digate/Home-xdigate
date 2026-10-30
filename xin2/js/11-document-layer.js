@@ -22,7 +22,7 @@ function dlDisplayRecord(a,scope){
 function dlFormat(a){return ['pptfile','pptoutline'].includes(a.mode)?'pptx':['adtable','items'].includes(a.mode)?'xlsx':'docx'}
 function dlType(type){return {docx:'Word 文档',xlsx:'Excel 表格',pptx:'PPT 演示文稿'}[type]||'文档'}
 function dlActionHTML(a,scope){
- if(!dlSupported(a))return '';
+ if(!dlSupported(a)||a.mode==='pptfile')return '';
  const c=dlContext(a,scope),doc=DL_RECORDS.get(c.key),args=JSON.stringify(a.id)+','+JSON.stringify(c.scope);
  if(doc)return '<button type="button" class="btn ghost sm dl-entry" onclick="event.stopPropagation();dlShowDocument('+esc(args)+')">打开在线文档</button>';
  return '<button type="button" class="btn ghost sm dl-entry" onclick="event.stopPropagation();dlCreate('+esc(args)+')">创建在线文档</button>';
@@ -42,7 +42,7 @@ drawDw=function(){
  dlOriginalDrawDw();
  let a=findArt(S.aid)?.[1];
  if(a?.mode==='pptoutline')a=pptOutlineFile(a);
- if(!dlSupported(a)||S.cr!=null||S.brief!=null)return;
+ if(!dlSupported(a)||a.mode==='pptfile'||S.cr!=null||S.brief!=null)return;
  const footer=document.querySelector('#dw .dw-artifact-content > .dw-f')||document.querySelector('#dw > .dw-f');if(!footer)return;
  const scope=a.mode==='plans'?S.oi:null;
  footer.querySelector('.dl-entry')?.remove();

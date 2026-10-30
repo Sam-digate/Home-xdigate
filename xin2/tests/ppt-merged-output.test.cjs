@@ -18,7 +18,7 @@ assert.ok(card.indexOf('打开在线文档')<card.indexOf('下载 PPTX'));
 assert.ok(card.indexOf('打开在线文档')<card.indexOf('openReportComments'));
 c.dlActionHTML=a=>a===file?'<button>创建在线文档</button>':'';
 assert.doesNotMatch(c.pptOutlinePeek(outline),/<button>创建在线文档<\/button>/);
-file.st='done';assert.match(c.pptOutlinePeek(outline),/<button>创建在线文档<\/button>/);file.st='review';
+file.st='done';assert.doesNotMatch(c.pptOutlinePeek(outline),/<button>创建在线文档<\/button>/);assert.match(c.pptOutlinePeek(outline),/打开在线文档/);file.st='review';
 let drawer=c.dPptOutline(outline);assert.ok(drawer.indexOf('PPT 文件产出')<drawer.indexOf('ppt-outline-toolbar'));
 assert.doesNotMatch(drawer,/onclick="approvePptFile|startDrawerReturn/);
 assert.doesNotMatch(drawer,/downloadPptFile|下载 PPTX/);

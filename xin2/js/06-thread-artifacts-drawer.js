@@ -650,7 +650,7 @@ function openPptOutlineFromCard(event,id){
 function pptFilePeek(a,outline=null){
  const ready=a.st!=='run';
  const outlineAction=outline?`<button class="btn ghost sm" onclick="openDw('${outline.id}')">查看产出</button>`:'';
- const documentAction=outline&&a.st==='done'&&typeof dlActionHTML==='function'?dlActionHTML(a,null):'';
+ const documentAction='';
  return `<div class="pk${outline?' ppt-outline-clickable':''}" id="pk-${a.id}"${outline?` onclick="openPptOutlineFromCard(event,'${outline.id}')"`:''}>
   <div class="pk-h"><span class="ty">产出 · PPT 文件</span><span class="chip plat">PPTX</span><span class="st ${a.st}">${a.st==='done'?'已批准':ready?'待审批':'生成中'}</span>${artifactRunLink(a.by)}</div>
   <div class="manual-artifact-summary ppt-file-summary"${outline?` role="button" tabindex="0" aria-label="${ready?'查看产出':'查看大纲'}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openDw('${outline.id}')}"`:''}>
