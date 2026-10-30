@@ -657,14 +657,13 @@ function pptFilePeek(a,outline=null){
    <div class="pk-t"><div class="tt">${esc(a.ttl)}</div><div class="ex">${ready?`PPT 已生成完成 · ${esc(a.createdAt)} · ${a.pageCount}页`:'PPT Agent 正在生成演示文稿，请稍候…'}</div></div>
    ${ready?'':'<div class="pbar ppt-file-progress"><i style="width:68%"></i></div>'}
   </div>
-  ${ready?`<div class="pk-a">${a.st==='review'?`<button class="btn sm" onclick="approvePptFile('${a.id}')">批准</button>`:''}${outlineAction}<button class="btn ghost sm" onclick="openPptDocumentEditor(\'${a.id}\')">在线编辑文档</button>${documentAction}<button class="btn ghost sm" onclick="downloadPptFile('${a.id}')">下载 PPTX</button><button class="rvb" onclick="openReportComments('${a.id}')">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''}</button><span class="v num">v${a.v} · 刚刚</span></div>${a.st==='done'?`<div class="nxt"><span class="lb">接下来</span><button class="na" onclick="toast('已同步到活动')">同步到活动 →</button></div>`:''}`:''}
+  ${ready?`<div class="pk-a">${a.st==='review'?`<button class="btn sm" onclick="approvePptFile('${a.id}')">批准</button>`:''}${outlineAction}<button class="btn ghost sm" onclick="openPptDocumentEditor(\'${a.id}\')">打开在线文档</button>${documentAction}<button class="btn ghost sm" onclick="downloadPptFile('${a.id}')">下载 PPTX</button><button class="rvb" onclick="openReportComments('${a.id}')">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''}</button><span class="v num">v${a.v} · 刚刚</span></div>${a.st==='done'?`<div class="nxt"><span class="lb">接下来</span><button class="na" onclick="toast('已同步到活动')">同步到活动 →</button></div>`:''}`:''}
  </div>`;
 }
 
 function openPptDocumentEditor(id){
  const [,a]=findArt(id);if(!a||a.mode!=='pptfile')return;
- if(typeof dlRecord==='function'&&dlRecord(a,null)){dlOpen(id,null);return;}
- toast('在线编辑地址待配置');
+ dlShowDocument(id,null);
 }
 function peek(a){
  const g=AG[a.by];
@@ -1174,10 +1173,10 @@ function confirmPptOutline(id){
 function approvePptFile(id){const [t,a]=findArt(id);if(!t||!a)return;a.st='done';t.st=t.arts.every(x=>x.st==='done')?'done':'review';t.up='刚刚';render();renderNav();if($('dw')?.classList.contains('on'))drawDw();toast('PPT 文件已批准');}
 function downloadPptFile(id){const [,a]=findArt(id);if(!a)return;toast('PPTX 下载已开始 · 展示功能');}
 function dPptFile(a){return `${pptCompactFile(a)}${S.pc?`<div style="margin-top:var(--sp-4)">${subPane(a)}</div>`:''}`;}
-function pptFileFooter(a){return `${a.st==='review'?`<button class="btn" onclick="approvePptFile('${a.id}')">批准</button>`:''}<button class="btn ghost" onclick="openPptDocumentEditor('${a.id}')">在线编辑文档</button><button class="btn ghost" onclick="downloadPptFile('${a.id}')">下载 PPTX</button><button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;}
+function pptFileFooter(a){return `${a.st==='review'?`<button class="btn" onclick="approvePptFile('${a.id}')">批准</button>`:''}<button class="btn ghost" onclick="openPptDocumentEditor('${a.id}')">打开在线文档</button><button class="btn ghost" onclick="downloadPptFile('${a.id}')">下载 PPTX</button><button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;}
 function pptOutlineFooter(a,commentArtifact=a){
  const file=pptOutlineFile(a);
- if(file)return `${file.st==='review'?`<button class="btn" onclick="approvePptFile('${file.id}')">批准</button>`:''}${file.st!=='run'?`<button class="btn ghost" onclick="openPptDocumentEditor('${file.id}')">在线编辑文档</button><button class="btn ghost" onclick="downloadPptFile('${file.id}')">下载 PPTX</button>`:''}<button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(commentArtifact)?`<span class="n">${subCount(commentArtifact)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;
+ if(file)return `${file.st==='review'?`<button class="btn" onclick="approvePptFile('${file.id}')">批准</button>`:''}${file.st!=='run'?`<button class="btn ghost" onclick="openPptDocumentEditor('${file.id}')">打开在线文档</button><button class="btn ghost" onclick="downloadPptFile('${file.id}')">下载 PPTX</button>`:''}<button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(commentArtifact)?`<span class="n">${subCount(commentArtifact)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;
 
  if(a.st==='done')return `<span class="st done">已批准</span><button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;
  return `<button class="btn" onclick="confirmPptOutline('${a.id}')">生成 PPT</button><button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;

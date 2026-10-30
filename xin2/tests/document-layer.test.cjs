@@ -69,7 +69,7 @@ check('cancel during progress stops creation and leaves source unchanged',()=>{
  assert.equal(run('DL_RECORDS.size'),0);assert.equal(opened.length,0);
  assert.equal(run('JSON.stringify(fixture)===fixtureBefore'),true);
 });
-check('progress completes then automatically opens the editor without a completion dialog',()=>{
+check('creation completes into document details without automatic navigation',()=>{
  const drawerBefore=node('dw').innerHTML;
  run(`dlCreate(fixture.id,1);dlSelectType('xlsx');dlConfirmCreate();dlSelectType('pptx');dlConfirmCreate()`);
  assert.equal(timers.size,1,'double click must not create duplicate timers');
@@ -81,23 +81,33 @@ check('progress completes then automatically opens the editor without a completi
  tick();
  assert.doesNotMatch(node('dl-progress').innerHTML,/<ol|dl-progress-steps/);
  assert.doesNotMatch(node('mod').innerHTML,/id="dl-progress-open"|>创建完成</);
- assert.equal(opened.length,1,'creation completion automatically opens the editor');
+ assert.equal(opened.length,0,'creation completion must not open the editor');
  assert.equal(run('DL_RECORDS.size'),1);
  assert.equal(run('dlRecord(fixture,1).type'),'xlsx','creation preserves the selected format');
  assert.equal(node('dw').innerHTML,drawerBefore);
- assert.equal(opened.length,1);
- assert.equal(opened[0][0],'about:blank');assert.equal(opened[0][1],'_blank');
- assert.match(navigated[0],/f0824232-fd64-4da2-a1b1-51fc560a55a5/);
- assert.equal(node('mod').classList.contains('on'),false);
+ assert.equal(opened.length,0);assert.equal(navigated.length,0);
+ assert.match(node('mod').innerHTML,/dl-document-title/);
+ assert.match(node('mod').innerHTML,/在 Office 中编辑/);
+ assert.equal(node('mod').classList.contains('on'),true);
  assert.equal(run('DL_RECORDS.size'),1);
 });
-check('reopen uses a labelled external link with no duplicate association',()=>{
+check('reopen uses a document-details button with no duplicate association',()=>{
  const html=run('dlActionHTML(fixture,1)');
- assert.match(html,/>编辑在线文档<\/a>/);
+ assert.match(html,/>打开在线文档<\/button>/);
  assert.doesNotMatch(html,/（示例）/);
- assert.match(html,/target="_blank" rel="noopener noreferrer"/);
- run('dlCreate(fixture.id,1)');assert.equal(opened.length,2);
+ assert.match(html,/dlShowDocument/);
+ run('dlCreate(fixture.id,1)');assert.equal(opened.length,0);
  assert.equal(run('DL_RECORDS.size'),1);
+});
+check('document details shows stored metadata and does not open Office automatically',()=>{
+ const before=opened.length;
+ run('dlShowDocument(fixture.id,1)');
+ const html=node('mod').innerHTML;
+ for(const text of ['在线文档','文档名称','存放位置','生成人','来源任务','在 Office 中编辑','复制链接','下载','在知识库中查看','完成'])assert.ok(html.includes(text),text);
+ assert.equal(opened.length,before);
+ assert.match(html,/SharePoint · 示例位置/);
+ assert.equal(node('mod').classList.contains('on'),true);
+ run('closeMod()');
 });
 check('different plans keep their own association and source stays unchanged',()=>{
  run('dlCreate(fixture.id,0);dlConfirmCreate()');
@@ -113,7 +123,7 @@ check('local editor and simulated version APIs are removed',()=>{
 });
 check('failed window open leaves a usable retry link',()=>{
  run(`window.open=()=>{throw new Error('blocked')};dlOpen(fixture.id,1)`);
- assert.match(run('dlActionHTML(fixture,1)'),/href="https:\/\/xdigate.sharepoint.com/);
+ assert.match(run('dlActionHTML(fixture,1)'),/dlShowDocument/);
 });
 check('automatic popup blocking falls back to direct same-tab navigation',()=>{
  run('dlAutoOpen(fixture.id,1)');
@@ -129,7 +139,7 @@ check('drawer action is inserted after the footer comment button',()=>{
  context.document.querySelector=selector=>selector==='#dw .dw-artifact-content > .dw-f'?footer:null;
  run('S.aid=fixture.id;S.oi=1;S.cr=null;S.brief=null;drawDw()');
  assert.equal(inserts.length,1);assert.equal(inserts[0].position,'afterend');
- assert.match(inserts[0].html,/>编辑在线文档<\/a>/);
+ assert.match(inserts[0].html,/>打开在线文档<\/button>/);
  assert.doesNotMatch(inserts[0].html,/dl-source-bar/);
  assert.equal(notes.length,1);
  assert.match(notes[0].html,/注: 系统与在线文档的修改不会自动同步/);

@@ -21,7 +21,7 @@ function dlType(type){return {docx:'Word 文档',xlsx:'Excel 表格',pptx:'PPT �
 function dlActionHTML(a,scope){
  if(!dlSupported(a))return '';
  const c=dlContext(a,scope),doc=DL_RECORDS.get(c.key),args=JSON.stringify(a.id)+','+JSON.stringify(c.scope);
- if(doc)return '<a class="btn ghost sm dl-entry" href="'+esc(doc.url)+'" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">编辑在线文档</a>';
+ if(doc)return '<button type="button" class="btn ghost sm dl-entry" onclick="event.stopPropagation();dlShowDocument('+esc(args)+')">打开在线文档</button>';
  return '<button type="button" class="btn ghost sm dl-entry" onclick="event.stopPropagation();dlCreate('+esc(args)+')">创建在线文档</button>';
 }
 const dlOriginalPeek=peek;
@@ -51,7 +51,7 @@ drawDw=function(){
 };
 function dlCreate(id,scope){
  const a=findArt(id)?.[1];if(!dlSupported(a))return;
- const c=dlContext(a,scope);if(DL_RECORDS.has(c.key)){dlOpen(id,scope);return}
+ const c=dlContext(a,scope);if(DL_RECORDS.has(c.key)){dlShowDocument(id,scope);return}
  dlCreation={...c,type:dlFormat(a),recommended:dlFormat(a),name:c.title};
  dlDrawCreation();
 }
@@ -72,7 +72,7 @@ function dlConfirmCreate(){
  c.name=c.name.trim();if(!c.name){toast('请填写文档名称');$('dl-name').focus();return}
  if(!['docx','xlsx','pptx'].includes(c.type)){toast('请选择文件类型');return}
  const a=findArt(c.aid)?.[1];if(!dlSupported(a))return;
- if(DL_RECORDS.has(c.key)){dlOpen(c.aid,c.scope);closeMod();return}
+ if(DL_RECORDS.has(c.key)){closeMod();dlShowDocument(c.aid,c.scope);return}
  c.running=true;c.phase=0;dlDrawProgress(true);
  function advance(){
   if(dlCreation!==c||!$('mod').classList.contains('on')||!document.querySelector('.dl-create'))return;
@@ -80,10 +80,10 @@ function dlConfirmCreate(){
   if(c.phase<3){dlDrawProgress();c.timer=setTimeout(advance,[1000,1100,900][c.phase]);return}
   const source=findArt(c.aid)?.[1];
   if(!dlSupported(source)){closeMod();toast('原产出状态已变化，请重新创建。');return}
-  DL_RECORDS.set(c.key,{key:c.key,aid:c.aid,scope:c.scope,taskId:c.task?.id,project:dlProject(c.task),owner:c.task?.own,name:c.name,type:c.type,url:DL_OFFICE_EXAMPLE,isExample:true});
+  DL_RECORDS.set(c.key,{key:c.key,aid:c.aid,scope:c.scope,taskId:c.task?.id,project:dlProject(c.task),owner:c.task?.own,name:c.name,type:c.type,url:DL_OFFICE_EXAMPLE,isExample:true,version:1,createdBy:dlActor(),createdAt:new Date().toISOString()});
   c.running=false;c.done=true;closeMod();render();
   if(S.aid===c.aid&&$('dw').classList.contains('on'))drawDw();
-  dlAutoOpen(c.aid,c.scope);
+  dlShowDocument(c.aid,c.scope);
  }
  c.timer=setTimeout(advance,1000);
 }
@@ -109,7 +109,26 @@ function dlAutoOpen(id,scope){
 function dlOpen(id,scope){
  const a=findArt(id)?.[1],doc=a&&dlRecord(a,scope);if(!doc)return;
  try{window.open(doc.url,'_blank','noopener,noreferrer')}
- catch{toast('无法打开新窗口，请点击「编辑在线文档」重试。')}
+ catch{toast('无法打开新窗口，请重试。')}
+}
+function dlShowDocument(id,scope){
+ const a=findArt(id)?.[1];if(!a||(!dlSupported(a)&&!(a.mode==='pptfile'&&a.st==='review')))return;
+ const linked=dlRecord(a,scope);
+ if(!linked&&a.mode!=='pptfile')return;
+ const doc=linked||{name:a.ttl,type:'pptx',version:a.v,owner:findArt(id)?.[0]?.own};
+ const c=dlContext(a,scope),args=esc(JSON.stringify(id)+','+JSON.stringify(c.scope));
+ const version=doc.version||1,time=doc.createdAt?new Date(doc.createdAt).toLocaleString('zh-CN',{timeZone:'Asia/Tokyo',hour12:false}):'未记录';
+ $('mod').innerHTML=`<section class="mbox dl-document" role="dialog" aria-modal="true" aria-labelledby="dl-document-title"><div class="mhd"><div><h3 id="dl-document-title">在线文档</h3><p class="dl-document-sub">一份产出生成一份文档，有一个固定链接，可以在 Office 里在线编辑。</p></div><button type="button" class="ib" onclick="closeMod()" aria-label="关闭">×</button></div><div class="mbd"><div class="dl-document-success">${linked?`这份产出已生成 ${esc(dlType(doc.type))}（第 ${version} 版）`:'PPT 文件已生成，尚未关联在线文档'}</div><dl class="dl-document-info"><dt>文档名称</dt><dd>${esc(doc.name)}</dd><dt>格式</dt><dd>${esc(dlType(doc.type))} · 第 ${version} 版</dd><dt>存放位置</dt><dd>${doc.storagePath?esc(doc.storagePath):(linked?'SharePoint · 示例位置':'尚未关联')}</dd><dt>生成人</dt><dd>${esc(doc.createdBy||'未记录')} · ${esc(time)}</dd></dl><div class="dl-document-actions"><button class="btn ghost sm" ${linked?'':'disabled'} onclick="dlOpen(${args})">在 Office 中编辑</button><button class="btn ghost sm" ${linked?'':'disabled'} onclick="dlCopyLink(${args})">复制链接</button><button class="btn ghost sm" ${linked?'':'disabled'} onclick="dlDownloadDocument(${args})">下载</button><button class="btn ghost sm" onclick="closeMod();go('know',null,{nav:true})">在知识库中查看</button></div><dl class="dl-document-info dl-document-source"><dt>来源任务</dt><dd>${esc(c.task?.t||'当前任务')}</dd><dt>项目</dt><dd>${esc(doc.project||dlProject(c.task))}</dd><dt>负责人</dt><dd>${esc(U[doc.owner]?.n||doc.owner||'未记录')}</dd></dl></div><div class="mft"><button class="btn" onclick="closeMod()">完成</button></div></section>`;
+ $('mod').classList.add('on');document.querySelector('.dl-document .ib')?.focus();
+}
+async function dlCopyLink(id,scope){
+ const a=findArt(id)?.[1],doc=a&&dlRecord(a,scope);if(!doc)return;
+ try{await navigator.clipboard.writeText(doc.url);toast('链接已复制');}catch{toast('无法访问剪贴板，请在 Office 页面复制链接。');}
+}
+function dlDownloadDocument(id,scope){
+ const a=findArt(id)?.[1],doc=a&&dlRecord(a,scope);if(!doc)return;
+ if(doc.downloadUrl){window.open(doc.downloadUrl,'_blank','noopener,noreferrer');return;}
+ toast('下载链接尚未接入，请在 Office 中下载。');
 }
 // Earlier scripts perform the first render before this enhancement is loaded.
 render();
