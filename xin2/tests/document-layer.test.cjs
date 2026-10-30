@@ -109,6 +109,15 @@ check('document details shows stored metadata and does not open Office automatic
  assert.equal(node('mod').classList.contains('on'),true);
  run('closeMod()');
 });
+check('PPT default document opens the configured example without creating an association',()=>{
+ const count=run('DL_RECORDS.size');
+ run("T.push({id:'ppt-default-task',own:'du',arts:[{id:'ppt-default-file',mode:'pptfile',st:'review',ttl:'PPT 默认文档',v:1}]});dlShowDocument('ppt-default-file',null)");
+ assert.match(node('mod').innerHTML,/已关联默认在线文档/);
+ assert.doesNotMatch(node('mod').innerHTML,/尚未关联|disabled/);
+ assert.equal(run("dlDisplayRecord(findArt('ppt-default-file')[1],null).url"),run('DL_OFFICE_EXAMPLE'));
+ assert.equal(run('DL_RECORDS.size'),count);
+ assert.match(fs.readFileSync(path.join(root,'css/09-document-layer.css'),'utf8'),/\.dl-document \.mhd>\.ib\{position:absolute;top:16px;right:18px/);
+});
 check('different plans keep their own association and source stays unchanged',()=>{
  run('dlCreate(fixture.id,0);dlConfirmCreate()');
  finish();run('closeMod()');
