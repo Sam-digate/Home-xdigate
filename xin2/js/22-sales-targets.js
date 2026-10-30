@@ -28,9 +28,23 @@ function salesProgressData(data,month,period){
  return {...data,progressTarget:data.target*elapsed/days};
 }
 function salesSetMonth(value){if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(value)||value>SALES_TARGET_MONTH)return;S.salesMonth=value;render();}
+function salesMoveTooltip(event){
+ if(event.pointerType==='touch')return;
+ if(!event.target.closest('.sales-stacked-bar')){salesResetTooltip(event);return;}
+ const tip=event.currentTarget.querySelector('.sales-tooltip');if(!tip)return;
+ tip.classList.add('sales-tooltip-follow');
+ const gap=16,pad=8,w=tip.offsetWidth,h=tip.offsetHeight;
+ const x=event.clientX+w+gap<=window.innerWidth-pad?event.clientX+gap:Math.max(pad,event.clientX-w-gap);
+ const y=Math.max(pad,Math.min(event.clientY+12,window.innerHeight-h-pad));
+ tip.style.left=x+'px';tip.style.top=y+'px';
+}
+function salesResetTooltip(event){
+ const tip=event.currentTarget.querySelector('.sales-tooltip');if(!tip)return;
+ tip.classList.remove('sales-tooltip-follow');tip.style.removeProperty('left');tip.style.removeProperty('top');
+}
 function salesMonthChart(r,max){
- const d=r.data,rate=d?(d.actual/d.target*100).toFixed(1)+'%':'—';
- return `<div class="sales-chart-month" tabindex="0" aria-label="${r.month}，${d?'目标 '+salesMoney(d.target)+'，实际 '+salesMoney(d.actual)+'，完成率 '+rate:'暂无目标数据'}"><div class="sales-chart-bars">${d?`<div class="sales-stacked-bar" style="height:${Math.max(d.actual,d.target)/max*100}%"><span class="actual${d.actual/max<.16?' sales-bar-short':''}" style="height:${d.actual/Math.max(d.actual,d.target)*100}%"><b class="sales-bar-rate">${rate}</b></span>${d.actual<d.target?`<span class="remaining" style="height:${(d.target-d.actual)/d.target*100}%"></span>`:''}</div>`:''}</div><span class="sales-chart-label">${r.month.slice(2).replace('-','/')}</span><small>${r.month===SALES_TARGET_MONTH?'截至今日':''}</small><div class="sales-tooltip" aria-hidden="true"><b>${r.month}</b>${d?`<div><span class="actual">实际</span><strong>${salesMoney(d.actual)}</strong></div><div><span class="target">目标</span><strong>${salesMoney(d.target)}</strong></div><div><span>完成率</span><strong>${rate}</strong></div>`:'<div>暂无目标数据</div>'}</div></div>`;
+ const d=r.data,rate=d?Math.round(d.actual/d.target*100)+'%':'—';
+ return `<div class="sales-chart-month" tabindex="0" onpointermove="salesMoveTooltip(event)" onpointerleave="salesResetTooltip(event)" aria-label="${r.month}，${d?'目标 '+salesMoney(d.target)+'，实际 '+salesMoney(d.actual)+'，完成率 '+rate:'暂无目标数据'}"><div class="sales-chart-bars">${d?`<div class="sales-stacked-bar" style="height:${Math.max(d.actual,d.target)/max*100}%"><span class="actual${d.actual/max<.16?' sales-bar-short':''}" style="height:${d.actual/Math.max(d.actual,d.target)*100}%"><b class="sales-bar-rate">${rate}</b></span>${d.actual<d.target?`<span class="remaining" style="height:${(d.target-d.actual)/d.target*100}%"></span>`:''}</div>`:''}</div><span class="sales-chart-label">${r.month.slice(2).replace('-','/')}</span><div class="sales-tooltip" aria-hidden="true"><b>${r.month}</b>${d?`<div><span class="actual">实际</span><strong>${salesMoney(d.actual)}</strong></div><div><span class="target">目标</span><strong>${salesMoney(d.target)}</strong></div><div><span>完成率</span><strong>${rate}</strong></div>`:'<div>暂无目标数据</div>'}</div></div>`;
 }
 function analyticsSalesTargets(){
  const metric=['gmv','nmv'].includes(S.salesMetric)?S.salesMetric:'gmv',month=S.salesMonth||SALES_TARGET_MONTH,store=S.anaStore||'all';
@@ -40,6 +54,6 @@ function analyticsSalesTargets(){
  const max=Math.max(1,...series.flatMap(r=>r.data?[r.data.target,r.data.actual]:[])),pct=data?data.actual/(data.progressTarget??data.target)*100:0;
  return `<section class="sales-target-section" aria-labelledby="sales-target-title"><div class="sales-target-head"><div class="sales-target-title-group"><h2 id="sales-target-title">销售目标</h2><div class="seg" role="group" aria-label="销售口径">${['gmv','nmv'].map(m=>`<button type="button" class="${metric===m?'on':''}" aria-pressed="${metric===m}" onclick="salesSetMetric('${m}')">${m.toUpperCase()}</button>`).join('')}</div></div></div>
  <div class="sales-target-grid"><article class="card sales-progress-card"><div class="sales-progress-head"><h3>当月目标完成情况</h3><div class="sales-progress-controls"><select aria-label="目标统计方式" onchange="salesSetPeriod(this.value)" title="按日对比截至数据当日的累计目标；按月对比整月目标"><option value="day" ${period==='day'?'selected':''}>按日</option><option value="month" ${period==='month'?'selected':''}>按月</option></select><details class="sales-formula"><summary aria-label="查看完成率计算公式"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v2"/></svg></summary><div class="sales-formula-note"><b>完成率计算方式</b><p>按日：累计实际销售 ÷（月度目标 ÷ 当月天数 × 已过天数）× 100%。</p><p>按月：累计实际销售 ÷ 月度目标 × 100%。</p></div></details></div></div>${data?`<div class="sales-ring" style="--sales-progress:${Math.min(100,pct)}%" role="img" aria-label="目标完成率 ${pct.toFixed(1)}%"><div><strong class="num">${pct.toFixed(1)}<small>%</small></strong><span>目标完成率</span></div></div><dl class="sales-amounts"><div><dt>实际销售</dt><dd class="num">${salesMoney(data.actual)}</dd></div><div><dt>月度目标</dt><dd class="num">${salesMoney(data.target)}</dd></div><div><dt>${data.actual>=data.target?'超出目标':'距离目标'}</dt><dd class="num">${salesMoney(Math.abs(data.target-data.actual))}</dd></div></dl>`:'<div class="sales-empty">暂无目标数据<br><small>等待目标与销售数据同步</small></div>'}</article>
- <article class="card sales-history-card"><div class="sales-history-head"><h3>目标与实际</h3><div class="sales-legend"><span class="actual">实际</span><span class="remaining">距目标差额</span></div></div><div class="sales-chart" role="group" aria-label="${esc(selected)}近六个月 ${metric.toUpperCase()} 目标与实际对比">${series.map(r=>salesMonthChart(r,max)).join('')}</div></article></div>
+ <article class="card sales-history-card"><div class="sales-history-head"><div class="sales-history-title"><h3>目标与实际</h3><span>目标设置请前往 Digate 后台配置</span></div><div class="sales-legend"><span class="actual">实际</span><span class="remaining">距目标差额</span></div></div><div class="sales-chart" role="group" aria-label="${esc(selected)}近六个月 ${metric.toUpperCase()} 目标与实际对比">${series.map(r=>salesMonthChart(r,max)).join('')}</div></article></div>
  </section>`;
 }
