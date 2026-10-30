@@ -506,7 +506,7 @@ function selectedAnalyticsKpis(){const ids=analyticsKpiIds();return KPI.filter(k
 function analyticsKpiCards(){return selectedAnalyticsKpis().map(k=>`<div class="kpic">
    <div class="kl">${esc(k.k)}</div><div class="kv num">${esc(k.v)}</div>
    <div class="kt"><span class="${k.up?'up':'dn'}">${esc(k.tr)}</span><span style="color:var(--t3)">${esc(k.vs)}</span></div>
-   <div class="kbar" aria-hidden="true"><i style="width:${k.pct}%"></i></div>
+   <div class="kbar" aria-hidden="true"><i style="width:${k.pct}%;background:${k.up?'var(--green)':'var(--red)'}"></i></div>
   </div>`).join('');}
 function analyticsKpiPicker(){
  const ids=analyticsKpiIds(),full=ids.length>=MAX_ANALYTICS_KPIS;
@@ -549,7 +549,7 @@ document.addEventListener('keydown',event=>{
 });
 function anaB(own){
  const metricMode=!!S.qmetric;
- let h=anaKpiOverview()+'<div class="blay">';
+ let h=anaKpiOverview()+analyticsSalesTargets()+'<div class="blay">';
  h+='<div class="bmain"><div class="card ana-chat-card'+(S.anaChatExpanded?' ana-chat-fullscreen':'')+'">';
  h+='<div class="dockh">'+AV('ana',26)
   +'<div style="flex:1;min-width:0"><div style="font-size:var(--fs-md);font-weight:600">'+(metricMode?'配置向导':nick('ana'))+'</div>'
