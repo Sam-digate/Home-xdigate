@@ -519,7 +519,7 @@ function analyticsStorePicker(){
   <div id="ana-store-panel" class="ana-kpi-panel ana-store-panel" role="listbox" aria-label="选择店铺" onclick="event.stopPropagation()" hidden>${ANALYTICS_STORES.map(store=>`<button class="ana-store-option ${store.id===selected.id?'on':''}" role="option" aria-selected="${store.id===selected.id}" onclick="selectAnalyticsStore('${store.id}')"><span>${esc(store.name)}</span></button>`).join('')}</div></div>`;
 }
 function anaKpiOverview(){
- return `<section class="ana-kpi-overview" aria-label="你的指标"><div class="ana-kpi-head"><div class="ana-kpi-title">你的指标</div>${analyticsDatePicker()}${analyticsKpiPicker()}${analyticsStorePicker()}</div>
+ return `<section class="ana-kpi-overview" aria-label="你的指标"><div class="ana-kpi-head"><div class="ana-kpi-title">你的指标</div>${salesTargetSummary()}${analyticsDatePicker()}${analyticsKpiPicker()}${analyticsStorePicker()}</div>
   <div class="kpigrid" id="ana-kpi-grid">${analyticsKpiCards()}</div></section>`;
 }
 function metricGuide(){

@@ -2,6 +2,11 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 const c=vm.createContext({S:{},Intl,Date,esc:s=>String(s).replace(/</g,'&lt;'),ANALYTICS_STORES:[{id:'all',name:'全部店铺'},{id:'tmall',name:'天猫'}],render:()=>{}});
 vm.runInContext(fs.readFileSync(path.join(__dirname,'../js/22-sales-targets.js'),'utf8'),c);
 const run=s=>vm.runInContext(s,c);
+assert.match(c.salesTargetSummary(),/aria-expanded="false"/);
+assert.match(c.analyticsSalesTargets(),/id="sales-target-details" hidden/);
+const monthlySummary=c.salesTargetSummary();c.S.salesMetric='nmv';c.S.salesPeriod='day';assert.equal(c.salesTargetSummary(),monthlySummary);
+c.document={getElementById:()=>null};c.salesToggleExpanded();assert.match(c.salesTargetSummary(),/aria-expanded="true"/);assert.doesNotMatch(c.analyticsSalesTargets(),/id="sales-target-details" hidden/);c.salesToggleExpanded();
+c.S.salesMetric='gmv';c.S.salesPeriod='month';
 const active=new Set(),tip={offsetWidth:190,offsetHeight:120,classList:{add:n=>active.add(n),remove:n=>active.delete(n)},style:{removeProperty(k){delete this[k];}}};
 c.window={innerWidth:1000,innerHeight:700};
 const hover={pointerType:'mouse',clientX:950,clientY:650,currentTarget:{querySelector:()=>tip},target:{closest:()=>({})}};
