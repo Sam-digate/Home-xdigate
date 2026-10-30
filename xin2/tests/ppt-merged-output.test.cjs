@@ -4,7 +4,7 @@ const outline={id:'outline',mode:'pptoutline',st:'done',by:'ppt',deckTitle:'方�
 const file={id:'file',mode:'pptfile',st:'review',by:'ppt',ttl:'生成文件',createdAt:'刚刚',pageCount:12,credits:99,v:1};
 const task={arts:[outline]};
 const c=vm.createContext({S:{pc:false},esc:s=>String(s),findArt:()=>[task,outline],artifactRunLink:()=>'',subCount:()=>0,pptCoverIsOpen:()=>false});
-for(const name of ['pptOutlineFile','pptOutlineLocked','updatePptOutlineField','updatePptPageField','movePptPage','deletePptPage','addPptPage','pptPageIsOpen','pptFileOutline','pptCompactFile','pptFilePeek','pptOutlinePeek','dPptOutline','pptOutlineFooter']){
+for(const name of ['pptOutlineFile','pptOutlineLocked','updatePptOutlineField','updatePptPageField','movePptPage','deletePptPage','addPptPage','pptPageIsOpen','pptFileOutline','pptCompactFile','pptFilePeek','pptOutlinePeek','dPptOutline','pptOutlineFooter','pptFileFooter','startDrawerReturn','confirmDrawerReturn']){
  const start=source.indexOf('function '+name+'('),next=source.indexOf('\nfunction ',start+1);
  vm.runInContext(source.slice(start,next<0?undefined:next),c);
 }
@@ -13,6 +13,9 @@ assert.doesNotMatch(c.dPptOutline(outline),/PPT 文件产出/);
 task.arts.push(file);
 const card=c.pptOutlinePeek(outline);assert.match(card,/产出 · PPT 文件/);assert.match(card,/查看产出/);assert.doesNotMatch(card,/查看大纲/);assert.match(card,/openDw\('outline'\)/);assert.match(card,/approvePptFile\('file'\)/);
 assert.doesNotMatch(card,/在 Gamma 中打开|openPptOnline/);
+assert.match(card,/在线编辑文档/);
+assert.ok(card.indexOf('在线编辑文档')<card.indexOf('下载 PPTX'));
+assert.ok(card.indexOf('在线编辑文档')<card.indexOf('openReportComments'));
 c.dlActionHTML=a=>a===file?'<button>创建在线文档</button>':'';
 assert.doesNotMatch(c.pptOutlinePeek(outline),/<button>创建在线文档<\/button>/);
 file.st='done';assert.match(c.pptOutlinePeek(outline),/<button>创建在线文档<\/button>/);file.st='review';
@@ -49,3 +52,13 @@ const editableDrawer=c.dPptOutline(outline);assert.doesNotMatch(editableDrawer,/
 c.updatePptPageField('outline',0,'title','Editable');assert.equal(outline.pages[0].title,'Editable');
 outline.outlineConfirmed=true;assert.equal(c.pptOutlineLocked(outline),true);
 console.log('PASS generated outlines are read-only; pre-generation outlines remain editable');
+for(const artifact of [outline,file]){
+ task.arts=[outline,file];c.findArt=()=>[task,artifact];artifact.st='review';artifact.drawerReturning=true;
+ assert.doesNotMatch(artifact===outline?c.pptOutlinePeek(outline):c.pptFilePeek(file),/退回|startDrawerReturn|drawer-return/);
+ assert.doesNotMatch(artifact===outline?c.pptOutlineFooter(outline):c.pptFileFooter(file),/退回|startDrawerReturn|drawer-return/);
+ artifact.drawerReturning=false;c.startDrawerReturn(artifact.id);assert.equal(artifact.drawerReturning,false);
+ c.confirmDrawerReturn(artifact.id);assert.equal(artifact.st,'review');
+}
+task.arts=[outline];c.findArt=()=>[task,outline];outline.st='review';
+assert.doesNotMatch(c.pptOutlinePeek(outline)+c.pptOutlineFooter(outline),/退回|startDrawerReturn|drawer-return/);
+console.log('PASS PPT return actions are removed and shared return handlers reject PPT artifacts');

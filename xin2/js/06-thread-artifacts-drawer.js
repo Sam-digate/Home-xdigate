@@ -554,7 +554,7 @@ function refreshDrawerReturn(id){
  if(drawerOpen)drawDw();else render();
 }
 function startDrawerReturn(id){
- const [,a]=findArt(id);if(!a)return;
+ const [,a]=findArt(id);if(!a||['pptoutline','pptfile'].includes(a.mode))return;
  a.drawerReturning=true;a.drawerReturnDraft='';refreshDrawerReturn(id);
  setTimeout(()=>$('drawer-return-'+id)?.focus(),0);
 }
@@ -564,7 +564,7 @@ function cancelDrawerReturn(id){
  a.drawerReturning=false;a.drawerReturnDraft='';refreshDrawerReturn(id);
 }
 function confirmDrawerReturn(id){
- const [t,a]=findArt(id);if(!t||!a)return;
+ const [t,a]=findArt(id);if(!t||!a||['pptoutline','pptfile'].includes(a.mode))return;
  const reason=(a.drawerReturnDraft||'').trim();
  if(!reason){toast('请填写退回原因');$('drawer-return-'+id)?.focus();return;}
  a.returnReason=reason;(a.sub=a.sub||[]).push({w:'du',k:'chg',tx:'退回原因：'+reason,at:'刚刚'});
@@ -640,7 +640,7 @@ function pptOutlinePeek(a){
   <div class="manual-artifact-summary" onclick="openDw('${a.id}')">
    <div class="pk-t"><div class="tt">${esc(a.deckTitle)}</div><div class="ex">${esc(a.ex)}</div></div>
   </div>
-  <div class="pk-a">${a.drawerReturning?drawerReturnEditor(a):`${a.st==='done'?'':`<button class="btn sm" onclick="confirmPptOutline('${a.id}')">批准</button>`}<button class="btn ghost sm" onclick="openDw('${a.id}')">查看大纲</button>${a.st==='done'?'':`<button class="btn ghost sm" onclick="startDrawerReturn('${a.id}')">退回</button>`}<button class="rvb" onclick="openReportComments('${a.id}')">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''}</button><span class="v num">v${a.v} · 刚刚</span>`}</div>
+  <div class="pk-a">${a.st==='done'?'':`<button class="btn sm" onclick="confirmPptOutline('${a.id}')">生成 PPT</button>`}<button class="btn ghost sm" onclick="openDw('${a.id}')">查看大纲</button><button class="rvb" onclick="openReportComments('${a.id}')">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''}</button><span class="v num">v${a.v} · 刚刚</span></div>
  </div>`;
 }
 function openPptOutlineFromCard(event,id){
@@ -655,12 +655,17 @@ function pptFilePeek(a,outline=null){
   <div class="pk-h"><span class="ty">产出 · PPT 文件</span><span class="chip plat">PPTX</span><span class="st ${a.st}">${a.st==='done'?'已批准':ready?'待审批':'生成中'}</span>${artifactRunLink(a.by)}</div>
   <div class="manual-artifact-summary ppt-file-summary"${outline?` role="button" tabindex="0" aria-label="${ready?'查看产出':'查看大纲'}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openDw('${outline.id}')}"`:''}>
    <div class="pk-t"><div class="tt">${esc(a.ttl)}</div><div class="ex">${ready?`PPT 已生成完成 · ${esc(a.createdAt)} · ${a.pageCount}页`:'PPT Agent 正在生成演示文稿，请稍候…'}</div></div>
-   ${ready?'<div class="ppt-file-hint">下载链接约 7 天有效，建议及时保存。批准后可创建在线文档，长期保留并随时查看 PPT。</div>':'<div class="pbar ppt-file-progress"><i style="width:68%"></i></div>'}
+   ${ready?'':'<div class="pbar ppt-file-progress"><i style="width:68%"></i></div>'}
   </div>
-  ${ready?`<div class="pk-a">${a.drawerReturning?drawerReturnEditor(a):`${a.st==='review'?`<button class="btn sm" onclick="approvePptFile('${a.id}')">批准</button>`:''}${outlineAction}${documentAction}<button class="btn ghost sm" onclick="downloadPptFile('${a.id}')">下载 PPTX</button>${a.st==='review'?`<button class="btn ghost sm" onclick="startDrawerReturn('${a.id}')">退回</button>`:''}<button class="rvb" onclick="openReportComments('${a.id}')">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''}</button><span class="v num">v${a.v} · 刚刚</span>`}</div>${a.st==='done'?`<div class="nxt"><span class="lb">接下来</span><button class="na" onclick="toast('已同步到活动')">同步到活动 →</button></div>`:''}`:''}
+  ${ready?`<div class="pk-a">${a.st==='review'?`<button class="btn sm" onclick="approvePptFile('${a.id}')">批准</button>`:''}${outlineAction}<button class="btn ghost sm" onclick="openPptDocumentEditor(\'${a.id}\')">在线编辑文档</button>${documentAction}<button class="btn ghost sm" onclick="downloadPptFile('${a.id}')">下载 PPTX</button><button class="rvb" onclick="openReportComments('${a.id}')">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''}</button><span class="v num">v${a.v} · 刚刚</span></div>${a.st==='done'?`<div class="nxt"><span class="lb">接下来</span><button class="na" onclick="toast('已同步到活动')">同步到活动 →</button></div>`:''}`:''}
  </div>`;
 }
 
+function openPptDocumentEditor(id){
+ const [,a]=findArt(id);if(!a||a.mode!=='pptfile')return;
+ if(typeof dlRecord==='function'&&dlRecord(a,null)){dlOpen(id,null);return;}
+ toast('在线编辑地址待配置');
+}
 function peek(a){
  const g=AG[a.by];
  if(a.mode==='general-session')return generalSessionPeek(a);
@@ -1035,7 +1040,7 @@ function syncInspectionConversation(t){
  if(count)count.textContent=(t.cmts||[]).length;
 }
 function openArtifactReturn(id){
- const [,a]=findArt(id);if(!a)return;
+ const [,a]=findArt(id);if(!a||['pptoutline','pptfile'].includes(a.mode))return;
  $('mod').innerHTML=`<div class="mbox" style="max-width:560px">
   <div class="mhd"><div class="e">退回产出</div><h3>${esc(a.ttl)}</h3></div>
   <form onsubmit="event.preventDefault();confirmArtifactReturn('${id}')">
@@ -1051,7 +1056,7 @@ function openArtifactReturn(id){
 function confirmArtifactReturn(id){
  const input=$('artifact-return-reason'),reason=input?.value.trim();
  if(!reason){toast('请填写退回原因');input?.focus();return;}
- const [t,a]=findArt(id);if(!a)return;
+ const [t,a]=findArt(id);if(!a||['pptoutline','pptfile'].includes(a.mode))return;
  const message={w:'du',k:'chg',tx:'退回原因：'+reason,at:'刚刚'};
  a.returnReason=reason;(a.sub=a.sub||[]).push({...message});
  // Keep approved directions and other artifacts unchanged; attach feedback to pending directions.
@@ -1064,6 +1069,7 @@ function confirmArtifactReturn(id){
 function act(id,w){
  const t=T.find(x=>x.id===S.tid),a=t.arts.find(x=>x.id===id);
  if(a.mode==='promoseq'&&w==='批准'){approvePromotion(id);return;}
+ if(w==='退回'&&['pptoutline','pptfile'].includes(a.mode))return;
  if(w==='退回'&&(a.returnLabel==='退回'||a.mode==='pdpseq'||a.id==='a2')){openArtifactReturn(id);return;}
  if(a.inspection&&(w==='忽略'||w==='标记为误报')){
   a.inspection.result=w==='忽略'?'已忽略':'已标记为误报';
@@ -1121,7 +1127,7 @@ function addPptPage(id){const [,a]=findArt(id);if(!a||pptOutlineLocked(a))return
 function pptOutlineFile(a){const [t]=findArt(a.id);return t?.arts.find(x=>x.mode==='pptfile'&&!x.deferred);}
 function pptFileOutline(a){const [t]=findArt(a.id);return t?.arts.find(x=>x.mode==='pptoutline'&&!x.deferred);}
 function pptCompactFile(a){
- return `<div class="ppt-compact-file"><span class="ppt-file-icon" aria-hidden="true">PPT</span><div class="ppt-compact-copy"><b>${esc(a.ttl)}.pptx</b><div class="ppt-ask-help">PPT 已生成完成 · ${esc(a.createdAt)} · ${a.pageCount}页</div></div><div class="ppt-ask-help ppt-compact-hint">下载链接约 7 天有效，建议及时保存。批准后可创建在线文档，长期保留并随时查看 PPT。</div></div>`;
+ return `<div class="ppt-compact-file"><span class="ppt-file-icon" aria-hidden="true">PPT</span><div class="ppt-compact-copy"><b>${esc(a.ttl)}.pptx</b><div class="ppt-ask-help">PPT 已生成完成 · ${esc(a.createdAt)} · ${a.pageCount}页</div></div></div>`;
 }
 function dPptOutline(a){
  const coverOpen=pptCoverIsOpen(a);
@@ -1157,7 +1163,7 @@ function confirmPptOutline(id){
  a.outlineConfirmed=true;a.st='done';a.drawerReturning=false;t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';
  t.pptLive={t:'PPT 生成正在制作演示文稿',sub:'正在根据已批准大纲生成页面内容与版式',p:43};
  if($('dw')?.classList.contains('on')&&S.aid===id)closeDw();
- render();renderNav();toast('大纲已批准 · PPT 正在生成');
+ render();renderNav();toast('大纲已确认 · PPT 正在生成');
  setTimeout(()=>{
   if(t.deletedAt||t.executionCancelled)return;
   let file=t.arts.find(x=>x.mode==='pptfile');
@@ -1168,13 +1174,13 @@ function confirmPptOutline(id){
 function approvePptFile(id){const [t,a]=findArt(id);if(!t||!a)return;a.st='done';t.st=t.arts.every(x=>x.st==='done')?'done':'review';t.up='刚刚';render();renderNav();if($('dw')?.classList.contains('on'))drawDw();toast('PPT 文件已批准');}
 function downloadPptFile(id){const [,a]=findArt(id);if(!a)return;toast('PPTX 下载已开始 · 展示功能');}
 function dPptFile(a){return `${pptCompactFile(a)}${S.pc?`<div style="margin-top:var(--sp-4)">${subPane(a)}</div>`:''}`;}
-function pptFileFooter(a){if(a.drawerReturning)return drawerReturnEditor(a);return `${a.st==='review'?`<button class="btn" onclick="approvePptFile('${a.id}')">批准</button>`:''}<button class="btn ghost" onclick="downloadPptFile('${a.id}')">下载 PPTX</button>${a.st==='review'?`<button class="btn ghost" onclick="startDrawerReturn('${a.id}')">退回</button>`:''}<button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;}
+function pptFileFooter(a){return `${a.st==='review'?`<button class="btn" onclick="approvePptFile('${a.id}')">批准</button>`:''}<button class="btn ghost" onclick="openPptDocumentEditor('${a.id}')">在线编辑文档</button><button class="btn ghost" onclick="downloadPptFile('${a.id}')">下载 PPTX</button><button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;}
 function pptOutlineFooter(a,commentArtifact=a){
  const file=pptOutlineFile(a);
- if(file)return `${file.st==='review'?`<button class="btn" onclick="approvePptFile('${file.id}')">批准</button>`:''}${file.st!=='run'?`<button class="btn ghost" onclick="downloadPptFile('${file.id}')">下载 PPTX</button>`:''}<button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(commentArtifact)?`<span class="n">${subCount(commentArtifact)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;
- if(a.drawerReturning)return drawerReturnEditor(a);
+ if(file)return `${file.st==='review'?`<button class="btn" onclick="approvePptFile('${file.id}')">批准</button>`:''}${file.st!=='run'?`<button class="btn ghost" onclick="openPptDocumentEditor('${file.id}')">在线编辑文档</button><button class="btn ghost" onclick="downloadPptFile('${file.id}')">下载 PPTX</button>`:''}<button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(commentArtifact)?`<span class="n">${subCount(commentArtifact)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;
+
  if(a.st==='done')return `<span class="st done">已批准</span><button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;
- return `<button class="btn" onclick="confirmPptOutline('${a.id}')">批准</button><button class="btn ghost" onclick="startDrawerReturn('${a.id}')">退回</button><button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;
+ return `<button class="btn" onclick="confirmPptOutline('${a.id}')">生成 PPT</button><button class="rvb ${S.pc?'on':''}" onclick="togglePptComment()">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''} ${S.pc?'▴':'▾'}</button>`;
 }
 function findArt(id){for(const t of T){if(!t.arts)continue;const a=t.arts.find(x=>x.id===id);if(a)return[t,a];}return[];}
 function openDw(id,oi){
