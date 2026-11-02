@@ -137,7 +137,7 @@ function openNew(agid,prefill,campaignId){
  const requestedCampaign=campaignId===undefined?S.cid:campaignId;
  const currentCampaign=CAMPS.some(c=>c.id===requestedCampaign)?requestedCampaign:'';S.newCampaignId=currentCampaign;
  $('mod').innerHTML=`<div class="mbox new-task-modal">
-  <div class="mhd"><div class="e">新建任务</div><h3>你想让什么发生？</h3></div>
+  <div class="mhd"><div class="e">新建任务</div><div class="new-task-title-row"><h3>你想让什么发生？</h3><span class="new-task-project" title="新任务将归属此项目"><span>当前项目</span><b>${esc(document.querySelector('.proj .v')?.textContent.trim()||'A8OPARIS')}</b></span></div></div>
   <div class="mbd">
     <div class="fld"><label>意图</label>
       <textarea id="ni" rows="6" placeholder="例如：围绕 11.11 主题做一组小红书内容，先给方向不要直接写稿">${esc(prefill||'')}</textarea></div>

@@ -444,3 +444,4 @@
 :focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:4px}
 .m1-disabled{opacity:.48;filter:grayscale(.35);cursor:not-allowed;box-shadow:none!important}
 .m1-owner-pill{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;background:var(--hairline);color:var(--t2);font-size:var(--fs-xs);font-weight:600;white-space:nowrap}
+.new-task-title-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.new-task-project{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border:1px solid var(--border);border-radius:6px;background:var(--surface-tint);font-size:var(--fs-xs);line-height:1.5;color:var(--t3)}.new-task-project b{font-weight:600;color:var(--t2)}

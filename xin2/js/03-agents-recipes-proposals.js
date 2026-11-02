@@ -293,7 +293,7 @@ function openRecipeDrawer(){
 function openRecipe(i){
  const r=RECIPES[i];if(!r)return;S.rc=i;
  $('mod').innerHTML=`<div class="mbox">
-  <div class="mhd"><div class="e">用配方开始</div><h3>${esc(r.n)}</h3></div>
+  <div class="mhd"><div class="e">用配方开始</div><div class="new-task-title-row"><h3>${esc(r.n)}</h3><span class="new-task-project" title="新任务将归属此项目"><span>当前项目</span><b>${esc(document.querySelector('.proj .v')?.textContent.trim()||'A8OPARIS')}</b></span></div></div>
   <div class="mbd">
     <div style="font-size:var(--fs-sm);color:var(--t2);margin-bottom:var(--sp-3)">${esc(r.d)}</div>
     <div class="plan-pv" style="margin-bottom:var(--sp-4)"><div class="h">这条配方会依次用到</div>
