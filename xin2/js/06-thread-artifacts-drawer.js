@@ -174,7 +174,7 @@ function vThread(){
     <div class="crumb"><button onclick="go('work')">工作</button> › ${t.camp?`<button onclick="goCamp('${t.camp}')">${t.camp}</button>`:'日常'} › <span>任务</span></div>
     ${taskMenuHTML(t,true)}<h2>${esc(t.t)}</h2>
     <div class="th-meta">
-      <span class="st ${t.st}">${STN[t.st]}</span>
+      <span class="st ${t.st}">${executionStatusLabel(t)||STN[t.st]}</span>
       ${t.camp?`<span class="chip camp">${t.camp}</span>`:'<span class="chip mut">日常</span>'}
       <span class="chip dom">${t.dom}</span><span class="chip lv">自主 ${t.lv}</span>
       <span class="chip mut">产品经理 ${U[t.own].n}</span>
@@ -216,7 +216,7 @@ function vThread(){
     ${t.demoDouyinRecommendation?creatorIntakeNode(t):''}
     ${t.supplement?renderThreadSupplement(t):''}
 
-    ${!t.demoDouyinRecommendation&&t.ask&&!t.answered&&(!t.prestartDemo||t.plan.status!=='pending')?`<div class="node wait"><div class="nlab">需要你补充 · CLARIFY</div>
+    ${!t.demoDouyinRecommendation&&t.ask&&!t.answered&&(!t.prestartDemo||t.plan.status!=='pending')?`<div class="node wait" id="clarify-${t.id}"><div class="nlab">需要你补充 · CLARIFY</div>
       <div class="bub"><div class="who agent-run-hit" role="button" tabindex="0" onclick="openTrace('${t.ag}','${t.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTrace('${t.ag}','${t.id}')}" title="查看运行状态"><span class="avs" style="background:${a.c}">${a.s}</span><span class="nm">${esc(t.ask.agentLabel||a.n)}</span>
         <span class="chip mut">${t.ask.ppt?'PPT 生成设置':t.ask.channels?'目标渠道':t.ask.qs.length+' 个问题'}</span><span class="tm">8分钟前</span></div>
         <div style="margin-bottom:var(--sp-3);color:var(--t2)">${esc(t.ask.tx)}</div>
@@ -229,6 +229,7 @@ function vThread(){
     ${t.answered?`<div class="node ok"><div class="nlab">你的补充 · ANSWERED</div>
       <div class="bub me"><div class="who"><span class="avs" style="background:${U.du.c}">DU</span><span class="nm">dudu</span><span class="tm">刚刚</span></div>
         ${t.ask.ppt||t.ask.channels?t.answered.map(x=>`<div style="font-size:var(--fs-sm);padding:var(--sp-1) 0;color:var(--t2)"><b style="color:var(--t1)">${esc(x)}</b></div>`).join(''):t.answered.map((x,i)=>`<div style="font-size:var(--fs-sm);padding:var(--sp-1) 0;color:var(--t2)">${t.ask.qs[i].q} → <b style="color:var(--t1)">${esc(x)}</b></div>`).join('')}</div></div>`:''}
+    ${executionTerminalNode(t)}
     ${answeredRunningNode(t,a)}
     ${t.live?`<div class="node act"><div class="nlab">执行 · RUNNING</div>
       <div class="live">
@@ -236,10 +237,11 @@ function vThread(){
         <div class="live-t" id="lt">${t.live.sub[0]}</div>
         <div class="pbar"><i id="lp" style="width:${t.live.p}%"></i></div>
         <div class="live-f" style="justify-content:flex-end">
+          ${executionStopButton(t)}
           <button class="btn ghost sm" onclick="openTrace('${t.ag}','${t.id}')">看它怎么想的</button></div>
       </div></div>`:''}
 
-    ${t.arts&&t.arts.length?`<div class="node ${t.st==='review'?'wait':'ok'}"><div class="nlab">产出 · ARTIFACT</div>
+    ${t.arts&&t.arts.length?`<div class="node ${t.st==='review'?'wait':'ok'}" id="artifacts-${t.id}"><div class="nlab">产出 · ARTIFACT</div>
       ${t.arts.filter(a=>!a.deferred&&!(t.id==='t1'&&a.id==='a2')&&!(a.mode==='pptfile'&&t.arts.some(x=>!x.deferred&&x.mode==='pptoutline'))).map(peek).join('')}</div>`:''}
 
     ${pptGeneratingNode(t)}
@@ -530,6 +532,7 @@ function renderThreadSupplement(t){
   </div></div>`;
 }
 function answeredRunningNode(t,a){
+ if(['stopped','failed','stopping'].includes(t.executionState))return '';
  if(t.live||!t.ask||!t.answered||t.st!=='run'||(t.arts&&t.arts.length))return '';
  const p=t.answerRun?.p||42,tk=t.answerRun?.tk||480,sub=t.answerRun?.sub||'正在根据补充信息生成后续产出';
  return `<div class="node act"><div class="nlab">执行 · RUNNING</div>

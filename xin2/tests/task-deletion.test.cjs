@@ -11,6 +11,7 @@ const context=vm.createContext({console,Intl,Date,document:{addEventListener(){}
   AG:{gen:{c:'#333'}},COLS:[{k:'todo',n:'待开始'},{k:'run',n:'进行中'},{k:'review',n:'待审批'},{k:'done',n:'已交付'}],
   crInfo:()=>({av:'',nm:'Dudu'}),canAdjustPrestartPlan:()=>false,nick:id=>id});
 vm.runInContext(read('js/16-task-deletion.js'),context);
+vm.runInContext(read('js/23-agent-execution.js'),context);
 vm.runInContext(read('js/05-knowledge-work.js').split('function fil(){')[1].replace(/^/,'function fil(){'),context);
 const core=read('js/02-core-nav-today-comments.js');
 // Load the real queue and completion callbacks without invoking page rendering.

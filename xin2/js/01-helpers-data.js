@@ -606,16 +606,111 @@ const T=[
     {t:'创意三：成分实验',e:'以 8 周实验对比数据为主视觉，偏理性说服。适合相似人群拓展中的成分党分层。',s:'review',g:['#A7F3D0','#059669'],sub:[]}]}],
  cmts:[]},
 
-{cr:{s:'h',w:'du'},id:'t16',trig:'manual',t:'新品内容一波（信息不足）',camp:'新品上市',dom:'内容',ag:'gen',own:'du',st:'ask',up:'8分钟前',day:0,lv:'M2',cost:'¥1.20',new:1,workTop:1,
- intent:{who:'du',tx:'给新品做一波内容。',at:'今天 11:48'},
- plan:{v:1,tx:'信息不足，无法直接生成。先补充目标渠道配置再出计划。',steps:[
-  {l:'读取品牌智库与产品中心',m:'已读取可关联产品与渠道规范',s:'ok',r:'6秒'},
-  {l:'识别信息缺口',m:'目标渠道、文章数量与关联产品待补充',s:'ok',r:'2秒'},
-  {l:'等待你补充',m:'补齐后自动生成计划',s:'ask',r:'—'}]},
- ask:{agentLabel:'详情页生成',tx:'目标渠道配置还没补齐。请确认平台、文章数量和关联产品，补齐后我就直接出计划。',
-  platforms:['小红书','抖音','B站'],products:['Evo1.1 轻盈营养体验','A80 修护安瓶精华 15ml','Clean Glow 修护霜 50g','Daily Shield 防晒 45ml'],
-  channels:[{platform:'小红书',qty:'1',products:['Evo1.1 轻盈营养体验','A80 修护安瓶精华 15ml']}]},
- cmts:[]}
+{
+ "cr": {
+  "s": "h",
+  "w": "du"
+ },
+ "id": "t16",
+ "trig": "manual",
+ "t": "新品内容一波（信息不足）",
+ "camp": "新品上市",
+ "dom": "内容",
+ "ag": "gen",
+ "own": "du",
+ "st": "run",
+ "up": "刚刚",
+ "day": 0,
+ "lv": "M2",
+ "cost": "¥1.20",
+ "new": 0,
+ "workTop": 320,
+ "intent": {
+  "who": "du",
+  "tx": "给新品做一波内容。",
+  "at": "今天 11:48"
+ },
+ "plan": {
+  "v": 2,
+  "tx": "目标渠道已补齐：小红书 1 篇 · Evo1.1 轻盈营养体验、A80 修护安瓶精华 15ml。",
+  "steps": [
+   {
+    "l": "读取品牌智库与产品中心",
+    "m": "渠道规范与关联产品已读取",
+    "s": "ok",
+    "r": "6秒"
+   },
+   {
+    "l": "确认目标渠道配置",
+    "m": "小红书 1 篇 · Evo1.1 轻盈营养体验、A80 修护安瓶精华 15ml",
+    "s": "ok",
+    "r": "刚刚"
+   },
+   {
+    "l": "生成内容计划",
+    "m": "按平台规则与文章数量拆分",
+    "s": "act",
+    "r": "进行中"
+   },
+   {
+    "l": "提交人工审批",
+    "m": "确认后进入内容生成",
+    "s": "todo",
+    "r": "—"
+   }
+  ]
+ },
+ "ask": {
+  "agentLabel": "详情页生成",
+  "tx": "目标渠道配置还没补齐。请确认平台、文章数量和关联产品，补齐后我就直接出计划。",
+  "platforms": [
+   "小红书",
+   "抖音",
+   "B站"
+  ],
+  "products": [
+   "Evo1.1 轻盈营养体验",
+   "A80 修护安瓶精华 15ml",
+   "Clean Glow 修护霜 50g",
+   "Daily Shield 防晒 45ml"
+  ],
+  "channels": [
+   {
+    "platform": "小红书",
+    "qty": "1",
+    "products": [
+     "Evo1.1 轻盈营养体验",
+     "A80 修护安瓶精华 15ml"
+    ]
+   }
+  ]
+ },
+ "cmts": [],
+ "answered": [
+  "小红书 1 篇 · Evo1.1 轻盈营养体验、A80 修护安瓶精华 15ml"
+ ],
+ "answeredChannels": [
+  {
+   "platform": "小红书",
+   "qty": "1",
+   "products": [
+    "Evo1.1 轻盈营养体验",
+    "A80 修护安瓶精华 15ml"
+   ]
+  }
+ ],
+ "executionCancelled": false,
+ "restoredPending": false,
+ "live": {
+  "t": "内容生成正在整理新品内容计划",
+  "el": "刚刚",
+  "sub": [
+   "正在根据补充信息匹配渠道、产品与文章数量"
+  ],
+  "p": 42,
+  "tk": 480
+ }
+}
 ];
 
 /* 在线文档演示任务：保留一篇产出，方便演示创建与在线编辑。 */
@@ -658,4 +753,4 @@ const STN={todo:'待开始',run:'进行中',review:'待审批',done:'已交付',
 const DOMS=['全部','内容','电商','用户运营','KOL','B2B'];
 const DAYN=['今天','昨天','本周早些时候'];
 
-let S={view:location.hash==='#permission'?'permission':'work',mode:'kanban',dom:'全部',approvalDom:'全部',tid:null,aid:null,focus:false,dtab:0,liveT:null,liveI:0,hist:[],currentUser:'br',accountOpen:false};
+let S={view:location.hash==='#permission'?'permission':'work',mode:'kanban',dom:'全部',approvalDom:'全部',tid:null,aid:null,focus:false,dtab:0,liveT:null,liveI:0,hist:[],currentUser:'du',accountOpen:false};

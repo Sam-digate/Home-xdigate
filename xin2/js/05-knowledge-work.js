@@ -1449,7 +1449,7 @@ function fpill(key,label,opts){
 function setDom(d){S.dom=d;render();}
 function setMode(m){S.mode=m;render();}
 function kanban(L){
- const preferredOrder=['t1-label-copy','t-ppt-form-demo','t5','t-douyin-creators','t-general-agent-demo','t-seo-flow-demo'];
+ const preferredOrder=['t16','t1-label-copy','t-ppt-form-demo','t5','t-douyin-creators','t-general-agent-demo','t-seo-flow-demo'];
  return `<div class="kb">${COLS.map(c=>{
   const it=L.filter(t=>t.st===c.k||(c.k==='review'&&t.st==='ask')).sort((a,b)=>{
    const ai=preferredOrder.indexOf(a.id),bi=preferredOrder.indexOf(b.id);
@@ -1464,7 +1464,7 @@ function kcard(t){
   const a=AG[t.ag]||{c:'#8B7FC7',s:'?',n:t.ag};
  return `<div role="button" tabindex="0" class="kcard src${(t.cr||{s:'h'}).s} ${t.new?'hasnew':''}" onclick="go('thread','${t.id}')" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();go('thread','${t.id}')}">
   ${taskMenuHTML(t)}
-  <div class="tt">${t.new?'<span class="nd"></span>':''}${t.pin?'<span class="pinb">置顶</span>':''}${esc(t.t)}</div>
+  <div class="tt">${t.new?'<span class="nd"></span>':''}${t.pin?'<span class="pinb">置顶</span>':''}${esc(t.t)} ${executionStatusLabel(t)?`<span class="execution-status ${t.executionState}">${executionStatusLabel(t)}</span>`:''}</div>
   <div class="meta">${t.camp?`<span class="chip camp">${t.camp}</span>`:'<span class="chip mut">日常</span>'}${t.platform?`<span class="chip plat">${esc(t.platform)}</span>`:''}<span class="chip dom">${t.dom}</span><span class="chip lv">${t.lv}</span>${t.generalAgentDemo&&!t.generalAgentConfirmed?'<span class="chip general-agent-wait">Agent 待确认</span>':t.generalAgentDemo?'<span class="chip general-agent-live">通用 Agent</span>':t.prestartDemo&&t.plan?.status==='rejected'?'<span class="chip" style="background:#FFF0F0;color:#C43232">计划未通过</span>':canAdjustPrestartPlan(t)&&!t.permissionBlocked?'<span class="chip mut">计划待确认</span>':''}</div>
   <div class="ft">
     ${t.new?`<span class="nchip">${t.new} 条新</span>`:''}

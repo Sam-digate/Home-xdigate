@@ -26,14 +26,14 @@ function navState(){return {view:S.view,tid:S.tid||null};}
 function sameNav(a,b){return a&&b&&a.view===b.view&&(a.tid||null)===(b.tid||null);}
 function backNav(){
  const prev=S.hist?.at(-1);
- return prev?`<div class="page-back-row"><button class="rvb page-back" onclick="event.stopPropagation();goBack()">← 返回上一页</button></div>`:'';
+ return prev||S.view==='thread'?`<div class="page-back-row"><button class="rvb page-back" onclick="event.stopPropagation();goBack()">← ${prev?'返回上一页':'返回工作'}</button></div>`:'';
 }
 function withBackNav(html){
  if(html.includes('page-back-row'))return html;
- return S.hist?.length?html.replace(/(<div class="wrap"[^>]*>)/,`$1${backNav()}`):html;
+ return S.hist?.length||S.view==='thread'?html.replace(/(<div class="wrap(?:\s[^"]*)?"[^>]*>)/,`$1${backNav()}`):html;
 }
 function goBack(){
- const prev=S.hist&&S.hist.pop();if(!prev)return;
+ const prev=S.hist&&S.hist.pop();if(!prev){if(S.view==='thread')go('work');return;}
  go(prev.view,prev.tid,{back:true});
 }
 function go(v,id,opt){closeSb();S.fopen=null;
@@ -104,7 +104,7 @@ function queue(){
  const q=[];
  const me=currentUser();
  T.forEach(t=>{
-  if(t.deletedAt||t.restoredPending)return;
+  if(t.devHidden||t.deletedAt||t.restoredPending)return;
   if(me==='du'&&t.ask&&!t.answered){const askN=t.ask.creator||t.ask.channels||t.ask.ppt?1:t.ask.qs.length;q.push({t,a:{id:'ask-'+t.id,by:t.ag},oi:null,ttl:t.ask.creator?'达人筛选条件待填写':t.ask.ppt?'PPT 生成设置待补充':t.ask.channels?'目标渠道待你补充':askN+' 个问题待你回答',
     g:['#C4B5FD','#7C3AED'],ty:'待补充',plat:null,vals:[{l:'信息缺口',v:t.ask.creator?'达人筛选表单':t.ask.ppt?'PPT 生成设置':t.ask.channels?'渠道配置':askN+' 项',s:'bad'}],wait:8,sla:null,ask:1});}
   if(!t.arts)return;t.arts.forEach(a=>{
@@ -230,7 +230,7 @@ function qrow(q){
  const bad=(q.vals||[]).some(v=>v.s==='bad'), warn=(q.vals||[]).some(v=>v.s==='warn');
  return `<div class="qrow ${over?'late':soon?'soon':''}">
   <div class="qthumb" style="${grad(q.g[0],q.g[1])}"><span class="ic">${q.ty.slice(0,2)}</span></div>
-  <div class="qmid" onclick="${q.m1==='requester'?`goM1Review('${q.t.id}')`:`goArt('${q.t.id}','${q.a.id}',${q.oi})`}">
+  <div class="qmid" onclick="${q.m1==='requester'?`goM1Review('${q.t.id}')`:`goTaskOutput('${q.t.id}','${q.a.id}',${!!q.ask})`}">
     <div class="tt">${esc(q.ttl)}</div>
     <div class="mt">${q.plat?`<span class="chip plat">${q.plat}</span>`:''}
       ${q.t.camp?`<span class="chip camp">${q.t.camp}</span>`:'<span class="chip mut">日常</span>'}
@@ -244,7 +244,6 @@ function qrow(q){
      :q.m1==='requester'?`<button class="btn sm" onclick="goM1Review('${q.t.id}')">去验收</button>`
      :bad?`<button class="btn sm" onclick="goArt('${q.t.id}','${q.a.id}',${q.oi})">去处理</button>`
        :`<button class="btn sm" onclick="qAct('${q.t.id}','${q.a.id}',${q.oi},1)">批准</button>`}
-    ${q.ask||q.m1==='requester'?'':`<button class="btn ghost sm" onclick="qAct('${q.t.id}','${q.a.id}',${q.oi},0)">退回</button>`}
   </div></div>`;
 }
 function qAct(tid,aid,oi,ok){
@@ -260,6 +259,14 @@ function qAct(tid,aid,oi,ok){
 function goArt(tid,aid,oi){
  go('thread',tid);
  setTimeout(()=>{openDw(aid);if(oi!==null&&oi!==undefined){S.dtab=0;S.oo=oi;drawDw();}},80);
+}
+function goTaskOutput(tid,aid,clarify=false){
+ go('thread',tid);
+ requestAnimationFrame(()=>{
+  if(S.view!=='thread'||S.tid!==tid)return;
+  const target=clarify?document.getElementById('clarify-'+tid):document.getElementById('pk-'+aid)||document.getElementById('artifacts-'+tid);
+  target?.scrollIntoView({behavior:'smooth',block:'start'});
+ });
 }
 function goM1Review(tid){
  go('thread',tid);
@@ -484,7 +491,7 @@ function sendAns(){
    S.askProductRow=null;render();toast('信息已补齐 · 正在生成社媒内容');
    setTimeout(()=>finishSocialDemo(t.id),3000);return;
   }
-  t.answered=summary;t.answeredChannels=rows.map(r=>({...r,products:[...r.products]}));t.executionCancelled=false;t.restoredPending=false;t.st='run';
+  t.answered=summary;t.answeredChannels=rows.map(r=>({...r,products:[...r.products]}));t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';
   t.plan={v:2,tx:'目标渠道已补齐：'+summary.join('；')+'。',steps:[
    {l:'读取品牌智库与产品中心',m:'渠道规范与关联产品已读取',s:'ok',r:'6秒'},
    {l:'确认目标渠道配置',m:summary.join('；'),s:'ok',r:'刚刚'},

@@ -211,11 +211,11 @@ const LIVEQ={vid:['读取镜头 5 参数（磨皮已关闭）…','渲染镜头 
 function openTrace(agid,tid){S.trace=agid;S.traceT=tid||S.tid;drawTrace();$('dw').classList.add('on');$('scrim').classList.add('on');startTrace();}
 function startTrace(){
  if(S.trT){clearInterval(S.trT);S.trT=null;}
- const t=T.find(x=>x.id===S.traceT);if(!t||t.st!=='run')return;
+ const t=T.find(x=>x.id===S.traceT);if(!t||t.st!=='run'||t.executionCancelled)return;
  if(t.agentStates?.[S.trace]&&t.agentStates[S.trace]!=='运行中')return;
- const q=LIVEQ[S.trace]||['执行中…'];let i=0;
+ const q=t.id==='t16'?(t.live?.sub||['正在生成内容计划…']):LIVEQ[S.trace]||['执行中…'];let i=0;
  S.trT=setInterval(()=>{
-  const el=$('lvline');if(!el){clearInterval(S.trT);S.trT=null;return;}
+  const el=$('lvline');if(!el||t.executionCancelled){clearInterval(S.trT);S.trT=null;return;}
   i=(i+1)%q.length;
   el.textContent=q[i];
  },1600);
@@ -224,11 +224,11 @@ function traceMeta(m){return String(m||'').split(' · ').filter(x=>!/tokens/i.te
 function drawTrace(){
  const id=S.trace,a=AG[id]||{n:id,c:'#8B7FC7',s:'A'};
  const t=T.find(x=>x.id===S.traceT),allTr=TRACE[id]||[];
- const tr=t&&t.traceOmit?allTr.filter((_,i)=>!t.traceOmit.includes(i)):allTr;
+ const tr=t?.id==='t16'?executionTraceSteps(t):t&&t.traceOmit?allTr.filter((_,i)=>!t.traceOmit.includes(i)):allTr;
  const agentState=t?.agentStates?.[id];
- const running=t&&(t.st==='run')&&(!agentState||agentState==='运行中');
+ const running=t&&(t.st==='run')&&!t.executionCancelled&&(!agentState||agentState==='运行中');
  const waitingPlan=t&&canAdjustPrestartPlan(t),rejectedPlan=t?.plan?.status==='rejected';
- const traceStatus=!t?'—':waitingPlan?'待确认':rejectedPlan?'未开始':agentState|| (t.manualPending?'待指定':t.st==='ask'?'等待补充':t.st==='run'?'运行中':t.st==='review'?'待审批':t.st==='done'?'已完成':'未开始');
+ const traceStatus=!t?'—':waitingPlan?'待确认':rejectedPlan?'未开始':executionStatusLabel(t)||agentState|| (t.manualPending?'待指定':t.st==='ask'?'等待补充':t.st==='run'?'运行中':t.st==='review'?'待审批':t.st==='done'?'已完成':'未开始');
  const showTrace=!waitingPlan&&!rejectedPlan&&!t?.manualPending&&!/^等待/.test(agentState||'');
  $('dw').innerHTML=`<div class="dw-h">
    <button class="ib" onclick="closeDw()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
@@ -238,11 +238,11 @@ function drawTrace(){
    <span class="odot ${ONLINE[id]?'on':'off'}"></span></div>
    <div class="dw-b">
     <div class="note" style="margin-bottom:var(--sp-3)">${showTrace?'这是这次运行的完整记录：读了什么、怎么判断、调了什么工具、为什么这么写。判断错了就在下面说，它会带着这个理由重做。':'当前任务还没有开始运行。'}</div>
-   ${showTrace?`<div class="trace">${tr.map((x,i)=>`<div class="tr ${running&&i===tr.length-2?'act':'ok'}">
+   ${showTrace?`<div class="trace">${tr.map((x,i)=>`<div class="tr ${t?.id==='t16'?x.state:running&&i===tr.length-2?'act':'ok'}">
      <div class="h"><span class="k ${x.k}">${({read:'读取',think:'判断',tool:'工具',write:'生成'})[x.k]}</span>${esc(x.h)}</div>
      <div class="b">${esc(x.b)}</div>${traceMeta(x.m)?`<div class="m">${esc(traceMeta(x.m))}</div>`:''}</div>`).join('')}
      ${running?`<div class="tr act"><div class="h"><span class="k tool">进行中</span><span class="spin"></span>
-      <span id="lvline">${(LIVEQ[id]||['执行中…'])[0]}</span></div></div>`:''}</div>`:`<div class="note">当前尚未开始执行，确认计划后可在这里查看运行状态。</div>`}
+      <span id="lvline">${esc(t?.id==='t16'?t.live?.sub?.[0]||'正在生成内容计划…':(LIVEQ[id]||['执行中…'])[0])}</span></div></div>`:''}</div>`:`<div class="note">当前尚未开始执行，确认计划后可在这里查看运行状态。</div>`}
    <div class="ctx" style="margin-top:var(--sp-4)">
      <div class="ctxr"><span class="k">自主级别</span><span class="v">${(REG.find(r=>r.id===id)||{}).lv!==undefined?LV[REG.find(r=>r.id===id).lv].k+' · '+LV[REG.find(r=>r.id===id).lv].n:'—'}</span></div>
       <div class="ctxr"><span class="k">状态</span><span class="v">${traceStatus}</span></div></div>
