@@ -24,7 +24,7 @@ function confirmExecutionStop(id){
  executionRefresh(t);
  setTimeout(()=>{
   if(!executionTask(id)||t.executionToken!==token)return;
-  t.live=null;t.executionState='stopped';t.up='刚刚';
+  t.live=null;t.executionState='stopped';t.st='todo';t.up='刚刚';
   executionAudit(t,'已中止',t.executionSnapshot.t);executionRefresh(t);toast('Agent 已中止，可在当前任务中重试');
  },450);
 }
@@ -47,5 +47,5 @@ function retryTaskExecution(id){
 function executionTerminalNode(t){
  if(!executionTask(t.id)||!['failed','stopped'].includes(t.executionState))return '';
  const failed=t.executionState==='failed',last=t.executionHistory?.at(-1),actor=U[last?.actor]?.n||last?.actor||'dudu';
- return `<div class="node wait"><div class="nlab">执行 · ${failed?'FAILED':'STOPPED'}</div><div class="bub execution-result"><div class="who"><b>${failed?'执行失败':'Agent 已中止'}</b><span class="tm">${esc(actor)} · ${last?esc(new Date(last.at).toLocaleString('zh-CN',{timeZone:'Asia/Tokyo',hour12:false})):'刚刚'}</span></div><p>${esc(failed?t.executionError:'已停止后续执行，补充信息与已完成内容均已保留。')}</p><p class="execution-step">停留步骤：生成内容计划</p><div class="execution-actions"><button class="btn sm" onclick="retryTaskExecution('${t.id}')">重试</button><button class="btn ghost sm" onclick="openTrace('${t.ag}','${t.id}')">看它怎么想的</button></div></div></div>`;
+ return `<div class="node wait"><div class="nlab">执行 · ${failed?'FAILED':'STOPPED'}</div><div class="bub execution-result"><div class="who"><b>${failed?'执行失败':'Agent 已中止'}</b>${failed?`<span class="tm">${esc(actor)} · ${last?esc(new Date(last.at).toLocaleString('zh-CN',{timeZone:'Asia/Tokyo',hour12:false})):'刚刚'}</span>`:''}</div><p>${!failed?`<span class="execution-stop-meta">${esc(actor)} · ${last?esc(new Date(last.at).toLocaleString('zh-CN',{timeZone:'Asia/Tokyo',hour12:false})):'刚刚'} · </span>`:''}${esc(failed?t.executionError:'已停止后续执行，补充信息与已完成内容均已保留。')}</p><p class="execution-step">停留步骤：生成内容计划</p><div class="execution-actions"><button class="btn sm" onclick="retryTaskExecution('${t.id}')">重试</button><button class="btn ghost sm" onclick="openTrace('${t.ag}','${t.id}')">看它怎么想的</button></div></div></div>`;
 }

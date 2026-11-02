@@ -6,8 +6,8 @@ const original=JSON.stringify(task.answeredChannels),arts=JSON.stringify(task.ar
 ctx.openExecutionStop('t16');assert.match(elements.mod.innerHTML,/confirmExecutionStop/);assert.equal(task.executionCancelled,undefined);
 ctx.confirmExecutionStop('t16');assert.equal(task.executionState,'stopping');assert.equal(task.executionCancelled,true);
 ctx.confirmExecutionStop('t16');assert.equal(callbacks.length,1);
-callbacks.shift()();assert.equal(task.executionState,'stopped');assert.equal(task.live,null);assert.match(ctx.executionTerminalNode(task),/retryTaskExecution/);
-ctx.retryTaskExecution('t16');assert.equal(task.executionState,'running');assert.equal(task.executionCancelled,false);assert.ok(task.live);
+callbacks.shift()();assert.equal(task.executionState,'stopped');assert.equal(task.st,'todo');assert.equal(task.live,null);assert.match(ctx.executionTerminalNode(task),/retryTaskExecution/);
+ctx.retryTaskExecution('t16');assert.equal(task.executionState,'running');assert.equal(task.st,'run');assert.equal(task.executionCancelled,false);assert.ok(task.live);
 ctx.retryTaskExecution('t16');assert.equal(callbacks.length,1);
 callbacks.shift()();assert.equal(task.executionState,'failed');assert.equal(task.live,null);
 assert.doesNotMatch(ctx.executionTerminalNode(task),/<details/);
