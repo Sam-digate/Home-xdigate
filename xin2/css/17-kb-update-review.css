@@ -25,3 +25,4 @@
 .kb-batch-choices input{width:10px;height:10px}
 .kb-batch-choices input::before{width:4px;height:4px}
 .kb-batch-section.ignore>.kb-batch-copy{opacity:.48}
+.kb-merged-document+.kb-update-source{margin-top:24px}

@@ -88,7 +88,7 @@ function kbConfirmRestoreVersion(){
  if(typeof kbSyncInsightParent==='function')kbSyncInsightParent(entry);S.kbRestoreDraft=null;closeMod();render();kbShowBrandHistory(entry.id);toast('已恢复为 v'+version+'，历史记录已保留');
 }
 function kbBrandUpdateStatus(entry){
- if(entry.sections){const count=entry.sections.filter(s=>s.pendingUpdate).length;return count?`<span class="kb-update-badge">${count} 个子板块待审批</span>`:'';}
+ if(entry.sections){const count=entry.sections.filter(s=>s.pendingUpdate).length;return count?`<span class="kb-update-badge">更新待审批</span>`:'';}
  return entry.pendingUpdate?`<span class="kb-update-badge">${entry.pendingUpdate.deferred?'更新暂缓':'更新待审批'}</span>`:'';
 }
 function kbBrandTabsHTML(id,active=0){
