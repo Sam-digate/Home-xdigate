@@ -6,7 +6,7 @@ const context=vm.createContext({console,location:{hash:''},window:{addEventListe
  setTimeout(fn){timers.set(++timer,fn);return timer},clearTimeout(id){timers.delete(id)},
  document:{activeElement:null,getElementById:id=>nodes.get(id)||null,addEventListener(){},querySelectorAll:()=>[],createElement:()=>({click(){},remove(){}}),body:{appendChild(){}}}});
 const run=code=>vm.runInContext(code,context),load=name=>run(fs.readFileSync(path.join(root,'js',name),'utf8'));
-load('01-helpers-data.js');load('05-knowledge-work.js');load('10-permissions.js');load('14-kb-document-demo.js');
+load('01-helpers-data.js');load('05-knowledge-work.js');load('10-permissions.js');load('14-kb-document-demo.js');run("S.currentUser='br'");
 run(`currentUser=()=>S.currentUser;toast=()=>{};render=()=>{};closeMod=()=>$('mod').classList.remove('on');closeDw=()=>{$('dw').classList.remove('on');$('scrim').classList.remove('on')};kbEnsure();`);
 function finish(){while(timers.size){const batch=[...timers.values()];timers.clear();batch.forEach(fn=>fn());}}
 function check(name,fn){fn();console.log('PASS',name);}

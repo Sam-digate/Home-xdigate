@@ -456,6 +456,7 @@ function kTpl(){
   </div>`).join('')}${list.length?'':'<div class="allclear">当前领域还没有模板。</div>'}`;
 }
 function kBrand(){
+ if(typeof kbBrandUpdatesEnsure==='function')kbBrandUpdatesEnsure();
  if(S.kcat===undefined)S.kcat='全部';
  const brand=knowledgeActiveBrand(),L=knowledgeBrandEntries().filter(x=>S.kcat==='全部'||x.cat===S.kcat);
  return `${knowledgeBrandSwitcher()}<div class="bar" style="margin:0 0 13px">
@@ -466,6 +467,7 @@ function kBrand(){
       <span style="display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap">
         <b style="font-size:var(--fs-md)">${esc(x.n)}</b>
         <span class="chip dom">${x.cat}</span>
+        ${typeof kbBrandUpdateStatus==='function'?kbBrandUpdateStatus(x):''}
         ${!x.filled?'<span class="st hold">空的</span>':x.stale?'<span class="st review">已过期</span>':`<span class="st ${GOV[x.gov].c}">${GOV[x.gov].n}</span>`}</span>
       <span style="display:block;font-size:var(--fs-sm);color:var(--t2);margin-top:var(--sp-1);line-height:1.55">${x.filled?esc(x.tx.slice(0,64))+'…':'还没有内容。Agent 读不到，但不会因此停下来。'}</span>
       <span style="display:block;font-size:var(--fs-xs);color:var(--t3);margin-top:var(--sp-1)">
@@ -473,17 +475,19 @@ function kBrand(){
     ${x.filled?`<span class="chip lv">${x.reads}</span>`:'<span class="chip mut">—</span>'}</button>`).join('')}`;
 }
 function openKB(id,tab){
+ if(typeof kbBrandUpdatesEnsure==='function')kbBrandUpdatesEnsure();
  const brand=knowledgeActiveBrand(),x=knowledgeBrandEntries().find(y=>y.id===id);if(!x)return;
- if(S.kb!==id)S.kbtab=0;
+ if(S.kb!==id)S.kbtab=x.pendingUpdate?2:0;
  if(tab!==undefined)S.kbtab=tab;
  if(S.kbtab===undefined)S.kbtab=0;
+ if(S.kbtab===3&&typeof kbShowBrandHistory==='function'){kbShowBrandHistory(id);return;}
+ if(S.kbtab===2){if(x.pendingUpdate&&typeof kbOpenBrandUpdate==='function'){kbOpenBrandUpdate(id);return;}S.kbtab=0;}
  S.kb=id;
  $('dw').innerHTML=`<div class="dw-h">
    <button class="ib" onclick="closeDw()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
    <div style="flex:1;min-width:0"><div class="ty">${esc(brand.name)} · ${x.cat}</div><h3>${esc(x.n)}</h3></div>
    ${!x.filled?'<span class="st hold">空的</span>':x.stale?'<span class="st review">已过期</span>':`<span class="st ${GOV[x.gov].c}">${GOV[x.gov].n}</span>`}</div>
-  <div class="dw-tabs"><button class="${S.kbtab===0?'on':''}" onclick="openKB('${id}',0)">内容</button>
-   <button class="${S.kbtab===1?'on':''}" onclick="openKB('${id}',1)">使用情况</button></div>
+  ${typeof kbBrandTabsHTML==='function'?kbBrandTabsHTML(id,S.kbtab):`<div class="dw-tabs"><button class="${S.kbtab===0?'on':''}" onclick="openKB('${id}',0)">内容</button><button class="${S.kbtab===1?'on':''}" onclick="openKB('${id}',1)">使用情况</button></div>`}
   <div class="dw-b">
    ${S.kbtab===0?`${!x.filled?`<div class="note" style="background:var(--danger-bg);border-color:var(--danger-bd);color:var(--danger-fg-strong);margin-bottom:var(--sp-3)">
      这条是空的。<b>Agent 不会因为缺这条就停下来</b>——它会照跑，只是少了一块依据。缺口只有你看得见。</div>`
@@ -507,6 +511,7 @@ function openKB(id,tab){
 function saveKBContent(id){
  const x=knowledgeBrandEntries().find(y=>y.id===id),editor=$('kb-content-editor');if(!x||!editor)return;
  const value=editor.value.trim();if(!value){toast('内容不能为空');return;}
+ if(typeof kbRecordManualKnowledgeUpdate==='function')kbRecordManualKnowledgeUpdate(x,value);
  x.tx=value;x.filled=1;x.stale=0;x.at='刚刚';x.by='dudu';closeDw();render();toast('内容已保存');
 }
 function cancelKBContent(id){openKB(id,0);toast('已取消修改');}
