@@ -476,6 +476,7 @@ function kBrand(){
 }
 function openKB(id,tab){
  if(typeof kbBrandUpdatesEnsure==='function')kbBrandUpdatesEnsure();
+ if(typeof kbOpenInsightRoute==='function'&&kbOpenInsightRoute(id,tab))return;
  const brand=knowledgeActiveBrand(),x=knowledgeBrandEntries().find(y=>y.id===id);if(!x)return;
  if(S.kb!==id)S.kbtab=x.pendingUpdate?2:0;
  if(tab!==undefined)S.kbtab=tab;

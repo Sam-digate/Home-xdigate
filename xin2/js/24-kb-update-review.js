@@ -22,10 +22,12 @@ function kbBrandUpdatesEnsure(){
  }
  entry.pendingUpdate={baseVersion:entry.version,version:entry.version+1,baseText:entry.tx,nextText:entry.tx.replace('敏感肌可用的专业修护','敏感肌日常修护').replace('用真实证据而非价格话术来化解','优先用真实体验与可核实的产品信息来化解')+'内容围绕换季与日常精简护理展开，产品参数及功效描述以已批准的资料为依据。',changeSummary:'更新修护定位与内容表达，补充日常护理场景和资料引用要求。',evidence:[{summary:'现有品牌资料强调专业感与可负担之间的平衡，并以真实证据支持内容表达。',quote:entry.tx,location:'当前已审阅内容 · 品牌整体理解'}],agent:'品牌资料维护 Agent',reason:'根据近期用户反馈与品牌资料复核，更新品牌整体理解。',...KB_UPDATE_SOURCE,detectedAt:new Date().toISOString(),deferred:false};
  }
+ if(typeof kbEnsureInsightSections==='function')kbEnsureInsightSections();
 }
+function kbFindKnowledgeItem(id){return knowledgeBrandEntries().flatMap(entry=>[entry,...(entry.sections||[])]).find(e=>e.id===id)||null;}
 function kbBrandReviewEntry(id){
  kbBrandUpdatesEnsure();if(!permissionHasPage('know.src')||knowledgeActiveBrand().status==='disabled')return null;
- return knowledgeBrandEntries().find(e=>e.id===id)||null;
+ return kbFindKnowledgeItem(id);
 }
 function kbEnsureEntryVersions(entry){
  entry.version=entry.version||1;
@@ -44,13 +46,13 @@ function kbRecordManualKnowledgeUpdate(entry,text){
 function kbHistoryTime(at){if(!at)return '未记录时间';if(/^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/.test(at))return at.replace(/-/g,'/');const date=new Date(at);return Number.isNaN(date.getTime())?at:date.toLocaleString('zh-CN',{timeZone:'Asia/Tokyo',hour12:false});}
 function kbHistoryRestoreAction(entry,version){
  const v=entry.knowledgeVersions.find(x=>x.version===version);if(!v||version===entry.version)return '';
- const disabled=!!entry.pendingUpdate||v.text===entry.tx;
- return `<button class="btn ghost sm" ${disabled?'disabled':''} title="${entry.pendingUpdate?'请先处理待审批更新':v.text===entry.tx?'与当前内容相同':'恢复为新版本，保留全部历史记录'}" onclick="kbOpenRestoreVersion('${entry.id}',${version})">恢复此版本</button>`;
+ const pending=!!entry.pendingUpdate||entry.sections?.some(s=>s.pendingUpdate),disabled=pending||v.text===entry.tx;
+ return `<button class="btn ghost sm" ${disabled?'disabled':''} title="${pending?'请先处理待审批更新':v.text===entry.tx?'与当前内容相同':'恢复为新版本，保留全部历史记录'}" onclick="kbOpenRestoreVersion('${entry.id}',${version})">恢复此版本</button>`;
 }
 function kbHistoryCardHTML(entry,record){
- const rejected=record.decision==='rejected',current=!rejected&&record.version===entry.version;
- const name=rejected?'更新建议已驳回':record.kind==='rollback'?'恢复历史版本':record.kind==='manual'?'手动更新':'自动更新已通过';
- return `<article class="kb-history-item"><header class="kb-history-card-head"><span class="kb-history-version">${rejected?'建议':'v'+record.version}</span><div class="kb-history-card-title"><div class="kb-history-title-line"><b>${name}</b><span class="st ${current?'done':rejected?'review':'todo'}">${current?'当前版本':rejected?'已驳回':'历史版本'}</span></div><div class="kb-history-meta">${esc(record.reviewer)}<span> · </span>${esc(kbHistoryTime(record.approvedAt||record.rejectedAt))}</div></div><div class="kb-history-header-actions"><button class="btn ghost sm" onclick="kbOpenBrandUpdate('${entry.id}','diff',${record.index})">查看对比</button>${!rejected?kbHistoryRestoreAction(entry,record.version):''}</div></header></article>`;
+ const ignored=record.decision==='ignored',rejected=record.decision==='rejected'||ignored,current=!rejected&&record.version===entry.version;
+ const name=ignored?'更新建议已忽略':rejected?'更新建议已忽略':record.kind==='rollback'?'恢复历史版本':record.kind==='manual'?'手动更新':'自动更新已通过';
+ return `<article class="kb-history-item"><header class="kb-history-card-head"><span class="kb-history-version">${rejected?'建议':'v'+record.version}</span><div class="kb-history-card-title"><div class="kb-history-title-line"><b>${name}</b><span class="st ${current?'done':rejected?'review':'todo'}">${current?'当前版本':rejected?(ignored?'已忽略':'已忽略'):'历史版本'}</span></div><div class="kb-history-meta">${esc(record.reviewer)}<span> · </span>${esc(kbHistoryTime(record.approvedAt||record.rejectedAt||record.ignoredAt))}</div></div><div class="kb-history-header-actions"><button class="btn ghost sm" onclick="kbOpenBrandUpdate('${entry.id}','diff',${record.index})">查看对比</button>${!rejected?kbHistoryRestoreAction(entry,record.version):''}</div></header></article>`;
 }
 function kbInitialHistoryCardHTML(entry,initial){
  const restore=kbHistoryRestoreAction(entry,initial.version);
@@ -61,13 +63,13 @@ function kbShowBrandHistory(id){
  const brand=knowledgeActiveBrand(),expanded=$('dw').classList.contains('expanded');closeDw();S.kb=id;S.kbtab=3;
  const drawer=$('dw');if(expanded)drawer.classList.add('expanded');
  const records=(entry.updateReviews||[]).map((r,index)=>({...r,index})).reverse(),initial=entry.knowledgeVersions[0];
- drawer.innerHTML=`<section class="kb-update-drawer" role="dialog" aria-modal="true" aria-label="品牌知识更新记录"><header class="dw-h"><button class="ib" aria-label="关闭更新记录" onclick="closeDw()"><i data-lucide="x"></i></button><div style="flex:1;min-width:0"><div class="ty">${esc(brand.name)} · ${esc(entry.cat)}</div><h3>${esc(entry.n)}</h3></div><span class="chip mut">当前 v${entry.version}</span></header>${kbBrandTabsHTML(id,3)}<div class="dw-b"><p class="kb-history-hint">已通过的历史版本可恢复为新版本，现有记录会完整保留。${entry.pendingUpdate?'请先处理待审批的更新建议，再恢复历史版本。':''}</p><div class="kb-history-list">${records.map(r=>kbHistoryCardHTML(entry,r)).join('')}${initial?kbInitialHistoryCardHTML(entry,initial):'<div class="allclear">暂无更新记录</div>'}</div></div><footer class="dw-f"><button class="btn ghost" onclick="closeDw()">完成</button></footer></section>`;
+ drawer.innerHTML=`<section class="kb-update-drawer" role="dialog" aria-modal="true" aria-label="品牌知识更新记录"><header class="dw-h"><button class="ib" aria-label="关闭更新记录" onclick="closeDw()"><i data-lucide="x"></i></button><div style="flex:1;min-width:0"><div class="ty">${esc(brand.name)} · ${esc(entry.cat)}</div><h3>${esc(entry.n)}</h3></div><span class="chip mut">当前 v${entry.version}</span></header>${kbBrandTabsHTML(id,3)}<div class="dw-b">${typeof kbInsightBreadcrumbHTML==='function'?kbInsightBreadcrumbHTML(entry):''}<p class="kb-history-hint">已通过的历史版本可恢复为新版本，现有记录会完整保留。${entry.pendingUpdate?'请先处理待审批的更新建议，再恢复历史版本。':''}</p><div class="kb-history-list">${records.map(r=>kbHistoryCardHTML(entry,r)).join('')}${initial?kbInitialHistoryCardHTML(entry,initial):'<div class="allclear">暂无更新记录</div>'}</div></div><footer class="dw-f"><button class="btn ghost" onclick="closeDw()">完成</button></footer></section>`;
  drawer.classList.add('on');$('scrim').classList.add('on');kpIcons();if(typeof syncDrawerExpandControl==='function')syncDrawerExpandControl();
 }
 function kbOpenRestoreVersion(id,version){
  const entry=kbBrandReviewEntry(id),target=entry?.knowledgeVersions.find(v=>v.version===version);
  if(!entry||!target||target.version===entry.version||target.text===entry.tx){toast('当前无需恢复此版本');return;}
- if(entry.pendingUpdate){toast('请先处理待审批的更新建议');return;}
+ if(entry.pendingUpdate||entry.sections?.some(s=>s.pendingUpdate)){toast('请先处理待审批的更新建议');return;}
  S.kbRestoreDraft={id,brand:knowledgeActiveBrand().id,version,expectedVersion:entry.version,expectedText:entry.tx};
  $('mod').innerHTML=`<section class="mbox kb-restore-modal" role="dialog" aria-modal="true" aria-labelledby="kb-restore-title"><div class="mhd"><h3 id="kb-restore-title">恢复历史版本？</h3><button class="ib" aria-label="关闭" onclick="closeMod()">×</button></div><div class="mbd"><b>${esc(entry.n)}</b><p>将 v${version} 的内容恢复为新版本 v${entry.version+1}，当前版本与全部更新记录都会保留。</p></div><div class="mft"><button class="btn" onclick="kbConfirmRestoreVersion()">确认恢复</button><button class="btn ghost" onclick="closeMod()">取消</button></div></section>`;
  $('mod').classList.add('on');
@@ -75,18 +77,23 @@ function kbOpenRestoreVersion(id,version){
 function kbConfirmRestoreVersion(){
  const draft=S.kbRestoreDraft;if(!draft||!$('mod').classList.contains('on'))return;
  const entry=kbBrandReviewEntry(draft.id),target=entry?.knowledgeVersions.find(v=>v.version===draft.version);
- if(!entry||!target||knowledgeActiveBrand().id!==draft.brand||entry.pendingUpdate||entry.version!==draft.expectedVersion||entry.tx!==draft.expectedText){toast('内容或权限已变化，请重新核对后恢复');return;}
+ if(!entry||!target||knowledgeActiveBrand().id!==draft.brand||entry.pendingUpdate||entry.sections?.some(s=>s.pendingUpdate)||entry.version!==draft.expectedVersion||entry.tx!==draft.expectedText){toast('内容或权限已变化，请重新核对后恢复');return;}
  const actor=U[currentUser()]?.n||currentUser(),at=new Date().toISOString(),version=entry.version+1;
  const record={baseVersion:entry.version,version,baseText:entry.tx,nextText:target.text,sourceLabel:'版本恢复 · v'+target.version,internalSource:true,agent:actor,generatedAt:at,detectedAt:at,approvedAt:at,decision:'approved',kind:'rollback',restoredFrom:target.version,reviewer:actor,changeSummary:'将历史 v'+target.version+' 的内容恢复为新版本 v'+version+'。',reason:'人工确认恢复历史内容。'};
  entry.updateReviews=entry.updateReviews||[];entry.updateReviews.push(record);entry.tx=target.text;entry.version=version;entry.by=actor;entry.at=new Date(at).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'}).replace(/-/g,'/');entry.filled=1;entry.stale=0;entry.gov='ok';kbAppendEntryVersion(entry,at,actor,'rollback');
- S.kbRestoreDraft=null;closeMod();render();kbShowBrandHistory(entry.id);toast('已恢复为 v'+version+'，历史记录已保留');
+ if(entry.sections&&target.sections){
+  for(const section of entry.sections){const snapshot=target.sections.find(s=>s.id===section.id);if(snapshot){section.tx=snapshot.tx;section.by=actor;section.at=entry.at;}}
+  entry.knowledgeVersions.at(-1).sections=typeof kbInsightSnapshot==='function'?kbInsightSnapshot(entry):target.sections.map(s=>({...s}));
+ }
+ if(typeof kbSyncInsightParent==='function')kbSyncInsightParent(entry);S.kbRestoreDraft=null;closeMod();render();kbShowBrandHistory(entry.id);toast('已恢复为 v'+version+'，历史记录已保留');
 }
 function kbBrandUpdateStatus(entry){
+ if(entry.sections){const count=entry.sections.filter(s=>s.pendingUpdate).length;return count?`<span class="kb-update-badge">${count} 个子板块待审批</span>`:'';}
  return entry.pendingUpdate?`<span class="kb-update-badge">${entry.pendingUpdate.deferred?'更新暂缓':'更新待审批'}</span>`:'';
 }
 function kbBrandTabsHTML(id,active=0){
- const entry=knowledgeBrandEntries().find(e=>e.id===id),tabs=[{label:'内容',index:0},{label:'使用情况',index:1},{label:'更新记录',index:3}];
- if(entry?.pendingUpdate)tabs.unshift({label:'更新建议',index:2});
+ const entry=kbFindKnowledgeItem(id),tabs=[{label:'内容',index:0},{label:'使用情况',index:1},{label:'更新记录',index:3}];
+ if(entry?.pendingUpdate||entry?.sections?.some(s=>s.pendingUpdate))tabs.unshift({label:'更新建议',index:2});
  return `<div class="dw-tabs" role="tablist" aria-label="品牌知识详情">${tabs.map(({label,index})=>`<button type="button" class="${active===index?'on':''}" role="tab" aria-selected="${active===index}" onclick="openKB('${id}',${index})">${label}</button>`).join('')}</div>`;
 }
 function kbTextDiff(before,after){
@@ -122,12 +129,12 @@ function kbOpenBrandUpdate(id,mode='diff',recordIndex=null){
  const historical=Number.isInteger(recordIndex)?entry.updateReviews?.[recordIndex]:null;
  if(recordIndex!==null&&!historical){toast('更新记录不存在');return;}
  const pending=historical?null:entry.pendingUpdate,review=historical||entry.updateReviews?.at(-1),u=pending||review;if(!u){openKB(id,0);return;}
- const rejected=!pending&&u.decision==='rejected';
+ const rejected=!pending&&u.decision==='rejected',ignored=!pending&&u.decision==='ignored';
  const activeMode=['original','diff','parallel','preview'].includes(mode)?mode:'diff';
  const brand=knowledgeActiveBrand(),ops=kbTextDiff(u.baseText,u.nextText),counts={added:ops.filter(o=>o.kind==='added').reduce((sum,o)=>sum+Array.from(o.text).length,0),removed:ops.filter(o=>o.kind==='removed').reduce((sum,o)=>sum+Array.from(o.text).length,0)};
  const expanded=$('dw').classList.contains('expanded');closeDw();S.kb=id;S.kbtab=pending?2:3;S.kbReviewEntry=id;S.kbReviewIndex=historical?recordIndex:null;
  const drawer=$('dw');if(expanded)drawer.classList.add('expanded');
- drawer.innerHTML=`<section class="kb-update-drawer ${activeMode==='parallel'?'kb-review-parallel':''}" role="dialog" aria-modal="true" aria-label="品牌知识更新对比"><header class="dw-h"><button class="ib" aria-label="关闭更新对比" onclick="closeDw()"><i data-lucide="x"></i></button><div style="flex:1;min-width:0"><div class="ty">${esc(brand.name)} · ${esc(entry.cat)}</div><h3>${esc(entry.n)}</h3></div><span class="st ${pending||rejected?'review':'done'}">${pending?(pending.deferred?'更新暂缓':'更新待审批'):rejected?'更新已驳回':'更新已通过'}</span></header>${kbBrandTabsHTML(id,S.kbtab)}<div class="dw-b">${kbUpdateExplanationHTML(u)}<div class="kb-merged-toolbar"><div class="seg" role="tablist" aria-label="内容显示方式">${[['diff','对比'],['preview','预览'],['parallel','并列']].map(([key,label])=>`<button type="button" id="kb-review-tab-${key}" role="tab" aria-selected="${activeMode===key}" aria-controls="kb-review-body" class="${activeMode===key?'on':''}" onclick="kbSwitchBrandUpdateView('${id}','${key}')">${label}</button>`).join('')}</div></div><div class="kb-merged-document"><div class="kb-merged-meta"><span>${activeMode==='original'?'原文 · v'+u.baseVersion:activeMode==='preview'?'更新后预览 · v'+u.version:'原文 → 更新建议'}</span>${['diff','parallel'].includes(activeMode)?`<span class="kb-merged-counts"><span class="added">+ 新增 ${counts.added} 字</span><span class="removed">− 删除 ${counts.removed} 字</span></span>`:''}</div><article class="kb-merged-body ${activeMode==='parallel'?'kb-parallel-body':''}" id="kb-review-body" role="tabpanel" tabindex="0" aria-labelledby="kb-review-tab-${activeMode}">${kbReviewBodyHTML(u,ops,activeMode)}</article></div>${!pending?`<div class="kb-review-receipt">${esc(u.reviewer)} 于 ${esc(new Date(u.approvedAt||u.rejectedAt).toLocaleString('zh-CN',{timeZone:'Asia/Tokyo',hour12:false}))} ${rejected?'驳回更新':'确认通过'}</div>`:''}</div><footer class="dw-f">${pending?`<button class="btn" onclick="kbApproveBrandUpdate('${id}',${u.baseVersion})">确认通过</button><button class="btn ghost" onclick="kbRejectBrandUpdate('${id}')">驳回</button>`:`<button class="btn ghost" onclick="kbShowBrandHistory('${id}')">返回更新记录</button>`}</footer></section>`;
+ drawer.innerHTML=`<section class="kb-update-drawer ${activeMode==='parallel'?'kb-review-parallel':''}" role="dialog" aria-modal="true" aria-label="品牌知识更新对比"><header class="dw-h"><button class="ib" aria-label="关闭更新对比" onclick="closeDw()"><i data-lucide="x"></i></button><div style="flex:1;min-width:0"><div class="ty">${esc(brand.name)} · ${esc(entry.cat)}</div><h3>${esc(entry.n)}</h3></div><span class="st ${pending||rejected||ignored?'review':'done'}">${pending?(pending.deferred?'更新暂缓':'更新待审批'):ignored?'更新已忽略':rejected?'更新已忽略':'更新已通过'}</span></header>${kbBrandTabsHTML(id,S.kbtab)}<div class="dw-b">${typeof kbInsightBreadcrumbHTML==='function'?kbInsightBreadcrumbHTML(entry):''}<div class="kb-merged-toolbar"><div class="seg" role="tablist" aria-label="内容显示方式">${[['diff','对比'],['preview','预览'],['parallel','并列']].map(([key,label])=>`<button type="button" id="kb-review-tab-${key}" role="tab" aria-selected="${activeMode===key}" aria-controls="kb-review-body" class="${activeMode===key?'on':''}" onclick="kbSwitchBrandUpdateView('${id}','${key}')">${label}</button>`).join('')}</div></div><div class="kb-merged-document"><div class="kb-merged-meta"><span>${activeMode==='original'?'原文 · v'+u.baseVersion:activeMode==='preview'?'更新后预览 · v'+u.version:'原文 → 更新建议'}</span>${['diff','parallel'].includes(activeMode)?`<span class="kb-merged-counts"><span class="added">+ 新增 ${counts.added} 字</span><span class="removed">− 删除 ${counts.removed} 字</span></span>`:''}</div><article class="kb-merged-body ${activeMode==='parallel'?'kb-parallel-body':''}" id="kb-review-body" role="tabpanel" tabindex="0" aria-labelledby="kb-review-tab-${activeMode}">${kbReviewBodyHTML(u,ops,activeMode)}</article></div>${kbUpdateExplanationHTML(u)}${!pending?`<div class="kb-review-receipt">${esc(u.reviewer)} 于 ${esc(new Date(u.approvedAt||u.rejectedAt||u.ignoredAt).toLocaleString('zh-CN',{timeZone:'Asia/Tokyo',hour12:false}))} ${ignored?'忽略更新':rejected?'忽略更新':'确认通过'}</div>`:''}</div><footer class="dw-f">${pending?`<button class="btn" onclick="kbApproveBrandUpdate('${id}',${u.baseVersion})">确认通过</button><button class="btn ghost" onclick="kbRejectBrandUpdate('${id}')">忽略</button>`:`<button class="btn ghost" onclick="kbShowBrandHistory('${id}')">返回更新记录</button>`}</footer></section>`;
  drawer.classList.add('on');$('scrim').classList.add('on');kpIcons();if(typeof syncDrawerExpandControl==='function')syncDrawerExpandControl();drawer.querySelector('.ib')?.focus({preventScroll:true});
 }
 function kbApproveBrandUpdate(id,baseVersion){
@@ -137,11 +144,12 @@ function kbApproveBrandUpdate(id,baseVersion){
  entry.updateReviews=entry.updateReviews||[];entry.updateReviews.push({...u,beforeText:entry.tx,approvedAt:at,decision:'approved',reviewer:actor});
  entry.tx=u.nextText;entry.version=u.version;entry.filled=1;entry.gov='ok';entry.stale=0;entry.by=actor;entry.at=new Date(at).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'}).replace(/-/g,'/');entry.pendingUpdate=null;
  kbAppendEntryVersion(entry,at,actor,'approved');
+ if(typeof kbSyncInsightParent==='function')kbSyncInsightParent(entry);
  render();kbOpenBrandUpdate(id);toast('更新已确认通过，品牌知识已更新');
 }
 function kbRejectBrandUpdate(id){
  const entry=kbBrandReviewEntry(id);if(!entry?.pendingUpdate)return;
  const u=entry.pendingUpdate,actor=U[currentUser()]?.n||currentUser();
  entry.updateReviews=entry.updateReviews||[];entry.updateReviews.push({...u,beforeText:entry.tx,decision:'rejected',rejectedAt:new Date().toISOString(),reviewer:actor});
- entry.pendingUpdate=null;render();kbOpenBrandUpdate(id);toast('已驳回更新，原内容保持不变');
+ entry.pendingUpdate=null;render();kbOpenBrandUpdate(id);toast('已忽略更新，原内容保持不变');
 }
