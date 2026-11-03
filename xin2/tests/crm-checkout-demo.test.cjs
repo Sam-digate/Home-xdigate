@@ -1,6 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const timers=[];let allowed=true;const nodes={};const $=id=>nodes[id]||(nodes[id]={value:'',innerHTML:'',classList:{add(){}}});
-const ctx=vm.createContext({setTimeout(fn){timers.push(fn);},AG:{},ONLINE:{},REG:[],T:[],S:{},U:{du:{n:'dudu'}},currentUser:()=> 'du',permissionHasPage:()=>allowed,$,render(){},toast(){},closeDw(){},closeMod(){},kpIcons(){},esc:String,STN:{todo:'todo',review:'review',done:'done'}});
+const ctx=vm.createContext({setTimeout(fn){timers.push(fn);},AG:{},TRACE:{},ONLINE:{},REG:[],T:[],S:{},U:{du:{n:'dudu'}},currentUser:()=> 'du',permissionHasPage:()=>allowed,$,render(){},toast(){},closeDw(){},closeMod(){},kpIcons(){},esc:String,STN:{todo:'todo',review:'review',done:'done'}});
 vm.runInContext(fs.readFileSync('js/28-crm-checkout-demo.js','utf8'),ctx);
 const t=ctx.crmTask();assert.equal(t.st,'todo');ctx.crmGenerate();assert.equal(t.st,'run');assert.ok(ctx.crmRunningHTML(t.crm).includes('progressbar'));ctx.crmGenerate();assert.equal(timers.length,3);while(timers.length)timers.shift()();assert.equal(t.st,'review');assert.equal(t.outputCount,1);ctx.crmCompleteDelivery();assert.equal(t.st,'review');
 ctx.crmOpenBundle();assert.ok($('dw').innerHTML.includes('crm-mail-card'));ctx.crmDrawBundle(0);assert.ok($('dw').innerHTML.includes('crm-bundle-subject'));

@@ -1,6 +1,13 @@
 /* Local CRM workflow: example contacts only, no network or mail delivery. */
 ONLINE.crm=1;
 AG.crm={n:'CRM 生命周期运营',s:'CRM',c:'#7C3AED'};
+TRACE.crm=[
+ {k:'read',h:'读取任务需求',b:'读取本任务描述，确定三封英文结账挽回邮件的内容范围。',m:'来源：当前任务 · 示例数据'},
+ {k:'think',h:'确定邮件安排',b:'按结账后 +1 小时、+24 小时和 +72 小时，分别安排提醒、解答顾虑和最后提醒。'},
+ {k:'write',h:'起草邮件方案',b:'生成三封邮件的主题和正文，采用简洁、温和的客户沟通语气。'},
+ {k:'think',h:'检查内容边界',b:'不添加折扣、虚假倒计时或未经批准的功效表述；正文不包含内部代码字段。'},
+ {k:'tool',h:'提交人工审核',b:'合并为一个邮件方案产出，等待人工编辑和批准。批准后交付，不直接发送真实邮件。'}
+];
 REG.push({id:'crm',nick:'CRM',n:'CRM 生命周期运营 Agent',em:'✉',dom:'用户运营',b:'live',lv:0,own:'Sophie',pm:'dudu',tr:['manual','event'],out:['挽回邮件'],d:'根据结账数据生成挽回邮件，经人工批准后按计划发送，并检查订单和退订状态。',r:0,ok:0,ed:0,c:'—',maturity:'M1',enabled:true});
 T.unshift({id:'t-crm-checkout',t:'Sensica · 放弃结账挽回邮件',ag:'crm',dom:'用户运营',own:'du',lv:'M1',st:'todo',trig:'manual',cr:{s:'h',w:'du'},camp:null,up:'刚刚',day:0,workTop:200,cost:'—',arts:[],cmts:[],outputCount:0,crm:{stage:'todo',brief:'为 Sensica 已开始结账但未付款、且已同意邮件营销的客户，准备 3 封英文挽回邮件。第一封提醒返回结账，第二封解答配送、退货和适用性问题，第三封最后提醒。暂不提供折扣，不新增未经批准的功效表述。',mails:[],records:[]}});
 function crmTask(){return T.find(t=>t.id==='t-crm-checkout'&&!t.deletedAt);}
@@ -8,7 +15,7 @@ function crmCanOperate(){return permissionHasPage('work')&&!!crmTask();}
 function crmNode(label,body,state='ok'){return `<div class="node ${state}"><div class="nlab">${label}</div>${body}</div>`;}
 function crmArtifactHTML(c){
  const approved=c.mails.every(m=>m.approved);
- return `<article class="pk"><div class="pk-h"><span class="ty">产出 · 邮件方案</span><span class="chip mut">3 封邮件</span><span class="st ${approved?'done':'review'}">${approved?'已批准':'待审批'}</span></div><div class="pk-b" onclick="crmOpenBundle()"><div class="pk-t"><div class="tt">Sensica · 放弃结账挽回邮件方案</div><div class="ex">结账提醒、解答顾虑和最后提醒，分别安排在结账后 +1 小时、+24 小时及 +72 小时。</div></div></div><div class="vals"><span class="val ok">✓ 邮件 <b class="m">${c.mails.length} 封</b></span><span class="val">触达时间 <b class="m">+1h / +24h / +72h</b></span></div><div class="crm-mail-footer"><button class="btn ghost sm" onclick="crmOpenBundle()">查看产出</button><span class="crm-context">v${c.version||1} · ${approved?'已批准':'等待人工审核'}</span></div></article>`;
+ return `<article class="pk"><div class="pk-h"><span class="ty">产出 · 邮件方案</span><span class="chip mut">3 封邮件</span><span class="st ${approved?'done':'review'}">${approved?'已批准':'待审批'}</span><span class="by artifact-run" role="button" tabindex="0" onclick="openTrace('crm','t-crm-checkout')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTrace('crm','t-crm-checkout')}">${AV('crm',16)}<span class="odot on"></span>CRM · 看运行 ↗</span></div><div class="pk-b" onclick="crmOpenBundle()"><div class="pk-t"><div class="tt">Sensica · 放弃结账挽回邮件方案</div><div class="ex">结账提醒、解答顾虑和最后提醒，分别安排在结账后 +1 小时、+24 小时及 +72 小时。</div></div></div><div class="vals"><span class="val ok">✓ 邮件 <b class="m">${c.mails.length} 封</b></span><span class="val">触达时间 <b class="m">+1h / +24h / +72h</b></span></div><div class="crm-mail-footer"><button class="btn ghost sm" onclick="crmOpenBundle()">查看产出</button><span class="crm-context">v${c.version||1} · ${approved?'已批准':'等待人工审核'}</span></div></article>`;
 }
 function crmOpenBundle(preserve=false){
  if(!crmCanOperate())return;const c=crmTask().crm;if(!c.mails.length)return;
