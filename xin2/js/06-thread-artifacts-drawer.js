@@ -155,6 +155,7 @@ function savePermissionBlockedPlan(id){
 }
 function vThread(){
  const t=T.find(x=>x.id===S.tid);if(!t||t.deletedAt)return vSoon();
+ if(t.crm&&typeof crmThreadHTML==='function')return crmThreadHTML(t);
  const a=AG[t.ag];
  const threadAgents=t.agents?.length?t.agents:[t.ag];
  const manualReviewArt=t.arts?.find(x=>x.manualOutput&&x.manual?.submitted&&!x.manual?.reviewed);

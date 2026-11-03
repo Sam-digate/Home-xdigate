@@ -812,3 +812,4 @@ body.dw-comment-resizing,body.dw-comment-resizing *{cursor:col-resize!important;
 @media(max-width:760px){.dw-comment-resize{display:none}}
 @media(min-width:1280px) and (max-width:1439px){#dw:has(>.dw-artifact-split:not(.comments-hidden)){width:92vw}#dw.expanded:has(>.dw-artifact-split:not(.comments-hidden)),#dw.focus:has(>.dw-artifact-split:not(.comments-hidden)){width:calc(100vw - 24px)}}
 @media(min-width:761px) and (max-width:1279px){#dw:has(>.dw-artifact-split:not(.comments-hidden)),#dw.expanded:has(>.dw-artifact-split:not(.comments-hidden)),#dw.focus:has(>.dw-artifact-split:not(.comments-hidden)){width:calc(100vw - 24px)}}
+.dw-artifact-comments,.dw-artifact-comments>.sub-w,.dw-artifact-comments .sub-l,.dw-artifact-comments .sub-c,.dw-artifact-comments .sub-c textarea{background:#fff}

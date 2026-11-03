@@ -97,3 +97,14 @@ html[data-theme="sensica"] .tabs button.selected{color:var(--t1)}
 html[data-theme="sensica"] :is(.seg,.kp-platform-nav,.kp-views,.roster-scope-tabs,.dw-tabs) button.on{color:var(--primary)}
 html[data-theme="sensica"] .dw-expand-toggle{background:var(--primary-bg)}
 html[data-theme="sensica"] #dw.expanded .dw-expand-toggle{background:var(--primary);color:var(--t1)}
+html[data-theme="sensica"] .live{background:var(--surface-tint);border-color:var(--border)}
+html[data-theme="sensica"] .live-h .t{color:var(--t1)}
+html[data-theme="sensica"] .live-h .e,
+html[data-theme="sensica"] .live-t,
+html[data-theme="sensica"] .live-f{color:var(--t2)}
+html[data-theme="sensica"] .live .spin{border-color:rgba(200,131,106,.25);border-top-color:var(--primary)}
+html[data-theme="sensica"] .live .pbar{background:rgba(200,131,106,.18)}
+html[data-theme="sensica"] .live .pbar i{background:var(--primary)}
+html[data-theme="sensica"] .live-f .sep{background:var(--border)}
+html[data-theme="sensica"] .node.act::before{background:var(--primary);border-color:var(--primary);box-shadow:0 0 0 5px rgba(200,131,106,.16);animation:sensica-running-pulse 1.8s ease-in-out infinite}
+@keyframes sensica-running-pulse{0%,100%{box-shadow:0 0 0 4px rgba(200,131,106,.16)}50%{box-shadow:0 0 0 9px rgba(200,131,106,.05)}}
