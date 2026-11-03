@@ -51,7 +51,7 @@ entry.pendingUpdate={...entry.updateReviews[0],baseVersion:2,version:3,baseText:
 run("S.kbrand='telosin'");c.kbApproveBrandUpdate('k1',2);assert.equal(entry.version,2);
 run("S.kbrand='a8oparis'");const approved=entry.tx;entry.tx+=' edit';c.kbApproveBrandUpdate('k1',2);assert.equal(entry.version,2);assert.ok(entry.pendingUpdate);entry.tx=approved;
 const hasPage=c.permissionHasPage;c.permissionHasPage=()=>false;c.kbApproveBrandUpdate('k1',2);assert.equal(entry.version,2);c.permissionHasPage=hasPage;
-c.kbRejectBrandUpdate('k2');assert.equal(other.version,1);assert.equal(other.tx,JSON.parse(otherSnapshot).tx);assert.equal(other.pendingUpdate,null);assert.equal(other.updateReviews[0].decision,'rejected');assert.match(node('dw').innerHTML,/kb-review-receipt/);assert.equal(entry.version,2);
+c.kbRejectBrandUpdate('k2');assert.equal(other.version,1);assert.equal(other.tx,JSON.parse(otherSnapshot).tx);assert.equal(other.pendingUpdate,null);assert.equal(other.updateReviews[0].decision,'rejected');assert.equal(node('dw').classList.contains('on'),false);assert.equal(entry.version,2);
 c.kbRejectBrandUpdate('k2');assert.equal(other.updateReviews.length,1);c.kbBrandUpdatesEnsure();assert.equal(other.pendingUpdate,null);
 // Version history is independent of suggestions; restoration creates a new version.
 assert.equal(entry.knowledgeVersions.length,2);assert.equal(entry.knowledgeVersions[0].text,original);

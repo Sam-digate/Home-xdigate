@@ -145,11 +145,11 @@ function kbApproveBrandUpdate(id,baseVersion){
  entry.tx=u.nextText;entry.version=u.version;entry.filled=1;entry.gov='ok';entry.stale=0;entry.by=actor;entry.at=new Date(at).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'}).replace(/-/g,'/');entry.pendingUpdate=null;
  kbAppendEntryVersion(entry,at,actor,'approved');
  if(typeof kbSyncInsightParent==='function')kbSyncInsightParent(entry);
- render();kbOpenBrandUpdate(id);toast('更新已确认通过，品牌知识已更新');
+ closeDw();render();toast('更新已确认通过，品牌知识已更新');
 }
 function kbRejectBrandUpdate(id){
  const entry=kbBrandReviewEntry(id);if(!entry?.pendingUpdate)return;
  const u=entry.pendingUpdate,actor=U[currentUser()]?.n||currentUser();
  entry.updateReviews=entry.updateReviews||[];entry.updateReviews.push({...u,beforeText:entry.tx,decision:'rejected',rejectedAt:new Date().toISOString(),reviewer:actor});
- entry.pendingUpdate=null;render();kbOpenBrandUpdate(id);toast('已忽略更新，原内容保持不变');
+ entry.pendingUpdate=null;closeDw();render();toast('已忽略更新，原内容保持不变');
 }

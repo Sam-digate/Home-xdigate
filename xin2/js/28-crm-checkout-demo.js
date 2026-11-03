@@ -54,7 +54,7 @@ function crmNavigateBundle(index){
  if(!crmCanOperate())return;
  if(!crmBundleDirty()){crmDrawBundle(index);return;}
  S.crmPendingNavigation=index;
- $('mod').innerHTML=`<section class="mbox" role="dialog" aria-modal="true" aria-labelledby="crm-unsaved-title"><div class="mhd"><h3 id="crm-unsaved-title">保存邮件修改？</h3><button class="ib" aria-label="关闭" onclick="closeMod()">×</button></div><div class="mbd">当前有未保存的修改，是否保存后继续？</div><div class="mft"><button class="btn" onclick="crmResolveNavigation(true)">保存并继续</button><button class="btn ghost" onclick="crmResolveNavigation(false)">不保存</button><button class="btn ghost" onclick="closeMod()">取消</button></div></section>`;
+ $('mod').innerHTML=`<section class="mbox confirm-modal" role="dialog" aria-modal="true" aria-labelledby="crm-unsaved-title"><div class="mhd"><h3 id="crm-unsaved-title">保存邮件修改？</h3><button class="ib" aria-label="关闭" onclick="closeMod()">×</button></div><div class="mbd">当前有未保存的修改，是否保存后继续？</div><div class="mft"><button class="btn" onclick="crmResolveNavigation(true)">保存并继续</button><button class="btn ghost" onclick="crmResolveNavigation(false)">不保存</button><button class="btn ghost" onclick="closeMod()">取消</button></div></section>`;
  $('mod').classList.add('on');
 }
 function crmResolveNavigation(save){

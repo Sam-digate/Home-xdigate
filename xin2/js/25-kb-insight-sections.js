@@ -138,5 +138,5 @@ function kbSubmitInsightBatch(parentId,action){
   section.pendingUpdate=null;
  }
  kbRecordInsightDocument(parent,before,at,actor,'approved',decisions);
- delete S.kbInsightBatchDrafts[parent.id];parent.lastInsightBatch={approved,ignored,at};render();kbDrawInsightPage(parent,0);toast(`已提交：通过 ${approved} 个，忽略 ${ignored} 个子板块更新`);
+ delete S.kbInsightBatchDrafts[parent.id];parent.lastInsightBatch={approved,ignored,at};closeDw();render();toast(`已提交：通过 ${approved} 个，忽略 ${ignored} 个子板块更新`);
 }

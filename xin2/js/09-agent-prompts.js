@@ -140,7 +140,7 @@ vAgents=function(){
  const list=REG.filter(a=>(S.adom==='全部'||a.dom===S.adom)&&(S.alv==='全部'||LV[a.lv].k===S.alv)),live=REG.filter(a=>a.b==='live').length;
  return `<div class="wrap"><div class="eyebrow">平台 · Agents</div><h1>Agents</h1><div class="sub">这里是登记处，不是工作台。每个 agent 的自主级别、归属、成本和产出类型都在这里定——工作永远发生在「工作」里。</div>
  <div class="daystrip"><span class="sm"><span class="odot on"></span> 在线 <b class="num">${REG.filter(a=>ONLINE[a.id]).length}</b> · 共 <b class="num">${REG.length}</b> 个 · 已上线 <b class="num">${live}</b> · 开发中 <b class="num">${REG.filter(a=>a.b==='dev').length}</b> · 规划中 <b class="num">${REG.filter(a=>a.b==='plan').length}</b></span></div>
- <div class="bar"><div class="seg">${agentTabs.map(tab=>`<button class="${S.atab===tab.index?'on':''}" onclick="S.atab=${tab.index};render()">${tab.label}</button>`).join('')}</div><span class="spacer"></span><button class="btn" onclick="openPersonalAgentApplication()">＋ 申请我的 Agent</button></div>
+ <div class="bar"><div class="seg">${agentTabs.map(tab=>`<button class="${S.atab===tab.index?'on':''}" onclick="S.atab=${tab.index};render()">${tab.label}</button>`).join('')}</div><span class="spacer"></span><button class="btn" onclick="openPersonalAgentApplication()">${personalAgentEntryLabel()}</button></div>
  ${S.atab===0?`<div class="bar"><div class="seg">${doms.map(d=>`<button class="${S.adom===d?'on':''}" onclick="S.adom='${d}';render()">${d}</button>`).join('')}</div><div class="seg">${levels.map(l=>`<button class="${S.alv===l?'on':''}" onclick="S.alv='${l}';render()">${l}</button>`).join('')}</div></div>`:''}
  ${S.atab===0?list.map(agRow).join(''):S.atab===1?recipesOnly():S.atab===2?routinesOnly():S.atab===3?sharedPromptsView():personalAgentReviewView()}</div>`;
 };
