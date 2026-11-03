@@ -308,18 +308,17 @@
 .crm-delay-pill{border-radius:20px;padding:2px 9px}
 .crm-mail-card-excerpt{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden;margin-top:7px;font-size:var(--fs-sm);line-height:1.65;color:var(--t3)}
 #crm-save-draft:disabled{color:var(--t3);background:var(--hairline);border-color:var(--border);opacity:.6;cursor:not-allowed;box-shadow:none;transform:none}
-.claims-document{padding:16px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface)}
-.claims-advice{padding:0;margin-bottom:24px}
+.claims-document{padding:0}
+.claims-advice{padding:14px 12px;margin-bottom:20px;border:1px solid var(--border);border-radius:6px;background:var(--surface)}
 .claims-advice h3{display:flex;align-items:center;gap:10px;margin:0;font-size:var(--fs-md);font-weight:600}
 .claims-advice-summary{margin:10px 0 14px;font-size:var(--fs-md);line-height:1.7;color:var(--t2)}
-.claims-advice-copy{padding-top:2px}
+.claims-advice-copy{border-top:1px solid var(--hairline);padding-top:12px}
 .claims-advice-copy h4{margin:0 0 6px;font-size:var(--fs-xs);font-weight:600;color:var(--t3)}
 .claims-advice-copy p{margin:0;font-size:var(--fs-md);line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
-.claims-review{padding:20px 0 0;border-top:1px solid var(--hairline)}
+.claims-review{padding:14px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface)}
 .claims-review>h3{display:flex;align-items:center;gap:10px;font-size:var(--fs-md);font-weight:600;margin:0 0 12px}
 .claims-review>h3>.st{font-size:var(--fs-xs);font-weight:500}
 .claims-review-item{padding:16px 0;margin:0;border-top:1px solid var(--hairline)}
-.claims-review-item:first-of-type{border-top:0;padding-top:4px}
 .claims-review-item:last-child{padding-bottom:0}
 .claims-review-item h4{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:var(--fs-md);font-weight:600;margin:0 0 12px}
 .claims-review-item dl{display:grid;grid-template-columns:76px minmax(0,1fr);gap:8px 12px;margin:0;font-size:var(--fs-md);line-height:1.7}
