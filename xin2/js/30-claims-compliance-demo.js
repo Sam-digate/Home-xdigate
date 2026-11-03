@@ -78,18 +78,27 @@ function claimsReportBody(c,locked,valid,passed){
 }
 function claimsOpenReport(preserve=false){
  if(!claimsAllowed())return;const c=claimsTask().claims;if(!['review','done'].includes(c.stage))return;
- closeDw();if(S.claimsCommentsOpen===undefined)S.claimsCommentsOpen=true;const locked=c.stage==='done',valid=c.checkedText===c.text,passed=valid&&c.verdict==='pass';
- $('dw').innerHTML=`<header class="dw-h"><button class="ib" aria-label="关闭" onclick="closeDw()"><i data-lucide="x"></i></button><div style="flex:1"><div class="ty">功效宣称与合规审核</div><h3>Sensilift · Meta 广告合规检查</h3></div><span class="st ${passed?'done':'review'}">${locked?'已交付':'待人工批准'}</span></header><nav class="dw-tabs" aria-label="报告内容"><button class="on" aria-current="page">文档</button></nav><div class="dw-b">${claimsReportBody(c,locked,valid,passed)}</div><footer class="dw-f">${locked?'<button class="btn ghost" onclick="closeDw()">完成</button>':`<button class="btn" id="claims-approve" onclick="claimsApprove()">批准并交付</button>`}<button class="rvb ${S.claimsCommentsOpen?'on':''}" aria-expanded="${!!S.claimsCommentsOpen}" onclick="claimsToggleComments()">评论 ${S.claimsCommentsOpen?'▴':'▾'}</button></footer>`;
+ closeDw();if(!preserve)S.claimsReportTab=0;claimsRecordVersion(c);if(S.claimsCommentsOpen===undefined)S.claimsCommentsOpen=true;const tab=S.claimsReportTab||0,locked=c.stage==='done',valid=c.checkedText===c.text,passed=valid&&c.verdict==='pass';
+ $('dw').innerHTML=`<header class="dw-h"><button class="ib" aria-label="关闭" onclick="closeDw()"><i data-lucide="x"></i></button><div style="flex:1"><div class="ty">功效宣称与合规审核</div><h3>Sensilift · Meta 广告合规检查</h3></div><span class="st ${passed?'done':'review'}">${locked?'已交付':'待人工批准'}</span></header><nav class="dw-tabs" aria-label="报告内容"><button class="${tab===0?'on':''}" ${tab===0?'aria-current="page"':''} onclick="claimsReportTab(0)">文档</button><button class="${tab===1?'on':''}" ${tab===1?'aria-current="page"':''} onclick="claimsReportTab(1)">版本</button></nav><div class="dw-b">${tab===1?dVer({v:c.version,claimsVersions:c.versions}):claimsReportBody(c,locked,valid,passed)}</div><footer class="dw-f">${locked?'<button class="btn ghost" onclick="closeDw()">完成</button>':`<button class="btn" id="claims-approve" onclick="claimsApprove()">批准并交付</button>`}<button class="rvb ${S.claimsCommentsOpen?'on':''}" aria-expanded="${!!S.claimsCommentsOpen}" onclick="claimsToggleComments()">评论 ${S.claimsCommentsOpen?'▴':'▾'}</button></footer>`;
  claimsMountComments();
  $('dw').classList.add('on');$('scrim').classList.add('on');kpIcons();if(typeof syncDrawerExpandControl==='function')syncDrawerExpandControl();
 }
 function claimsToggleComments(){S.claimsCommentsOpen=!S.claimsCommentsOpen;claimsOpenReport(true);}
+function claimsReportTab(tab){if(!claimsAllowed()||![0,1].includes(tab))return;S.claimsReportTab=tab;claimsOpenReport(true);}
+function claimsRecordVersion(c){
+ if(!c.checkedAt)return;c.versions=c.versions||[];
+ const last=c.versions[c.versions.length-1];
+ if(last&&last.v===c.version&&last.text===c.checkedText)return;
+ if(last&&last.v===c.version)c.version++;
+ c.versions.push({v:c.version,text:c.checkedText,at:c.checkedAt,label:'合规审核报告 · '+claimsRecommendation(c).label,findings:c.findings.map(f=>({...f})),recommendation:{...claimsRecommendation(c)}});
+}
 function claimsMountComments(){
  if(!$('dw').querySelector)return;
  const c=claimsTask().claims;
  const thread=c.commentThread||(c.commentThread={id:'claims-report-comments',ttl:'Sensilift · Meta 广告合规检查',sub:[]});
  S.pc=S.claimsCommentsOpen;
- mountDrawerCommentSplit(thread,{tabs:['文档']});
+ if(S.claimsReportTab===1)return;
+ mountDrawerCommentSplit(thread,{tabs:['文档','版本']});
  const pane=$('dw').querySelector('.dw-artifact-comments');
  if(pane)pane.innerHTML=pane.innerHTML.replaceAll('subSend(','claimsReportCommentSend(');
 }
@@ -107,14 +116,16 @@ function claimsEditText(value){
  const review=$('claims-review');if(review)review.innerHTML=claimsReviewHTML(c,true,c.verdict==='pass');
  if($('claims-approve'))$('claims-approve').disabled=false;
 }
-function claimsRecheck(){if(!claimsAllowed()||claimsTask().claims.stage!=='review')return;const c=claimsTask().claims;claimsEvaluate(c);c.version++;render();claimsOpenReport(true);}
+function claimsRecheck(){if(!claimsAllowed()||claimsTask().claims.stage!=='review')return;const c=claimsTask().claims;c.version++;claimsEvaluate(c);render();claimsOpenReport(true);}
 function claimsApprove(){
  if(!claimsAllowed())return;const t=claimsTask(),c=t.claims;if(c.stage!=='review')return;
  if(c.checkedText!==c.text)claimsEvaluate(c);
  c.approvedRisk=claimsRisk(c).label;
  c.approvedRecommendation={...claimsRecommendation(c)};
+ claimsRecordVersion(c);
  c.approvedReview={verdict:c.verdict,findings:c.findings.map(f=>({...f})),checkedText:c.checkedText,checkedAt:c.checkedAt};
  c.stage='done';c.approvedBy=U[currentUser()]?.n||currentUser();c.approvedAt=new Date().toISOString();c.approvedText=c.text;t.st='done';t.up='刚刚';closeDw();render();toast('合规检查报告已批准并交付');
+ const version=c.versions.find(v=>v.v===c.version);if(version){version.approvedAt=c.approvedAt;version.approvedBy=c.approvedBy;}
 }
 function claimsAddComment(){
  if(!claimsAllowed())return;const t=claimsTask(),draft=caGet('task',t.id),input=$('ci');if(!input||!caReady(draft))return;

@@ -1466,6 +1466,7 @@ function dPts(a){
   ${a.id==='a2-label-copy'?'':`<div class="ctxr"><span class="k">来源方向</span><span class="v">方向二</span></div>`}</div>`;
 }
 function dVer(a){
+ if(a.claimsVersions)return a.claimsVersions.slice().reverse().map(v=>`<div class="vrow"><span class="vv">v${v.v}</span><span class="vt">${v.v===a.v?'当前版本 · ':''}${esc(v.label)}${v.approvedAt?' · 已批准':''}</span><span class="vd">${esc(kbHistoryTime(v.approvedAt||v.at))}</span></div>`).join('');
  if(a.mode==='pptoutline')return `<div class="vrow"><span class="vv">v${a.v}</span><span class="vt">当前版本 · 1 个创意方向 · ${a.pages.length+1} 页大纲</span><span class="vd">刚刚</span></div>`;
  if(a.mode==='pptfile')return `<div class="vrow"><span class="vv">v${a.v}</span><span class="vt">当前版本 · ${a.pageCount} 页 PPTX 文件</span><span class="vd">刚刚</span></div>`;
  if(a.mode==='items')return `<div class="vrow"><span class="vv">v${a.v}</span><span class="vt">当前版本 · ${a.rows.length} 个 SKU 上架资料</span></div>`;

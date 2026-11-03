@@ -2,6 +2,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const timers=[],nodes={};let allowed=true;const $=id=>nodes[id]||(nodes[id]={innerHTML:'',textContent:'',disabled:false,classList:{add(){}}});
 const c=vm.createContext({T:[],AG:{},REG:[],TRACE:{},ONLINE:{},S:{},U:{du:{n:'dudu'}},currentUser:()=> 'du',permissionHasPage:()=>allowed,$,render(){},closeDw(){},toast(){},kpIcons(){},esc:s=>String(s).replaceAll('<','&lt;'),setTimeout(fn){timers.push(fn)},Date,kbHistoryTime:String});
 vm.runInContext(fs.readFileSync('js/30-claims-compliance-demo.js','utf8'),c);
+const drawerSource=fs.readFileSync('js/07-listing-promotion-pdp-drawers.js','utf8');vm.runInContext(drawerSource.slice(drawerSource.indexOf('function dVer(')),c);
 const t=c.claimsTask();assert.equal(t.st,'todo');assert.equal(t.claims.selected,true);t.claims.selected=false;c.claimsStart();assert.equal(t.st,'todo');c.claimsSelectAgent();c.claimsStart();assert.equal(t.st,'run');c.claimsStart();assert.equal(timers.length,3);while(timers.length)timers.shift()();assert.equal(t.st,'review');assert.equal(t.claims.findings.length,3);
 c.claimsOpenReport();assert.ok($('dw').innerHTML.includes('<details>'));
 assert.equal(c.claimsRisk(t.claims).label,'高风险');
@@ -10,12 +11,14 @@ assert.equal(($('dw').innerHTML.match(/<span class="st review">中风险<\/span>
 assert.match($('dw').innerHTML, /效果承诺缺少依据 <span class="st hold">高风险<\/span><\/h4>/);
 assert.doesNotMatch($('dw').innerHTML,/id="claims-approve" disabled|项需处理|未解决的问题不能批准/);
 assert.match($('dw').innerHTML, /class="dw-tabs"/);assert.equal(c.S.claimsCommentsOpen,true);
-assert.match($('dw').innerHTML, /aria-current="page">文档/);
+assert.match($('dw').innerHTML, /aria-current="page" onclick="claimsReportTab\(0\)">文档/);
 assert.ok($('dw').innerHTML.indexOf('class="claims-advice"')<$('dw').innerHTML.indexOf('class="claims-review"'));
 assert.doesNotMatch($('dw').innerHTML,/<textarea|claimsEditText\(/);
 assert.equal(c.claimsRecommendation(t.claims).label,'不通过');
 assert.equal(c.claimsRecommendation(t.claims).text,vm.runInContext('CLAIMS_DEMO_SAFE',c));
-assert.doesNotMatch($('dw').innerHTML,/claimsReportTab|class="claims-finding"|class="claims-original"|class="claims-rewrite"/);
+assert.doesNotMatch($('dw').innerHTML,/class="claims-finding"|class="claims-original"|class="claims-rewrite"/);
+assert.equal(t.claims.versions.length,1);c.claimsReportTab(1);assert.match($('dw').innerHTML,/class="vrow"/);assert.match($('dw').innerHTML,/当前版本/);assert.equal(t.claims.versions.length,1);
+c.claimsReportTab(0);assert.match($('dw').innerHTML,/class="claims-advice"/);
 const draft=t.claims.text;
 c.claimsToggleComments();assert.equal(c.S.claimsCommentsOpen,false);c.claimsToggleComments();assert.equal(c.S.claimsCommentsOpen,true);
 assert.equal(t.claims.text,draft);
@@ -25,6 +28,7 @@ c.claimsMountComments();assert.equal(mounted.thread.id,'claims-report-comments')
 delete $('dw').querySelector;
 assert.doesNotMatch($('dw').innerHTML,/claimsApplySuggestion/);
 c.claimsEditText(vm.runInContext('CLAIMS_DEMO_SAFE',c));c.claimsRecheck();assert.equal(t.claims.verdict,'pass');
+assert.equal(t.claims.versions.length,2);assert.equal(t.claims.versions[0].findings.length,3);assert.equal(t.claims.versions[1].findings.length,0);
 assert.equal(c.claimsRecommendation(t.claims).label,'通过');
 c.claimsEditText(t.claims.text+' Guaranteed.');assert.equal(t.claims.verdict,'review');assert.equal(c.claimsRisk(t.claims).label,'中风险');
 assert.equal(c.claimsRecommendation(t.claims).label,'部分通过');assert.equal(c.claimsRecommendation(t.claims).text,null);
@@ -32,6 +36,7 @@ c.claimsEditText(vm.runInContext('CLAIMS_DEMO_SENTENCES.join(" ")',c));assert.eq
 allowed=false;c.claimsApprove();assert.equal(t.st,'review');allowed=true;c.claimsApprove();assert.equal(t.st,'done');
 assert.equal(t.claims.approvedRisk,'高风险');assert.equal(t.claims.approvedReview.findings.length,3);assert.equal(t.claims.verdict,'review');
 assert.equal(t.claims.approvedRecommendation.label,'不通过');assert.equal(t.claims.approvedRecommendation.text,vm.runInContext('CLAIMS_DEMO_SAFE',c));
+assert.equal(t.claims.versions.at(-1).approvedAt,t.claims.approvedAt);
 const approved=t.claims.approvedText;c.claimsEditText('changed');assert.equal(t.claims.text,approved);c.claimsApprove();assert.equal(t.claims.approvedText,approved);
 c.claimsOpenReport();assert.match($('dw').innerHTML,/高风险/);assert.doesNotMatch($('dw').innerHTML,/<textarea|id="claims-approve"/);
 console.log('PASS selection, progress, report layout, risk updates, human approval with retained findings, locked delivery and permission guards');
