@@ -613,7 +613,7 @@ function requiresApproval(){return true;}
 function approvalPill(){return '<span class="recipe-chain-arrow">→</span><span class="pstepc approval">⛒ 审批</span>';}
 
 function vAgents(){
- if(S.atab===undefined)S.atab=0;
+ if(S.atab===undefined)S.atab=typeof personalAgentCanReview==='function'&&personalAgentCanReview()?4:0;
  if(S.adom===undefined)S.adom='全部';
  if(S.alv===undefined)S.alv='全部';
  const doms=['全部','内容','电商','用户运营','KOL','B2B','平台'];

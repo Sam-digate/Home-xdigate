@@ -133,7 +133,7 @@ function slotPalette(p){return p.shared?(p.slots||[]):(SLOTS[p.ag]||p.slots||[])
 function badSlots(p,body){const pal=slotPalette(p);return slotsUsed(body).filter(s=>!pal.includes(s))}
 
 vAgents=function(){
- if(S.atab===undefined)S.atab=0;if(S.adom===undefined)S.adom='全部';if(S.alv===undefined)S.alv='全部';
+ if(S.atab===undefined)S.atab=personalAgentCanReview()?4:0;if(S.adom===undefined)S.adom='全部';if(S.alv===undefined)S.alv='全部';
  const agentTabs=[{index:0,permission:'agent.registry',label:`Agent 登记处${pendingPromptCount()?`<span class="kb-tab-alert num">${pendingPromptCount()}</span>`:''}`},{index:1,permission:'agent.recipes',label:`配方 ${RECIPES.filter(r=>!r.cad).length}`},{index:2,permission:'agent.routines',label:`例行 ${RECIPES.filter(r=>r.cad).length}${RECIPES.filter(r=>r.attn).length?`<span class="kb-tab-alert num">${RECIPES.filter(r=>r.attn).length}</span>`:''}`},{index:3,permission:'agent.prompts',label:`共享提示词 ${PSHARED.length}`},...(personalAgentCanReview()?[{index:4,permission:'agent.registry',label:`\u7533\u8bf7\u5ba1\u6838${personalAgentReviewBadge()?`<span class="kb-tab-alert num">${personalAgentReviewBadge()}</span>`:''}`}]:[])].filter(tab=>permissionHasPage(tab.permission));
  if(!agentTabs.some(tab=>tab.index===S.atab))S.atab=agentTabs[0]?.index||0;
  const doms=['全部','内容','电商','用户运营','KOL','B2B','平台'],levels=['全部','M1','M2','M3'];
@@ -459,3 +459,4 @@ function pmCloseRevertDialog(){const layer=$('pm-revert-dialog');if(layer)layer.
 function confirmPromptRevert(){const draft=S.pmRevert;if(!draft)return;const p=findPrompt(draft.id),v=draft.v;pmCloseRevertDialog();toast('已提交回滚到 v'+v+' · 等 '+promptOwner(p)+' 批准');closeMod()}
 function newPrompt(agid){const shared=!agid,stamp=Date.now(),p={id:'prompt-'+stamp,family:(shared?'shared-new|':'agent-new|'+agid+'|')+stamp,shared,ag:agid||undefined,n:'',isNew:true,ty:shared?'frag':'run',v:1,st:'test',model:shared?null:'gpt-5.4',by:promptCurrentName(),at:'刚刚',note:'',use:shared?[]:undefined,slots:shared?[]:(SLOTS[agid]||[]),body:'',hist:[]};(shared?PSHARED:PROMPTS).unshift(p);if(agid){S.pmPromptFilter=S.pmPromptFilter||{};S.pmPromptFilter[agid]='test'}else S.pmSharedFilter='test';openPrompt(p.id);setTimeout(()=>$('pm-name')?.focus(),0)}
 renderNav();
+if(S.view==='agent')render();
