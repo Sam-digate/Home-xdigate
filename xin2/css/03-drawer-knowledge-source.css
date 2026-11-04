@@ -33,7 +33,10 @@
 .dw-tabs button:hover{color:var(--t1)}
 .dw-tabs button.on{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
 .meta-creative-doc{display:grid;gap:var(--sp-3)}
+.meta-creative-title,.meta-creative-previews{border:1px solid var(--border);border-radius:var(--r-sm)}
 .meta-creative-title{margin:0;font-size:var(--fs-lg);font-weight:700;line-height:1.5;color:var(--t1)}
+.meta-creative-title{padding:var(--sp-2) var(--sp-3)}
+.meta-creative-previews{padding:var(--sp-2) var(--sp-3) 0}
 .meta-creative-preview{padding:var(--sp-4) 0}
 .meta-creative-preview:first-child{padding-top:var(--sp-2)}
 .meta-creative-preview+.meta-creative-preview{border-top:1px solid var(--hairline)}
