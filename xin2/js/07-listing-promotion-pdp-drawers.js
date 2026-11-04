@@ -1179,6 +1179,20 @@ function dDoc(a){
 四、渠道分工
 小红书承担信任建立，抖音承担扩散与转化。</textarea></div>`;
 }
+function dMetaCreative(a){
+ const blocked=a.metaCreative.disclosureMissing;
+ return `<div class="meta-creative-doc">
+  <div><div class="meta-creative-field">标题</div><h2 class="meta-creative-title">Meta static creative — 2 variants</h2></div>
+  <section aria-labelledby="meta-creative-body-label">
+   <div id="meta-creative-body-label" class="meta-creative-field">正文</div>
+   <div class="meta-creative-previews">${a.plans.map(p=>`<section class="meta-creative-preview">
+    <p class="meta-creative-variant">${esc(p.t)}</p>
+    <h3>${esc(p.headline)}</h3><p>${esc(p.body)}</p>
+   </section>`).join('')}</div>
+  </section>
+  ${blocked?'<details class="meta-creative-check"><summary>检查详情</summary><p>XA-11 · R4 · 每个版本各 1 条检查提示</p><code>disclosure_rules_unavailable</code></details>':''}
+ </div>`;
+}
 function dPlanDoc(a,p,i){
  if(!p)return '<div class="allclear">这份产出还没有内容。</div>';
  const body=p.body||`${p.e}\n\n一、目标\n在有限预算与短周期内，用真实证据建立信任，再以话题动作放大扩散。\n\n二、内容主线\n以真实使用场景为核心，避免过度修饰。前三屏承担代入感，中段承担证据，结尾承担行动。\n\n三、排期\n预热期建立话题与真实测评基调；蓄水期铺开腰部 KOC；爆发期集中投放会场利益点；返场期复用方向一结构。\n\n四、渠道分工\n小红书承担信任建立，抖音承担扩散与转化。`;
@@ -1463,7 +1477,7 @@ function dPts(a){
  if(a.inspection){const d=a.inspection;return `<div class="ctx">${[['风险等级',d.severity],['巡检维度',d.category],['实际 '+(d.metric||'GMV'),d.actual],['预期范围',d.expected],['数据日期',d.date],['来源',d.source]].map(([k,v])=>`<div class="ctxr"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>`).join('')}</div>`;}
  return `<div class="ctx">${(a.vals||[]).map(v=>`<div class="ctxr"><span class="k">${v.l}</span><span class="v">${v.v}</span></div>`).join('')}
   <div class="ctxr"><span class="k">关联活动</span><span class="v">11.11 大促</span></div>
-  ${a.id==='a2-label-copy'?'':`<div class="ctxr"><span class="k">来源方向</span><span class="v">方向二</span></div>`}</div>`;
+  ${isSocialArticleDemo(a)?'':`<div class="ctxr"><span class="k">来源方向</span><span class="v">方向二</span></div>`}</div>`;
 }
 function dVer(a){
  if(a.claimsVersions)return a.claimsVersions.slice().reverse().map(v=>`<div class="vrow"><span class="vv">v${v.v}</span><span class="vt">${v.v===a.v?'当前版本 · ':''}${esc(v.label)}${v.approvedAt?' · 已批准':''}</span><span class="vd">${esc(kbHistoryTime(v.approvedAt||v.at))}</span></div>`).join('');

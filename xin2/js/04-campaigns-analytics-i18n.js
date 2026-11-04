@@ -25,11 +25,11 @@ const CAMPS=[
 
 function campaignOutputLinks(c){
  return (c.syncedOutputs||[]).map(link=>{const [t,a]=findArt(link.aid);return {link,t,a};})
-  .filter(({link,t,a})=>t?.id===link.tid&&a?.id==='a2-label-copy'&&a.mode==='plans'&&a.plans?.length);
+  .filter(({link,t,a})=>t?.id===link.tid&&isSocialArticleDemo(a)&&a.mode==='plans'&&a.plans?.length);
 }
 function campaignSyncReady(a){return !!(a?.plans?.length&&a.plans.every(p=>p.s==='done'));}
 function openCampaignSync(aid){
- const [t,a]=findArt(aid);if(a?.id!=='a2-label-copy'||a.mode!=='plans'||!a.plans?.length){toast('产出不存在或已移除');return;}
+ const [t,a]=findArt(aid);if(!isSocialArticleDemo(a)||a.mode!=='plans'||!a.plans?.length){toast('产出不存在或已移除');return;}
  const pending=a.plans.filter(p=>p.s!=='done').length;
  if(pending){toast('还有 '+pending+' 篇内容待审核，全部批准后才能同步到活动');return;}
  S.campSync={aid,tid:t.id,cid:null};
@@ -61,7 +61,7 @@ function confirmCampaignSync(){
  const d=S.campSync;if(!d)return;
  const c=CAMPS.find(x=>x.id===d.cid),[t,a]=findArt(d.aid);
  if(!c){toast('请选择要同步的活动');return;}
- if(t?.id!==d.tid||a?.id!=='a2-label-copy'||a.mode!=='plans'||!a.plans?.length){toast('产出不存在或已移除');return;}
+ if(t?.id!==d.tid||!isSocialArticleDemo(a)||a.mode!=='plans'||!a.plans?.length){toast('产出不存在或已移除');return;}
  if(!campaignSyncReady(a)){toast('全部产出批准后才能同步到活动');return;}
  if((c.syncedOutputs||[]).some(x=>x.aid===a.id)){toast('这组内容已同步到该活动');return;}
  // Link the output without moving its source task or changing approval state.

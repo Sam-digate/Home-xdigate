@@ -748,6 +748,42 @@ const labelCopy={
 };
 T.splice(1,0,labelCopy);
 
+const socialArticleShowcase=JSON.parse(JSON.stringify(labelCopy));
+socialArticleShowcase.id='t1-social-article-showcase';
+socialArticleShowcase.t='Meta static creative — 2 variants';
+socialArticleShowcase.workTop=330;
+socialArticleShowcase.intent.tx='Prepare Meta static creative for Sensifirm.';
+socialArticleShowcase.plan.tx=socialArticleShowcase.intent.tx;
+socialArticleShowcase.plan.steps[1].l='准备 Meta 静态广告文案';
+socialArticleShowcase.plan.steps[1].m='Sensifirm · Weeknight Body Routine';
+const showcaseArticle=socialArticleShowcase.arts[0];
+showcaseArticle.id='a2-social-article-showcase';
+showcaseArticle.ttl='Sensifirm · Meta static creative';
+showcaseArticle.ex='两版 Sensifirm 静态广告文案';
+showcaseArticle.metaCreative={disclosureMissing:true};
+showcaseArticle.st='review';
+showcaseArticle.v=1;
+showcaseArticle.sub=[];
+showcaseArticle.vals=[{l:'关联产品',v:'Sensifirm',s:'ok'},{l:'渠道',v:'Meta',s:'ok'}];
+Object.assign(showcaseArticle.plans[0],{
+ t:'01 · Weeknight Body Routine',
+ e:'Sensifirm Weeknight Care',
+ tags:[],
+ headline:'Sensifirm Weeknight Care',
+ body:'Intended for the temporary reduction in the appearance of cellulite. A weeknight routine at home. Results may vary.',
+ cta:'Learn more',
+ sub:[]
+});
+showcaseArticle.plans.push({
+ ...showcaseArticle.plans[0],t:'02 · Summer-Ready Body Prep',e:'Sensifirm Summer Prep',headline:'Sensifirm Summer Prep',
+ body:'Intended for the temporary reduction in the appearance of cellulite. A weekly body routine. Results may vary.',sub:[]
+});
+T.splice(2,0,socialArticleShowcase);
+
+function isSocialArticleDemo(artifact){
+ return artifact?.id==='a2-label-copy'||artifact?.id==='a2-social-article-showcase';
+}
+
 const COLS=[{k:'todo',n:'待开始',c:'#9490B8'},{k:'run',n:'进行中',c:'#3B82F6'},{k:'review',n:'待审批',c:'#F59E0B'},{k:'done',n:'已交付',c:'#10B981'}];
 const STN={todo:'待开始',run:'进行中',review:'待审批',done:'已交付',ask:'待补充信息'};
 const DOMS=['全部','内容','电商','用户运营','KOL','B2B'];

@@ -1455,7 +1455,7 @@ function fpill(key,label,opts){
 function setDom(d){S.dom=d;render();}
 function setMode(m){S.mode=m;render();}
 function kanban(L){
- const preferredOrder=['t16','t1-label-copy','t-ppt-form-demo','t5','t-douyin-creators','t-general-agent-demo','t-seo-flow-demo'];
+ const preferredOrder=['t1-social-article-showcase','t16','t1-label-copy','t-ppt-form-demo','t5','t-douyin-creators','t-general-agent-demo','t-seo-flow-demo'];
  return `<div class="kb">${COLS.map(c=>{
   const it=L.filter(t=>t.st===c.k||(c.k==='review'&&t.st==='ask')).sort((a,b)=>{
    const ai=preferredOrder.indexOf(a.id),bi=preferredOrder.indexOf(b.id);

@@ -740,27 +740,28 @@ if(a.mode==='roster'||a.mode==='items'){
      ${a.nxt.map(n=>`<button class="na" onclick="toast('${n==='同步到活动'?'已同步到活动':'已在同一线程中新增步骤：'+n}')">${n} →</button>`).join('')}</div>`:''}</div>`;
  }
  if(a.mode==='plans'){
+  const previews=a.metaCreative?[{...a.plans[0],t:a.ttl,e:a.ex}]:a.plans;
   return `<div class="pk" id="pk-${a.id}">
-   <div class="pk-h"><span class="ty">产出 · ${a.id==='a2'?'活动策划':'社媒内容'}</span><span class="chip plat">小红书</span>
+   <div class="pk-h"><span class="ty">产出 · ${a.metaCreative?'静态广告':a.id==='a2'?'活动策划':'社媒内容'}</span><span class="chip plat">${a.metaCreative?'Meta':'小红书'}</span>
     ${a.plans.length===1?`<span class="st ${a.plans[0].s}">${a.plans[0].s==='done'?'已批准':'待审批'}</span>`:''}
     ${artifactRunLink(a.by)}</div>
-   <div style="padding:var(--sp-3)"><div class="opts${a.plans.length===1?' single-output':''}">${a.plans.map((p,i)=>`
+   <div style="padding:var(--sp-3)"><div class="opts${previews.length===1?' single-output':''}">${previews.map((p,i)=>`
      <div class="optwrap"><button class="opt ${p.s==='done'?'win':''}" onclick="openDw('${a.id}',${i})" style="width:100%">
        <div class="im" style="${p.img?`background-image:url('${p.img}');background-size:cover;background-position:center`:grad(p.g[0],p.g[1])}"></div>
        <div class="bd"><div class="ot">${esc(p.t)}</div><div class="oe">${esc(p.e)}</div>
-         ${a.plans.length>1?`<div class="of"><span class="st ${p.s}">${p.s==='done'?'已批准':'待审批'}</span>
+         ${a.plans.length>1&&!a.metaCreative?`<div class="of"><span class="st ${p.s}">${p.s==='done'?'已批准':'待审批'}</span>
            ${subCount(p)?`<span class="chip mut">评论 ${subCount(p)}</span>`:''}</div>`:''}</div>
      </button>
      </div>`).join('')}</div></div>
-   ${a.id==='a2-label-copy'?`<div class="pk-a">${a.socialReturning?`<div class="listing-reject-inline"><input id="social-return-${a.id}" type="text" aria-label="退回原因" placeholder="填写退回原因" value="${esc(a.socialReturnDraft||'')}" oninput="setSocialReturnDraft('${a.id}',this.value)"><button class="btn sm" onclick="confirmSocialReturn('${a.id}')">确认</button><button class="btn ghost sm" onclick="cancelSocialReturn('${a.id}')">取消</button></div>`:`${a.plans.some(p=>p.s==='review')?`<button class="btn sm" onclick="openSocialApproval('${a.id}')">批准</button><button class="btn ghost sm" onclick="startSocialReturn('${a.id}')">退回</button>`:''}${a.plans.length===1?`<button class="rvb" onclick="openDw('${a.id}',0)">评论 ${subCount(a.plans[0])?`<span class="n">${subCount(a.plans[0])}</span>`:''}</button>`:''}<span class="v">v${a.v} · 2小时前</span>`}</div>`:`<div class="vals">${a.vals.map(v=>`<span class="val ${v.s}">${v.s==='ok'?'✓':v.s==='warn'?'!':'✕'} ${v.l} <span class="m">${v.v}</span></span>`).join('')}</div>
+   ${a.metaCreative?.disclosureMissing?`<div class="pk-a"><button class="btn ghost sm" onclick="openDw('${a.id}',0)">查看素材</button></div>`:isSocialArticleDemo(a)?`<div class="pk-a">${a.socialReturning?`<div class="listing-reject-inline"><input id="social-return-${a.id}" type="text" aria-label="退回原因" placeholder="填写退回原因" value="${esc(a.socialReturnDraft||'')}" oninput="setSocialReturnDraft('${a.id}',this.value)"><button class="btn sm" onclick="confirmSocialReturn('${a.id}')">确认</button><button class="btn ghost sm" onclick="cancelSocialReturn('${a.id}')">取消</button></div>`:`${a.plans.some(p=>p.s==='review')?`<button class="btn sm" onclick="openSocialApproval('${a.id}')">批准</button><button class="btn ghost sm" onclick="startSocialReturn('${a.id}')">退回</button>`:''}${a.plans.length===1?`<button class="rvb" onclick="openDw('${a.id}',0)">评论 ${subCount(a.plans[0])?`<span class="n">${subCount(a.plans[0])}</span>`:''}</button>`:''}<span class="v">v${a.v} · 2小时前</span>`}</div>`:`<div class="vals">${a.vals.map(v=>`<span class="val ${v.s}">${v.s==='ok'?'✓':v.s==='warn'?'!':'✕'} ${v.l} <span class="m">${v.v}</span></span>`).join('')}</div>
     <div class="pk-a"${a.hideMeta?' style="display:none"':''}><button class="btn ghost sm" onclick="openDw('${a.id}')">编辑 ↗</button>
      ${a.id==='a4-direction'||subCount(a)?`<button class="rvb" onclick="openReview('${a.id}')">评论 ${subCount(a)?`<span class="n">${subCount(a)}</span>`:''}</button>`:''}
      <span class="v">v${a.v} · 2小时前</span></div>`}
-    ${a.nxt&&(a.id!=='a2-label-copy'||a.plans.every(p=>p.s==='done'))?`<div class="nxt"><span class="lb">接下来</span>${a.nxt.map(n=>n==='下载活动策划'
+    ${a.nxt&&(!isSocialArticleDemo(a)||a.plans.every(p=>p.s==='done'))?`<div class="nxt"><span class="lb">接下来</span>${a.nxt.map(n=>n==='下载活动策划'
       ?`<span class="plan-download"><button class="na" onclick="event.stopPropagation();S.planDownloadOpen=!S.planDownloadOpen;render()">${n} →</button>${S.planDownloadOpen?`<span class="plan-download-menu"><button onclick="downloadActivityPlan('HTML')">HTML 格式</button><button onclick="downloadActivityPlan('Word')">Word 格式</button></span>`:''}</span>`
-      :n==='同步到活动'&&a.id==='a2-label-copy'?`<button class="na" onclick="openCampaignSync('${a.id}')">${n} →</button>`
+      :n==='同步到活动'&&isSocialArticleDemo(a)?`<button class="na" onclick="openCampaignSync('${a.id}')">${n} →</button>`
       :n==='发布'&&a.ty==='社媒内容'&&typeof pubActionHTML==='function'?pubActionHTML(a)
-      :`<button class="na" onclick="toast('已在同一线程中新增步骤：${n}')">${n} →</button>`).join('')}${a.id==='a2-label-copy'?campaignSyncLinks(a.id):''}</div>`:''}
+      :`<button class="na" onclick="toast('已在同一线程中新增步骤：${n}')">${n} →</button>`).join('')}${isSocialArticleDemo(a)?campaignSyncLinks(a.id):''}</div>`:''}
    </div>`;
  }
  if(a.mode==='pdpseq'){
@@ -906,6 +907,7 @@ function optAct(aid,i,ok){
 }
 function approvePlan(aid,i){
  const t=T.find(x=>x.id===S.tid),a=t.arts.find(x=>x.id===aid),p=a.plans[i];
+ if(a.metaCreative?.disclosureMissing){toast('请先补充已批准的披露文案');return;}
  p.s='done';
  if(a.demoSocial){
   const complete=a.plans.every(x=>x.s==='done');a.st=complete?'done':'review';t.st=complete?'done':'review';t.up='刚刚';
@@ -1072,6 +1074,7 @@ function confirmArtifactReturn(id){
 }
 function act(id,w){
  const t=T.find(x=>x.id===S.tid),a=t.arts.find(x=>x.id===id);
+ if(w==='批准'&&a.metaCreative){a.plans.forEach(plan=>{plan.s='done';});}
  if(a.mode==='promoseq'&&w==='批准'){approvePromotion(id);return;}
  if(w==='退回'&&['pptoutline','pptfile'].includes(a.mode))return;
  if(w==='退回'&&(a.returnLabel==='退回'||a.mode==='pdpseq'||a.id==='a2')){openArtifactReturn(id);return;}
@@ -1345,7 +1348,7 @@ else if(a.mode==='csa'){
   if(a.ty==='活动策划'){
    tabs=['文档','版本'];body=[dPlanDoc(a,plan,planIndex)+planComments,dVer(a)][S.dtab];
   }else{
-   tabs=['文档','图片','版本'];body=[dPlanDoc(a,plan,planIndex)+planComments,dPlanImgs(plan)+planComments,dVer(a)][S.dtab];
+   tabs=['文档','图片','版本'];body=[(a.metaCreative?dMetaCreative(a):dPlanDoc(a,plan,planIndex))+planComments,dPlanImgs(plan)+planComments,dVer(a)][S.dtab];
   }
  }
  else if(isStandaloneDirection){
@@ -1417,7 +1420,7 @@ else if(a.mode==='csa'){
  $('dw').innerHTML=`
   <div class="dw-h">
     <button class="ib" onclick="closeDw()" title="关闭"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-    <div style="flex:1;min-width:0"><div class="ty">${a.mode==='plans'?(a.id==='a2'?'活动策划':'社媒内容'):a.ty}${a.plat?' · '+a.plat:''}</div><h3 style="${direction?'white-space:pre-line':''}">${esc(direction?direction.t:plan?plan.t:a.ttl)}</h3></div>
+    <div style="flex:1;min-width:0"><div class="ty">${a.mode==='plans'?(a.id==='a2'?'活动策划':'社媒内容'):a.ty}${a.plat?' · '+a.plat:''}</div><h3 style="${direction?'white-space:pre-line':''}">${esc(a.metaCreative?a.ttl:direction?direction.t:plan?plan.t:a.ttl)}</h3></div>
     ${(a.mode==='plans'?a.plans.length:isStandaloneDirection?a.opts.length:t2.arts.length)>1?`<button class="ib" onclick="${a.mode==='plans'?'stepPlan':isStandaloneDirection?'stepDirection':'stepArt'}(-1)" ${(a.mode==='plans'?planIndex<=0:isStandaloneDirection?directionIndex<=0:idx<=0)?'disabled':''} title="${a.mode==='plans'?'上一篇':isStandaloneDirection?'上一个方向':'上一个产出'}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
     <button class="ib" onclick="${a.mode==='plans'?'stepPlan':isStandaloneDirection?'stepDirection':'stepArt'}(1)" ${(a.mode==='plans'?planIndex>=a.plans.length-1:isStandaloneDirection?directionIndex>=a.opts.length-1:idx>=t2.arts.length-1)?'disabled':''} title="${a.mode==='plans'?'下一篇':isStandaloneDirection?'下一个方向':'下一个产出'}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></button>`:''}
   </div>
@@ -1448,7 +1451,7 @@ else if(a.mode==='csa'){
      :a.mode==='pdpseq'&&S.dtab===0?`${a.st==='review'?`<button class="btn" onclick="act('${a.id}','批准');closeDw()">批准</button>`:''}
       <button class="btn ghost" onclick="previewDetailPlan()">预览完整规划表</button>`
      :a.mode==='plans'&&a.ty!=='活动策划'&&S.dtab===1?`<button class="btn ghost" onclick="downloadAllPlanImages()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 21h14"/></svg> 批量下载</button>`
-     :a.mode==='plans'&&S.dtab===0?`${plan.s==='review'?`<button class="btn" onclick="approvePlan('${a.id}',${planIndex})">批准</button>`:''}
+     :a.mode==='plans'&&S.dtab===0?`${a.metaCreative?(a.st==='review'?`<button class="btn" onclick="act('${a.id}','批准');closeDw()">批准</button>`:''):plan.s==='review'?`<button class="btn" onclick="approvePlan('${a.id}',${planIndex})">批准</button>`:''}
       <button class="rvb ${S.pc?'on':''}" onclick="togglePlanDrawerComment()">评论
         ${subCount(plan)?`<span class="n">${subCount(plan)}</span>`:''} ${S.pc?'▴':'▾'}</button>`
      :a.mode==='plans'?''
