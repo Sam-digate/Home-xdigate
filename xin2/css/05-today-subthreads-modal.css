@@ -177,6 +177,12 @@
 .ppt-attachment-upload{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.ppt-attachment-list{list-style:none;display:grid;gap:6px}.ppt-attachment-list li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px}.ppt-attachment-list li>span{min-width:0;overflow-wrap:anywhere}.ppt-attachment-list small{color:var(--t3);margin-left:8px}.ppt-attachment-list button{color:var(--t2);flex-shrink:0}.ppt-file-error{color:var(--danger-fg);font-size:var(--fs-sm)}
 .ppt-ask select{width:100%;height:38px;padding:0 11px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--primary-tint);color:var(--t1);font-size:var(--fs-sm);font-weight:600}
 .ppt-ask select:focus{outline:none;border-color:var(--primary-lt);background:#fff;box-shadow:0 0 0 3px rgba(124,58,237,.08)}
+.campaign-brief-form select,.campaign-brief-form .ppt-product-dropdown summary{background:#fff}
+.campaign-brief-form input:not([type="checkbox"]){width:100%;min-width:0;height:38px;padding:0 11px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface);color:var(--t1);font:inherit;font-size:var(--fs-sm)}
+.campaign-brief-form input:focus-visible{outline:1px solid var(--primary-lt)}
+.campaign-date-range{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;min-height:38px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface);color:var(--t2);font-size:var(--fs-sm)}
+.campaign-brief-form .campaign-date-range input[type="date"]{height:36px;padding:0 6px;border:0;background:transparent}
+.campaign-date-range:focus-within{border-color:var(--primary-lt)}
 .manual-review{padding:var(--sp-4) 18px}.manual-review .who{margin-bottom:var(--sp-4)}.manual-review-intro{font-size:var(--fs-sm);color:var(--t2);line-height:1.65;margin-bottom:var(--sp-4)}
 .manual-review-section{margin-bottom:var(--sp-4)}.manual-review-label{font-size:var(--fs-sm);font-weight:650;color:var(--t1);margin-bottom:var(--sp-2)}.manual-review-label .optional{font-weight:400;color:var(--t3)}
 .manual-review-options{display:flex;gap:var(--sp-2);flex-wrap:wrap}.manual-review-choice{height:36px;padding:0 16px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--t2);font-size:var(--fs-sm);font-weight:600}

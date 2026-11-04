@@ -360,4 +360,10 @@ try{
 }catch(e){}
 const drawerExpandObserver=new MutationObserver(()=>syncDrawerExpandControl());
 drawerExpandObserver.observe($('dw'),{childList:true});
+const defaultSeoThread=T.find(task=>task.id==='t-seo-flow-demo'&&!task.deletedAt);
+if(!location.hash&&defaultSeoThread&&permissionCanAccessView('thread')){
+ S.view='thread';
+ S.tid=defaultSeoThread.id;
+ S.hist=[{view:'work',tid:null}];
+}
 renderNav();render();

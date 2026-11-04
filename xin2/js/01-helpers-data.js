@@ -217,15 +217,15 @@ const T=[
    {w:'du',tx:'那更像是流量问题，还是页面问题？',at:'今天 10:21'},
    {w:'csa',k:'ag',tx:'页面问题的信号更强一些。老客与自然流量的移动端加购率也同步下降，而桌面端基本稳定；广告新增流量进一步放大了降幅。建议先检查移动端首屏加载与权益表达，再按来源拆分做一次对照。',at:'今天 10:22'}
   ]}],cmts:[]},
-{cr:{s:'h',w:'du'},id:'t1',trig:'manual',new:4,t:'11.11 小红书活动策划 · 低预算高信任感',camp:'11.11 大促',dom:'内容',ag:'plan',own:'du',st:'review',up:'2小时前',day:0,lv:'M2',cost:'¥12.40',outputCount:1,
+{cr:{s:'h',w:'du'},id:'t1',trig:'manual',new:4,t:'11.11 小红书活动策划 · 低预算高信任感',camp:'11.11 大促',dom:'内容',ag:'plan',own:'du',st:'ask',up:'刚刚',day:0,lv:'M2',cost:'¥12.40',outputCount:0,campaignBriefRequired:true,
  intent:{who:'du',tx:'围绕 11.11 主题「2111」策划一套小红书活动方案，主打低预算也能做出高信任感。先给我活动方向，确认后再完善完整策划。',at:'今天 09:12'},
- plan:{tx:'先生成 3 个创意方向供评论，批准后再生成完整策划文档与正文。',steps:[
-  {l:'读取品牌智库与 11.11 活动 Brief',m:'战略规划数据 · 禁用词规则 · 会场排期',s:'ok',r:'8秒'},
-  {l:'生成 3 个创意方向',m:'小红书 · 独立内容',s:'ok',r:'42秒'},
-  {l:'等待方向审批',m:'方向二已批准 · 方向一/三待处理',s:'act',r:'—'},
+ plan:{tx:'先确认活动 Brief，再生成 3 个创意方向。批准方向后生成完整策划。',steps:[
+  {l:'确认活动 Brief',m:'产品、预算、渠道、合作、时间与目标',s:'act',r:'—'},
+  {l:'生成 3 个创意方向',m:'小红书 · 独立内容',s:'todo',r:'—'},
+  {l:'等待方向审批',m:'3 个方向待审批',s:'todo',r:'—'},
   {l:'生成完整策划文档',m:'含正文、话题、配图建议',s:'todo',r:'—'},
   {l:'交付并送发布队列',m:'发布 Agent 接手',s:'todo',r:'—'}]},
- arts:[{id:'a1',nxt:['同步到活动'],vals:[{l:'禁用词',v:'通过',s:'ok'}],mode:'options',independent:true,returnLabel:'退回',ty:'创意方向',plat:'小红书',ttl:'创意方向',by:'plan',v:2,
+ arts:[{id:'a1',deferred:true,nxt:['同步到活动'],vals:[{l:'禁用词',v:'通过',s:'ok'}],mode:'options',independent:true,returnLabel:'退回',ty:'创意方向',plat:'小红书',ttl:'创意方向',by:'plan',v:2,
    opts:[
     {t:'方向一：先抛出真实痛点，\n再用细节证据给出答案',e:'用用户最常见的真实痛点开场，让读者快速产生代入感；随后用使用细节、前后变化与具体证据逐步回答问题。正文围绕活动主题 2111 拆解利益点，采用「问题—证据—结论」结构，强化收藏与私信转化。',s:'review',g:['#A78BFA','#7C3AED'],
      sub:[{w:'so',tx:'结构没问题，但"问题-对比-结论"这套我们 618 用过两次了，双十一再用会疲。先留着，返场期复用。',at:'今天 10:24'}]},
@@ -519,7 +519,7 @@ const T=[
   {l:'选择一个方向',m:'3 选 1',s:'todo',r:'—'},
   {l:'生成 SEO 文章',m:'正文 · 图片 · 结构与关键词 · FAQ',s:'todo',r:'—'}]},
  arts:[{id:'a-seo-intake',mode:'seo-intake',ty:'关键词确认',ttl:'Chinese Social media',by:'seo',v:1,st:'review',pv:'none',g:['#93C5FD','#2563EB'],vals:[],sub:[],
-  seoIntake:{fit:'适合写文章',summary:'前 7 条有效自然结果中有 5 条是文章类页面，说明这个词能靠一篇内容参与排名。',articles:4,uncategorized:3,natural:7,articlePages:5,topTenAI:3,market:'US',expanded:true,results:[
+  seoIntake:{fit:'适合写文章',summary:'前 7 条有效自然结果中有 5 条是文章类页面，说明这个词能靠一篇内容参与排名。',articles:4,uncategorized:3,natural:7,articlePages:5,topTenAI:3,market:'US',expanded:false,results:[
    ['#2','What is the most popular social media app in China?','非文章（AI 判断）'],
    ['#4','Weibo','文章'],
    ['#5','Inside China Social Media: Platforms Brands Can’t Ignore','文章'],

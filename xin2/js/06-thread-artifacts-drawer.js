@@ -153,6 +153,95 @@ function savePermissionBlockedPlan(id){
  t.ag=agent.id;t.agents=[agent.id];t.agentLabels={[agent.id]:agentLabel(agent.id)};t.agentStates={[agent.id]:'待确认'};t.permissionBlocked=false;t.permissionRequest=null;t.prestartDemo=true;t.dom=agent.dom||t.dom;t.lv=agent.maturity||LV[agent.lv].k;t.plan={...t.plan,...base,v:(t.plan.v||1)+1,status:'pending',startedAt:null};t.up='刚刚';S.prestartDraft=null;
  renderNav();render();toast('已改用 '+agentLabel(agent.id)+' 重新规划，请确认后开始');
 }
+const CAMPAIGN_BRIEF_GOALS=['品牌认知','新品种草','转化促销','拉新','复购','其他'];
+const CAMPAIGN_BRIEF_PLATFORMS=['小红书','抖音','微信','微博'];
+
+function campaignBriefNode(t){
+ const brief=t.campaignBrief;
+ const fields=brief?[
+  ['平台',brief.platform],['活动时间',`${brief.startDate} 至 ${brief.endDate}`],
+  ['活动目标',brief.goal||'未填写'],['预算',brief.budget==null?'未填写':`¥${brief.budget.toLocaleString('zh-CN')}`],
+  ['达人合作',!(brief.includesCreators??(brief.creatorShare!==null))?'不包含':brief.creatorShare===null?'包含 · 预算占比未填写':`包含 · 预算占比 ${brief.creatorShare}%`],
+  ['产品',brief.product||'未填写']
+ ]:[];
+ return `<div class="node ${brief?'ok':'wait'}"><div class="nlab">${brief?'你的补充 · ANSWERED':'需要你补充 · CLARIFY'}</div><div class="bub">
+  <div class="who"><span class="avs" style="background:${AG.plan.c}">${AG.plan.s}</span><span class="nm">活动策划</span><span class="chip mut">活动 Brief</span></div>
+  ${brief?`<div class="ctx">${fields.map(([label,value])=>`<div class="ctxr"><span class="k">${label}</span><span class="v">${esc(value)}</span></div>`).join('')}</div>`:`
+  <p style="margin-bottom:var(--sp-3);color:var(--t2)">请补充活动信息，确认后查看 3 个创意方向。</p>
+  <form onsubmit="submitCampaignBrief(event)">
+   <div class="channel-ask ppt-ask campaign-brief-form">
+    <div class="ppt-ask-style-row">
+     <div class="ppt-ask-field ppt-products"><span class="ppt-ask-label" id="campaign-platform-label">平台 <span>（必填，可多选）</span></span>
+      <details class="ppt-product-dropdown" onchange="updateCampaignPlatformLabel(this)"><summary aria-labelledby="campaign-platform-label campaign-platform-value"><span id="campaign-platform-value">小红书</span><span aria-hidden="true">⌄</span></summary>
+       <div class="ppt-product-options">${CAMPAIGN_BRIEF_PLATFORMS.map(platform=>`<label><input type="checkbox" name="platform" value="${platform}" ${platform==='小红书'?'checked':''}><span>${platform}</span></label>`).join('')}</div>
+      </details></div>
+     <div class="ppt-ask-field"><span class="ppt-ask-label" id="campaign-date-label">活动时间 <span>（必填）</span></span>
+      <div class="campaign-date-range" role="group" aria-labelledby="campaign-date-label">
+       <input name="startDate" aria-label="开始日期" type="date" required onchange="this.form.elements.endDate.min=this.value">
+       <span aria-hidden="true">至</span>
+       <input name="endDate" aria-label="结束日期" type="date" required>
+      </div>
+     </div>
+    </div>
+    <div class="ppt-ask-style-row">
+     <label class="ppt-ask-field"><span class="ppt-ask-label">活动目标 <span>（选填）</span></span><select name="goal"><option value="">请选择主要目标</option>${CAMPAIGN_BRIEF_GOALS.map(goal=>`<option>${goal}</option>`).join('')}</select></label>
+     <label class="ppt-ask-field"><span class="ppt-ask-label">预算 <span>（选填，人民币）</span></span><input name="budget" type="number" min="0.01" step="0.01" placeholder="请输入总预算"></label>
+    </div>
+    <div class="ppt-ask-style-row">
+     <label class="ppt-ask-field"><span class="ppt-ask-label">是否包含达人合作</span><select name="creator" onchange="toggleCampaignCreatorBudget(this)"><option value="no">不包含</option><option value="yes">包含</option></select></label>
+     <label class="ppt-ask-field"><span class="ppt-ask-label">产品 <span>（选填）</span></span><select name="product"><option value="">请选择产品</option>${PRODS.map(product=>`<option>${esc(product.n)}</option>`).join('')}</select></label>
+    </div>
+    <div data-campaign-creator-budget hidden><label class="ppt-ask-field"><span class="ppt-ask-label">达人预算占比 <span>（选填，占总预算 %）</span></span><input name="creatorShare" type="number" min="0.01" max="100" step="0.01" placeholder="例如 30" disabled></label></div>
+   </div>
+   <button class="btn" type="submit">提交并继续</button>
+  </form>`}
+ </div></div>`;
+}
+
+function toggleCampaignCreatorBudget(select){
+ const included=select.value==='yes';
+ const field=select.form.elements.creatorShare;
+ select.form.querySelector('[data-campaign-creator-budget]').hidden=!included;
+ field.disabled=!included;
+ if(!included)field.value='';
+}
+
+function updateCampaignPlatformLabel(dropdown){
+ const selected=[...dropdown.querySelectorAll('input:checked')].map(input=>input.value);
+ dropdown.querySelector('#campaign-platform-value').textContent=selected.join('、')||'请选择平台';
+}
+
+function submitCampaignBrief(event){
+ event.preventDefault();
+ const t=T.find(task=>task.id===S.tid&&!task.deletedAt);
+ if(!t?.campaignBriefRequired||t.campaignBrief||!permissionHasPage('work'))return;
+ const form=event.currentTarget;
+ if(!form.reportValidity())return;
+ const values=new FormData(form);
+ const product=values.get('product').trim();
+ const platform=values.getAll('platform').join('、');
+ if(!platform){toast('请至少选择一个平台');return;}
+ const includesCreators=values.get('creator')==='yes';
+ const creatorShare=values.get('creatorShare');
+ const budget=values.get('budget');
+ t.campaignBrief={product,budget:budget?Number(budget):null,platform,includesCreators,
+  creatorShare:includesCreators&&creatorShare?Number(creatorShare):null,
+  startDate:values.get('startDate'),endDate:values.get('endDate'),goal:values.get('goal')};
+ const directions=t.arts.find(a=>a.id==='a1');
+ directions.deferred=false;
+ directions.plat=platform;
+ t.plan.steps[0].s='ok';
+ Object.assign(t.plan.steps[1],{s:'ok',m:[platform,t.campaignBrief.goal].filter(Boolean).join(' · ')});
+ t.plan.steps[2].s='act';
+ t.st='review';t.outputCount=1;t.up='刚刚';
+ render();
+}
+
+function threadAnsweredNode(content,author=U.du){
+ return `<div class="node ok"><div class="nlab">你的补充 · ANSWERED</div>
+  <div class="bub me"><div class="who"><span class="avs" style="background:${author.c}">${esc(author.s)}</span><span class="nm">${esc(author.n)}</span><span class="tm">刚刚</span></div>${content}</div></div>`;
+}
+
 function vThread(){
  const t=T.find(x=>x.id===S.tid);if(!t||t.deletedAt)return vSoon();
  if(t.crm&&typeof crmThreadHTML==='function')return crmThreadHTML(t);
@@ -164,6 +253,11 @@ function vThread(){
  const intentAuthor=U[t.intent?.who]||null;
  const m1Art=t.arts?.find(x=>x.m1);
  const hasM1Delivery=!!m1Art;
+ const keywordIntake=t.id==='t-seo-flow-demo'?t.arts?.find(art=>art.mode==='seo-intake'&&!art.deferred):null;
+ const seoDirections=keywordIntake?t.arts.find(art=>art.seoFlow&&!art.deferred):null;
+ const visibleArtifacts=(t.arts||[]).filter(art=>art!==keywordIntake&&art!==seoDirections&&!art.deferred
+  &&!(t.id==='t1'&&art.id==='a2')
+  &&!(art.mode==='pptfile'&&t.arts.some(item=>!item.deferred&&item.mode==='pptoutline')));
  const hideM1Delivery=(hasM1Delivery&&m1Art.m1?.stage==='owner'&&!(m1Art.m1.reviewHistory||[]).length)||(t.demoDualAgents&&t.agentStates?.insp==='运行中');
  if(!t.arts&&!t.ask&&!t.standing&&!t.manualPending)return `<div class="wrap thread-wrap"><div class="th-hd"><div class="crumb"><button onclick="go('work')">工作</button> › ${t.camp||'日常'}</div>
   ${taskMenuHTML(t,true)}<h2>${esc(t.t)}</h2>
@@ -217,6 +311,9 @@ function vThread(){
 
     ${t.demoDouyinRecommendation?creatorIntakeNode(t):''}
     ${t.supplement?renderThreadSupplement(t):''}
+    ${t.campaignBriefRequired?campaignBriefNode(t):''}
+    ${keywordIntake?seoIntakeClarification(keywordIntake):''}
+    ${seoDirections?seoDirectionClarification(seoDirections):''}
 
     ${!t.demoDouyinRecommendation&&t.ask&&!t.answered&&(!t.prestartDemo||t.plan.status!=='pending')?`<div class="node wait" id="clarify-${t.id}"><div class="nlab">需要你补充 · CLARIFY</div>
       <div class="bub"><div class="who agent-run-hit" role="button" tabindex="0" onclick="openTrace('${t.ag}','${t.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTrace('${t.ag}','${t.id}')}" title="查看运行状态"><span class="avs" style="background:${a.c}">${a.s}</span><span class="nm">${esc(t.ask.agentLabel||a.n)}</span>
@@ -228,9 +325,7 @@ function vThread(){
           <button class="btn" onclick="sendAns()">${t.ask.ppt?'提交并继续':'补齐并继续'}</button>
           ${t.ask.channels||t.ask.ppt?'':`<span style="font-size:var(--fs-xs);color:var(--t3)">${Object.keys(S.ans||{}).length}/${t.ask.qs.length} 已选 · 也可以直接在下面留言说明</span>`}</div>
       </div></div>`:''}
-    ${t.answered?`<div class="node ok"><div class="nlab">你的补充 · ANSWERED</div>
-      <div class="bub me"><div class="who"><span class="avs" style="background:${U.du.c}">DU</span><span class="nm">dudu</span><span class="tm">刚刚</span></div>
-        ${t.ask.ppt||t.ask.channels?t.answered.map(x=>`<div style="font-size:var(--fs-sm);padding:var(--sp-1) 0;color:var(--t2)"><b style="color:var(--t1)">${esc(x)}</b></div>`).join(''):t.answered.map((x,i)=>`<div style="font-size:var(--fs-sm);padding:var(--sp-1) 0;color:var(--t2)">${t.ask.qs[i].q} → <b style="color:var(--t1)">${esc(x)}</b></div>`).join('')}</div></div>`:''}
+    ${t.answered?threadAnsweredNode(t.answered.map((answer,i)=>`<div style="font-size:var(--fs-sm);padding:var(--sp-1) 0;color:var(--t2)">${t.ask.ppt||t.ask.channels?'':`${t.ask.qs[i].q} → `}<b style="color:var(--t1)">${esc(answer)}</b></div>`).join('')):''}
     ${executionTerminalNode(t)}
     ${answeredRunningNode(t,a)}
     ${t.live?`<div class="node act"><div class="nlab">执行 · RUNNING</div>
@@ -243,8 +338,8 @@ function vThread(){
           <button class="btn ghost sm" onclick="openTrace('${t.ag}','${t.id}')">看它怎么想的</button></div>
       </div></div>`:''}
 
-    ${t.arts&&t.arts.length?`<div class="node ${t.st==='review'?'wait':'ok'}" id="artifacts-${t.id}"><div class="nlab">产出 · ARTIFACT</div>
-      ${t.arts.filter(a=>!a.deferred&&!(t.id==='t1'&&a.id==='a2')&&!(a.mode==='pptfile'&&t.arts.some(x=>!x.deferred&&x.mode==='pptoutline'))).map(peek).join('')}</div>`:''}
+    ${visibleArtifacts.length&&(!t.campaignBriefRequired||t.campaignBrief)?`<div class="node ${t.st==='review'?'wait':'ok'}" id="artifacts-${t.id}"><div class="nlab">产出 · ARTIFACT</div>
+      ${visibleArtifacts.map(peek).join('')}</div>`:''}
 
     ${pptGeneratingNode(t)}
 
@@ -253,6 +348,7 @@ function vThread(){
         ${t.standing==='ana'?'常驻分析线程不收口——它是你问数据的地方。<b>结论要变成活儿，得另开一条</b>：在产出上点「建单去做」。'
          :t.standing?'常驻线程没有"最终交付物"——它按排期一直跑。每次产出单独审批，批完就归档，线程继续。'
          :t.demoDouyinRecommendation&&t.creatorIntake.stage==='form'?'请先提交达人筛选表单，再生成推荐名单。'
+         :t.campaignBriefRequired&&!t.campaignBrief?'提交活动 Brief 后，将展示创意方向。'
          :t.prestartDemo&&!t.arts.length?(t.plan?.status==='rejected'?'计划未通过，未开始执行。':canAdjustPrestartPlan(t)?'计划待确认，尚未开始执行。':'执行中，尚未生成产出。')
          :t.permissionBlocked&&t.plan?.status==='rejected'?'计划未通过，未开始执行。'
          :t.permissionBlocked?'等待获得内容生成 Agent 权限，尚未开始执行。'
@@ -891,9 +987,12 @@ document.addEventListener('click',e=>{
 function optAct(aid,i,ok){
  const t=T.find(x=>x.id===S.tid),a=t.arts.find(x=>x.id===aid);
  if(a.seoFlow&&ok){
+  if(a.st!=='review'||!a.opts[i])return;
+  const choice=a.opts[i];
+  if(choice.custom&&!choice.t.trim()){toast('请填写自定义方向的选题名称');return;}
   a.opts.forEach((o,j)=>o.s=j===i?'done':'archived');a.st='done';a.selected=i;
-  a.pendingDirection={t:a.opts[i].t,e:a.opts[i].e,questions:[...(a.opts[i].questions||[])],angles:[...(a.opts[i].angles||[])]};
-  if(t.plan?.steps){t.plan.steps[1]={l:'生成内容方向',m:'已生成 3 个方向',s:'ok',r:'刚刚'};t.plan.steps[2]={l:'选择一个方向',m:'已批准方向'+['一','二','三'][i],s:'ok',r:'刚刚'};}
+  a.pendingDirection={t:choice.t.trim(),e:choice.e,questions:[...(choice.questions||[])],angles:(choice.angles||[]).filter(angle=>angle.trim())};
+  if(t.plan?.steps){t.plan.steps[1]={l:'生成内容方向',m:'已生成 3 个方向',s:'ok',r:'刚刚'};t.plan.steps[2]={l:'选择一个方向',m:choice.custom?'已批准自定义方向':'已批准方向'+['一','二','三'][i],s:'ok',r:'刚刚'};}
   t.live=null;t.st='review';t.up='刚刚';closeDw();finishSeoFlowArticle(t.id,a.id,i);return;
  }
  if(a.hideChoice&&ok)a.opts.forEach((o,j)=>o.s=j===i?'done':'review');
@@ -1910,22 +2009,103 @@ function generateDirectionImages(id,i){
 }
 
 /* ---- option-set drawer ---- */
+function seoDirectionClarification(a){
+ const selected=a.st==='done'?a.selected:a.draftDirection;
+ if(a.st==='done')return threadAnsweredNode(`<b>已选内容方向：</b>${esc(a.opts[selected]?.t||'')}`);
+ if(a.st==='run')return threadAnsweredNode(`<b>都不用：</b>${esc(a.returnReason||'')}`);
+ return `<div class="node wait"><div class="nlab">需要你补充 · CLARIFY</div><div class="bub">
+  <div class="who"><span class="avs" style="background:${AG.seo.c}">${AG.seo.s}</span><span class="nm">B2B SEO</span><span class="chip mut">SEO 内容方向</span></div>
+  <p>选择一个内容方向后开始写文章。</p>
+  <div class="seo-direction-choices">${a.opts.map((option,i)=>{
+   const active=selected===i;
+   return `<section class="seo-direction-option${active?' on':''}${option.custom?' custom':''}"><label class="seo-direction-choice">
+    <input type="radio" name="seo-direction-${a.id}" ${active?'checked':''} onchange="selectInlineSeoDirection('${a.id}',${i})">
+    ${active?`<b>${option.custom?'自定义方向':`方向${['一','二','三'][i]||i+1}`}</b>`:`<span><b>${esc(option.t||(option.custom?'自定义方向':''))}</b><small>${esc(option.e)}</small></span>`}</label>
+    ${option.custom?`<button type="button" class="ib seo-direction-remove" title="删除自定义方向" aria-label="删除自定义方向" onclick="removeCustomSeoDirection('${a.id}',${i})">×</button>`:''}
+    ${active?dSeoDirection(a,i):''}</section>`;
+  }).join('')}</div>
+  <div class="seo-intake-actions">${a.drawerReturning?drawerReturnEditor(a):`<button class="btn" ${selected==null?'disabled':''} onclick="optAct('${a.id}',${selected??-1},1)">批准，开始写</button><button class="btn ghost" onclick="addCustomSeoDirection('${a.id}')">＋ 自定义方向</button><button class="btn ghost" onclick="startDrawerReturn('${a.id}')">都不用</button>`}</div>
+ </div></div>`;
+}
+function addCustomSeoDirection(id){
+ const [,a]=findArt(id);
+ if(!a?.seoFlow||a.st!=='review')return;
+ let index=a.opts.findIndex(option=>option.custom);
+ if(index===-1){
+  index=a.opts.length;
+  a.opts.push({custom:true,t:'',e:'',s:'review',g:['#93C5FD','#2563EB'],sub:[],questions:[],angles:['']});
+ }
+ selectInlineSeoDirection(id,index);
+ document.querySelector('.seo-direction-option.on .seo-direction-detail input')?.focus();
+}
+function removeCustomSeoDirection(id,index){
+ const [,a]=findArt(id);
+ if(!a?.seoFlow||a.st!=='review'||!a.opts[index]?.custom)return;
+ a.opts.splice(index,1);
+ if(a.draftDirection===index)a.draftDirection=null;
+ else if(a.draftDirection>index)a.draftDirection--;
+ render();
+}
+function selectInlineSeoDirection(id,index){
+ const [,a]=findArt(id);
+ if(!a?.seoFlow||a.st!=='review'||!a.opts[index])return;
+ a.draftDirection=index;
+ render();
+}
 function dSeoDirection(a,i){
  const o=a.opts[i],questions=o.questions||[],angles=o.angles||[];
  return `<div class="seo-direction-detail">
   <div class="fld"><label>选题名称</label><input value="${esc(o.t)}" oninput="updateSeoDirectionField('${a.id}',${i},'t',this.value)"></div>
   <div class="fld"><label>选题说明</label><textarea rows="5" oninput="updateSeoDirectionField('${a.id}',${i},'e',this.value)">${esc(o.e)}</textarea></div>
-  <section class="seo-direction-section"><div class="seo-direction-section-title">覆盖问题 <span>· ${questions.length} 个</span></div><div class="seo-direction-chips">${questions.map(q=>`<span>${esc(q)}</span>`).join('')}</div></section>
+  <section class="seo-direction-section"><div class="seo-direction-section-title">覆盖问题 <span>· ${questions.length} 个</span></div>
+   <div class="seo-direction-chips">${questions.map((q,j)=>o.editingQuestion===j?`<form class="seo-question-edit" onsubmit="addSeoQuestion(event,'${a.id}',${i},${j})" onkeydown="if(event.key==='Escape'){event.preventDefault();event.stopPropagation();editSeoQuestion('${a.id}',${i},null)}">
+     <input name="question" aria-label="编辑覆盖问题" value="${esc(q)}" required><button type="submit">确认</button>
+    </form>`:`<span><button class="seo-question-text" type="button" title="编辑问题" onclick="editSeoQuestion('${a.id}',${i},${j})">${esc(q)}</button><button type="button" title="删除问题" aria-label="删除问题：${esc(q)}" onclick="removeSeoQuestion('${a.id}',${i},${j})">×</button></span>`).join('')}
+    <details class="seo-question-add" ontoggle="if(this.open)this.querySelector('input').focus()">
+     <summary>＋ 添加问题</summary>
+     <form onsubmit="addSeoQuestion(event,'${a.id}',${i})" onkeydown="if(event.key==='Escape'){event.preventDefault();event.stopPropagation();const editor=this.closest('details');this.reset();editor.open=false;editor.querySelector('summary').focus()}">
+      <input name="question" aria-label="新覆盖问题" placeholder="输入问题" required><button type="submit">确认</button>
+     </form>
+    </details>
+   </div></section>
   <section class="seo-direction-section"><div class="seo-direction-section-head"><div><div class="seo-direction-section-title">文章角度 <span>· 每篇写什么</span></div><p>同一选题可拆成不同角度，生成文章时将按这里的内容组织结构。</p></div><div class="seo-direction-tools"><button class="btn ghost sm" onclick="addSeoDirectionAngle('${a.id}',${i})">＋ 加一篇</button><button class="btn ghost sm" onclick="helpSplitSeoAngles('${a.id}',${i})">帮我拆角度</button></div></div>
    <div class="seo-direction-angles">${angles.map((x,j)=>`<div class="seo-direction-angle"><span>#${j+1}</span><textarea rows="2" placeholder="填写这篇文章的写作角度" onfocus="selectSeoDirectionAngle('${a.id}',${i},${j})" oninput="updateSeoDirectionAngle('${a.id}',${i},${j},this.value)">${esc(x)}</textarea><button class="ib" title="删除这个角度" onclick="removeSeoDirectionAngle('${a.id}',${i},${j})" ${angles.length<=1?'disabled':''}>×</button></div>`).join('')}</div>
   </section>
  </div>`;
 }
+function editSeoQuestion(id,index,questionIndex){
+ const [,a]=findArt(id),option=a?.opts?.[index];
+ if(!option||a.st==='done')return;
+ option.editingQuestion=questionIndex;
+ refreshDrawerReturn(id);
+ if(questionIndex!==null)document.querySelector('.seo-question-edit input')?.focus();
+}
+function addSeoQuestion(event,id,index,questionIndex=null){
+ event.preventDefault();
+ const [,a]=findArt(id),option=a?.opts?.[index];
+ const question=event.currentTarget.elements.question.value.trim();
+ if(!option||!question||a.st==='done')return;
+ option.questions=option.questions||[];
+ if(option.questions.some((item,i)=>i!==questionIndex&&item.toLowerCase()===question.toLowerCase())){toast('这个问题已添加');return;}
+ if(questionIndex===null)option.questions.push(question);
+ else option.questions[questionIndex]=question;
+ option.editingQuestion=null;
+ option.edited=true;
+ refreshDrawerReturn(id);
+}
+function removeSeoQuestion(id,index,questionIndex){
+ const [,a]=findArt(id),option=a?.opts?.[index];
+ if(a?.st==='done'||!option?.questions?.[questionIndex])return;
+ option.questions.splice(questionIndex,1);
+ option.editingQuestion=null;
+ option.edited=true;
+ refreshDrawerReturn(id);
+}
 function updateSeoDirectionField(aid,i,key,value){const [,a]=findArt(aid),o=a?.opts?.[i];if(!o)return;o[key]=value;o.edited=true;}
 function updateSeoDirectionAngle(aid,i,j,value){const [,a]=findArt(aid),o=a?.opts?.[i];if(!o?.angles)return;o.angles[j]=value;o.edited=true;}
 function selectSeoDirectionAngle(aid,i,j){const [,a]=findArt(aid),o=a?.opts?.[i];if(o)o.activeAngle=j;}
-function addSeoDirectionAngle(aid,i){const [,a]=findArt(aid),o=a?.opts?.[i];if(!o)return;o.angles=o.angles||[];o.angles.push('填写这篇文章的写作角度');o.activeAngle=o.angles.length-1;o.edited=true;drawDw();}
-function removeSeoDirectionAngle(aid,i,j){const [,a]=findArt(aid),o=a?.opts?.[i];if(!o?.angles||o.angles.length<=1)return;o.angles.splice(j,1);o.activeAngle=Math.min(o.activeAngle??0,o.angles.length-1);o.edited=true;drawDw();}
+function addSeoDirectionAngle(aid,i){const [,a]=findArt(aid),o=a?.opts?.[i];if(!o)return;o.angles=o.angles||[];o.angles.push('填写这篇文章的写作角度');o.activeAngle=o.angles.length-1;o.edited=true;refreshDrawerReturn(aid);}
+function removeSeoDirectionAngle(aid,i,j){const [,a]=findArt(aid),o=a?.opts?.[i];if(!o?.angles||o.angles.length<=1)return;o.angles.splice(j,1);o.activeAngle=Math.min(o.activeAngle??0,o.angles.length-1);o.edited=true;refreshDrawerReturn(aid);}
 function helpSplitSeoAngles(aid,i){
  const [,a]=findArt(aid),o=a?.opts?.[i];if(!o)return;
  const suggestions=[
@@ -1935,7 +2115,7 @@ function helpSplitSeoAngles(aid,i){
  ];
  const angleIndex=Math.max(0,Math.min(o.angles.length-1,o.activeAngle??0)),pool=suggestions[i]||suggestions[0];
  const current=pool.indexOf(o.angles[angleIndex]),next=current<0?0:(current+1)%pool.length;
- o.angles[angleIndex]=pool[next];o.activeAngle=angleIndex;o.edited=true;drawDw();toast(`已更新第 ${angleIndex+1} 篇的文章角度`);
+ o.angles[angleIndex]=pool[next];o.activeAngle=angleIndex;o.edited=true;refreshDrawerReturn(aid);toast(`已更新第 ${angleIndex+1} 篇的文章角度`);
 }
 function seoDirectionFooter(a,i){
  const o=a.opts[i];
@@ -2262,33 +2442,87 @@ function seoIntakePeek(a){
   <div class="pk-a">${q.status==='confirmed'?'<span class="st done">已确认 · 正在生成 3 个方向</span>':q.status==='rejected'?'<span class="st ask">已拒绝</span>':`<button class="btn sm" onclick="confirmSeoIntake('${a.id}')">确认</button><button class="btn ghost sm" onclick="rejectSeoIntake('${a.id}')">拒绝</button>`}<button class="btn ghost sm" onclick="openDw('${a.id}')">查看表单</button><span class="v num">v${a.v} · 刚刚</span></div>
  </div>`;
 }
-function dSeoIntake(a){
+function seoIntakeClarification(a){
+ const intake=a.seoIntake;
+ const status=intake.status;
+ if(status==='confirmed'||status==='rejected'){
+  const lines=[`关键词：${a.ttl}`,`处理结果：${status==='confirmed'?'确认，出方向':'已拒绝'}`];
+  if(intake.summary&&(!intake.resultsKeyword||intake.resultsKeyword===a.ttl))lines.push(intake.summary);
+  if(status==='rejected'&&intake.rejectReason)lines.push(`拒绝原因：${intake.rejectReason}`);
+  const summary=lines.map(line=>`<div style="font-size:var(--fs-sm);padding:var(--sp-1) 0"><b>${esc(line)}</b></div>`).join('');
+  return threadAnsweredNode(summary,U[intake.respondedBy]||U.du);
+ }
+ const hasResults=!intake.resultsKeyword||intake.resultsKeyword===a.ttl;
+ return `<div class="node wait" id="clarify-${a.id}">
+  <div class="nlab">需要你补充 · CLARIFY</div>
+  <div class="bub"><div class="who"><span class="avs" style="background:${AG.seo.c}">${AG.seo.s}</span><span class="nm">B2B SEO</span><span class="chip mut">关键词确认</span></div>
+   <p style="margin-bottom:var(--sp-3);color:var(--t2)">这个词值得写一篇文章吗？</p>
+   ${dSeoIntake(a,true)}
+   ${intake.editAction?seoIntakeActionForm(a):`
+   <div class="seo-intake-actions"><button class="btn" ${hasResults?'':'disabled'} onclick="confirmSeoIntake('${a.id}',true)">确认，出方向</button><button class="btn ghost" onclick="editSeoIntakeAction('${a.id}','keyword')">换个词</button><button class="btn ghost" onclick="editSeoIntakeAction('${a.id}','reject')">拒绝</button></div>`}
+  </div></div>`;
+}
+function seoIntakeActionForm(a){
+ const replacing=a.seoIntake.editAction==='keyword';
+ const label=replacing?'请输入新关键词':'请输入拒绝原因';
+ return `<form class="seo-intake-actions" onsubmit="submitSeoIntakeAction(event,'${a.id}')" onkeydown="if(event.key==='Escape'){event.preventDefault();event.stopPropagation();editSeoIntakeAction('${a.id}',null)}">
+  <div class="fld" style="flex:1;min-width:0;margin:0"><input name="response" aria-label="${label}" placeholder="${label}" required></div>
+  <button type="submit" class="btn">${replacing?'换个词':'拒绝'}</button>
+ </form>`;
+}
+function editSeoIntakeAction(id,action){
+ const [,a]=findArt(id);
+ if(!a?.seoIntake)return;
+ a.seoIntake.editAction=action;
+ render();
+ if(action)$(`clarify-${id}`)?.querySelector('[name="response"]')?.focus();
+}
+function submitSeoIntakeAction(event,id){
+ event.preventDefault();
+ const [,a]=findArt(id);
+ const response=event.currentTarget.elements.response.value.trim();
+ if(!a?.seoIntake?.editAction||!response)return;
+ if(a.seoIntake.editAction==='reject'){
+  a.seoIntake.rejectReason=response;
+  a.seoIntake.respondedBy=currentUser();
+  a.seoIntake.editAction=null;
+  rejectSeoIntake(id,true);
+  return;
+ }
+ a.seoIntake.resultsKeyword??=a.ttl;
+ a.ttl=response;
+ editSeoIntakeAction(id,null);
+}
+function dSeoIntake(a,inline=false){
  const q=a.seoIntake;
+ if(q.resultsKeyword&&q.resultsKeyword!==a.ttl)return `<div class="note">「${esc(a.ttl)}」暂无搜索结果。</div>`;
  return `<div class="seo-intake-panel"><div class="seo-intake-hero"><div class="seo-intake-verdict"><b>「${esc(a.ttl)}」</b><span class="st done">${esc(q.fit)}</span></div><p>${esc(q.summary)}</p></div>
   <div class="seo-intake-metrics"><div><span>有效自然结果</span><b class="num">${q.natural}</b></div><div><span>文章类页面</span><b class="num">${q.articlePages}</b></div><div><span>未分类结果</span><b class="num">${q.uncategorized}</b></div><div><span>前 10 位 AI 摘要</span><b class="num">${q.topTenAI}</b></div></div>
   <div class="seo-intake-market"><span>查询市场</span><b>${esc(q.market)}</b></div>
-  <button class="seo-results-toggle" onclick="toggleSeoIntakeResults('${a.id}')" aria-expanded="${!!q.expanded}">${q.expanded?'收起':'展开'}搜索结果（${q.results.length}）<span>${q.expanded?'▴':'▾'}</span></button>
+  <button class="seo-results-toggle" onclick="toggleSeoIntakeResults('${a.id}',${inline})" aria-expanded="${!!q.expanded}">${q.expanded?'收起':'展开'}搜索结果（${q.results.length}）<span>${q.expanded?'▴':'▾'}</span></button>
   ${q.expanded?`<div class="seo-result-list">${q.results.map(r=>`<div class="seo-result-row"><span class="num">${esc(r[0])}</span><span>${esc(r[1])}</span><span>${esc(r[2])}</span></div>`).join('')}</div>`:''}</div>`;
 }
 function seoIntakeFooter(a){const s=a.seoIntake.status;if(s==='confirmed')return '<span class="st done">已确认</span><span style="font-size:var(--fs-sm);color:var(--t2)">正在生成 3 个内容方向…</span>';if(s==='rejected')return '<span class="st ask">已拒绝</span>';return `<button class="btn" onclick="confirmSeoIntake('${a.id}')">确认</button><button class="btn ghost" onclick="rejectSeoIntake('${a.id}')">拒绝</button>`;}
-function toggleSeoIntakeResults(id){const [,a]=findArt(id);if(!a?.seoIntake)return;a.seoIntake.expanded=!a.seoIntake.expanded;drawDw();}
-function confirmSeoIntake(id){
+function toggleSeoIntakeResults(id,inline=false){const [,a]=findArt(id);if(!a?.seoIntake)return;a.seoIntake.expanded=!a.seoIntake.expanded;if(inline)render();else drawDw();}
+function confirmSeoIntake(id,inline=false){
  const [t,a]=findArt(id);if(!a?.seoIntake)return;
- a.seoIntake.status='confirmed';a.st='done';
+ if(a.seoIntake.resultsKeyword&&a.seoIntake.resultsKeyword!==a.ttl)return;
+ a.seoIntake.status='confirmed';a.seoIntake.respondedBy=currentUser();a.st='done';
  let directions=t.arts.find(x=>x.id==='a-seo-directions');
  if(!directions){
   directions={id:'a-seo-directions',mode:'options',seoFlow:true,ty:'SEO 内容方向',ttl:'Chinese Social media · 内容方向',by:'seo',v:1,st:'review',pv:'none',g:['#93C5FD','#2563EB'],returnLabel:'退回',opts:[
-   {t:'方向一：美国品牌进入中国社媒的入门指南',e:'从市场进入决策切入，对比微信、小红书、抖音和微博的角色，帮助美国品牌选择第一站。',g:['#93C5FD','#2563EB'],s:'review',sub:[],questions:['what are chinese social media apps','what social media do chinese use','what is the chinese social media app'],angles:['填写这篇文章的写作角度']},
-   {t:'方向二：中国社媒平台与用户场景对比',e:'以平台对照为主线，比较用户人群、内容形态、商业能力和适合的品牌目标。',g:['#C4B5FD','#7C3AED'],s:'review',sub:[],questions:['most popular social media in China','WeChat vs Xiaohongshu','Chinese social media demographics'],angles:['填写这篇文章的写作角度']},
-   {t:'方向三：从策略到执行的中国社媒营销框架',e:'围绕目标、平台组合、内容本地化、达人合作与效果衡量，提供可执行的落地框架。',g:['#6EE7B7','#059669'],s:'review',sub:[],questions:['China social media marketing strategy','how to market in China','Chinese influencer marketing'],angles:['填写这篇文章的写作角度']}
+   {t:'方向一：美国品牌进入中国社媒的入门指南',e:'从市场进入决策切入，对比微信、小红书、抖音和微博的角色，帮助美国品牌选择第一站。',g:['#93C5FD','#2563EB'],s:'review',sub:[],questions:['what are chinese social media apps','what social media do chinese use','what is the chinese social media app','which Chinese social media platform should US brands start with','how do brands get started on Xiaohongshu'],angles:['填写这篇文章的写作角度']},
+   {t:'方向二：中国社媒平台与用户场景对比',e:'以平台对照为主线，比较用户人群、内容形态、商业能力和适合的品牌目标。',g:['#C4B5FD','#7C3AED'],s:'review',sub:[],questions:['most popular social media in China','WeChat vs Xiaohongshu','Chinese social media demographics','how does Douyin differ from TikTok','which Chinese platforms support social commerce'],angles:['填写这篇文章的写作角度']},
+   {t:'方向三：从策略到执行的中国社媒营销框架',e:'围绕目标、平台组合、内容本地化、达人合作与效果衡量，提供可执行的落地框架。',g:['#6EE7B7','#059669'],s:'review',sub:[],questions:['China social media marketing strategy','how to market in China','Chinese influencer marketing','how should brands localize content for China','how to measure a Chinese social media campaign'],angles:['填写这篇文章的写作角度']}
   ]};
   t.arts.push(directions);
  }
  t.st='review';t.up='刚刚';
  if(t.plan?.steps){t.plan.steps[0]={l:'确认关键词机会',m:'已确认适合写文章',s:'ok',r:'刚刚'};t.plan.steps[1]={l:'生成内容方向',m:'3 个方向已生成 · 待选择',s:'act',r:'刚刚'};}
- S.aid=directions.id;S.oi=0;S.dtab=0;render();drawDw();toast('已生成 3 个 SEO 内容方向 · 请选择一个');
+ if(!inline){S.aid=directions.id;S.oi=0;S.dtab=0;}
+ render();if(!inline)drawDw();toast('已生成 3 个 SEO 内容方向 · 请选择一个');
 }
-function rejectSeoIntake(id){const [t,a]=findArt(id);if(!a?.seoIntake)return;a.seoIntake.status='rejected';a.st='ask';t.st='ask';t.up='刚刚';if(t.plan?.steps)t.plan.steps[0]={l:'确认关键词机会',m:'已拒绝 · 等待调整关键词',s:'warn',r:'刚刚'};render();drawDw();toast('已拒绝 · 可以调整关键词后重新分析');}
+function rejectSeoIntake(id,inline=false){const [t,a]=findArt(id);if(!a?.seoIntake)return;a.seoIntake.status='rejected';a.st='ask';t.st='ask';t.up='刚刚';if(t.plan?.steps)t.plan.steps[0]={l:'确认关键词机会',m:'已拒绝 · 等待调整关键词',s:'warn',r:'刚刚'};render();if(!inline)drawDw();toast('已拒绝 · 可以调整关键词后重新分析');}
 function finishSeoFlowArticle(tid,directionId,i){
  const t=T.find(x=>x.id===tid),a=t?.arts?.find(x=>x.id===directionId);if(!t||!a?.pendingDirection)return;
  const direction=a.pendingDirection;
