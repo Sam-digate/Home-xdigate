@@ -4,7 +4,16 @@ const c=vm.createContext({S:{},currentUser:()=>user,permissionCurrentMember:()=>
 for(const f of ['26-personal-agent-application','27-personal-agent-review','29-personal-agent-setup'])vm.runInContext(fs.readFileSync('js/'+f+'.js','utf8'),c);
 const app=c.personalAgentApplication();app.submittedAt=new Date().toISOString();app.submittedAnswers=['Goal','CEO','Team','Slack','Confirm sends'];c.personalAgentSubmitForReview(app);
 const r=c.personalAgentReviewList().find(r=>r.owner==='du');c.decidePersonalAgentReview(r.id,'approve');assert.equal(r.status,'building');assert.equal(timers.length,3);c.personalAgentBeginBuild(r.id);assert.equal(timers.length,3);
-while(timers.length)timers.shift()();assert.equal(r.status,'connecting');assert.equal(app.reviewStatus,'connecting');c.personalAgentActivate(r.id);assert.equal(r.status,'connecting');
+c.openPersonalAgentReview(r.id);
+const reviewTabs=$('dw').innerHTML.split('class="dw-tabs"')[1].split('class="dw-b"')[0];
+assert.ok(reviewTabs.indexOf('>回答<')<reviewTabs.indexOf('>构建<'));assert.ok(reviewTabs.indexOf('>构建<')<reviewTabs.indexOf('>连接<'));
+assert.ok($('dw').innerHTML.includes('pa-review-stages'));
+while(timers.length)timers.shift()();assert.equal(r.status,'connecting');assert.equal(app.reviewStatus,'connecting');
+c.openPersonalAgentSetup(r.id);
+const ownTabs=$('dw').innerHTML.split('class="dw-tabs"')[1].split('class="dw-b"')[0];
+assert.ok(ownTabs.indexOf('>连接<')<ownTabs.indexOf('>构建<'));assert.ok(ownTabs.indexOf('>构建<')<ownTabs.indexOf('>回答<'));
+assert.ok(!$('dw').innerHTML.includes('pa-review-stages'));
+c.personalAgentActivate(r.id);assert.equal(r.status,'connecting');
 user='other';c.personalAgentConnectChannel(r.id,'slack');assert.equal(r.connections,undefined);user='du';role='member';
 for(const key of ['slack','m365','xdgate'])c.personalAgentConnectChannel(r.id,key);c.personalAgentActivate(r.id);assert.equal(r.status,'live');assert.equal(app.reviewStatus,'live');assert.equal(r.connections.github,undefined);const at=r.activatedAt;c.personalAgentActivate(r.id);assert.equal(r.activatedAt,at);
 scope='other';assert.equal(c.personalAgentSetupRecord(r.id),undefined);

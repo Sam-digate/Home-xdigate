@@ -114,7 +114,7 @@ function crmProductNode(c){
  if(c.stage==='todo')return '';
  if(c.product)return typeof threadAnsweredNode==='function'?threadAnsweredNode(`<b>推广产品：${esc(c.product)}</b>`):crmNode('你的补充 · ANSWERED',`<div class="bub me">推广产品：${esc(c.product)}</div>`);
  if(c.stage!=='product')return '';
- return crmNode('需要你补充 · CLARIFY',`<div class="bub"><div class="who"><span class="avs" style="background:var(--primary)">CR</span><span class="nm">CRM 生命周期运营</span><span class="chip mut">推广产品</span></div><h3>这些流程主要推哪个产品？</h3><p class="crm-context">选择本次邮件的推广产品，确认后生成草稿。</p><div class="channel-ask ppt-ask">${CRM_CAMPAIGN_PRODUCTS.map((product,index)=>`<label style="display:flex;align-items:center;gap:8px;font-size:var(--fs-md)"><input type="radio" name="crm-product" value="${index}" ${product===c.productDraft?'checked':''} onchange="crmSelectProduct(${index})">${product}</label>`).join('')}</div><button class="btn" onclick="crmGenerate()">用这个选择生成草稿</button></div>`,'wait');
+ return crmNode('需要你补充 · CLARIFY',`<div class="bub crm-product-form"><section class="crm-product-panel" aria-labelledby="crm-product-heading"><h3 id="crm-product-heading">这些流程主要推哪个产品？</h3><p class="crm-context">选择本次邮件的推广产品，确认后生成草稿。</p><div class="crm-product-options" role="radiogroup" aria-labelledby="crm-product-heading">${CRM_CAMPAIGN_PRODUCTS.map((product,index)=>`<label><input type="radio" name="crm-product" value="${index}" ${product===c.productDraft?'checked':''} onchange="crmSelectProduct(${index})"><span>${product}</span></label>`).join('')}</div><button class="btn" onclick="crmGenerate()">用这个选择生成草稿</button></section></div>`,'wait');
 }
 function crmSelectProduct(index){
  if(!crmCanOperate())return;const c=crmTask().crm;

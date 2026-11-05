@@ -289,6 +289,13 @@
 .execution-result .who>b{font-size:var(--fs-md);font-weight:600;color:var(--t1);line-height:1.45}
 .execution-result>p:not(.execution-step){font-size:var(--fs-sm);color:var(--t2);line-height:1.6;margin:0}
 .crm-context{font-size:var(--fs-sm);line-height:1.7;color:var(--t3);margin:10px 0}
+.crm-product-form{border-left:3px solid var(--gold);padding:14px 16px}
+.crm-product-panel{border:1px solid var(--border);border-radius:var(--r);padding:20px;background:var(--surface)}
+.crm-product-panel h3{font-size:var(--fs-lg);font-weight:600;line-height:1.5}
+.crm-product-panel .crm-context{margin:4px 0 16px}
+.crm-product-options{display:grid;gap:4px;margin-bottom:20px}
+.crm-product-options label{display:flex;align-items:center;gap:10px;min-height:38px;font-size:var(--fs-md);color:var(--t1);cursor:pointer}
+.crm-product-options input{width:16px;height:16px;margin:0;flex:0 0 16px;accent-color:var(--primary)}
 .crm-brief{display:block;width:100%;min-height:130px;margin-top:8px;padding:12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface);color:var(--t1);font:inherit;line-height:1.8;resize:vertical}
 .crm-plan-steps{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;font-size:var(--fs-sm);color:var(--t2)}
 .crm-plan-steps span{padding:5px 8px;border-radius:6px;background:var(--surface-tint)}
