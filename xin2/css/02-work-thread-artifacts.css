@@ -314,6 +314,16 @@
 .crm-mail-card-title b{font-size:var(--fs-md);font-weight:600}.crm-mail-card-meta{margin-top:12px;color:var(--t3);font-size:var(--fs-xs)}
 .crm-delay-pill{border-radius:20px;padding:2px 9px}
 .crm-mail-card-excerpt{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden;margin-top:7px;font-size:var(--fs-sm);line-height:1.65;color:var(--t3)}
+.crm-risk-count{font-size:var(--fs-xs);font-weight:500;background:#FFF1F2;color:#B42332;border-radius:20px;padding:4px 9px}
+.crm-highlight-editor{position:relative;background:var(--surface-tint);border-radius:var(--r-sm)}
+.crm-highlight-backdrop,.csa-email .crm-highlight-editor textarea{box-sizing:border-box;width:100%;margin:0;border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 11px;font-family:inherit;font-size:var(--fs-md);font-weight:400;line-height:1.7;letter-spacing:normal;white-space:pre-wrap;overflow-wrap:break-word;word-break:normal;tab-size:8;overflow-y:scroll}
+.crm-highlight-backdrop{position:absolute;inset:0;color:transparent;pointer-events:none;scrollbar-color:transparent transparent}
+.crm-highlight-backdrop mark{color:transparent;background:#FFE4E6;border-radius:2px;padding:0}
+.csa-email .crm-highlight-editor textarea{display:block;position:relative;z-index:1;background:transparent;color:var(--t1);resize:vertical;min-height:280px}
+.csa-email .crm-highlight-editor textarea:focus{background:transparent;outline:2px solid var(--primary-lt);outline-offset:1px}
+.csa-email .crm-highlight-subject textarea{min-height:44px;height:44px;resize:none}
+#crm-mail-review{margin-top:20px}
+#crm-approve-all:disabled{color:var(--t3);background:var(--hairline);border-color:var(--border);opacity:.6;cursor:not-allowed;box-shadow:none;transform:none}
 #crm-save-draft:disabled{color:var(--t3);background:var(--hairline);border-color:var(--border);opacity:.6;cursor:not-allowed;box-shadow:none;transform:none}
 .claims-document{padding:0}
 .claims-advice{padding:14px 12px;margin-bottom:20px;border:1px solid var(--border);border-radius:6px;background:var(--surface)}

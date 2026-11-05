@@ -15,9 +15,43 @@ allowed=false;ctx.crmSaveBundle(true);assert.equal(t.st,'review');allowed=true;c
 ctx.crmSaveBundle(true);ctx.crmCompleteDelivery();assert.equal(ctx.S.crmDeliveredOutputs.length,1);assert.equal(typeof ctx.crmSend,'undefined');
 console.log('PASS CRM single output, card/detail navigation, atomic validation, draft review, approval delivery, permissions and duplicate protection');
 
-t.crm.stage='review';t.st='review';ctx.crmOpenBundle();ctx.crmDrawBundle(0);assert.equal(ctx.crmBundleDirty(),false);const saved=t.crm.mails[0].subject;
+t.crm.stage='review';t.st='review';t.crm.mails.forEach(mail=>mail.approved=false);ctx.crmOpenBundle();ctx.crmDrawBundle(0);assert.equal(ctx.crmBundleDirty(),false);const saved=t.crm.mails[0].subject;
 ctx.crmEditBundleField(0,'subject','unsaved');assert.equal(ctx.crmBundleDirty(),true);ctx.crmNavigateBundle(1);assert.equal(ctx.S.crmBundleIndex,0);assert.ok($('mod').innerHTML.includes('crmResolveNavigation'));
 ctx.crmResolveNavigation(false);assert.equal(ctx.S.crmBundleIndex,1);assert.equal(ctx.S.crmBundleDraft[0].subject,saved);assert.equal(ctx.crmBundleDirty(),false);
 ctx.crmEditBundleField(1,'body','Updated body');ctx.crmNavigateBundle(null);ctx.crmResolveNavigation(true);assert.equal(ctx.S.crmBundleIndex,null);assert.equal(t.crm.mails[1].body,'Updated body');assert.equal(ctx.crmBundleDirty(),false);
 ctx.crmEditBundleField(0,'subject','temp');ctx.crmEditBundleField(0,'subject',t.crm.mails[0].subject);assert.equal(ctx.crmBundleDirty(),false);
 console.log('PASS dirty detection, reverted edits, navigation save/discard and disabled save reset');
+
+const risky={subject:'Guaranteed results',body:'Professional anti-aging without the clinic, visible results in 7 days. Visible results in 7 days.'};
+assert.equal(ctx.crmMailFindings(risky).length,4);
+assert.equal(ctx.crmMailFindings({subject:'Hello',body:'Review the product information.'}).length,0);
+t.crm.mails[1].body=risky.body;
+t.crm.stage='review';ctx.crmOpenBundle();ctx.crmDrawBundle(1);
+assert.ok($('dw').innerHTML.includes('<mark>'));assert.ok($('dw').innerHTML.includes('claims-review-item'));
+assert.ok($('dw').innerHTML.includes('<textarea id="crm-bundle-body"'));assert.ok(!$('dw').innerHTML.includes('crmToggleMailEditing'));
+assert.ok($('dw').innerHTML.includes('查看详细依据'));assert.ok($('dw').innerHTML.includes('问题与依据'));
+const highlighted=ctx.crmHighlightedMail(risky,'body',1).replace(/<\/?mark>/g,'');assert.equal(highlighted,risky.body);
+ctx.crmEditBundleField(1,'body','Professional anti-aging without the clinic.');
+assert.ok($('crm-highlight-body').innerHTML.includes('<mark>Professional anti-aging without the clinic</mark>'));
+assert.ok($('crm-mail-review').innerHTML.includes('claims-review-item'));
+ctx.crmEditBundleField(1,'body','Review the product information.');
+assert.ok(!$('crm-highlight-body').innerHTML.includes('<mark>'));assert.equal(ctx.crmMailFindings(ctx.S.crmBundleDraft[1]).length,0);
+assert.ok($('crm-mail-review').innerHTML.includes('上次保存的审核结果'));
+assert.equal(ctx.crmBundleDirty(),true);
+assert.equal($('crm-approve-all').disabled,true);ctx.crmSaveBundle(true);assert.equal(t.st,'review');assert.equal(t.crm.mails[1].body,risky.body);
+ctx.crmSaveBundle(false);assert.equal(ctx.crmBundleDirty(),false);assert.ok($('dw').innerHTML.includes('未检出预设风险'));assert.ok(!$('dw').innerHTML.includes('<mark>'));
+console.log('PASS claim detection, inline highlights, deferred review after save and approval requires saved changes');
+
+t.crm.stage='review';t.st='review';t.crm.mails.forEach(mail=>mail.approved=false);
+ctx.crmOpenBundle();assert.ok($('dw').innerHTML.includes('>批准全部</button>'));
+ctx.crmDrawBundle(0);assert.ok($('dw').innerHTML.includes('>批准本封</button>'));
+allowed=false;ctx.crmApproveBundleMail(0);assert.equal(t.crm.mails[0].approved,false);allowed=true;
+ctx.crmApproveBundleMail(0);assert.equal(t.crm.mails[0].approved,true);assert.equal(t.st,'review');assert.equal(t.crm.mails[1].approved,false);
+ctx.crmDrawBundle(1);ctx.crmApproveBundleMail(1);assert.equal(t.crm.mails[1].approved,true);
+ctx.crmDrawBundle(0);assert.ok($('dw').innerHTML.includes('readonly'));const approvedSubject=t.crm.mails[0].subject;
+ctx.crmEditBundleField(0,'subject','Edited approved mail');assert.equal(ctx.crmBundleDirty(),false);assert.equal(ctx.S.crmBundleDraft[0].subject,approvedSubject);
+ctx.S.crmBundleDraft[0].subject='Forged edit';ctx.crmSaveBundle(false);assert.equal(t.crm.mails[0].subject,approvedSubject);
+ctx.crmOpenBundle();ctx.crmDrawBundle(2);ctx.crmEditBundleField(2,'subject','Revised unapproved mail');ctx.crmSaveBundle(false);
+assert.equal(t.crm.mails[0].approved,true);assert.equal(t.crm.mails[1].approved,true);assert.equal(t.crm.mails[2].approved,false);
+ctx.crmApproveBundleMail(2);assert.equal(t.st,'done');assert.ok(t.crm.mails.every(mail=>mail.approved));
+console.log('PASS separate approval, approved mails read-only, mutation guard, unchanged approvals and delivery after all approvals');
