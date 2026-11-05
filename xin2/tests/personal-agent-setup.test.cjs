@@ -26,3 +26,16 @@ console.log('PASS four entry labels, one application per employee and rejected r
 const rejectTarget=c.personalAgentReviewList().find(r=>r.status==='pending');c.openPersonalAgentReject(rejectTarget.id);assert.ok($('mod').innerHTML.includes('confirm-modal'));$('pa-reject-reason').value='';c.decidePersonalAgentReview(rejectTarget.id,'reject');assert.equal(rejectTarget.status,'rejected');assert.equal(rejectTarget.rejectionReason,'');
 rejectTarget.status='pending';c.openPersonalAgentReject(rejectTarget.id);$('pa-reject-reason').value='Please clarify scope';c.decidePersonalAgentReview(rejectTarget.id,'reject');assert.equal(rejectTarget.rejectionReason,'Please clarify scope');
 console.log('PASS rejection confirmation and optional reason');
+user=own.owner;
+own.status='connecting';own.connections={};
+c.personalAgentLoginPrompt(own.id,'slack');
+assert.match($('mod').innerHTML,/正在跳转至 Slack 登录/);
+c.cancelPersonalAgentLogin();while(timers.length)timers.shift()();
+assert.equal(own.connections.slack,undefined);
+c.personalAgentLoginPrompt(own.id,'slack');while(timers.length)timers.shift()();
+assert.match($('mod').innerHTML,/模拟登录成功/);
+assert.equal(own.connections.slack,undefined);
+c.finishPersonalAgentLogin();assert.ok(own.connections.slack);
+c.personalAgentLoginPrompt(own.id,'m365');user='other';while(timers.length)timers.shift()();
+assert.equal(own.connections.m365,undefined);
+console.log('PASS simulated login progress, cancellation, explicit return and account isolation');

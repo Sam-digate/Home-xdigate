@@ -6,7 +6,7 @@ const PERSONAL_AGENT_QUESTIONS=[
  {title:'你每天用哪些工具？',hint:'Tools — 决定需要连接哪些渠道。',placeholder:'Slack、Outlook、Teams、XDGate、SharePoint…'},
  {title:'助理可以自己做什么？',hint:'Autonomy — 用于建议自主级别 M1/M2/M3，默认 M1：发送前逐条问你。',placeholder:'例如：可以起草邮件，但发送前要我确认'}
 ];
-const PERSONAL_AGENT_TOOLS=['Slack','Outlook','Teams','XDGate','SharePoint','GitHub','Notion','其他'];
+const PERSONAL_AGENT_TOOLS=['Slack','Microsoft 365','XDGate','GitHub','Notion','Outlook','Teams','SharePoint','其他'];
 function personalAgentReceiptHTML(app){
  const status=app.reviewStatus||'pending';
  const labels={pending:'待审批',building:'构建中',connecting:'待连接',live:'已上线',rejected:'已拒绝'};

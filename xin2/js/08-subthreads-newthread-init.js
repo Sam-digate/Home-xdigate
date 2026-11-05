@@ -294,7 +294,7 @@ function openContentData(i){
  </div>`;
  $('mod').classList.add('on');
 }
-function closeMod(){if(document.querySelector('#mod .new-task-modal'))taReset();if(typeof closePermissionFocus==='function')closePermissionFocus();S.manualFallback=false;S.campSync=null;S.newCampaignId=null;$('mod').classList.remove('on','plan-mode','asset-mode','permission-modal-wrap');}
+function closeMod(){S.paLogin=null;if(document.querySelector('#mod .new-task-modal'))taReset();if(typeof closePermissionFocus==='function')closePermissionFocus();S.manualFallback=false;S.campSync=null;S.newCampaignId=null;$('mod').classList.remove('on','plan-mode','asset-mode','permission-modal-wrap');}
 function mkThread(){
  const v=$('ni').value.trim();if(!v){toast('先写一句你想做什么');return;}
  if(!taReady())return;

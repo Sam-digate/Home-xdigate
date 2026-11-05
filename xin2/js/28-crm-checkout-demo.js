@@ -77,7 +77,7 @@ function crmSaveBundle(approve,keepOpen=false){
  if(changed)c.version=(c.version||1)+1;if(approve)crmCompleteDelivery();S.crmBundleDraft=c.mails.map(m=>({...m}));render();if(!keepOpen){if(approve)closeDw();else crmDrawBundle(S.crmBundleIndex);}toast(approve?'整套邮件已批准并交付':'草稿已保存，整套邮件需重新批准');return true;
 }
 function crmIntentHTML(c){return `<div class="bub me intent-card"><div class="who"><span class="avs" style="background:var(--primary)">DU</span><span class="nm">dudu</span><span class="tm">刚刚</span></div>${esc(c.brief)}</div>`;}
-function crmPlanHTML(c){return `<div class="bub"><div class="who"><span class="avs" style="background:var(--primary)">CR</span><span class="nm">CRM 生命周期运营</span><span class="chip dom">计划 v${c.planVersion||1}</span><span class="tm">${c.stage==='todo'?'待确认':c.stage==='done'?'已确认 · 已完成':'已确认 · 执行中'}</span></div><p class="prestart-summary">CRM Agent 读取结账信息，生成 3 封英文挽回邮件。整套邮件由你审核批准后交付。</p><div class="prestart-plan-actions">${c.stage==='todo'?`<button class="btn ghost sm" onclick="crmEditPlan()">调整计划 ↗</button><button class="btn ghost sm" onclick="crmEditPlan()">手动调整</button><button class="btn sm" onclick="crmGenerate()">确认并开始</button>`:'<button class="btn ghost sm" onclick="promoteThread()">变成例行 ↗</button>'}</div></div>`;}
+function crmPlanHTML(c){return `<div class="bub"><div class="who"><span class="avs" style="background:var(--primary)">CR</span><span class="nm">CRM 生命周期运营</span><span class="chip dom">计划 v${c.planVersion||1}</span><span class="tm">${c.stage==='todo'?'待确认':c.stage==='product'?'已确认 · 待补充':c.stage==='done'?'已确认 · 已完成':'已确认 · 执行中'}</span></div><p class="prestart-summary">CRM Agent 读取结账信息，生成 3 封英文挽回邮件。整套邮件由你审核批准后交付。</p><div class="prestart-plan-actions">${c.stage==='todo'?`<button class="btn ghost sm" onclick="crmEditPlan()">调整计划 ↗</button><button class="btn ghost sm" onclick="crmEditPlan()">手动调整</button><button class="btn sm" onclick="crmConfirmPlan()">确认并开始</button>`:'<button class="btn ghost sm" onclick="promoteThread()">变成例行 ↗</button>'}</div></div>`;}
 function crmEditPlan(){
  if(!crmCanOperate()||crmTask().crm.stage!=='todo')return;
  const c=crmTask().crm;closeDw();
@@ -87,10 +87,10 @@ function crmEditPlan(){
 function crmSavePlan(){if(!crmCanOperate()||crmTask().crm.stage!=='todo')return;const value=$('crm-plan-brief').value.trim();if(!value){toast('请填写任务描述');return;}const c=crmTask().crm;if(value!==c.brief){c.brief=value;c.planVersion=(c.planVersion||1)+1;}closeDw();render();}
 function crmThreadHTML(t){
  const c=t.crm,approved=c.mails.filter(m=>m.approved).length;
- return `<div class="wrap thread-wrap"><div class="th-hd"><div class="crumb">工作 › 日常 › 任务</div><h2>${esc(t.t)}</h2><div class="th-meta"><span class="st ${t.st}">${STN[t.st]}</span><span class="chip dom">用户运营</span><span class="chip lv">M1 人工审批</span><span class="chip mut">由 dudu 发起</span></div><p class="crm-context">示例客户数据 · Shopify / Klaviyo 尚未连接</p><div class="th-stats"><div class="ts"><div class="l">主 Agent</div><div class="v thread-agent-list" style="display:flex;align-items:center;gap:4px">${AV('crm',20)}<span class="odot on"></span>CRM 生命周期运营</div></div><div class="ts"><div class="l">产出</div><div class="v num">${t.outputCount}</div></div><div class="ts"><div class="l">更新</div><div class="v">${t.up}</div></div></div></div><div class="spine">${crmNode('意图 · INTENT',crmIntentHTML(c))}${crmNode('计划 · PLAN',crmPlanHTML(c),c.stage==='todo'?'wait':'ok')}${crmRunningHTML(c)}${c.mails.length?crmNode('产出 · ARTIFACT',crmArtifactHTML(c),c.mails.every(m=>m.approved)?'ok':'wait'):''}${crmDeliveryHTML(t)}</div>${crmConversationHTML(t)}</div>`;
+ return `<div class="wrap thread-wrap"><div class="th-hd"><div class="crumb">工作 › 日常 › 任务</div><h2>${esc(t.t)}</h2><div class="th-meta"><span class="st ${t.st}">${STN[t.st]}</span><span class="chip dom">用户运营</span><span class="chip lv">M1 人工审批</span><span class="chip mut">由 dudu 发起</span></div><p class="crm-context">示例客户数据 · Shopify / Klaviyo 尚未连接</p><div class="th-stats"><div class="ts"><div class="l">主 Agent</div><div class="v thread-agent-list" style="display:flex;align-items:center;gap:4px">${AV('crm',20)}<span class="odot on"></span>CRM 生命周期运营</div></div><div class="ts"><div class="l">产出</div><div class="v num">${t.outputCount}</div></div><div class="ts"><div class="l">更新</div><div class="v">${t.up}</div></div></div></div><div class="spine">${crmNode('意图 · INTENT',crmIntentHTML(c))}${crmNode('计划 · PLAN',crmPlanHTML(c),c.stage==='todo'?'wait':'ok')}${crmProductNode(c)}${crmRunningHTML(c)}${c.mails.length?crmNode('产出 · ARTIFACT',crmArtifactHTML(c),c.mails.every(m=>m.approved)?'ok':'wait'):''}${crmDeliveryHTML(t)}</div>${crmConversationHTML(t)}</div>`;
 }
 function crmSaveBrief(value){if(crmCanOperate()&&crmTask().crm.stage==='todo')crmTask().crm.brief=value;}
-function crmDeliveryHTML(t){return `<div class="node ${t.crm.stage==='done'?'ok':''}" id="delivery-${t.id}"><div class="nlab">交付 · DELIVERY</div><div class="bub" style="color:var(--t2)">${t.crm.stage==='todo'?'计划待确认，尚未开始执行。':t.crm.stage==='generating'?'执行中，尚未生成产出。':t.crm.stage==='done'?'✓ 已交付：<b style="color:var(--t1)">Sensica · 放弃结账挽回邮件方案</b>，已沉淀到知识库作为可信来源。':'本线程的交付物为 <b style="color:var(--t1)">Sensica · 放弃结账挽回邮件方案</b>。上方产出批准后自动收口。'}</div></div>`;}
+function crmDeliveryHTML(t){return `<div class="node ${t.crm.stage==='done'?'ok':''}" id="delivery-${t.id}"><div class="nlab">交付 · DELIVERY</div><div class="bub" style="color:var(--t2)">${t.crm.stage==='todo'?'计划待确认，尚未开始执行。':t.crm.stage==='product'?'请选择推广产品，确认后生成邮件草稿。':t.crm.stage==='generating'?'执行中，尚未生成产出。':t.crm.stage==='done'?'✓ 已交付：<b style="color:var(--t1)">Sensica · 放弃结账挽回邮件方案</b>，已沉淀到知识库作为可信来源。':'本线程的交付物为 <b style="color:var(--t1)">Sensica · 放弃结账挽回邮件方案</b>。上方产出批准后自动收口。'}</div></div>`;}
 function crmCompleteDelivery(){
  const t=crmTask();if(!t||t.crm.stage==='done'||t.crm.mails.length!==3||t.crm.mails.some(m=>!m.approved))return;
  t.crm.stage='done';t.st='done';t.up='刚刚';t.crm.deliveredAt=new Date().toISOString();
@@ -103,8 +103,26 @@ function crmAddComment(){
  const tx=input.value.trim(),attachments=caFiles(draft);if(!tx&&!attachments.length)return;
  t.cmts.push({w:currentUser(),tx,attachments,at:'刚刚'});caClear(draft);render();toast('已发送');
 }
+const CRM_CAMPAIGN_PRODUCTS=['Sensilift','Sensifirm','Sensilight Mini','Sensilight Pro','Sensilight ICE','品牌层面（不指定具体产品）'];
+function crmConfirmPlan(){
+ if(!crmCanOperate())return;const t=crmTask(),c=t.crm;
+ if(c.stage!=='todo')return;
+ if(!c.brief.trim()){toast('请填写任务描述');return;}
+ c.stage='product';c.productDraft=CRM_CAMPAIGN_PRODUCTS[0];t.st='ask';render();
+}
+function crmProductNode(c){
+ if(c.stage==='todo')return '';
+ if(c.product)return typeof threadAnsweredNode==='function'?threadAnsweredNode(`<b>推广产品：${esc(c.product)}</b>`):crmNode('你的补充 · ANSWERED',`<div class="bub me">推广产品：${esc(c.product)}</div>`);
+ if(c.stage!=='product')return '';
+ return crmNode('需要你补充 · CLARIFY',`<div class="bub"><div class="who"><span class="avs" style="background:var(--primary)">CR</span><span class="nm">CRM 生命周期运营</span><span class="chip mut">推广产品</span></div><h3>这些流程主要推哪个产品？</h3><p class="crm-context">选择本次邮件的推广产品，确认后生成草稿。</p><div class="channel-ask ppt-ask">${CRM_CAMPAIGN_PRODUCTS.map((product,index)=>`<label style="display:flex;align-items:center;gap:8px;font-size:var(--fs-md)"><input type="radio" name="crm-product" value="${index}" ${product===c.productDraft?'checked':''} onchange="crmSelectProduct(${index})">${product}</label>`).join('')}</div><button class="btn" onclick="crmGenerate()">用这个选择生成草稿</button></div>`,'wait');
+}
+function crmSelectProduct(index){
+ if(!crmCanOperate())return;const c=crmTask().crm;
+ if(c.stage==='product'&&CRM_CAMPAIGN_PRODUCTS[index])c.productDraft=CRM_CAMPAIGN_PRODUCTS[index];
+}
 function crmGenerate(){
- if(!crmCanOperate())return;const t=crmTask(),c=t.crm;if(c.stage!=='todo')return;if(!c.brief.trim()){toast('请填写任务描述');return;}
+ if(!crmCanOperate())return;const t=crmTask(),c=t.crm;if(c.stage!=='product'||!CRM_CAMPAIGN_PRODUCTS.includes(c.productDraft))return;
+ c.product=c.productDraft;c.version=(c.version||0)+1;
  c.stage='generating';c.progress=8;c.progressText='正在读取任务需求与邮件安排…';c.generationToken=(c.generationToken||0)+1;const token=c.generationToken;t.st='run';t.up='刚刚';render();
  const steps=[{p:35,text:'正在起草结账提醒与顾虑解答邮件…'},{p:72,text:'正在生成最后提醒，检查语气和功效表述…'},{p:100,text:'邮件检查完成，准备提交审核'}];
  steps.forEach((step,i)=>setTimeout(()=>{
@@ -120,7 +138,7 @@ function crmBuildMails(t){
  {delay:'结账后 +1 小时',purpose:'温和提醒尚未完成的结账，帮助客户继续了解和选购。',subject:'A little more time to decide on Sensica?',body:'Hi there,\n\nYou started checking out with Sensica but did not finish your order. If you were interrupted, you can return to checkout whenever you are ready.\n\nChoosing a device for your routine deserves a little thought. Take another look at the product details and suitability information to decide whether it is right for you.\n\nIf something was unclear, our team is here to help you find an answer.\n\nThe Sensica Team',cta:'Return to checkout'},
  {delay:'结账后 +24 小时',purpose:'回应配送、退货、保修与使用方面的顾虑，提供清晰的决策指引。',subject:'A few answers before you choose',body:'Hi there,\n\nStill weighing up your Sensica order? You may want to check delivery options, the returns policy or warranty coverage before making a decision.\n\nYou can find those details on our website. For questions about using a device, start with its product information and instructions, including the suitability and safety guidance.\n\nIf you cannot find what you need, contact our team. We would be happy to point you in the right direction.\n\nThe Sensica Team',cta:'Review your order'},
  {delay:'结账后 +72 小时',purpose:'最后一次轻量提醒，尊重客户选择，不增加折扣或紧迫感。',subject:'One last note about your Sensica order',body:'Hi there,\n\nWe wanted to leave you one final reminder about the Sensica order you started. If you would like to continue, you can return to checkout and review your selection.\n\nThere is no need to rush. Check the current price, availability and product information before deciding what works for you.\n\nIf now is not the right time, that is fine too. Thank you for considering Sensica.\n\nThe Sensica Team',cta:'Return to your order'}
- ].map(m=>({...m,approved:false,version:1}));c.stage='review';t.st='review';t.outputCount=1;t.up='刚刚';render();toast('已生成 3 封邮件，请审核后交付');
+ ].map(m=>({...m,product:c.product,subject:c.product&&c.product!==CRM_CAMPAIGN_PRODUCTS[5]?m.subject.replaceAll('Sensica',c.product):m.subject,body:c.product&&c.product!==CRM_CAMPAIGN_PRODUCTS[5]?m.body.replace('product details',c.product+' product details').replaceAll('Sensica order',c.product+' order'):m.body,approved:false,version:1}));c.stage='review';t.st='review';t.outputCount=1;t.up='刚刚';render();toast('已生成 3 封邮件，请审核后交付');
 }
 function crmOpenMail(index){
  if(!crmCanOperate())return;const c=crmTask().crm,m=c.mails[index];if(!m)return;

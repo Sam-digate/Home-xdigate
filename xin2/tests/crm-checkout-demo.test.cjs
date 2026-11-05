@@ -2,7 +2,11 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const timers=[];let allowed=true;const nodes={};const $=id=>nodes[id]||(nodes[id]={value:'',innerHTML:'',classList:{add(){}}});
 const ctx=vm.createContext({setTimeout(fn){timers.push(fn);},AG:{},TRACE:{},ONLINE:{},REG:[],T:[],S:{},U:{du:{n:'dudu'}},currentUser:()=> 'du',permissionHasPage:()=>allowed,$,render(){},toast(){},closeDw(){},closeMod(){},kpIcons(){},esc:String,STN:{todo:'todo',review:'review',done:'done'}});
 vm.runInContext(fs.readFileSync('js/28-crm-checkout-demo.js','utf8'),ctx);
-const t=ctx.crmTask();assert.equal(t.st,'todo');ctx.crmGenerate();assert.equal(t.st,'run');assert.ok(ctx.crmRunningHTML(t.crm).includes('progressbar'));ctx.crmGenerate();assert.equal(timers.length,3);while(timers.length)timers.shift()();assert.equal(t.st,'review');assert.equal(t.outputCount,1);ctx.crmCompleteDelivery();assert.equal(t.st,'review');
+const t=ctx.crmTask();assert.equal(t.st,'todo');ctx.crmGenerate();assert.equal(t.st,'todo');
+ctx.crmConfirmPlan();assert.equal(t.st,'ask');assert.equal(t.crm.productDraft,'Sensilift');assert.equal(timers.length,0);assert.ok(ctx.crmProductNode(t.crm).includes('type="radio"'));
+ctx.crmSelectProduct(1);assert.equal(t.crm.productDraft,'Sensifirm');ctx.crmSelectProduct(99);assert.equal(t.crm.productDraft,'Sensifirm');
+allowed=false;ctx.crmGenerate();assert.equal(t.st,'ask');allowed=true;
+ctx.crmGenerate();assert.equal(t.crm.product,'Sensifirm');assert.equal(t.st,'run');assert.ok(ctx.crmProductNode(t.crm).includes('Sensifirm'));assert.ok(ctx.crmRunningHTML(t.crm).includes('progressbar'));ctx.crmGenerate();assert.equal(timers.length,3);while(timers.length)timers.shift()();assert.equal(t.st,'review');assert.equal(t.outputCount,1);ctx.crmCompleteDelivery();assert.equal(t.st,'review');
 ctx.crmOpenBundle();assert.ok($('dw').innerHTML.includes('crm-mail-card'));ctx.crmDrawBundle(0);assert.ok($('dw').innerHTML.includes('crm-bundle-subject'));
 ctx.crmEditBundleField(0,'subject','Revised subject');ctx.crmNavigateBundle(1);assert.equal(ctx.S.crmBundleDraft[0].subject,'Revised subject');
 ctx.crmEditBundleField(2,'body','');ctx.crmSaveBundle(true);assert.equal(t.st,'review');assert.notEqual(t.crm.mails[0].subject,'Revised subject');
