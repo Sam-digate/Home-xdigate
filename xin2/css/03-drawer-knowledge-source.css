@@ -723,8 +723,8 @@
 .seo-direction-option{border:1px solid var(--border);border-radius:var(--r-sm)}
 .seo-direction-option.on{border-color:var(--primary)}
 .seo-direction-option.custom{position:relative}
-.seo-direction-option.custom>.seo-direction-choice{padding-right:46px}
-.seo-direction-remove{position:absolute;top:4px;right:8px}
+.seo-direction-option.custom>.seo-direction-choice{padding-right:72px}
+.seo-direction-remove{position:absolute;top:6px;right:8px;color:var(--danger-fg)}
 .seo-direction-choice{display:flex;align-items:flex-start;gap:var(--sp-3);padding:var(--sp-3);cursor:pointer}
 .seo-direction-option.on>.seo-direction-choice{background:var(--surface-tint);border-radius:var(--r-sm) var(--r-sm) 0 0}
 .seo-direction-option>.seo-direction-detail{padding:var(--sp-3)}
@@ -735,6 +735,7 @@
 .seo-direction-section-title span{color:var(--t3);font-weight:600}
 .seo-direction-chips{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-top:var(--sp-3)}
 .seo-direction-chips span{display:inline-flex;align-items:center;min-height:30px;padding:0 10px;border-radius:8px;background:var(--primary-bg);color:var(--primary);font-size:var(--fs-xs);font-weight:600}
+.seo-question-volume{margin-left:6px;font-size:inherit;font-weight:400;opacity:.72;font-variant-numeric:tabular-nums}
 .seo-question-add{max-width:100%;color:var(--primary);font-size:var(--fs-xs);font-weight:600}
 .seo-question-add summary,.seo-question-add form,.seo-question-edit{display:flex;align-items:center;min-height:30px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--primary-bg)}
 .seo-question-add summary{list-style:none;cursor:pointer}

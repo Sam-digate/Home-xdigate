@@ -2021,7 +2021,7 @@ function seoDirectionClarification(a){
    return `<section class="seo-direction-option${active?' on':''}${option.custom?' custom':''}"><label class="seo-direction-choice">
     <input type="radio" name="seo-direction-${a.id}" ${active?'checked':''} onchange="selectInlineSeoDirection('${a.id}',${i})">
     ${active?`<b>${option.custom?'自定义方向':`方向${['一','二','三'][i]||i+1}`}</b>`:`<span><b>${esc(option.t||(option.custom?'自定义方向':''))}</b><small>${esc(option.e)}</small></span>`}</label>
-    ${option.custom?`<button type="button" class="ib seo-direction-remove" title="删除自定义方向" aria-label="删除自定义方向" onclick="removeCustomSeoDirection('${a.id}',${i})">×</button>`:''}
+    ${option.custom?`<button type="button" class="btn ghost sm seo-direction-remove" title="删除自定义方向" aria-label="删除自定义方向" onclick="removeCustomSeoDirection('${a.id}',${i})">删除</button>`:''}
     ${active?dSeoDirection(a,i):''}</section>`;
   }).join('')}</div>
   <div class="seo-intake-actions">${a.drawerReturning?drawerReturnEditor(a):`<button class="btn" ${selected==null?'disabled':''} onclick="optAct('${a.id}',${selected??-1},1)">批准，开始写</button><button class="btn ghost" onclick="addCustomSeoDirection('${a.id}')">＋ 自定义方向</button><button class="btn ghost" onclick="startDrawerReturn('${a.id}')">都不用</button>`}</div>
@@ -2058,7 +2058,7 @@ function dSeoDirection(a,i){
   <div class="fld"><label>选题名称</label><input value="${esc(o.t)}" oninput="updateSeoDirectionField('${a.id}',${i},'t',this.value)"></div>
   <div class="fld"><label>选题说明</label><textarea rows="5" oninput="updateSeoDirectionField('${a.id}',${i},'e',this.value)">${esc(o.e)}</textarea></div>
   <section class="seo-direction-section"><div class="seo-direction-section-title">覆盖问题 <span>· ${questions.length} 个</span></div>
-   <div class="seo-direction-chips">${questions.map((q,j)=>o.editingQuestion===j?`<form class="seo-question-edit" onsubmit="addSeoQuestion(event,'${a.id}',${i},${j})" onkeydown="if(event.key==='Escape'){event.preventDefault();event.stopPropagation();editSeoQuestion('${a.id}',${i},null)}">
+   <div class="seo-direction-chips">${questions.map((q,j)=>o.questionVolumes?.[j]!=null?`<span>${esc(q)} <small class="seo-question-volume" title="示例搜索量">${o.questionVolumes[j]}</small><button type="button" title="移除问题" aria-label="移除问题：${esc(q)}" onclick="removeSeoQuestion('${a.id}',${i},${j})">×</button></span>`:o.editingQuestion===j?`<form class="seo-question-edit" onsubmit="addSeoQuestion(event,'${a.id}',${i},${j})" onkeydown="if(event.key==='Escape'){event.preventDefault();event.stopPropagation();editSeoQuestion('${a.id}',${i},null)}">
      <input name="question" aria-label="编辑覆盖问题" value="${esc(q)}" required><button type="submit">确认</button>
     </form>`:`<span><button class="seo-question-text" type="button" title="编辑问题" onclick="editSeoQuestion('${a.id}',${i},${j})">${esc(q)}</button><button type="button" title="删除问题" aria-label="删除问题：${esc(q)}" onclick="removeSeoQuestion('${a.id}',${i},${j})">×</button></span>`).join('')}
     <details class="seo-question-add" ontoggle="if(this.open)this.querySelector('input').focus()">
@@ -2075,7 +2075,7 @@ function dSeoDirection(a,i){
 }
 function editSeoQuestion(id,index,questionIndex){
  const [,a]=findArt(id),option=a?.opts?.[index];
- if(!option||a.st==='done')return;
+ if(!option||a.st==='done'||option.questionVolumes?.[questionIndex]!=null)return;
  option.editingQuestion=questionIndex;
  refreshDrawerReturn(id);
  if(questionIndex!==null)document.querySelector('.seo-question-edit input')?.focus();
@@ -2084,7 +2084,7 @@ function addSeoQuestion(event,id,index,questionIndex=null){
  event.preventDefault();
  const [,a]=findArt(id),option=a?.opts?.[index];
  const question=event.currentTarget.elements.question.value.trim();
- if(!option||!question||a.st==='done')return;
+ if(!option||!question||a.st==='done'||option.questionVolumes?.[questionIndex]!=null)return;
  option.questions=option.questions||[];
  if(option.questions.some((item,i)=>i!==questionIndex&&item.toLowerCase()===question.toLowerCase())){toast('这个问题已添加');return;}
  if(questionIndex===null)option.questions.push(question);
@@ -2097,6 +2097,7 @@ function removeSeoQuestion(id,index,questionIndex){
  const [,a]=findArt(id),option=a?.opts?.[index];
  if(a?.st==='done'||!option?.questions?.[questionIndex])return;
  option.questions.splice(questionIndex,1);
+ option.questionVolumes?.splice(questionIndex,1);
  option.editingQuestion=null;
  option.edited=true;
  refreshDrawerReturn(id);
@@ -2468,6 +2469,7 @@ function seoIntakeActionForm(a){
  return `<form class="seo-intake-actions" onsubmit="submitSeoIntakeAction(event,'${a.id}')" onkeydown="if(event.key==='Escape'){event.preventDefault();event.stopPropagation();editSeoIntakeAction('${a.id}',null)}">
   <div class="fld" style="flex:1;min-width:0;margin:0"><input name="response" aria-label="${label}" placeholder="${label}" required></div>
   <button type="submit" class="btn">${replacing?'换个词':'拒绝'}</button>
+  <button type="button" class="btn ghost" onclick="editSeoIntakeAction('${a.id}',null)">取消</button>
  </form>`;
 }
 function editSeoIntakeAction(id,action){
@@ -2515,6 +2517,8 @@ function confirmSeoIntake(id,inline=false){
    {t:'方向二：中国社媒平台与用户场景对比',e:'以平台对照为主线，比较用户人群、内容形态、商业能力和适合的品牌目标。',g:['#C4B5FD','#7C3AED'],s:'review',sub:[],questions:['most popular social media in China','WeChat vs Xiaohongshu','Chinese social media demographics','how does Douyin differ from TikTok','which Chinese platforms support social commerce'],angles:['填写这篇文章的写作角度']},
    {t:'方向三：从策略到执行的中国社媒营销框架',e:'围绕目标、平台组合、内容本地化、达人合作与效果衡量，提供可执行的落地框架。',g:['#6EE7B7','#059669'],s:'review',sub:[],questions:['China social media marketing strategy','how to market in China','Chinese influencer marketing','how should brands localize content for China','how to measure a Chinese social media campaign'],angles:['填写这篇文章的写作角度']}
   ]};
+  const sampleVolumes=[[8000,4300,3800,2100,1600],[7500,4000,4100,3600,1900],[5600,3200,2700,1800,1200]];
+  directions.opts.forEach((option,index)=>{option.questionVolumes=sampleVolumes[index];});
   t.arts.push(directions);
  }
  t.st='review';t.up='刚刚';

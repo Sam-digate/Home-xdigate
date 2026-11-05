@@ -1458,6 +1458,7 @@ function kanban(L){
  const preferredOrder=['t1-social-article-showcase','t16','t1-label-copy','t-ppt-form-demo','t5','t-douyin-creators','t-general-agent-demo','t-seo-flow-demo'];
  return `<div class="kb">${COLS.map(c=>{
   const it=L.filter(t=>t.st===c.k||(c.k==='review'&&t.st==='ask')).sort((a,b)=>{
+   if(c.k==='todo')return (b.workTop||0)-(a.workTop||0);
    const ai=preferredOrder.indexOf(a.id),bi=preferredOrder.indexOf(b.id);
    return (ai<0?preferredOrder.length:ai)-(bi<0?preferredOrder.length:bi);
   });

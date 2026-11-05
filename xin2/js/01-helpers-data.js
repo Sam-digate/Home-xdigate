@@ -511,7 +511,7 @@ const T=[
  cmts:[]},
 {cr:{s:'a',w:'cs'},id:'t11',trig:'scheduled',t:'复购提醒 · 45 天未回购人群',camp:null,dom:'用户运营',ag:'cs',own:'ar',st:'done',up:'本周一',day:2,lv:'M3',cost:'¥9.70'},
 {cr:{s:'h',w:'so'},id:'t12',trig:'manual',t:'竞品 8 月内容动作复盘',camp:null,dom:'内容',ag:'orch',own:'so',st:'done',up:'本周一',day:2,lv:'M1',cost:'¥28.30'},
-{cr:{s:'h',w:'so'},id:'t-seo-flow-demo',trig:'manual',t:'SEO 新流程演示 · Chinese Social media',camp:null,dom:'B2B',ag:'seo',own:'so',st:'review',up:'刚刚',day:0,lv:'M1',cost:'—',new:1,
+{cr:{s:'h',w:'so'},id:'t-seo-flow-demo',trig:'manual',t:'SEO 新流程演示 · Chinese Social media',camp:null,dom:'B2B',ag:'seo',own:'so',st:'todo',workTop:340,up:'刚刚',day:0,lv:'M1',cost:'—',new:1,
  intent:{who:'so',tx:'以关键词「Chinese Social media」生成一篇面向美国市场的 SEO 文章。',at:'刚刚'},
  plan:{v:1,tx:'确认关键词机会 → 选择内容方向 → 生成文章。',steps:[
   {l:'确认关键词机会',m:'待人工确认',s:'act',r:'—'},
