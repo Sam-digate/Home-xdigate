@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sensica · Sign in</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #24201c;
+      --muted: #74685f;
+      --border: #dcd3cb;
+      --accent: #965b48;
+      --paper: #fbf8f4;
+      font: 16px/1.5 system-ui, "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: #fff;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    .login-page {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      min-height: 100vh;
+      min-height: 100svh;
+    }
+    .product-image {
+      min-height: 100%;
+      background: #eee1d8 url("https://cdn.shopify.com/s/files/1/0689/2840/5561/files/sensilift_mini_ls_01.jpg") center / cover no-repeat;
+    }
+    .login-panel {
+      display: grid;
+      place-items: center;
+      padding: 44px clamp(24px, 5vw, 80px);
+    }
+    .login-card {
+      position: relative;
+      width: min(100%, 532px);
+      padding: 64px clamp(24px, 4vw, 60px) 44px;
+      border: 1px solid #f2ece7;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 12px 38px rgba(53, 37, 25, .11), 0 2px 8px rgba(53, 37, 25, .04);
+    }
+    .brand {
+      display: grid;
+      place-items: center;
+      min-height: 42px;
+      margin: 0 auto 35px;
+    }
+    .brand img { display: block; width: 162px; max-height: 52px; object-fit: contain; }
+    .brand img[hidden] { display: none; }
+    .brand-fallback { font-size: 26px; font-weight: 650; letter-spacing: .18em; }
+    .language-switch {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      display: inline-flex;
+      gap: 2px;
+      padding: 3px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--paper);
+    }
+    .language-switch button {
+      min-width: 40px;
+      padding: 4px 8px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font: 600 12px/1.5 system-ui, "Microsoft YaHei", sans-serif;
+      cursor: pointer;
+    }
+    .language-switch button[aria-pressed="true"] {
+      background: var(--ink);
+      color: #fff;
+    }
+    .login-form { display: grid; gap: 22px; }
+    .field label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 550; }
+    .field input {
+      width: 100%;
+      height: 48px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+    }
+    .field input::placeholder { color: var(--muted); font-size: 14px; }
+    .field input:focus { border-color: var(--accent); outline: 2px solid #ebd9d0; }
+    .password-field { position: relative; }
+    .password-field input { padding-right: 48px; }
+    .password-toggle {
+      position: absolute;
+      inset: 3px 4px 3px auto;
+      display: grid;
+      place-items: center;
+      width: 42px;
+      border: 0;
+      border-radius: 6px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+    }
+    .password-toggle:hover { color: var(--ink); background: var(--paper); }
+    .password-toggle svg { width: 19px; height: 19px; }
+    .password-toggle .eye-slash { display: none; }
+    .password-toggle[aria-pressed="true"] .eye-slash { display: block; }
+    .submit {
+      min-height: 48px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--ink);
+      color: #fff;
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    .submit:hover { background: #100e0c; }
+    button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .form-status {
+      min-height: 20px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+    @media (max-width: 760px) {
+      .login-page { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+      .product-image { min-height: clamp(150px, 26svh, 230px); background-position: center 42%; }
+      .login-panel { padding: 24px 18px 32px; }
+      .login-card { padding-top: 60px; padding-bottom: 24px; }
+      .brand { margin-bottom: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="login-page">
+    <div class="product-image" role="img" aria-label="Sensica Sensilift Mini"></div>
+    <section class="login-panel" id="login-panel" aria-label="Sign in">
+      <div class="login-card">
+        <div class="language-switch" id="language-switch" role="group" aria-label="Language">
+          <button type="button" lang="en" data-language="en" aria-label="English" aria-pressed="true">EN</button>
+          <button type="button" lang="zh-CN" data-language="zh-CN" aria-pressed="false">中文</button>
+        </div>
+        <div class="brand">
+          <img src="https://sensica.com/cdn/shop/files/Sensica_Logo.png" alt="Sensica"
+            onerror="this.hidden = true; this.nextElementSibling.hidden = false">
+          <span class="brand-fallback" hidden>SENSICA</span>
+        </div>
+        <form class="login-form" id="login-form" method="post">
+          <div class="field">
+            <label for="account" id="account-label">Account</label>
+            <input id="account" type="text" autocomplete="username" placeholder="Enter your account" required>
+          </div>
+          <div class="field">
+            <label for="password" id="password-label">Password</label>
+            <div class="password-field">
+              <input id="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+              <button class="password-toggle" id="password-toggle" type="button" aria-label="Show password"
+                aria-controls="password" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z"/>
+                  <circle cx="12" cy="12" r="2.5"/>
+                  <path class="eye-slash" d="m4 4 16 16"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button class="submit" id="login-submit" type="submit">Sign in</button>
+        </form>
+        <p class="form-status" id="login-status" role="status"></p>
+      </div>
+    </section>
+  </main>
+  <script>
+    const password = document.getElementById('password');
+    const toggle = document.getElementById('password-toggle');
+    const form = document.getElementById('login-form');
+    const status = document.getElementById('login-status');
+    const languageSwitch = document.getElementById('language-switch');
+    const translations = {
+      'zh-CN': {
+        account: '账号', accountPlaceholder: '请输入账号', password: '密码',
+        passwordPlaceholder: '请输入密码', login: '登录', language: '语言',
+        show: '显示密码', hide: '隐藏密码', preview: '表单填写完成。当前为登录页面预览。'
+      },
+      en: {
+        account: 'Account', accountPlaceholder: 'Enter your account', password: 'Password',
+        passwordPlaceholder: 'Enter your password', login: 'Sign in', language: 'Language',
+        show: 'Show password', hide: 'Hide password', preview: 'Form complete. This is a sign-in preview.'
+      }
+    };
+    let copy = translations[document.documentElement.lang];
+
+    function updatePasswordLabel() {
+      const visible = password.type === 'text';
+      toggle.setAttribute('aria-pressed', String(visible));
+      toggle.setAttribute('aria-label', visible ? copy.hide : copy.show);
+    }
+
+    for (const button of languageSwitch.querySelectorAll('button')) {
+      button.addEventListener('click', () => {
+        const language = button.dataset.language;
+        copy = translations[language];
+        document.documentElement.lang = language;
+        document.title = 'Sensica · ' + copy.login;
+        document.getElementById('login-panel').setAttribute('aria-label', copy.login);
+        languageSwitch.setAttribute('aria-label', copy.language);
+        for (const option of languageSwitch.querySelectorAll('button')) {
+          option.setAttribute('aria-pressed', String(option === button));
+        }
+        document.getElementById('account-label').textContent = copy.account;
+        document.getElementById('account').placeholder = copy.accountPlaceholder;
+        document.getElementById('password-label').textContent = copy.password;
+        password.placeholder = copy.passwordPlaceholder;
+        document.getElementById('login-submit').textContent = copy.login;
+        if (status.textContent) status.textContent = copy.preview;
+        updatePasswordLabel();
+      });
+    }
+
+    toggle.addEventListener('click', () => {
+      password.type = password.type === 'password' ? 'text' : 'password';
+      updatePasswordLabel();
+    });
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      status.textContent = copy.preview;
+    });
+
+    form.addEventListener('input', () => { status.textContent = ''; });
+  </script>
+</body>
+</html>
