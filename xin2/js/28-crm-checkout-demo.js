@@ -31,12 +31,13 @@ function crmHighlightedMail(mail,field,index){
  findings.forEach(finding=>{if(finding.field!==field)return;html+=esc(text.slice(from,finding.start))+`<mark>${esc(text.slice(finding.start,finding.end))}</mark>`;from=finding.end;});
  return html+esc(text.slice(from));
 }
-function crmMailReviewHTML(mail){
+function crmMailReviewHTML(mail,dirty){
  const findings=crmMailFindings(mail);
- return `<h3>审核结果</h3>${findings.length?findings.map((f,i)=>`<section class="claims-review-item"><h4>${i+1}. ${f.text==='visible results in 7 days'?'见效时间需核对':f.text==='guaranteed results'?'绝对效果承诺':'专业效果需核对'} <span class="crm-risk-count">${f.risk}</span></h4><dl><dt>原文</dt><dd>${esc(mail[f.field].slice(f.start,f.end))}</dd><dt>问题与依据</dt><dd>${esc(f.reason)}</dd></dl><details><summary>查看详细依据</summary><p>位置：邮件${f.field==='subject'?'主题':'正文'}。产品：${esc(mail.product||'Sensica')}。</p><p>依据状态：命中预设演示规则，需结合产品获批主张、适用条件及支持资料核验。</p></details></section>`).join(''):'<p class="crm-context">未检出预设风险，等待人工审核。</p>'}`;
+ const status=dirty?'<span class="st review">待更新</span>':findings.length?`<span class="crm-risk-count">${findings.length} 处需核查</span>`:'<span class="st done">未发现问题</span>';
+ return `<summary>审核结果 ${status}</summary>${dirty?'<p class="crm-context">以下为上次保存的审核结果，保存草稿后更新。</p>':''}${findings.length?findings.map((f,i)=>`<section class="claims-review-item"><h4>${i+1}. ${f.text==='visible results in 7 days'?'见效时间需核对':f.text==='guaranteed results'?'绝对效果承诺':'专业效果需核对'} <span class="crm-risk-count">${f.risk}</span></h4><dl><dt>原文</dt><dd>${esc(mail[f.field].slice(f.start,f.end))}</dd><dt>问题与依据</dt><dd>${esc(f.reason)}</dd></dl><details><summary>查看详细依据</summary><p>位置：邮件${f.field==='subject'?'主题':'正文'}。产品：${esc(mail.product||'Sensica')}。</p><p>依据状态：命中预设演示规则，需结合产品获批主张、适用条件及支持资料核验。</p></details></section>`).join(''):'<p class="crm-context">未检出预设风险，等待人工审核。</p>'}`;
 }
 function crmMailHasUnsavedChanges(mail,index){return ['subject','body'].some(key=>mail[key]!==crmTask()?.crm.mails[index]?.[key]);}
-function crmDraftReviewHTML(mail,index){return (crmMailHasUnsavedChanges(mail,index)?'<p class="crm-context">待更新 · 以下为上次保存的审核结果，保存草稿后更新。</p>':'')+crmMailReviewHTML(crmTask().crm.mails[index]);}
+function crmDraftReviewHTML(mail,index){return crmMailReviewHTML(crmTask().crm.mails[index],crmMailHasUnsavedChanges(mail,index));}
 function crmDraftHighlightHTML(mail,field,index){
  const saved=crmTask().crm.mails[index];if(!crmMailHasUnsavedChanges(mail,index))return crmHighlightedMail(saved,field,index);
  // Track only previously checked phrases; new text is checked after saving.
@@ -55,7 +56,7 @@ function crmMailEditorHTML(mail,field,index,locked){
  return `<div class="crm-highlight-editor ${subject?'crm-highlight-subject':''}"><div id="crm-highlight-${field}" class="crm-highlight-backdrop" aria-hidden="true">${crmDraftHighlightHTML(mail,field,index)}\n</div><textarea id="crm-bundle-${field}" rows="${subject?1:12}" aria-label="${subject?'主题':'正文'}" ${locked?'readonly':''} oninput="crmEditBundleField(${index},'${field}',this.value)" onscroll="crmSyncMailHighlight('${field}',this)">${esc(mail[field])}</textarea></div>`;
 }
 function crmMailContentHTML(mail,index,locked){
- return `<div class="csa-email"><div class="fld"><label for="crm-bundle-subject">主题</label>${crmMailEditorHTML(mail,'subject',index,locked)}</div><div class="fld"><label for="crm-bundle-body">正文</label>${crmMailEditorHTML(mail,'body',index,locked)}</div></div><section id="crm-mail-review" class="claims-review">${crmDraftReviewHTML(mail,index)}</section>`;
+ return `<div class="csa-email"><div class="fld"><label for="crm-bundle-subject">主题</label>${crmMailEditorHTML(mail,'subject',index,locked)}</div><div class="fld"><label for="crm-bundle-body">正文</label>${crmMailEditorHTML(mail,'body',index,locked)}</div></div><details id="crm-mail-review" class="claims-review">${crmDraftReviewHTML(mail,index)}</details>`;
 }
 function crmNode(label,body,state='ok'){return `<div class="node ${state}"><div class="nlab">${label}</div>${body}</div>`;}
 function crmArtifactHTML(c){
@@ -66,7 +67,30 @@ function crmOpenBundle(preserve=false){
  if(!crmCanOperate())return;const c=crmTask().crm;if(!c.mails.length)return;
  if(S.crmCommentsOpen===undefined)S.crmCommentsOpen=true;
  if(!preserve||!S.crmBundleDraft)S.crmBundleDraft=c.mails.map(m=>({...m}));
+ S.crmBundleTab='mail';
  crmDrawBundle();
+}
+function crmBundleVersions(c){
+ if(!c.versions)c.versions=[{version:c.version||1,label:'邮件方案'}];
+ return c.versions;
+}
+function crmRecordBundleSave(c,mailNumbers){
+ if(!mailNumbers.length)return;
+ const versions=crmBundleVersions(c);
+ c.version=(c.version||1)+1;
+ versions.push({version:c.version,label:`保存草稿 · 邮件 ${mailNumbers.join('、')}`,at:new Date().toISOString()});
+}
+function crmBundleVersionsHTML(c){
+ const current=c.version||1;
+ return crmBundleVersions(c).slice().reverse().map(entry=>{
+  const label=entry.version===current?'当前版本 · '+entry.label:entry.label;
+  return `<div class="vrow"><span class="vv">v${entry.version}</span><span class="vt">${esc(label)}</span><span class="vd">${entry.at?esc(kbHistoryTime(entry.at)):''}</span></div>`;
+ }).join('');
+}
+function crmSwitchBundleTab(tab){
+ if(!crmCanOperate()||!S.crmBundleDraft||!['mail','versions'].includes(tab)||S.crmBundleTab===tab)return;
+ S.crmBundleTab=tab;
+ crmDrawBundle(S.crmBundleIndex);
 }
 function crmBundleFooterHTML(mail,index,locked){
  if(locked||mail?.approved)return '<span class="st done">已批准</span>';
@@ -76,8 +100,10 @@ function crmDrawBundle(index=null){
  if(!crmCanOperate()||!S.crmBundleDraft)return;const c=crmTask().crm,locked=c.stage==='done',draft=S.crmBundleDraft,m=index===null?null:draft[index];
  if(index!==null&&!m)return;
  S.crmBundleIndex=index;
+ const showVersions=S.crmBundleTab==='versions';
+ const tabs=`<nav class="dw-tabs" aria-label="邮件方案内容"><button type="button" class="${showVersions?'':'on'}" ${showVersions?'':'aria-current="page"'} onclick="crmSwitchBundleTab('mail')">邮件</button><button type="button" class="${showVersions?'on':''}" ${showVersions?'aria-current="page"':''} onclick="crmSwitchBundleTab('versions')">版本</button></nav>`;
  const body=m?`<div class="crm-mail-navigation"><button class="btn ghost sm" onclick="crmNavigateBundle(null)">← 返回邮件列表</button><span class="crm-context" style="margin:0">邮件 ${index+1} / ${draft.length} · ${m.delay}</span><span class="spacer"></span><button class="btn ghost sm" ${index===0?'disabled':''} onclick="crmNavigateBundle(${index-1})">上一封</button><button class="btn ghost sm" ${index===draft.length-1?'disabled':''} onclick="crmNavigateBundle(${index+1})">下一封</button></div>${crmMailContentHTML(m,index,locked||m.approved)}`:`<div class="crm-bundle-heading"><h3>邮件</h3><span class="crm-context" style="margin-left:auto">${draft.length} 封</span></div>${draft.map((mail,i)=>`<button class="crm-mail-card" onclick="crmNavigateBundle(${i})"><span class="crm-mail-card-title"><b>${esc(mail.subject)}</b><span class="chip mut">v${mail.version}</span>${crmMailFindings(mail).length?`<span class="crm-risk-count">${crmMailFindings(mail).length} 处需核查</span>`:''}</span><span class="crm-mail-card-excerpt">${esc(mail.body.split(/\n\s*\n/).filter(p=>p.trim()).slice(1,3).join(' '))}</span><span class="crm-mail-card-meta"><span class="chip mut crm-delay-pill">${mail.delay}</span><span class="spacer"></span><span class="st ${mail.approved?'done':'review'}">${mail.approved?'已批准':'待审批'}</span></span></button>`).join('')}`;
- $('dw').innerHTML=`<section class="personal-agent-application" role="dialog" aria-modal="true" aria-label="CRM 邮件方案"><header class="dw-h"><button class="ib" aria-label="关闭" onclick="closeDw()"><i data-lucide="x"></i></button><div style="flex:1"><div class="ty">CRM · 邮件方案</div><h3>Sensica · 放弃结账挽回邮件方案</h3></div></header><div class="dw-b">${body}</div><footer class="dw-f">${crmBundleFooterHTML(m,index,locked)}</footer></section>`;
+ $('dw').innerHTML=`<section class="personal-agent-application" role="dialog" aria-modal="true" aria-label="CRM 邮件方案"><header class="dw-h"><button class="ib" aria-label="关闭" onclick="closeDw()"><i data-lucide="x"></i></button><div style="flex:1"><div class="ty">CRM · 邮件方案</div><h3>Sensica · 放弃结账挽回邮件方案</h3></div></header>${tabs}<div class="dw-b">${showVersions?crmBundleVersionsHTML(c):body}</div><footer class="dw-f">${showVersions?'':crmBundleFooterHTML(m,index,locked)}</footer></section>`;
  crmMountComments(index);
  $('dw').classList.add('on');$('scrim').classList.add('on');kpIcons();if(typeof syncDrawerExpandControl==='function')syncDrawerExpandControl();
 }
@@ -126,9 +152,19 @@ function crmSaveBundle(approve,keepOpen=false){
  if(c.mails.some((m,i)=>m.approved&&['subject','body','cta'].some(key=>m[key]!==S.crmBundleDraft[i]?.[key]))){toast('已批准邮件不可修改');return;}
  const values=S.crmBundleDraft.map(m=>({subject:m.subject.trim(),body:m.body.trim(),cta:m.cta}));
  if(values.some(v=>!v.subject||!v.body||!v.cta)){toast('请补齐每封邮件的标题、正文和按钮文案');return;}
- let changed=false;
- c.mails.forEach((m,i)=>{const v=values[i],edited=Object.keys(v).some(k=>v[k]!==m[k]);if(edited){m.version++;changed=true;m.approved=false;delete m.reviewer;}Object.assign(m,v);if(approve){m.approved=true;m.reviewer=U[currentUser()]?.n||currentUser();}});
- if(changed)c.version=(c.version||1)+1;if(approve)crmCompleteDelivery();S.crmBundleDraft=c.mails.map(m=>({...m}));render();if(!keepOpen){if(approve)closeDw();else crmDrawBundle(S.crmBundleIndex);}toast(approve?'整套邮件已批准并交付':'草稿已保存，修改的邮件需重新批准');return true;
+ const changedMails=[];
+ c.mails.forEach((m,i)=>{
+  const v=values[i];
+  if(!m.approved&&Object.keys(v).some(key=>v[key]!==m[key])){
+   Object.assign(m,v);
+   m.version++;
+   delete m.reviewer;
+   changedMails.push(i+1);
+  }
+  if(approve){m.approved=true;m.reviewer=U[currentUser()]?.n||currentUser();}
+ });
+ crmRecordBundleSave(c,changedMails);
+ if(approve)crmCompleteDelivery();S.crmBundleDraft=c.mails.map(m=>({...m}));render();if(!keepOpen){if(approve)closeDw();else crmDrawBundle(S.crmBundleIndex);}toast(approve?'整套邮件已批准并交付':'草稿已保存，修改的邮件需重新批准');return true;
 }
 function crmApproveBundleMail(index){
  if(!crmCanOperate())return;const c=crmTask().crm,m=c.mails[index];
@@ -202,7 +238,9 @@ function crmBuildMails(t){
  {delay:'结账后 +1 小时',purpose:'温和提醒尚未完成的结账，帮助客户继续了解和选购。',subject:'A little more time to decide on Sensica?',body:'Hi there,\n\nYou started checking out with Sensica but did not finish your order. If you were interrupted, you can return to checkout whenever you are ready.\n\nChoosing a device for your routine deserves a little thought. Take another look at the product details and suitability information to decide whether it is right for you.\n\nIf something was unclear, our team is here to help you find an answer.\n\nThe Sensica Team',cta:'Return to checkout'},
  {delay:'结账后 +24 小时',purpose:'回应配送、退货、保修与使用方面的顾虑，提供清晰的决策指引。',subject:'A few answers before you choose',body:'Hi there,\n\nStill weighing up your Sensica order? You may want to check delivery options, the returns policy or warranty coverage before making a decision.\n\nProfessional anti-aging without the clinic, visible results in 7 days.\n\nYou can find those details on our website. For questions about using a device, start with its product information and instructions, including the suitability and safety guidance.\n\nIf you cannot find what you need, contact our team. We would be happy to point you in the right direction.\n\nThe Sensica Team',cta:'Review your order'},
  {delay:'结账后 +72 小时',purpose:'最后一次轻量提醒，尊重客户选择，不增加折扣或紧迫感。',subject:'One last note about your Sensica order',body:'Hi there,\n\nWe wanted to leave you one final reminder about the Sensica order you started. If you would like to continue, you can return to checkout and review your selection.\n\nThere is no need to rush. Check the current price, availability and product information before deciding what works for you.\n\nIf now is not the right time, that is fine too. Thank you for considering Sensica.\n\nThe Sensica Team',cta:'Return to your order'}
- ].map(m=>({...m,product:c.product,subject:c.product&&c.product!==CRM_CAMPAIGN_PRODUCTS[5]?m.subject.replaceAll('Sensica',c.product):m.subject,body:c.product&&c.product!==CRM_CAMPAIGN_PRODUCTS[5]?m.body.replace('product details',c.product+' product details').replaceAll('Sensica order',c.product+' order'):m.body,approved:false,version:1}));c.stage='review';t.st='review';t.outputCount=1;t.up='刚刚';render();toast('已生成 3 封邮件，请审核后交付');
+ ].map(m=>({...m,product:c.product,subject:c.product&&c.product!==CRM_CAMPAIGN_PRODUCTS[5]?m.subject.replaceAll('Sensica',c.product):m.subject,body:c.product&&c.product!==CRM_CAMPAIGN_PRODUCTS[5]?m.body.replace('product details',c.product+' product details').replaceAll('Sensica order',c.product+' order'):m.body,approved:false,version:1}));
+ c.versions=[{version:c.version||1,label:'生成邮件方案',at:new Date().toISOString()}];
+ c.stage='review';t.st='review';t.outputCount=1;t.up='刚刚';render();toast('已生成 3 封邮件，请审核后交付');
 }
 function crmOpenMail(index){
  if(!crmCanOperate())return;const c=crmTask().crm,m=c.mails[index];if(!m)return;
@@ -213,6 +251,6 @@ function crmOpenMail(index){
 function crmSaveMail(index,approve){
  if(!crmCanOperate())return;const c=crmTask().crm,m=c.mails[index];if(!m||m.approved||c.stage==='done')return;
  const subject=$('crm-subject').value.trim(),body=$('crm-body').value.trim(),cta=$('crm-cta').value.trim();if(!subject||!body||!cta){toast('请补齐标题、正文和按钮文案');return;}
- const changed=subject!==m.subject||body!==m.body||cta!==m.cta;Object.assign(m,{subject,body,cta,approved:approve});if(changed)m.version++;if(approve)m.reviewer=U[currentUser()]?.n||currentUser();if(approve)crmCompleteDelivery();closeDw();render();toast(approve?'邮件已批准':'草稿已保存，需重新批准');
+ const changed=subject!==m.subject||body!==m.body||cta!==m.cta;Object.assign(m,{subject,body,cta,approved:approve});if(changed){m.version++;crmRecordBundleSave(c,[index+1]);}if(approve)m.reviewer=U[currentUser()]?.n||currentUser();if(approve)crmCompleteDelivery();closeDw();render();toast(approve?'邮件已批准':'草稿已保存，需重新批准');
 }
 function crmApprove(index){if(!crmCanOperate())return;const c=crmTask().crm,m=c.mails[index];if(!m||m.approved||c.stage==='done')return;m.approved=true;m.reviewer=U[currentUser()]?.n||currentUser();crmCompleteDelivery();render();}

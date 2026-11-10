@@ -1620,12 +1620,12 @@ function drawerCommentWidth(total,requested){return Math.max(300,Math.min(Math.m
 function mountDrawerCommentResize(split,handle){
  const apply=width=>{
   const total=split.getBoundingClientRect().width;if(total<786)return;
-  const next=drawerCommentWidth(total,width);S.drawerCommentRatio=next/total;
-  split.style.setProperty('--dw-comment-width',next/total*100+'%');
+  const next=drawerCommentWidth(total,width);S.drawerCommentWidth=next;
+  split.style.setProperty('--dw-comment-width',next+'px');
   handle.setAttribute('aria-valuemin','300');handle.setAttribute('aria-valuemax',String(Math.max(300,Math.floor(total-486))));
   handle.setAttribute('aria-valuenow',String(Math.round(next)));handle.setAttribute('aria-valuetext',Math.round(next)+' 像素');
  };
- requestAnimationFrame(()=>apply(split.getBoundingClientRect().width*(S.drawerCommentRatio||.34)));
+ requestAnimationFrame(()=>apply(S.drawerCommentWidth||split.getBoundingClientRect().width*.34));
  let drag=null;
  const finish=()=>{drag=null;document.body.classList.remove('dw-comment-resizing')};
  handle.addEventListener('pointerdown',event=>{
