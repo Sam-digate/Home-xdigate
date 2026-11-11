@@ -93,7 +93,7 @@ function rejectListingStage(id,reason){
  l.rejected={stage,by:'du',at,reason};l.open[stage]=true;l.rejecting=false;l.rejectDraft='';
  a.ex=`${names[stage]}阶段已退回，等待调整后重新处理。`;
  a.vals=[{l:'当前阶段',v:'已退回',s:'bad'}];
- a.rows[0].sub.push({k:'sys',tx:`dudu 已退回「${names[stage]}」。原因：${reason}`,at});
+ a.rows[0].sub.push({k:'sys',tx:`Nova 已退回「${names[stage]}」。原因：${reason}`,at});
  refreshListingCard(a);drawDw();if(draft!==undefined&&$('si'))$('si').value=draft;
  toast(`已退回「${names[stage]}」`);
 }
@@ -170,7 +170,7 @@ function confirmListingStep(id,i){
   a.ex='平台回执与商品上架结果均已确认，商品已完成发布。';a.vals=[{l:'商品字段',v:'已确认',s:'ok'},{l:'商品上架',v:'已完成',s:'ok'}];
   task.plan.steps[task.plan.steps.length-1]={l:'商品上架结果已确认',m:'最终截图 · 人工确认完成',s:'ok',r:'刚刚'};
   if(task.arts.every(x=>x.st==='done'))task.st='done';
-  a.rows[0].sub.push({k:'sys',tx:'dudu 已确认商品上架结果截图。',at:'刚刚'});render();
+  a.rows[0].sub.push({k:'sys',tx:'Nova 已确认商品上架结果截图。',at:'刚刚'});render();
  }
  refreshListingCard(a);drawDw();
  toast('商品上架结果已批准');
@@ -711,19 +711,19 @@ function kolSet(i,st){
  const [,a]=findArt(S.aid);const r=a&&a.rows&&a.rows[i];if(!r)return;const old=r.s,oldStatus=rosterStatus(a,r);
  if(a.workflow==='douyin'&&st==='样品寄送'&&oldStatus!=='样品寄送'){
   r.s='样品寄送';ensureSampleShippingDraft(a,i);
-  (r.sub=r.sub||[]).push({k:'sys',tx:'状态：'+oldStatus+' → 样品寄送 · 由 dudu 操作'});
+  (r.sub=r.sub||[]).push({k:'sys',tx:'状态：'+oldStatus+' → 样品寄送 · 由 Nova 操作'});
   render();openDouyinWorkflowForm(i,'shipping');toast('已切换为样品寄送 · 寄样表单已加载');return;
  }
  if(a.workflow==='douyin'&&['合同确认','已上播'].includes(st)&&oldStatus!==st){
   S.sampleShipping=null;r.s=st;ensureDouyinContractDraft(a,i);
-  (r.sub=r.sub||[]).push({k:'sys',tx:'状态：'+oldStatus+' → '+st+' · 由 dudu 操作'});
+  (r.sub=r.sub||[]).push({k:'sys',tx:'状态：'+oldStatus+' → '+st+' · 由 Nova 操作'});
   render();openDouyinWorkflowForm(i,'contract');toast('已切换为'+st+' · 合同表单已加载');return;
  }
  if(sampleShippingDraftFor(a,i))S.sampleShipping=null;
  if(douyinContractDraftFor(a,i))S.douyinContract=null;
  if(a.workflow==='douyin'&&S.or===i)S.or=null;
  r.s=st;
- (r.sub=r.sub||[]).push({k:'sys',tx:'状态：'+old+' → '+st+' · 由 dudu 操作'});
+ (r.sub=r.sub||[]).push({k:'sys',tx:'状态：'+old+' → '+st+' · 由 Nova 操作'});
  drawDw();render();toast(r.n+' → '+st);
 }
 function focusSampleShippingForm(i){
@@ -734,7 +734,7 @@ function focusSampleShippingForm(i){
 function setSampleShippingField(field,value){if(S.sampleShipping)S.sampleShipping[field]=value;}
 function cancelSampleShipping(){
  const draft=S.sampleShipping;if(!draft)return;const [,a]=findArt(draft.aid),r=a?.rows?.[draft.i];
- if(r){r.sampleShippingDraft=null;if(rosterStatus(a,r)==='样品寄送')r.s='商务洽谈';(r.sub=r.sub||[]).push({k:'sys',tx:'已取消样品寄送状态 · 由 dudu 操作',at:'刚刚'})}
+ if(r){r.sampleShippingDraft=null;if(rosterStatus(a,r)==='样品寄送')r.s='商务洽谈';(r.sub=r.sub||[]).push({k:'sys',tx:'已取消样品寄送状态 · 由 Nova 操作',at:'刚刚'})}
  S.sampleShipping=null;S.or=null;drawDw();render();toast('已取消样品寄送状态')
 }
 function validateSampleShipping(a,i){
@@ -774,7 +774,7 @@ function focusDouyinContractForm(i){
 function setDouyinContractField(field,value){if(S.douyinContract)S.douyinContract[field]=value;}
 function cancelDouyinContract(){
  const draft=S.douyinContract;if(!draft)return;const [,a]=findArt(draft.aid),r=a?.rows?.[draft.i],current=rosterStatus(a,r),previous=current==='已上播'?'合同确认':'商务洽谈';
- if(r){r.s=previous;if(current==='合同确认')r.douyinContractDraft=null;(r.sub=r.sub||[]).push({k:'sys',tx:'状态：'+current+' → '+previous+' · 由 dudu 操作',at:'刚刚'})}
+ if(r){r.s=previous;if(current==='合同确认')r.douyinContractDraft=null;(r.sub=r.sub||[]).push({k:'sys',tx:'状态：'+current+' → '+previous+' · 由 Nova 操作',at:'刚刚'})}
  S.douyinContract=current==='已上播'&&r?r.douyinContractDraft:null;S.or=null;drawDw();render();toast('已取消'+current+'状态')
 }
 function validateDouyinContract(a,i){

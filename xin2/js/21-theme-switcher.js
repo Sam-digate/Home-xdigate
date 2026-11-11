@@ -1,13 +1,8 @@
 /* A visual-only theme change: never rerender a form or reload the connector. */
 (() => {
   const root=document.documentElement;
-  // New default: ignore the previous Sensica-first preference once, then remember new choices.
-  const storageKey='xdigate-app-theme-v2';
+  // Each page load starts with the original palette.
   root.dataset.theme='default';
-  try{
-    const saved=localStorage.getItem(storageKey);
-    if(saved==='default'||saved==='sensica')root.dataset.theme=saved;
-  }catch(_){}
   function syncButton(){
     const sensica=root.dataset.theme==='sensica';
     const button=document.getElementById('theme-switch');
@@ -22,7 +17,6 @@
   window.toggleAppTheme=function(){
     const theme=root.dataset.theme==='sensica'?'default':'sensica';
     root.dataset.theme=theme;
-    try{localStorage.setItem(storageKey,theme);}catch(_){}
     const frame=document.querySelector('iframe.connector-frame');
     const child=frame?.contentDocument;
     if(child){

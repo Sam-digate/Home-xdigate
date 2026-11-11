@@ -12,13 +12,12 @@ function setup(saved,blocked=false){
 }
 assert.equal(setup(null).label.textContent,'原版配色');
 assert.equal(setup(null,true).root.dataset.theme,'default');
-assert.ok(code.includes("const storageKey='xdigate-app-theme-v2'"));
-const a=setup('sensica');assert.equal(a.label.textContent,'Sensica 配色');
-a.context.window.toggleAppTheme();assert.equal(a.root.dataset.theme,'default');assert.equal(a.childRoot.dataset.theme,'default');assert.equal(a.label.textContent,'原版配色');assert.equal(a.attrs['aria-pressed'],'false');assert.equal(a.stored.value,'default');assert.equal(a.links.length,1);
-a.context.window.toggleAppTheme();assert.equal(a.root.dataset.theme,'sensica');assert.equal(a.childRoot.dataset.theme,'sensica');assert.equal(a.links.length,1);
+const a=setup('sensica');assert.equal(a.label.textContent,'原版配色');
+a.context.window.toggleAppTheme();assert.equal(a.root.dataset.theme,'sensica');assert.equal(a.childRoot.dataset.theme,'sensica');assert.equal(a.label.textContent,'Sensica 配色');assert.equal(a.attrs['aria-pressed'],'true');assert.equal(a.links.length,1);
+a.context.window.toggleAppTheme();assert.equal(a.root.dataset.theme,'default');assert.equal(a.childRoot.dataset.theme,'default');assert.equal(a.links.length,1);
 assert.equal(setup('default').root.dataset.theme,'default');assert.equal(setup('invalid').root.dataset.theme,'default');
 const b=setup(null,true);assert.doesNotThrow(()=>b.context.window.toggleAppTheme());
-console.log('PASS theme toggle, persistence, iframe sync without reload, accessible label and blocked storage fallback');
+console.log('PASS original palette on load, theme toggle, iframe sync without reload and accessible label');
 const skin=fs.readFileSync(require('node:path').join(__dirname,'../css/sensica-theme.css'),'utf8');
 assert.match(skin,/html\[data-theme="sensica"\] \.avs\[style\*="#7c3aed" i\]\{background:#C8836A!important;color:#fff\}/);
 assert.ok(skin.includes('html[data-theme="sensica"] :is(.seg,.kp-platform-nav,.kp-views,.roster-scope-tabs,.dw-tabs) button.on{color:var(--primary)}'));

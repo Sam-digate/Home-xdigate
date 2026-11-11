@@ -333,8 +333,14 @@
 .claims-advice h3{display:flex;align-items:center;gap:10px;margin:0;font-size:var(--fs-md);font-weight:600}
 .claims-advice-summary{margin:10px 0 14px;font-size:var(--fs-md);line-height:1.7;color:var(--t2)}
 .claims-advice-copy{border-top:1px solid var(--hairline);padding-top:12px}
+.claims-advice-copy+.claims-advice-copy{margin-top:12px}
 .claims-advice-copy h4{margin:0 0 6px;font-size:var(--fs-xs);font-weight:600;color:var(--t3)}
 .claims-advice-copy p{margin:0;font-size:var(--fs-md);line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.claims-copy-mark{color:inherit;border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.claims-copy-mark.verify{background:#fff0d6}
+.claims-copy-mark.high{background:#ffe0e4}
+.claims-advice-copy h4>.st{margin-left:4px}
+.claims-document h4>.st::before,.claims-advice h3>.st.hold::before{content:none}
 .claims-review{padding:14px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface)}
 .claims-review>h3{display:flex;align-items:center;gap:10px;font-size:var(--fs-md);font-weight:600;margin:0 0 12px}
 .claims-review>h3>.st{font-size:var(--fs-xs);font-weight:500}

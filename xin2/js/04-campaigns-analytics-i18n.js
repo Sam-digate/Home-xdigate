@@ -1179,7 +1179,7 @@ function doSaveTpl(){
  if(!n){toast('先给模板起个名');return;}
  const sup=($('tpu')||{value:''}).value;
  const slots=(($('tps')||{value:''}).value||'').split(/[,，]/).map(v=>v.trim()).filter(Boolean).map(v=>'{'+v+'}');
- TPLS.unshift({id:'tp'+Date.now(),n,dom:x.dom||kDomFromType(x.ty),ty:x.ty,used:0,edit:0,by:'dudu',at:'今天',
+ TPLS.unshift({id:'tp'+Date.now(),n,dom:x.dom||kDomFromType(x.ty),ty:x.ty,used:0,edit:0,by:'Nova',at:'今天',
   from:x.from,fromT:x.fromT,sup:sup.startsWith('——')?'——':'替代 '+sup,slots,
   d:($('tpd')||{value:''}).value.trim()||'（还没写使用场景）'});
  closeMod();S.kgrp='out';S.ktab=1;go('know');

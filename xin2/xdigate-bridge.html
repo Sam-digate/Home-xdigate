@@ -449,7 +449,7 @@ function thumb(kind){
 const S={sig:12480,hand:1320,arts:148,shelf:[],decisions:[],gate:[],packets:[],flows:0,rot:0,appear:0};
 // Demo task owners; production should use each task's owner and signed-in user.
 const BRIDGE_CURRENT_USER='Brooks';
-const BRIDGE_TASK_OWNERS={seo:'Sophie',senti:'dudu',adopt:'Brooks',pvis:'Sam',detail:'Brooks',patrol:'Brooks',ppt:'Brooks',orch:'Brooks'};
+const BRIDGE_TASK_OWNERS={seo:'Sophie',senti:'Nova',adopt:'Brooks',pvis:'Sam',detail:'Brooks',patrol:'Brooks',ppt:'Brooks',orch:'Brooks'};
 let shelfOwnerFilter=BRIDGE_CURRENT_USER;
 let shelfProjectFilter='all';
 function shelfArtifacts(){return S.shelf.filter(item=>(shelfOwnerFilter==='all'||item.owner===shelfOwnerFilter)&&(shelfProjectFilter==='all'||item.project===shelfProjectFilter))}
@@ -471,7 +471,7 @@ function renderShelfOwner(){
  const ownerName=value=>value==='all'?P('全部','All'):value;
  picker.classList.toggle('has-owner',shelfOwnerFilter!=='all');
  document.getElementById('shelfOwnerText').textContent=P('负责人','Owner')+(shelfOwnerFilter==='all'?'':' · '+ownerName(shelfOwnerFilter));
- menu.replaceChildren(...['all','Brooks','dudu','Sophie','Sam'].map(value=>{
+ menu.replaceChildren(...['all','Brooks','Nova','Sophie','Sam'].map(value=>{
   const button=document.createElement('button');button.type='button';button.textContent=ownerName(value);
   button.className=value===shelfOwnerFilter?'selected':'';button.setAttribute('aria-pressed',String(value===shelfOwnerFilter));
   button.onclick=()=>{shelfOwnerFilter=value;picker.open=false;renderShelf();picker.querySelector('summary').focus()};
@@ -486,7 +486,7 @@ let uid=0;
 const STATUS={done:['已交付','Delivered','var(--s-done)'],review:['待审批','In review','var(--s-review)'],ops:['已交运营','To ops','var(--violet-500)']};
 function addArt(agId,status,isNew,custom){
   const a=custom||ART[agId]||['doc','产出','Output','产出'];
-  S.shelf.unshift({id:++uid,project:'A80PARIS',owner:BRIDGE_TASK_OWNERS[agId]||'dudu',ag:agId,kind:a[0],zh:a[1],en:a[2],k:a[3],status,isNew:!!isNew,tm:new Date()});
+  S.shelf.unshift({id:++uid,project:'A80PARIS',owner:BRIDGE_TASK_OWNERS[agId]||'Nova',ag:agId,kind:a[0],zh:a[1],en:a[2],k:a[3],status,isNew:!!isNew,tm:new Date()});
   if(isNew) S.arts++;
   renderShelf();
 }

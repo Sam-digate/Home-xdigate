@@ -11,7 +11,7 @@ const KB=[
   ags:['gen','vid','pdp','cs','msg','seo'],gov:'ok',by:'法务 · Shlomi',
   tx:'142 条规则。功效宣称类需检测报告支撑；「修护」在精华类目允许，在面霜类目需加限定；禁止绝对化用语与比价表述。'},
  {id:'k4',n:'用户洞察',cat:'战略规划数据',filled:1,at:'2026/05/30',stale:0,reads:64,
-  ags:['gen','kol','cs'],gov:'ok',by:'dudu',
+  ags:['gen','kol','cs'],gov:'ok',by:'Nova',
   tx:'核心人群 24–32 岁，屏障受损后进入长期修护，决策链路长、复购率高，对「见效快」的话术免疫。'},
  {id:'k5',n:'品牌表达系统',cat:'战略规划数据',filled:1,at:'2026/02/14',stale:1,reads:31,
   ags:['gen','vid'],gov:'pend',by:'Sophie',
@@ -37,16 +37,16 @@ const PRODS=[
 const PFIELDS=['产品图','包装图','商品申报名称','净重','类目','规格','成分','卖点','AI 补充卖点'];
 const ASSETS=[
  {n:'修护精华主视觉',type:'图片',src:'agent',by:'gen',prod:'A8O 修护精华 30ml',tags:['电商推广','关键词推广'],used:12,img:'https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=720&q=84'},
- {n:'真实护肤使用场景',type:'图片',src:'upload',by:'dudu',prod:'A8O 修护精华 30ml',tags:['场景氛围','小红书'],used:8,img:'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=720&q=84'},
+ {n:'真实护肤使用场景',type:'图片',src:'upload',by:'Nova',prod:'A8O 修护精华 30ml',tags:['场景氛围','小红书'],used:8,img:'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=720&q=84'},
  {n:'双十一笔记封面',type:'图片',src:'promo',by:'gen',prod:'A8O 修护精华 30ml',tags:['Hook','小红书'],used:3,img:'https://images.unsplash.com/photo-1611080541599-8c6dbde6ed28?auto=format&fit=crop&w=720&q=84'},
  {n:'安瓶产品展示图',type:'图片',src:'upload',by:'br',prod:'A8O 修护安瓶精华 15ml',tags:['产品展示','电商推广'],used:5,img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=720&q=84'},
  {n:'精华质地特写',type:'图片',src:'agent',by:'gen',prod:'A8O 修护精华 30ml',tags:['产品展示','功效表达'],used:9,img:'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=720&q=84'},
- {n:'敏感肌实测记录',type:'视频',src:'upload',by:'dudu',prod:null,tags:['AI 视频','功效表达'],used:6,img:'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=720&q=84'},
+ {n:'敏感肌实测记录',type:'视频',src:'upload',by:'Nova',prod:null,tags:['AI 视频','功效表达'],used:6,img:'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=720&q=84'},
  {n:'舒缓面霜使用步骤',type:'图片',src:'upload',by:'br',prod:'A8O 舒缓面霜 50ml',tags:['场景氛围','产品展示'],used:7,img:'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=720&q=84'},
  {n:'成分实验对比图',type:'图片',src:'agent',by:'gen',prod:'A8O 修护精华 30ml',tags:['功效表达','内容引擎'],used:14,img:'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=720&q=84'},
  {n:'晨间护肤组合',type:'图片',src:'promo',by:'gen',prod:'A8O 舒缓面霜 50ml',tags:['电商推广','内容引擎'],used:10,img:'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=720&q=84'},
  {n:'精华吸收过程',type:'视频',src:'agent',by:'vid',prod:'A8O 修护安瓶精华 15ml',tags:['AI 视频','产品展示'],used:4,img:'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=720&q=76&sat=-15'},
- {n:'修护套装陈列',type:'图片',src:'upload',by:'dudu',prod:null,tags:['产品展示','电商推广'],used:2,img:'https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=720&q=76&crop=edges'},
+ {n:'修护套装陈列',type:'图片',src:'upload',by:'Nova',prod:null,tags:['产品展示','电商推广'],used:2,img:'https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=720&q=76&crop=edges'},
  {n:'夜间修护氛围图',type:'图片',src:'promo',by:'gen',prod:'A8O 修护精华 30ml',tags:['场景氛围','小红书'],used:11,img:'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=720&q=76&sat=-10'}];
 const ASRC={upload:{n:'人工上传',c:'mut'},agent:{n:'Agent 生成',c:'dom'},promo:{n:'已批准产出晋升',c:'lv'}};
 const DEFAULT_ASSET_TAGS=['通用素材','Hook','AI 视频','产品展示','场景氛围','功效表达','电商推广','小红书'];
@@ -412,7 +412,7 @@ const TPLS=[
  {id:'tp1',n:'退款话术模板 v3',dom:'用户运营',ty:'客服回复',used:1284,edit:12,by:'Ariel',at:'2026/07/20',
   from:'C-1048 包裹破损回复',fromT:'t4',sup:'替代 v2（补偿金额写死的那版）',slots:['{客户称呼}','{问题描述}','{退款时效}','{补偿金额}'],
   d:'破损、错发、物流延误三类场景的退款话术。补偿金额走槽位，不写死。'},
- {id:'tp2',n:'小红书真实测评结构',dom:'内容',ty:'社媒内容',used:64,edit:22,by:'dudu',at:'2026/08/14',
+ {id:'tp2',n:'小红书真实测评结构',dom:'内容',ty:'社媒内容',used:64,edit:22,by:'Nova',at:'2026/08/14',
   from:'方向二 · 低预算高信任感',fromT:'t1',sup:'——',slots:['{场景}','{痛点}','{证据}','{利益点}'],
   d:'方向二沉淀下来的结构：场景开场 → 痛点对比 → 证据 → 利益点。'},
  {id:'tp3',n:'详情页 A+ 模块骨架',dom:'电商',ty:'详情页',used:31,edit:41,by:'Brooks',at:'2026/06/02',
@@ -513,7 +513,7 @@ function saveKBContent(id){
  const x=knowledgeBrandEntries().find(y=>y.id===id),editor=$('kb-content-editor');if(!x||!editor)return;
  const value=editor.value.trim();if(!value){toast('内容不能为空');return;}
  if(typeof kbRecordManualKnowledgeUpdate==='function')kbRecordManualKnowledgeUpdate(x,value);
- x.tx=value;x.filled=1;x.stale=0;x.at='刚刚';x.by='dudu';closeDw();render();toast('内容已保存');
+ x.tx=value;x.filled=1;x.stale=0;x.at='刚刚';x.by='Nova';closeDw();render();toast('内容已保存');
 }
 function cancelKBContent(id){openKB(id,0);toast('已取消修改');}
 function productSeed(p,i){

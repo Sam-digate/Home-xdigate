@@ -111,7 +111,7 @@ function queue(){
   if(a.deferred)return;
   if(a.m1){
    if(a.m1.stage==='owner'&&me===a.m1.owner)q.push({t,a,oi:null,ttl:a.ttl,g:a.g,ty:'负责人审核',plat:a.plat,vals:[{l:'M1 产出',v:'待你先批准',s:'warn'}],wait:5,sla:30,m1:'owner'});
-   if(a.m1.stage==='requester'&&me===a.m1.requester)q.push({t,a,oi:null,ttl:t.demoDualAgents?'双 Agent 交付待 dudu 验收':a.ttl,g:a.g,ty:'验收',plat:a.plat,vals:t.demoDualAgents?[{l:'详情页内容',v:'Brooks 已批准',s:'ok'},{l:'巡检报告',v:'Brooks 已批准',s:'ok'}]:[{l:'Brooks',v:'已批准',s:'ok'}],wait:0,sla:null,m1:'requester',priority:1});
+   if(a.m1.stage==='requester'&&me===a.m1.requester)q.push({t,a,oi:null,ttl:t.demoDualAgents?'双 Agent 交付待 Nova 验收':a.ttl,g:a.g,ty:'验收',plat:a.plat,vals:t.demoDualAgents?[{l:'详情页内容',v:'Brooks 已批准',s:'ok'},{l:'巡检报告',v:'Brooks 已批准',s:'ok'}]:[{l:'Brooks',v:'已批准',s:'ok'}],wait:0,sla:null,m1:'requester',priority:1});
    return;
   }
   if(me!=='du')return;
@@ -323,7 +323,7 @@ function convList(t){
 }
 
 /* ============ mentions ============ */
-const TEAM=[{k:'du',n:'dudu',r:'内容运营'},{k:'so',n:'Sophie',r:'策略'},{k:'br',n:'Brooks',r:'电商'},{k:'ar',n:'Ariel',r:'用户运营'},{k:'sam',n:'Sam',r:'KOL'}];
+const TEAM=[{k:'du',n:'Nova',r:'内容运营'},{k:'so',n:'Sophie',r:'策略'},{k:'br',n:'Brooks',r:'电商'},{k:'ar',n:'Ariel',r:'用户运营'},{k:'sam',n:'Sam',r:'KOL'}];
 function mHTML(tx){return esc(tx).replace(/@([A-Za-z\u4e00-\u9fa5]+)/g,'<span class="mn">@$1</span>');}
 function closeMentions(keepId){
  document.querySelectorAll('[id^="m-"]').forEach(el=>{if(el.id!=='m-'+keepId)el.innerHTML='';});
@@ -474,7 +474,7 @@ function sendAns(){
     {l:'确认目标平台与关联产品',m:summary.join('；'),s:'ok',r:'刚刚'},
     {l:'整理详情页当前规划表',m:'屏幕结构 · 卖点顺序 · 产品露出',s:'act',r:'进行中'},
     {l:'生成详情页内容产出',m:'1 个 M1 产出',s:'todo',r:'—'},
-    {l:'提交产品负责人审核',m:'Brooks 先批准，通过后再给 dudu 验收',s:'todo',r:'—'}]};
+    {l:'提交产品负责人审核',m:'Brooks 先批准，通过后再给 Nova 验收',s:'todo',r:'—'}]};
    if(t.demoDualAgents)t.plan.steps.splice(t.plan.steps.length-1,0,{l:'店铺巡检检查页面与上架风险',m:'等待详情页产出经 Brooks 批准',s:'todo',r:'未开始'});
    t.live={t:'详情页生成正在整理当前规划表',el:'刚刚',sub:['正在读取产品资料与天猫详情页规则'],p:40,tk:720};
    S.askProductRow=null;render();toast('信息已补齐 · 详情页 Agent 正在生成');

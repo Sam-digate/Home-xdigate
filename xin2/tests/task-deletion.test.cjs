@@ -5,11 +5,11 @@ function node(id){if(!nodes.has(id)){const classes=new Set();nodes.set(id,{inner
 const context=vm.createContext({console,Intl,Date,document:{addEventListener(){},getElementById:node},$:node,
   S:{view:'work',dom:'全部',hist:[],mode:'kanban'},T:[],user:'du',role:'admin',access:true,
   currentUser:()=>context.user,permissionCanAccessView:()=>context.access,permissionCurrentMember:()=>({role:context.role,status:'active'}),
-  U:{du:{n:'Dudu',c:'#333'},br:{n:'Brooks',c:'#333'}},
+  U:{du:{n:'Nova',c:'#333'},br:{n:'Brooks',c:'#333'}},
   esc:s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),
   toast:s=>context.lastToast=s,closeDw(){},closeMod:()=>node('mod').classList.remove('on'),render(){},renderNav(){},clearInterval(){},
   AG:{gen:{c:'#333'}},COLS:[{k:'todo',n:'待开始'},{k:'run',n:'进行中'},{k:'review',n:'待审批'},{k:'done',n:'已交付'}],
-  crInfo:()=>({av:'',nm:'Dudu'}),canAdjustPrestartPlan:()=>false,nick:id=>id});
+  crInfo:()=>({av:'',nm:'Nova'}),canAdjustPrestartPlan:()=>false,nick:id=>id});
 vm.runInContext(read('js/16-task-deletion.js'),context);
 vm.runInContext(read('js/23-agent-execution.js'),context);
 vm.runInContext(read('js/05-knowledge-work.js').split('function fil(){')[1].replace(/^/,'function fil(){'),context);

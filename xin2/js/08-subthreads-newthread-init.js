@@ -39,7 +39,7 @@ function subPane(a,oi,options={}){
    ${a.rows&&!a.listing&&Number.isInteger(oi)&&!options.hideCollabMeta?`<div class="collab-meta">
      ${a.mode==='roster'?`<label class="collab-field"><span>合作状态</span><select onchange="kolSet(${oi},this.value)">${Object.keys(rosterStatusMap(a)).map(s=>`<option ${s===rosterDisplayStatus(a,x,oi)?'selected':''}>${s}</option>`).join('')}</select></label>`:''}
      <label class="collab-field"><span>配合度</span><select onchange="setCreatorField('${a.id}',${oi},'coop',this.value,'配合度')">${['高','中','低'].map(s=>`<option ${s===(x.coop||'中')?'selected':''}>${s}</option>`).join('')}</select></label>
-     <label class="collab-field"><span>负责人</span><select onchange="setCreatorField('${a.id}',${oi},'commOwner',this.value,'负责人')">${['待分配','jack','dudu','Sophie','Sam'].map(s=>`<option ${s===(x.commOwner||'待分配')?'selected':''}>${s}</option>`).join('')}</select></label>
+     <label class="collab-field"><span>负责人</span><select onchange="setCreatorField('${a.id}',${oi},'commOwner',this.value,'负责人')">${['待分配','jack','Nova','Sophie','Sam'].map(s=>`<option ${s===(x.commOwner||'待分配')?'selected':''}>${s}</option>`).join('')}</select></label>
    </div>`:''}
    ${peopleOnly&&a.workflow==='douyin'&&Number.isInteger(oi)&&a.rows?.[oi]?dSampleShippingForm(a,oi)+dDouyinContractForm(a,oi):''}
    <div class="sub-c" ${caDropAttrs('sub',a.id,oi)}>
@@ -226,7 +226,7 @@ function showManualFallback(){
   <div class="manual-fallback-h">暂未找到适合执行此任务的 Agent</div>
   <div class="manual-fallback-p">可以调整任务描述，或指定人员继续处理。人工提交仍会进入当前的审批、评论和版本流程。</div>
   <div class="manual-fields">
-   <div class="fld"><label>指定人员</label><select id="manual-person"><option value="br">Brooks</option><option value="so">Sophie</option><option value="du">dudu</option></select></div>
+   <div class="fld"><label>指定人员</label><select id="manual-person"><option value="br">Brooks</option><option value="so">Sophie</option><option value="du">Nova</option></select></div>
    <div class="fld"><label>截止时间</label><input id="manual-deadline" type="datetime-local" value="2026-08-28T18:00"></div>
   </div>
   <div class="fld" style="margin:var(--sp-3) 0 0"><label>产出模板</label><input id="manual-template" type="hidden" value="文件交付">
@@ -311,7 +311,7 @@ function mkThread(){
  }
  if(dualDemo||d==='内容'){
   const id='n'+Date.now(),plan=prestartPlanPreset('pdp');
-  plan.tx=dualDemo?'详情页生成 Agent 先整理规划并生成内容，Brooks 批准后由店铺巡检 Agent 检查商品资料、页面信息与上架风险。两份产出分别经 Brooks 批准后，再交 dudu 统一验收、分别评分。':'详情页生成 Agent 先整理详情页规划并生成内容。M1 产出先交 Brooks 审批，再交 dudu 验收打分。';
+  plan.tx=dualDemo?'详情页生成 Agent 先整理规划并生成内容，Brooks 批准后由店铺巡检 Agent 检查商品资料、页面信息与上架风险。两份产出分别经 Brooks 批准后，再交 Nova 统一验收、分别评分。':'详情页生成 Agent 先整理详情页规划并生成内容。M1 产出先交 Brooks 审批，再交 Nova 验收打分。';
   if(dualDemo)plan.steps.splice(plan.steps.length-1,0,{l:'店铺巡检检查页面与上架风险',m:'等待详情页产出经 Brooks 批准',s:'todo',r:'未开始'});
   T.unshift({attachments:taSnapshot(),cr:{s:'h',w:'du'},trig:'manual',id,t:dualDemo?'天猫详情页生成与店铺巡检':v.slice(0,26)+(v.length>26?'…':''),camp:c,dom:'电商',ag:'pdp',agents:dualDemo?['pdp','insp']:['pdp'],agentLabels:dualDemo?{pdp:'详情页生成',insp:'店铺巡检'}:{pdp:'详情页生成'},agentStates:dualDemo?{pdp:'待确认',insp:'等待详情页批准'}:{pdp:'待确认'},own:'br',st:'todo',up:'刚刚',day:0,lv:'M1',cost:'¥0.20',outputCount:0,prestartDemo:true,demoM1Pdp:true,demoDualAgents:dualDemo,
    intent:{who:'du',tx:taskIntent,at:'刚刚'},plan:{v:1,status:'pending',startedAt:null,...plan},
@@ -360,10 +360,12 @@ try{
 }catch(e){}
 const drawerExpandObserver=new MutationObserver(()=>syncDrawerExpandControl());
 drawerExpandObserver.observe($('dw'),{childList:true});
-const defaultCrmThread=T.find(task=>task.id==='t-crm-checkout'&&!task.deletedAt);
-if(!location.hash&&defaultCrmThread&&permissionCanAccessView('thread')){
- S.view='thread';
- S.tid=defaultCrmThread.id;
- S.hist=[{view:'work',tid:null}];
+let defaultPersonalAgentId=null;
+if(!location.hash&&permissionCanAccessView('agent')){
+ S.view='agent';
+ S.tid=null;
+ S.hist=[];
+ personalAgentDefaultDemo();
 }
 renderNav();render();
+if(defaultPersonalAgentId)openPersonalAgentSetup(defaultPersonalAgentId);

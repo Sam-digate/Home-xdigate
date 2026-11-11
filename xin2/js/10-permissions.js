@@ -16,6 +16,10 @@ const PERMISSION_AGENT_TEMPLATES=[
 
 const PERMISSION_PROJECTS=[
  {id:'a80',name:'A80PARIS',color:'#7C3AED'},
+ {id:'evo11',name:'Evo1.1',color:'#0891B2'},
+ {id:'tn',name:'TN',color:'#2563EB'},
+ {id:'nike',name:'Nike',color:'#24201C'},
+ {id:'clinic',name:'Clinic',color:'#10B981'},
  {id:'tmall',name:'NEXA',color:'#E11D48'},
  {id:'douyin',name:'LUMIÈRE',color:'#F59E0B'},
  {id:'red',name:'MORIKO',color:'#DB2777'},
@@ -63,7 +67,7 @@ const PERMISSION_MEMBER_PAGE_IDS=PERMISSION_PAGE_IDS.filter(id=>id!=='permission
 
 const PERMISSION_MEMBERS=[
  {id:'br',name:'u2c',accountId:'u2c',password:'U2c666',initials:'U2',color:'#0891B2',role:'admin',status:'active',createdAt:'2026-01-12',last:'今天 10:32',agents:[],projects:[],pages:[...PERMISSION_PAGE_IDS]},
- {id:'du',name:'Dudu',accountId:'u2c:dudu',password:'Dudu66',initials:'DU',color:'#7C3AED',role:'admin',status:'active',createdAt:'2026-02-03',last:'刚刚',agents:['ppt','trend','ana'],projects:['a80','tmall'],pages:[...PERMISSION_MEMBER_PAGE_IDS]},
+ {id:'du',name:'Nova',accountId:'u2c:dudu',password:'Dudu66',initials:'NO',color:'#7C3AED',role:'admin',status:'active',createdAt:'2026-02-03',last:'刚刚',agents:['ppt','trend','ana'],projects:['a80','evo11','tn','nike','clinic','tmall'],pages:[...PERMISSION_MEMBER_PAGE_IDS]},
  {id:'asher',name:'asher',email:'asher@xdigate.cn',initials:'AS',color:'#2563EB',role:'member',status:'active',createdAt:'2026-02-15',last:'今天 09:18',agents:['gen','ppt','pdp','trend'],projects:['a80','velora','solvia'],pages:[...PERMISSION_MEMBER_PAGE_IDS]},
  {id:'so',name:'Sophie',email:'sophie@xdigate.cn',initials:'SO',color:'#E11D48',role:'member',status:'active',createdAt:'2026-03-08',last:'昨天 18:42',agents:['gen','plan','kol'],projects:['tmall','douyin'],pages:[...PERMISSION_MEMBER_PAGE_IDS]},
  {id:'ar',name:'Ariel',email:'ariel@xdigate.cn',initials:'AR',color:'#10B981',role:'member',status:'active',createdAt:'2026-04-21',last:'昨天 16:05',agents:['cs','trend'],projects:['red','elara'],pages:[...PERMISSION_MEMBER_PAGE_IDS]},

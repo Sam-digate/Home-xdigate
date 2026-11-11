@@ -63,7 +63,7 @@ function manualPrestartPlan(agents,t){
  const ids=agents.map(a=>a.id),labels=agents.map(a=>agentLabel(a.id)),dual=ids.length===2&&ids[0]==='pdp'&&ids[1]==='insp';
  if(dual){
   const plan=prestartPlanPreset('pdp');
-  plan.tx='详情页生成 Agent 先整理规划并生成内容，Brooks 批准后由店铺巡检 Agent 检查商品资料、页面信息与上架风险。两份产出分别经 Brooks 批准后，再交 dudu 统一验收、分别评分。';
+  plan.tx='详情页生成 Agent 先整理规划并生成内容，Brooks 批准后由店铺巡检 Agent 检查商品资料、页面信息与上架风险。两份产出分别经 Brooks 批准后，再交 Nova 统一验收、分别评分。';
   plan.steps.splice(plan.steps.length-1,0,{l:'店铺巡检检查页面与上架风险',m:'等待详情页产出经 Brooks 批准',s:'todo',r:'未开始'});
   return plan;
  }
@@ -155,7 +155,7 @@ function adjPlan(){
  if(t.prestartDemo){savePrestartPlan(t.id);return;}
  if(!v||!v.value.trim()){toast('写一句要改什么');return;}
  t.plan.v=(t.plan.v||1)+1;
- t.plan.adj='dudu 追加：'+v.value.trim();
+ t.plan.adj='Nova 追加：'+v.value.trim();
  t.plan.steps.splice(t.plan.steps.length-1,0,{l:v.value.trim().slice(0,20),m:'由你追加 · 计划 v'+t.plan.v,s:'todo',r:'—'});
  S.pa=false;render();toast('计划已改为 v'+t.plan.v+' · 未完成的步骤会按新计划走');
 }
@@ -347,7 +347,7 @@ function dispatch(agid){
  const t=T.find(x=>x.id===S.tid);
  if(blockPrestartDispatch(t))return;
  t.plan.v=(t.plan.v||1)+1;
- t.plan.adj='dudu 直接指派了 '+nick(agid)+'（未经编排）';
+ t.plan.adj='Nova 直接指派了 '+nick(agid)+'（未经编排）';
  t.plan.steps.splice(t.plan.steps.length-1,0,{l:nick(agid)+' · 直接指派',m:(REG.find(y=>y.id===agid)||{}).n,s:'act',r:'刚开始'});
  (t.cmts=t.cmts||[]).push({w:'du',tx:'直接找了 @'+nick(agid)+'，不走编排。',at:'刚刚'});
  closeMod();render();toast(nick(agid)+' 已接手 · 已加进这条线程');
@@ -504,11 +504,11 @@ const LV=[
 ];
 const BS={live:{n:'已上线',c:'done'},dev:{n:'开发中',c:'run'},plan:{n:'规划中',c:'todo'}};
 const REG=[
- {id:'ppt',nick:'小演',em:'▣',avg:'2分16秒',n:'PPT Agent',d:'根据表单需求生成可编辑大纲，确认后制作演示文稿，并提供下载与在线编辑地址。',dom:'内容',b:'live',lv:0,own:'Sophie',pm:'dudu',tr:['manual'],out:['PPT'],r:18,ok:94,ed:17,c:'¥246',maturity:'M1',rating:'4.7',returnRate:'8%',ontime:'94%',risk:'正常',sla:'10',exceptionOwner:'产品经理',enabled:true},
- {id:'gen',nick:'阿文',em:'✍️',avg:'1分12秒',n:'内容生成 Agent',d:'按品牌调性与活动 Brief 生成社媒正文、话题与配图建议。',dom:'内容',b:'live',lv:1,own:'Sophie',pm:'dudu',tr:['manual','proposal'],out:['社媒内容'],r:142,ok:94,ed:18,c:'¥1,840',rec:['内容 Brief → 3 方向 → 策划文档']},
- {id:'vid',nick:'阿影',em:'🎬',avg:'—',n:'视频生成 Agent',d:'脚本 → 分镜表 → 分镜图片。自动剪辑成片尚未具备，成片目前仍需人工完成。',dom:'内容',b:'plan',lv:0,own:'Sophie',pm:'dudu',tr:['manual'],out:['视频'],r:0,ok:0,ed:0,c:'—'},
- {id:'plan',nick:'小策',em:'🗂',avg:'1分46秒',n:'活动策划 Agent',d:'生成活动主题、排期、预算分配与渠道分工。',dom:'内容',b:'live',lv:1,own:'Sophie',pm:'dudu',tr:['manual'],out:['活动策划'],r:24,ok:91,ed:22,c:'¥680'},
- {id:'pub',nick:'小发',em:'📤',avg:'22秒',n:'社媒发布 Agent',d:'把已批准内容推送到小红书/抖音并回收数据。',dom:'内容',b:'live',lv:2,own:'Sophie',pm:'dudu',tr:['orchestrated'],out:[],r:96,ok:98,ed:2,c:'¥210'},
+ {id:'ppt',nick:'小演',em:'▣',avg:'2分16秒',n:'PPT Agent',d:'根据表单需求生成可编辑大纲，确认后制作演示文稿，并提供下载与在线编辑地址。',dom:'内容',b:'live',lv:0,own:'Sophie',pm:'Nova',tr:['manual'],out:['PPT'],r:18,ok:94,ed:17,c:'¥246',maturity:'M1',rating:'4.7',returnRate:'8%',ontime:'94%',risk:'正常',sla:'10',exceptionOwner:'产品经理',enabled:true},
+ {id:'gen',nick:'阿文',em:'✍️',avg:'1分12秒',n:'内容生成 Agent',d:'按品牌调性与活动 Brief 生成社媒正文、话题与配图建议。',dom:'内容',b:'live',lv:1,own:'Sophie',pm:'Nova',tr:['manual','proposal'],out:['社媒内容'],r:142,ok:94,ed:18,c:'¥1,840',rec:['内容 Brief → 3 方向 → 策划文档']},
+ {id:'vid',nick:'阿影',em:'🎬',avg:'—',n:'视频生成 Agent',d:'脚本 → 分镜表 → 分镜图片。自动剪辑成片尚未具备，成片目前仍需人工完成。',dom:'内容',b:'plan',lv:0,own:'Sophie',pm:'Nova',tr:['manual'],out:['视频'],r:0,ok:0,ed:0,c:'—'},
+ {id:'plan',nick:'小策',em:'🗂',avg:'1分46秒',n:'活动策划 Agent',d:'生成活动主题、排期、预算分配与渠道分工。',dom:'内容',b:'live',lv:1,own:'Sophie',pm:'Nova',tr:['manual'],out:['活动策划'],r:24,ok:91,ed:22,c:'¥680'},
+ {id:'pub',nick:'小发',em:'📤',avg:'22秒',n:'社媒发布 Agent',d:'把已批准内容推送到小红书/抖音并回收数据。',dom:'内容',b:'live',lv:2,own:'Sophie',pm:'Nova',tr:['orchestrated'],out:[],r:96,ok:98,ed:2,c:'¥210'},
  {id:'trend',nick:'小趋',em:'📈',avg:'36秒',n:'趋势 / 热点 Agent',d:'采集平台热点，按品牌适配度和风险打分入库；时效性强的单独提案。',dom:'内容',b:'live',lv:0,own:'Sophie',pm:'Sophie',tr:['scheduled'],out:['提案','热点'],r:210,ok:76,ed:0,c:'¥940',cfg:'trend'},
  {id:'listen',nick:'小听',em:'👂',avg:'2分18秒',n:'舆情监控 Agent',d:'每日计算品牌社交健康度，负面聚集时提案。只观察，从不发布或回复。',dom:'用户运营',b:'live',lv:0,own:'Ariel',pm:'Sophie',tr:['scheduled'],out:['提案','舆情发现'],r:90,ok:92,ed:4,c:'¥1,120',cfg:'listen'},
  {id:'comp',nick:'小竞',em:'🔍',avg:'2分04秒',n:'竞品分析 Agent',d:'跟踪竞品内容动作与投放变化，沉淀到知识库。',dom:'内容',b:'live',lv:0,own:'Sophie',pm:'Sophie',tr:['scheduled'],out:['文档'],r:31,ok:89,ed:15,c:'¥520'},
@@ -553,9 +553,9 @@ REG.forEach(a=>{
 let PAUSED=false;
 const RECIPES=[
  {id:'r1',n:'内容 Brief → 3 方向 → 策划文档',d:'最常用的内容起手式。给一句意图，拿回三个方向，选一个再展开。',
-  ag:['orch','gen','plan'],dom:'内容',used:64,cad:null,hitl:'approve',own:'dudu'},
+  ag:['orch','gen','plan'],dom:'内容',used:64,cad:null,hitl:'approve',own:'Nova'},
  {id:'r2',n:'方向 → 脚本 → 分镜 → 成片',d:'把已批准的内容方向做成竖版短视频。',
-  ag:['vid'],dom:'内容',used:22,cad:null,hitl:'approve',own:'dudu'},
+  ag:['vid'],dom:'内容',used:22,cad:null,hitl:'approve',own:'Nova'},
  {id:'r3',n:'大促详情页改版',d:'读产品中心 → 生成字段 → 校验类目 → 待人工确认后上架。',
   ag:['pdp','exec'],dom:'电商',used:31,cad:null,hitl:'approve',own:'Brooks'},
  {id:'r4',n:'达人短名单 → 逐个发 Brief',d:'按画像匹配出名单，批准后逐位跟进合作。',
@@ -846,14 +846,14 @@ function gateAct(id,ok){
  const t=T.find(x=>x.standing===r.id);
  if(ok){
   if(t){t.executionCancelled=false;t.restoredPending=false;t.st='run';t.new=(t.new||0)+1;t.up='刚刚';
-   t.plan.steps[1]={l:'⛒ 审批门 · dudu 已批准',m:'可逆 · 上线前可撤销报名',s:'ok',r:'—'};
+   t.plan.steps[1]={l:'⛒ 审批门 · Nova 已批准',m:'可逆 · 上线前可撤销报名',s:'ok',r:'—'};
    t.plan.steps[2]={l:'审批执行 · 在天猫完成报名',m:'进行中',s:'act',r:'刚开始'};}
   r.st='ok';r.attn=0;r.gate=null;r.next='9月1日';r.last='刚刚 · 已完成';
   r.runs[0]={at:'今天 09:12',trig:'定时',dur:'3分52秒',res:'已批准 · 8 个 SKU 报名',tid:'t18',art:'活动报名'};
   toast('已批准 · 在原线程内继续执行，没有新开线程');}
  else {
   if(t){t.st='done';t.up='刚刚';
-   t.plan.steps[1]={l:'⛒ 审批门 · dudu 已拒绝',m:'本次运行中止，未执行任何动作',s:'ok',r:'—'};
+   t.plan.steps[1]={l:'⛒ 审批门 · Nova 已拒绝',m:'本次运行中止，未执行任何动作',s:'ok',r:'—'};
    t.plan.steps[2]={l:'审批执行 · 未执行',m:'已跳过',s:'todo',r:'—'};
    (t.log=t.log||[]).unshift({at:'今天 09:12',res:'已拒绝 · 未执行',silent:1});}
   r.st='idle';r.attn=0;r.gate=null;r.next='9月1日';r.last='刚刚 · 已拒绝';
@@ -1195,7 +1195,7 @@ function saveRoutine(){
   if(n.editing){const r=RECIPES.find(x=>x.id===n.editing);
    Object.assign(r,{n:nm,d:d||r.d,ag:n.ag,hitl:n.hitl,dom:n.dom});
    closeRoutineEditor();render();toast('配方已保存');return;}
-  RECIPES.push({id:'rc'+Date.now(),n:nm,d:d||'（还没写说明）',ag:n.ag,dom:n.dom,used:0,cad:null,hitl:n.hitl,own:'dudu'});
+  RECIPES.push({id:'rc'+Date.now(),n:nm,d:d||'（还没写说明）',ag:n.ag,dom:n.dom,used:0,cad:null,hitl:n.hitl,own:'Nova'});
   closeRoutineEditor();S.atab=1;go('agent');toast('配方已创建 · 随时能加排期变成例行');return;}
  if(n.editing){
   const r=RECIPES.find(x=>x.id===n.editing);
@@ -1208,7 +1208,7 @@ function saveRoutine(){
  RECIPES.unshift({id,n:nm,d:d||'（还没写说明）',ag:n.ag,dom:n.dom,used:0,
   cad:n.freq+' '+n.time,tz:n.tz,freq:n.freq,time:n.time,start:n.date,weekday:n.weekday,monthday:n.monthday,
   next3:nextRuns,catchup:n.catchup,overlap:n.overlap,retry:n.retry,
-  hitl:n.hitl,own:'dudu',st:'idle',next:nextRuns[0],last:'还没跑过',
+  hitl:n.hitl,own:'Nova',st:'idle',next:nextRuns[0],last:'还没跑过',
   dlv:($('nrdlv')||{value:'只留在系统里，不外送'}).value,fresh:1,oneoff:n.freq==='一次性',runs:[]});
  closeRoutineEditor();S.atab=1;go('agent');
  toast('例行已创建 · 首次 '+nextRuns[0]+(n.freq==='一次性'?' · 跑完自动停用':''));
@@ -1314,7 +1314,7 @@ function setAgentConfig(id,key,value){
 function agConfig(a){
  const m=agAdmin(a),specific=agCfg(a);
  const slas=['5','10','15','20','30','45','60','90','120','未设置'];
- const managers=['dudu','Sophie','Brooks','Ariel','Sam','Shlomi','Gil'];
+ const managers=['Nova','Sophie','Brooks','Ariel','Sam','Shlomi','Gil'];
  return `<div style="font-size:var(--fs-xs);font-weight:700;color:var(--t1);margin-bottom:var(--sp-2)">描述 <span style="font-weight:400;color:var(--t3)">· Router 按它判断这个 Agent 能干什么</span></div>
  <textarea style="width:100%;min-height:104px;resize:vertical;border:1px solid var(--border);border-radius:var(--r);padding:var(--sp-3) 12px;font-size:var(--fs-sm);line-height:1.65;color:var(--t1);background:#fff" oninput="REG.find(x=>x.id==='${a.id}').d=this.value">${esc(a.d)}</textarea>
  <div style="font-size:var(--fs-xs);font-weight:600;color:var(--t2);margin:var(--sp-1) 0 7px">英文描述 <span style="font-weight:400;color:var(--t3)">· 可选</span></div>
@@ -1398,7 +1398,7 @@ const REV={y:{n:'可逆',c:'done'},p:{n:'部分可逆',c:'review'},n:{n:'不可�
 const DROPR=['判断错了','时机不对','已经处理了','不归我管','基准看着不对','有用但现在不做'];
 const BUDGET=5;
 const PROPS=[
- {src:'a',reason:{"saw": "48 小时内讨论量从基准 2.7 万涨到 8.4 万。", "judge": "增速本身不稀奇，热点每周都有。让我提这一条的是话题的内容——讨论集中在\"预算有限怎么搭\"，和已经批准的方向二「低预算高信任感」几乎是同一句话。所以这不是要你想新东西，是把手上已有的内容换个话题壳。", "ruled": ["等两天看热度是否持续 —— 否决：窗口只有 5–7 天，等到确认就晚了", "自己造一个话题 —— 否决：造话题的成本远高于蹭，方向二本来也不主打新奇", "全平台一起铺 —— 否决：这个话题在抖音的热度只有小红书的 1/6"], "ifdo": "自然曝光 +12–18 万，不额外增加投放预算。", "ifdob": "依据：过去 4 次蹭趋势内容的曝光中位数。样本只有 4 次，别当准数看。", "ifnot": "窗口过去后同样的内容只能靠付费拿曝光，粗算多花 ¥8–12k。"},id:'p1',by:'trend',t:'蹭 #早C晚A 出 2 条内容',conf:'hi',age:'25 分钟前',life:.3,camp:'11.11 大促',dom:'内容',cost:'¥14',st:'new',rev:'y',own:'dudu',score:82,
+ {src:'a',reason:{"saw": "48 小时内讨论量从基准 2.7 万涨到 8.4 万。", "judge": "增速本身不稀奇，热点每周都有。让我提这一条的是话题的内容——讨论集中在\"预算有限怎么搭\"，和已经批准的方向二「低预算高信任感」几乎是同一句话。所以这不是要你想新东西，是把手上已有的内容换个话题壳。", "ruled": ["等两天看热度是否持续 —— 否决：窗口只有 5–7 天，等到确认就晚了", "自己造一个话题 —— 否决：造话题的成本远高于蹭，方向二本来也不主打新奇", "全平台一起铺 —— 否决：这个话题在抖音的热度只有小红书的 1/6"], "ifdo": "自然曝光 +12–18 万，不额外增加投放预算。", "ifdob": "依据：过去 4 次蹭趋势内容的曝光中位数。样本只有 4 次，别当准数看。", "ifnot": "窗口过去后同样的内容只能靠付费拿曝光，粗算多花 ¥8–12k。"},id:'p1',by:'trend',t:'蹭 #早C晚A 出 2 条内容',conf:'hi',age:'25 分钟前',life:.3,camp:'11.11 大促',dom:'内容',cost:'¥14',st:'new',rev:'y',own:'Nova',score:82,
   sig:'#早C晚A 讨论量 8.4 万条 / 48h',base:'该话题 30 天基准 2.7 万条（带宽 1.9–3.4 万，n=30）',
   why:'增长 214%，讨论集中在"预算有限怎么搭"，和方向二的「低预算高信任感」是同一个话题面。现在切进去成本最低，窗口预计还有 5–7 天。',
   imp:'预估自然曝光 +12–18 万',impb:'依据：过去 4 次蹭趋势内容的曝光中位数，样本 n=4，置信度不高',
@@ -1408,7 +1408,7 @@ const PROPS=[
 ];
 const SUPPRESSED=[
  {t:'某腰部达人涨粉较快',by:'kol',score:38,thr:60,own:'Sophie',why:'与本季目标无关，报价高于名单均值'},
- {t:'小红书某美妆话题上升',by:'trend',score:31,thr:60,own:'dudu',why:'品牌相关度 0.31 · 低于阈值 0.55'},
+ {t:'小红书某美妆话题上升',by:'trend',score:31,thr:60,own:'Nova',why:'品牌相关度 0.31 · 低于阈值 0.55'},
  {t:'某 SKU 价格波动 2%',by:'insp',score:22,thr:60,own:'Brooks',why:'在基准带宽内，未达汇报门槛'},
  {t:'竞品发了一条日常内容',by:'comp',score:19,thr:60,own:'Sophie',why:'无策略变化信号'}];
 
@@ -1548,7 +1548,7 @@ function takeProp(id,edit){
  T.unshift({cr:p.src==='h'?{s:'h',w:p.from}:{s:'a',w:p.by},id:tid,new:1,t:p.t,camp:p.camp,dom:p.dom,ag:p.agents[0],own:'du',st:'run',up:'刚刚',day:0,
   lv:LV[(REG.find(y=>y.id===p.agents[0])||{lv:1}).lv].k,cost:'¥0.20',
   intent:{who:'du',tx:'采纳了 '+nick(p.by)+' 的提案：'+p.t+(edit?'。我要求改的是：'+p.editNote:''),at:'刚刚'},
-  plan:{v:edit?2:1,tx:'来自提案的预编排方案。'+p.why,adj:edit?'dudu 在采纳时提了改动：'+p.editNote:null,
+  plan:{v:edit?2:1,tx:'来自提案的预编排方案。'+p.why,adj:edit?'Nova 在采纳时提了改动：'+p.editNote:null,
    steps:p.plan.map((x,i)=>({l:x,m:i===0?'进行中':'排队中',s:i===0?'act':'todo',r:i===0?'刚开始':'—'}))},
   cmts:(p.cmts||[]).slice()});
  p.tid=tid;p.st='running';render();

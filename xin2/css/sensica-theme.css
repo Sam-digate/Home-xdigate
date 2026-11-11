@@ -86,7 +86,7 @@ html[data-theme="sensica"] :is(.kp-sync-scroll,.kp-scroll){scrollbar-color:var(-
 html[data-theme="sensica"] :is(.btn:hover,.flow-back-button:hover){border-color:var(--primary-lt)}
 html[data-theme="sensica"] :is(.backdrop,.modal-backdrop){background:rgba(36,32,28,.30)}
 html[data-theme="sensica"] .pub-note{box-shadow:0 5px 24px rgba(36,32,28,.04)}
-/* User identity stays unchanged; only dudu's theme-specific avatar paint changes. */
+/* User identity stays unchanged; only Nova's theme-specific avatar paint changes. */
 html[data-theme="sensica"] :is(.av,.avs)[data-user="du"],
 /* Legacy thread/message templates still inline the default purple identity color.
    Limit this fallback to compact identity badges, never platform logos or images. */

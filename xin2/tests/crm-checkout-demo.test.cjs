@@ -1,6 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const timers=[];let allowed=true;const nodes={};const $=id=>nodes[id]||(nodes[id]={value:'',innerHTML:'',classList:{add(){}}});
-const ctx=vm.createContext({setTimeout(fn){timers.push(fn);},AG:{},TRACE:{},ONLINE:{},REG:[],T:[],S:{},U:{du:{n:'dudu'}},currentUser:()=> 'du',permissionHasPage:()=>allowed,$,render(){},toast(){},closeDw(){},closeMod(){},kpIcons(){},esc:String,STN:{todo:'todo',review:'review',done:'done'}});
+const ctx=vm.createContext({setTimeout(fn){timers.push(fn);},AG:{},TRACE:{},ONLINE:{},REG:[],T:[],S:{},U:{du:{n:'Nova'}},currentUser:()=> 'du',permissionHasPage:()=>allowed,$,render(){},toast(){},closeDw(){},closeMod(){},kpIcons(){},esc:String,STN:{todo:'todo',review:'review',done:'done'}});
 ctx.kbHistoryTime=String;
 vm.runInContext(fs.readFileSync('js/28-crm-checkout-demo.js','utf8'),ctx);
 const t=ctx.crmTask();assert.equal(t.st,'todo');ctx.crmGenerate();assert.equal(t.st,'todo');

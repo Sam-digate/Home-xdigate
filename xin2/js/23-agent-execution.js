@@ -46,6 +46,6 @@ function retryTaskExecution(id){
 }
 function executionTerminalNode(t){
  if(!executionTask(t.id)||!['failed','stopped'].includes(t.executionState))return '';
- const failed=t.executionState==='failed',last=t.executionHistory?.at(-1),actor=U[last?.actor]?.n||last?.actor||'dudu';
+ const failed=t.executionState==='failed',last=t.executionHistory?.at(-1),actor=U[last?.actor]?.n||last?.actor||'Nova';
  return `<div class="node wait"><div class="nlab">执行 · ${failed?'FAILED':'STOPPED'}</div><div class="bub execution-result"><div class="who"><b>${failed?'执行失败':'Agent 已中止'}</b>${failed?`<span class="tm">${esc(actor)} · ${last?esc(new Date(last.at).toLocaleString('zh-CN',{timeZone:'Asia/Tokyo',hour12:false})):'刚刚'}</span>`:''}</div><p>${!failed?`<span class="execution-stop-meta">${esc(actor)} · ${last?esc(new Date(last.at).toLocaleString('zh-CN',{timeZone:'Asia/Tokyo',hour12:false})):'刚刚'} · </span>`:''}${esc(failed?t.executionError:'已停止后续执行，补充信息与已完成内容均已保留。')}</p><p class="execution-step">停留步骤：生成内容计划</p><div class="execution-actions"><button class="btn sm" onclick="retryTaskExecution('${t.id}')">重试</button><button class="btn ghost sm" onclick="openTrace('${t.ag}','${t.id}')">看它怎么想的</button></div></div></div>`;
 }

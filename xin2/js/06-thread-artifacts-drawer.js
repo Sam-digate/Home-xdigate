@@ -137,7 +137,7 @@ function permissionBlockedPlanNode(t){
  return `<div class="node wait"><div class="nlab">计划 · PLAN</div>
   <div class="bub permission-plan-blocked">
    <div class="who"><span class="avs" style="background:${agent.c}">${agent.s}</span><span class="nm">${esc(agent.n)}</span><span class="chip mut">计划 v1</span><span class="tm">${rejected?'未通过':'等待权限'}</span></div>
-   ${rejected?`<div class="prestart-rejected-note"><b>不通过原因：</b>${esc(t.plan.feedback||'未填写')}</div>`:`<div class="permission-plan-message"><span class="permission-plan-lock"><i data-lucide="lock-keyhole"></i></span><div><b>dudu 暂无使用权限</b><p>该任务已匹配到${esc(agent.n)}，获得授权后才能确认计划并开始执行。</p></div></div>
+   ${rejected?`<div class="prestart-rejected-note"><b>不通过原因：</b>${esc(t.plan.feedback||'未填写')}</div>`:`<div class="permission-plan-message"><span class="permission-plan-lock"><i data-lucide="lock-keyhole"></i></span><div><b>Nova 暂无使用权限</b><p>该任务已匹配到${esc(agent.n)}，获得授权后才能确认计划并开始执行。</p></div></div>
    ${draft?`<div class="prestart-plan-editor permission-plan-editor"><textarea id="prestart-adjustment" rows="2" aria-label="计划调整要求" placeholder="说明希望如何调整，系统会改用你有权限的 Agent" oninput="setPrestartDraft(this.value)">${esc(draft.tx)}</textarea><div class="prestart-plan-editor-actions"><button class="btn sm" onclick="savePermissionBlockedPlan('${t.id}')">重新规划</button><button class="btn ghost sm" onclick="cancelPrestartPlan('${t.id}')">取消</button></div></div>`:rejecting?`<div class="prestart-plan-editor permission-plan-editor"><textarea rows="2" aria-label="不通过原因" placeholder="填写不通过原因" oninput="setPrestartReject(this.value)">${esc(S.prestartReject.tx)}</textarea><div class="prestart-plan-editor-actions"><button class="btn sm" onclick="confirmPrestartReject('${t.id}')">确定</button><button class="btn ghost sm" onclick="cancelPrestartReject('${t.id}')">取消</button></div></div>`:`<div class="permission-plan-actions"><button class="btn ghost sm" type="button" onclick="openPermissionBlockedPlan('${t.id}')">调整计划 ↗</button><button class="btn ghost sm" type="button" onclick="openManualPrestart('${t.id}')">手动调整</button><button class="btn sm permission-plan-request" type="button" ${requested?'disabled':''} onclick="requestTaskAgentPermission('${t.id}',event)">${requested?'<i data-lucide="clock-3"></i> 已申请，等待管理员处理':'申请权限'}</button><button class="prestart-reject-link" type="button" onclick="openPrestartReject('${t.id}')">不通过</button></div>`}`}
   </div></div>`;
 }
@@ -377,7 +377,7 @@ function vThread(){
     <div class="card-t">对话 <span class="chip mut">${(t.cmts||[]).length}</span></div>
     <div id="cl">${convList(t)}</div>
     <div class="cbox" ${caDropAttrs('task',t.id)}>
-      <span class="avs" style="background:${U.du.c}">DU</span>
+      <span class="avs" style="background:${U.du.c}">NO</span>
       <div style="flex:1;min-width:0;position:relative">
         <div id="m-ci"></div>
         <textarea id="ci" rows="3" oninput="onKey(event,'ci');caRemember('task','${t.id}',this.value)" placeholder="${t.prestartDemo?'补充任务需求或留言…':'线程级的事：范围、优先级、要不要砍掉某个方向…&#10;输入 @ 可以提到团队成员'}">${esc(caGet('task',t.id).text)}</textarea>
@@ -447,12 +447,12 @@ function m1OwnerDecision(id,ok){
   }
   if(t.demoDualAgents&&m.kind==='inspection'){
    m.stage='requester';t.st='review';a.st='review';t.up='刚刚';t.agentStates.insp='已批准';
-   if(t.plan?.steps){const last=t.plan.steps[t.plan.steps.length-1];if(last){last.s='act';last.r='等待 dudu 统一验收';}}
-   toast('巡检报告已批准 · 等待 dudu 验收并分别评分');
+   if(t.plan?.steps){const last=t.plan.steps[t.plan.steps.length-1];if(last){last.s='act';last.r='等待 Nova 统一验收';}}
+   toast('巡检报告已批准 · 等待 Nova 验收并分别评分');
   }else{
   m.stage='requester';t.st='review';a.st='review';t.up='刚刚';
   if(t.plan?.steps){t.plan.steps[2].s='ok';t.plan.steps[2].r='Brooks 已批准';t.plan.steps[3].s='act';t.plan.steps[3].r='待验收';}
-  toast('Brooks 已批准 · 等待 dudu 验收');
+  toast('Brooks 已批准 · 等待 Nova 验收');
   }
  }else{
   m.stage='returned';t.executionCancelled=false;t.restoredPending=false;t.st='run';a.st='run';a.v++;t.up='刚刚';
@@ -506,7 +506,7 @@ function m1RequesterApprove(id){
    render();if($('dw')?.classList.contains('on'))drawDw();toast('已退回 '+names.join('、')+' · 备注已提交');return;
   }
   t.st='done';t.up='刚刚';if(t.plan?.steps){const step=t.plan.steps[t.plan.steps.length-1];if(step){step.s='ok';step.r='已验收';}}
-  S.m1AgentReviews=null;render();if($('dw')?.classList.contains('on'))drawDw();toast('dudu 已完成逐项验收 · 双 Agent 任务已交付');return;
+  S.m1AgentReviews=null;render();if($('dw')?.classList.contains('on'))drawDw();toast('Nova 已完成逐项验收 · 双 Agent 任务已交付');return;
  }
  if(!decision){toast('请先选择通过或退回');return;}
  if(decision==='pass'&&t.demoDualAgents&&(!agentScores.pdp||!agentScores.inspection)){toast('请分别为两个 Agent 评分');return;}
@@ -515,7 +515,7 @@ function m1RequesterApprove(id){
  if(decision==='return'){
   m.stage='owner';m.requesterAt='刚刚';m.ownerAt=null;m.ownerDecision=null;m.feedback=fb;m.reviewHistory.push({who:m.requester,role:'任务发起人',result:'验收退回，返回负责人审批',feedback:fb,at:'刚刚'});
   a.st='review';a.v++;t.st='review';t.up='刚刚';if(t.demoDualAgents)t.agentStates.insp='待 Brooks 审批';
-  if(t.plan?.steps){const last=t.plan.steps[t.plan.steps.length-1];if(last){last.s='act';last.r='待审批';last.m='dudu 退回后返回 Brooks 重新审批';}}
+  if(t.plan?.steps){const last=t.plan.steps[t.plan.steps.length-1];if(last){last.s='act';last.r='待审批';last.m='Nova 退回后返回 Brooks 重新审批';}}
   S.m1Decision=null;S.m1Score=null;S.m1AgentScores=null;render();if($('dw')?.classList.contains('on'))drawDw();toast(t.demoDualAgents?'已退回巡检报告 · 返回 Brooks 重新审批':'已退回 · 返回 Brooks 重新审批');return;
  }
  const reviewed=t.demoDualAgents?t.arts.filter(x=>x.m1):[a];
@@ -526,7 +526,7 @@ function m1RequesterApprove(id){
  });
  t.st='done';t.up='刚刚';if(t.demoDualAgents){t.agentStates.pdp='已完成';t.agentStates.insp='已完成';}
  if(t.plan?.steps){const step=t.demoDualAgents?t.plan.steps[t.plan.steps.length-1]:t.plan.steps[3];if(step){step.s='ok';step.r='已验收';}}
- S.m1Decision=null;S.m1Score=null;S.m1AgentScores=null;render();drawDw();toast(t.demoDualAgents?'dudu 已完成验收并分别评分 · 双 Agent 任务已交付':'dudu 已验收 · 任务已交付');
+ S.m1Decision=null;S.m1Score=null;S.m1AgentScores=null;render();drawDw();toast(t.demoDualAgents?'Nova 已完成验收并分别评分 · 双 Agent 任务已交付':'Nova 已验收 · 任务已交付');
 }
 function m1Delivery(t){
  const m1Arts=t.arts?.filter(x=>x.m1)||[];
@@ -538,7 +538,7 @@ function m1Delivery(t){
  }).join('');
  if(m.stage==='owner'){const returned=(m.reviewHistory||[]).some(h=>(h.result||'').includes('退回'));return `<div class="bub manual-review">
   <div class="who"><span class="avs" style="background:${U.br.c}">BR</span><span class="nm">${returned?'返回 Brooks 重新审批':'等待 Brooks 审批'}</span><span class="chip" style="background:var(--orange-bg);color:var(--orange-fg);border:1px solid #FED7AA">待审批</span><span class="tm">刚刚</span></div>
-  <div class="manual-review-intro">${returned?'dudu 已退回，本次产出返回产品负责人 Brooks 重新审批；通过后会再次提交给 dudu 验收。':t.demoDualAgents?'店铺巡检报告已经生成。Brooks 批准后，两份产出会一起交给 dudu 验收，并分别为两个 Agent 评分。':'产品负责人需先审批本次产出，通过后再提交给 dudu 验收打分。'}</div>
+  <div class="manual-review-intro">${returned?'Nova 已退回，本次产出返回产品负责人 Brooks 重新审批；通过后会再次提交给 Nova 验收。':t.demoDualAgents?'店铺巡检报告已经生成。Brooks 批准后，两份产出会一起交给 Nova 验收，并分别为两个 Agent 评分。':'产品负责人需先审批本次产出，通过后再提交给 Nova 验收打分。'}</div>
   ${history}
  </div>`;}
  if(m.stage==='requester'){
@@ -577,10 +577,10 @@ function m1Delivery(t){
    <div class="manual-review-section"><div class="manual-review-label">3 评价 ${decision==='return'?`<span style="color:#DC2626;font-weight:500">· 退回时必填</span>`:`<span class="optional">· 选填</span>`}</div>
     <textarea id="m1-feedback" placeholder="${decision==='return'?'请填写退回原因':'给详情页 Agent 一点反馈'}">${esc(m.feedback||'')}</textarea>
    </div>
-   <div class="manual-review-foot"><button class="btn" onclick="m1RequesterApprove('${a.id}')">批准</button><span style="font-size:var(--fs-xs);color:var(--t3)">任务发起人负责审批</span></div>`):`<span class="st review">等待 dudu 验收</span>`}
+   <div class="manual-review-foot"><button class="btn" onclick="m1RequesterApprove('${a.id}')">批准</button><span style="font-size:var(--fs-xs);color:var(--t3)">任务发起人负责审批</span></div>`):`<span class="st review">等待 Nova 验收</span>`}
   </div>`;
  }
- if(m.stage==='done'){const scoreText=t.demoDualAgents?`详情页生成 ${m1Arts.find(x=>x.m1.kind==='pdp')?.m1.score||4}/5 · 店铺巡检 ${m1Arts.find(x=>x.m1.kind==='inspection')?.m1.score||4}/5`:`评分 ${m.score||4} / 5`;return `<div class="bub manual-review-result pass"><div class="manual-review-result-head"><span class="manual-review-result-icon">✓</span><div><div class="manual-review-result-title">已交付</div><div class="manual-review-result-sub">Brooks 已批准，dudu 已验收 · ${scoreText}</div></div></div>
+ if(m.stage==='done'){const scoreText=t.demoDualAgents?`详情页生成 ${m1Arts.find(x=>x.m1.kind==='pdp')?.m1.score||4}/5 · 店铺巡检 ${m1Arts.find(x=>x.m1.kind==='inspection')?.m1.score||4}/5`:`评分 ${m.score||4} / 5`;return `<div class="bub manual-review-result pass"><div class="manual-review-result-head"><span class="manual-review-result-icon">✓</span><div><div class="manual-review-result-title">已交付</div><div class="manual-review-result-sub">Brooks 已批准，Nova 已验收 · ${scoreText}</div></div></div>
   <div style="margin:var(--sp-3) 0 10px;color:var(--t2);font-size:var(--fs-sm);line-height:1.65">${t.demoDualAgents?'详情页内容与店铺巡检报告已合并完成验收。':'本线程的交付物为 <b style="color:var(--t1)">A8O 修护精华 30ml · 详情页 v4</b>。上方产出全部批准后自动收口。'}</div>${history}</div>`;
  }
  return `<div class="bub manual-review-result return"><div class="manual-review-result-head"><span class="manual-review-result-icon">↩</span><div><div class="manual-review-result-title">负责人退回</div><div class="manual-review-result-sub">详情页 Agent 修改后会再次提交 Brooks 审核</div></div></div>${history}</div>`;
@@ -617,7 +617,7 @@ function toggleM1Comment(){const opening=!S.pc;S.pc=!S.pc;drawDw();if(opening)sc
 function renderThreadSupplement(t){
  const x=t.supplement;
  return `<div class="node ok"><div class="nlab">你的补充 · ANSWERED</div>
-  <div class="bub me"><div class="who"><span class="avs" style="background:${U.du.c}">DU</span><span class="nm">dudu</span><span class="tm">刚刚</span></div>
+  <div class="bub me"><div class="who"><span class="avs" style="background:${U.du.c}">NO</span><span class="nm">Nova</span><span class="tm">刚刚</span></div>
    <div class="thread-supplement" aria-label="已录入的活动表单">
     <div class="thread-supplement-field wide"><span>名称</span><b>${esc(x.name)}</b></div>
     <div class="thread-supplement-field"><span>活动类型</span><b>${esc(x.type)}</b></div>
@@ -1096,13 +1096,13 @@ function submitManualReview(id){
  const box=$('manual-review-feedback-'+id);if(box)m.reviewFeedback=box.value.trim();
  if(m.reviewDecision==='pass'){
   m.reviewed=true;m.reviewResult='通过';m.reviewAt='刚刚';a.st='done';t.st='done';t.up='刚刚';
-  (m.records=m.records||[]).push({who:'dudu',at:'刚刚',tx:'主管审核通过'+(m.reviewScore?' · 评分 '+m.reviewScore:'')});
+  (m.records=m.records||[]).push({who:'Nova',at:'刚刚',tx:'主管审核通过'+(m.reviewScore?' · 评分 '+m.reviewScore:'')});
   toast('主管审核通过 · 任务已完成');
  }else{
   if(!m.reviewFeedback){toast('退回时请填写评价');return;}
   const feedback=m.reviewFeedback;m.submitted=false;m.reviewed=false;m.reviewResult='退回';m.reviewAt='刚刚';m.reviewDecision='';
   a.st='run';a.v=(a.v||1)+1;t.executionCancelled=false;t.restoredPending=false;t.st='run';t.up='刚刚';a.ex=`${manualPeopleLabel(manualArtifactPeople(m))} 正在根据主管审核意见修改人工产出。`;
-  (m.records=m.records||[]).push({who:'dudu',at:'刚刚',tx:'主管退回：'+feedback});
+  (m.records=m.records||[]).push({who:'Nova',at:'刚刚',tx:'主管退回：'+feedback});
   toast('已退回处理人修改');
  }
  render();if($('dw').classList.contains('on'))drawDw();
@@ -1200,7 +1200,7 @@ function dispatchFrom(agid,tx){
  if(blockPrestartDispatch(t))return;
  t.plan=t.plan||{v:1,tx:'直接指派。',steps:[]};
  t.plan.v=(t.plan.v||1)+1;
- t.plan.adj='dudu 在评论里直接 @了 '+a.nick+'（未走编排）';
+ t.plan.adj='Nova 在评论里直接 @了 '+a.nick+'（未走编排）';
  t.plan.steps.splice(Math.max(0,t.plan.steps.length-1),0,{l:a.nick+' · 被直接 @ 派活',m:tx.replace('@'+a.nick,'').trim().slice(0,26),s:'act',r:'刚开始'});
  t.cmts.push({w:agid,tx:'收到，我接了。这条会作为新一步跑在这条线程里，跑完回到待审批。',at:'刚刚'});
  t.executionCancelled=false;t.restoredPending=false;t.st='run';render();toast(a.nick+' 接了活 · 已加进这条线程');
@@ -1756,7 +1756,7 @@ function removeManualFile(index){
 }
 function addManualRecord(){
  const i=$('manual-record-input'),tx=i&&i.value.trim();if(!tx)return;const [,a]=findArt(S.aid);if(!a?.manual)return;
- a.manual.records.push({who:'dudu',at:'刚刚',tx});drawDw();toast('处理记录已添加');
+ a.manual.records.push({who:'Nova',at:'刚刚',tx});drawDw();toast('处理记录已添加');
 }
 
 function dDetailDirection(a,i){

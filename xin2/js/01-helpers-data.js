@@ -65,12 +65,12 @@ function prestartPlanPreset(agid){
    ['检查品牌调性与禁用词','引用资料 · 品牌规范'],
    ['提交人工审批','确认后交付，不自动发布']
   ]},
-  pdp:{tx:'读取 A8O 修护精华产品资料、天猫详情页规则与 11.11 Brief，先整理详情页规划表，确认后生成 1 个详情页内容产出。M1 产出会先交 Brooks 审批，再交 dudu 验收打分。',expected:'1 个天猫详情页内容产出：当前规划表、详情图、创意方向与版本记录。',reason:'需求包含天猫详情页与商品转化表达，和详情页 Agent 的规划表、详情图与卖点组织能力匹配。',steps:[
+  pdp:{tx:'读取 A8O 修护精华产品资料、天猫详情页规则与 11.11 Brief，先整理详情页规划表，确认后生成 1 个详情页内容产出。M1 产出会先交 Brooks 审批，再交 Nova 验收打分。',expected:'1 个天猫详情页内容产出：当前规划表、详情图、创意方向与版本记录。',reason:'需求包含天猫详情页与商品转化表达，和详情页 Agent 的规划表、详情图与卖点组织能力匹配。',steps:[
    ['读取产品资料与天猫规则','产品中心 · 详情页规范 · 11.11 活动'],
    ['确认目标平台与关联产品','天猫 · A8O 修护精华 30ml'],
    ['整理详情页当前规划表','屏幕结构 · 主标题 · 卖点顺序'],
    ['生成详情页内容产出','1 个 M1 产出 · 待负责人审批'],
-   ['提交产品负责人审核','Brooks 先批准，通过后再给 dudu 验收']
+   ['提交产品负责人审核','Brooks 先批准，通过后再给 Nova 验收']
   ]},
   plan:{tx:'读取 A8O 产品资料与 11.11 Brief，整理活动主题、目标人群、渠道、预算及执行安排，形成完整活动策划供人工确认。',expected:'1 份活动策划：活动概述、创意方向、渠道安排、预算及执行清单。',reason:'活动策划 Agent 适合先明确活动策略与执行安排，再拆分具体内容生产任务。',steps:[
    ['读取产品资料与活动 Brief','产品中心 · 品牌智库 · 11.11 活动'],
@@ -162,7 +162,7 @@ const AG={
  csa:{n:'客户成功 Agent',c:'#0F9F7A',s:'成'},
  orch:{n:'Orchestrator',c:'#6D28D9',s:'编'}
 };
-const U={du:{n:'dudu',c:'#7C3AED',s:'DU'},so:{n:'Sophie',c:'#E11D48',s:'SO'},br:{n:'Brooks',c:'#0891B2',s:'BR'},ar:{n:'Ariel',c:'#10B981',s:'AR'},sam:{n:'Sam',c:'#7C83C6',s:'SA'}};
+const U={du:{n:'Nova',c:'#7C3AED',s:'NO'},so:{n:'Sophie',c:'#E11D48',s:'SO'},br:{n:'Brooks',c:'#0891B2',s:'BR'},ar:{n:'Ariel',c:'#10B981',s:'AR'},sam:{n:'Sam',c:'#7C83C6',s:'SA'}};
 
 const T=[
 {cr:{s:'h',w:'du'},id:'t-general-agent-demo',trig:'manual',workTop:160,t:'生成好评返现文案',camp:null,dom:'内容',ag:'general',own:'du',generalAgentDemo:true,generalAgentConfirmed:false,prestartDemo:true,st:'review',up:'刚刚',day:0,lv:'M1',cost:'—',outputCount:0,
@@ -188,12 +188,12 @@ const T=[
  intent:{who:'du',tx:'为 A8O 修护精华 30ml 准备一组双十一推广内容，面向关注换季护理的用户。先推荐合适的 Agent 和执行计划，确认后再开始，不自动发布。',at:'刚刚'},
  plan:{v:1,status:'pending',startedAt:null,...prestartPlanPreset('gen')},arts:[],cmts:[]},
 {cr:{s:'h',w:'du'},id:'t-m1-pdp-demo',trig:'manual',new:1,t:'M1 审批演示 · 天猫详情页内容',camp:'11.11 大促',dom:'电商',ag:'pdp',own:'du',st:'review',up:'刚刚',day:0,lv:'M1',cost:'¥7.60',outputCount:1,m1Demo:true,
- intent:{who:'du',tx:'用详情页 Agent 生成一个天猫详情页内容产出，演示 M1 产出需要先由产品负责人 Brooks 批准，再交给 dudu 验收打分。',at:'刚刚'},
- plan:{v:1,tx:'详情页 Agent 生成单个详情页内容方案；M1 产出先交 Brooks 负责人审核，通过后再给 dudu 验收。',steps:[
+ intent:{who:'du',tx:'用详情页 Agent 生成一个天猫详情页内容产出，演示 M1 产出需要先由产品负责人 Brooks 批准，再交给 Nova 验收打分。',at:'刚刚'},
+ plan:{v:1,tx:'详情页 Agent 生成单个详情页内容方案；M1 产出先交 Brooks 负责人审核，通过后再给 Nova 验收。',steps:[
   {l:'读取商品资料与天猫规则',m:'A8O 修护精华 · 详情页规范 · 11.11 活动',s:'ok',r:'8秒'},
   {l:'生成详情页内容方案',m:'标题、卖点顺序、图片屏规划',s:'ok',r:'42秒'},
   {l:'提交产品负责人审核',m:'Brooks 先批准 M1 产出',s:'act',r:'待审核'},
-  {l:'发起人验收打分',m:'dudu 通过后正式交付',s:'todo',r:'—'}]},
+  {l:'发起人验收打分',m:'Nova 通过后正式交付',s:'todo',r:'—'}]},
  arts:[{id:'a-m1-pdp-demo',nxt:['生成详情页','存进知识库'],mode:'pdpseq',ty:'详情页内容',plat:'天猫',ttl:'A8O 修护精华 30ml · 天猫详情页内容',by:'pdp',v:1,st:'review',sourceDirection:1,pv:'wd',g:['#67E8F9','#0891B2'],
   ex:'围绕换季敏感、干燥泛红等真实场景，先建立问题共鸣，再用核心卖点和实验依据完成详情页转化。',vals:[{l:'规划表',v:'已生成',s:'ok'},{l:'方向来源',v:'已关联',s:'ok'}],
   m1:{stage:'owner',owner:'br',requester:'du',ownerAt:null,ownerDecision:null,requesterAt:null,score:null,feedback:'',reviewHistory:[]},
@@ -576,7 +576,7 @@ const T=[
 // 开发中任务：暂时从工作列表隐藏，完成后移除 devHidden 标记。
 {devHidden:true,cr:{s:'h',w:'br'},id:'t15',trig:'manual',t:'11.11 天猫会场广告 · 蓄水期投放',camp:'11.11 大促',dom:'电商',ag:'adplan',own:'br',st:'review',up:'2小时前',day:0,lv:'M2',cost:'¥27.40',new:5,
  intent:{who:'br',tx:'蓄水期天猫广告，预算 12 万，目标是把会场收藏加购做起来，ROAS 别低于 2.5。给我策略、预算分配和创意。',at:'今天 08:50'},
- plan:{v:2,tx:'投放策略 → 预算分配 → 广告创意，三份产出一起审。',adj:'dudu 在计划批准后追加了「创意要对齐方向二调性」',steps:[
+ plan:{v:2,tx:'投放策略 → 预算分配 → 广告创意，三份产出一起审。',adj:'Nova 在计划批准后追加了「创意要对齐方向二调性」',steps:[
   {l:'读取历史投放与会场排期',m:'近 90 天 · 4 个计划',s:'ok',r:'18秒'},
   {l:'生成推广计划表',m:'4 个计划 + 机动 · ¥120,000 · 人群/预算/出价',s:'ok',r:'1分28秒'},
   {l:'生成广告创意',m:'3 组 · 已对齐方向二',s:'ok',r:'2分40秒'},

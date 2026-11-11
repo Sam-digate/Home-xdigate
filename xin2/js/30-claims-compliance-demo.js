@@ -9,9 +9,9 @@ const CLAIMS_DEMO_REPLACEMENTS=[
  'Read the instructions for use, including suitability and safety guidance, before starting.',
  'Contact the Sensica team if you have questions before choosing your device.'
 ];
-const CLAIMS_DEMO_SAFE=CLAIMS_DEMO_REPLACEMENTS.join(' ');
+const CLAIMS_DEMO_SAFE=[CLAIMS_DEMO_SENTENCES[0],...CLAIMS_DEMO_REPLACEMENTS.slice(1)].join(' ');
 AG.claims={n:'功效宣称与合规审核',s:'审',c:'#7C3AED'};ONLINE.claims=1;
-REG.push({id:'claims',nick:'合规审核',n:'Claims & Compliance Review Agent',em:'🛡',dom:'内容',b:'live',lv:0,own:'Sophie',pm:'dudu',tr:['manual','orchestrated'],out:['合规检查报告'],d:'核对功效宣称、适用范围及必要说明，给出依据摘要与修改建议，交由人工确认。',r:0,ok:0,ed:0,c:'—',enabled:true});
+REG.push({id:'claims',nick:'合规审核',n:'Claims & Compliance Review Agent',em:'🛡',dom:'内容',b:'live',lv:0,own:'Sophie',pm:'Nova',tr:['manual','orchestrated'],out:['合规检查报告'],d:'核对功效宣称、适用范围及必要说明，给出依据摘要与修改建议，交由人工确认。',r:0,ok:0,ed:0,c:'—',enabled:true});
 TRACE.claims=[{k:'read',h:'识别审核上下文',b:'Sensilift · 美国 · Meta 广告，不跨产品混查。'},{k:'read',h:'读取文案',b:'识别适用范围、使用计划及效果承诺。'},{k:'think',h:'应用演示规则',b:'本任务使用预置示例结果，未检索真实获批资料。'},{k:'write',h:'整理重点结果',b:'输出原句、问题与依据摘要、建议改为；详细信息折叠。'},{k:'tool',h:'提交人工审核',b:'修改使原检查失效；重新检查后才能批准交付。'}];
 T.unshift({id:'t-claims-sensilift',t:'Sensilift · Meta 广告合规审核',dom:'内容',ag:'claims',own:'du',lv:'M1',st:'todo',trig:'manual',cr:{s:'h',w:'du'},camp:null,up:'刚刚',day:0,workTop:210,cost:'—',arts:[],cmts:[],outputCount:0,claims:{stage:'recommend',selected:true,original:CLAIMS_DEMO_SENTENCES.join(' '),text:CLAIMS_DEMO_SENTENCES.join(' '),version:1,checkedText:null}});
 function claimsTask(){return T.find(t=>t.id==='t-claims-sensilift'&&!t.deletedAt);}
@@ -37,7 +37,7 @@ function claimsArtifactHTML(c){
 }
 function claimsThreadHTML(t){
  const c=t.claims,ready=c.stage!=='recommend',done=c.stage==='done';
- return `<div class="wrap thread-wrap"><div class="th-hd"><div class="crumb">工作 › 日常 › 任务</div><h2>${esc(t.t)}</h2><div class="th-meta"><span class="st ${t.st}">${STN[t.st]}</span><span class="chip dom">内容</span><span class="chip lv">M1 人工确认</span><span class="chip mut">由 dudu 发起</span></div><div class="th-stats"><div class="ts"><div class="l">主 Agent</div><div class="v">${AV('claims',20)} 合规审核</div></div><div class="ts"><div class="l">产出</div><div class="v num">${t.outputCount}</div></div><div class="ts"><div class="l">更新</div><div class="v">${t.up}</div></div></div></div><div class="spine">${crmNode('意图 · INTENT',`<div class="bub me intent-card"><div class="who"><span class="avs" style="background:var(--primary)">DU</span><span class="nm">dudu</span><span class="tm">刚刚</span></div><p>Review this Sensilift Meta ad copy for US claims compliance:</p><p style="margin-top:8px">${esc(c.original)}</p></div>`)}${crmNode('计划 · PLAN',claimsPlanHTML(c),ready?'ok':'wait')}${c.stage==='running'?crmNode('执行 · RUNNING',`<div class="live"><div class="live-h"><span class="spin"></span><span class="t">正在检查广告文案</span><span class="e">${c.progress}%</span></div><div class="live-t">${esc(c.progressText)}</div><div class="pbar" role="progressbar" aria-label="合规检查进度" aria-valuenow="${c.progress}" aria-valuemin="0" aria-valuemax="100"><i style="width:${c.progress}%"></i></div></div>`,'act'):''}${['review','done'].includes(c.stage)?crmNode('产出 · ARTIFACT',claimsArtifactHTML(c),done?'ok':'wait'):''}${crmNode('交付 · DELIVERY',`<div class="bub" style="color:var(--t2)">${done?'✓ 已交付：<b>Sensilift · Meta 广告合规检查报告</b>，已保留修改稿和人工审核记录。':ready?'本线程的交付物为合规检查报告与修改稿。完成复审并人工批准后交付。':'计划待确认，尚未开始执行。'}</div>`,done?'ok':'') }</div>${crmConversationHTML(t).replace('crmAddComment()','claimsAddComment()')}</div>`;
+ return `<div class="wrap thread-wrap"><div class="th-hd"><div class="crumb">工作 › 日常 › 任务</div><h2>${esc(t.t)}</h2><div class="th-meta"><span class="st ${t.st}">${STN[t.st]}</span><span class="chip dom">内容</span><span class="chip lv">M1 人工确认</span><span class="chip mut">由 Nova 发起</span></div><div class="th-stats"><div class="ts"><div class="l">主 Agent</div><div class="v">${AV('claims',20)} 合规审核</div></div><div class="ts"><div class="l">产出</div><div class="v num">${t.outputCount}</div></div><div class="ts"><div class="l">更新</div><div class="v">${t.up}</div></div></div></div><div class="spine">${crmNode('意图 · INTENT',`<div class="bub me intent-card"><div class="who"><span class="avs" style="background:var(--primary)">NO</span><span class="nm">Nova</span><span class="tm">刚刚</span></div><p>Review this Sensilift Meta ad copy for US claims compliance:</p><p style="margin-top:8px">${esc(c.original)}</p></div>`)}${crmNode('计划 · PLAN',claimsPlanHTML(c),ready?'ok':'wait')}${c.stage==='running'?crmNode('执行 · RUNNING',`<div class="live"><div class="live-h"><span class="spin"></span><span class="t">正在检查广告文案</span><span class="e">${c.progress}%</span></div><div class="live-t">${esc(c.progressText)}</div><div class="pbar" role="progressbar" aria-label="合规检查进度" aria-valuenow="${c.progress}" aria-valuemin="0" aria-valuemax="100"><i style="width:${c.progress}%"></i></div></div>`,'act'):''}${['review','done'].includes(c.stage)?crmNode('产出 · ARTIFACT',claimsArtifactHTML(c),done?'ok':'wait'):''}${crmNode('交付 · DELIVERY',`<div class="bub" style="color:var(--t2)">${done?'✓ 已交付：<b>Sensilift · Meta 广告合规检查报告</b>，已保留修改稿和人工审核记录。':ready?'本线程的交付物为合规检查报告与修改稿。完成复审并人工批准后交付。':'计划待确认，尚未开始执行。'}</div>`,done?'ok':'') }</div>${crmConversationHTML(t).replace('crmAddComment()','claimsAddComment()')}</div>`;
 }
 function claimsSelectAgent(){if(!claimsAllowed()||claimsTask().claims.stage!=='recommend')return;claimsTask().claims.selected=true;render();}
 function claimsStart(){
@@ -47,9 +47,16 @@ function claimsStart(){
 }
 function claimsEvaluate(c){
  c.checkedText=c.text;c.findings=[];c.checkedAt=new Date().toISOString();
- const specs=[['适用部位需核对','“facial” 泛指面部，当前示例信息不足以确认其与获批适用部位一致。'],['使用计划需核对','“5 minutes once a week” 需要对应产品说明的支持，本演示没有接入正式依据。'],['效果承诺缺少依据','专业级效果及 7 天见效表述没有可核验的批准依据，不能默认放行。']];
- CLAIMS_DEMO_SENTENCES.forEach((sentence,i)=>{if(c.text.includes(sentence))c.findings.push({index:i,original:sentence,title:specs[i][0],reason:specs[i][1],replacement:CLAIMS_DEMO_REPLACEMENTS[i]});});
- c.verdict=c.text.trim()===CLAIMS_DEMO_SAFE?'pass':'review';
+ const issues=[
+  {index:1,title:'使用计划需核对',reason:'“5 minutes once a week” 需要对应产品说明的支持，本演示没有接入正式依据。'},
+  {index:2,title:'效果承诺缺少依据',reason:'专业级效果及 7 天见效表述没有可核验的批准依据，不能默认放行。'}
+ ];
+ for(const issue of issues){
+  const original=CLAIMS_DEMO_SENTENCES[issue.index];
+  if(c.text.includes(original))c.findings.push({...issue,original,replacement:CLAIMS_DEMO_REPLACEMENTS[issue.index]});
+ }
+ const acceptedCopy=[CLAIMS_DEMO_SENTENCES[0],CLAIMS_DEMO_SAFE,CLAIMS_DEMO_REPLACEMENTS.join(' ')];
+ c.verdict=acceptedCopy.includes(c.text.trim().replace(/\s+/g,' '))?'pass':'review';
  if(!c.findings.length&&c.verdict!=='pass')c.findings.push({index:null,title:'修改内容需人工核验',original:c.text,reason:'这段内容超出预置示例，本地演示无法核验，不能自动判为通过。',replacement:null});
 }
 function claimsRisk(c){
@@ -69,12 +76,49 @@ function claimsRecommendation(c){
  const style=c.verdict==='pass'?'done':high?'hold':'review';
  const summary=c.verdict==='pass'?'当前文案可保留，建议由人工确认后使用。':high?'原文含缺少依据的效果承诺，建议调整后使用下方文案。':'部分表述需要核实，建议采用下方改写，并确认产品说明。';
  const complete=findings.every(f=>!!f.replacement);
- const text=complete?findings.reduce((copy,f)=>copy.replace(f.original,f.replacement),c.text):null;
+ const text=complete?findings.reduce((copy,f)=>copy.replaceAll(f.original,f.replacement),c.text):null;
  return {label,style,summary,text};
+}
+function claimsMarkedCopy(copy,findings){
+ const ranges=[];
+ for(const finding of findings){
+  if(finding.index!==1&&finding.index!==2)continue;
+  const sentence=finding.original;
+  for(let start=copy.indexOf(sentence);start!==-1;start=copy.indexOf(sentence,start+sentence.length)){
+   ranges.push({start,end:start+sentence.length,high:finding.index===2});
+  }
+ }
+ ranges.sort((a,b)=>a.start-b.start);
+ let cursor=0,html='';
+ for(const {start,end,high} of ranges){
+  html+=esc(copy.slice(cursor,start));
+  html+=`<mark class="claims-copy-mark ${high?'high':'verify'}" title="${high?'高风险':'中风险'}">${esc(copy.slice(start,end))}</mark>`;
+  cursor=end;
+ }
+ return html+esc(copy.slice(cursor));
 }
 function claimsReportBody(c,locked,valid,passed){
  const advice=claimsRecommendation(c);
- return `<section class="claims-document"><section class="claims-advice" aria-label="审核建议"><h3>审核建议 <span class="st ${advice.style}">${advice.label}</span></h3><p class="claims-advice-summary">${esc(advice.summary)}</p><div class="claims-advice-copy"><h4>改写建议</h4><p>${advice.text?esc(advice.text):'暂无完整建议文案，请结合下方审核结果人工确认。'}</p></div></section>${!locked?'':`<p class="crm-context">批准人 ${esc(c.approvedBy)} · ${esc(kbHistoryTime(c.approvedAt))}</p>`}<section class="claims-review" id="claims-review">${claimsReviewHTML(c,valid,passed)}</section></section>`;
+ const reviewedCopy=c.checkedText??c.original??c.text;
+ const findings=c.findings||[];
+ const legend=[1,2]
+  .map(index=>findings.find(finding=>finding.index===index))
+  .filter(Boolean)
+  .map(claimsFindingRiskPill)
+  .join(' ');
+ return `<section class="claims-document">
+  <section class="claims-advice" aria-label="审核建议">
+   <h3>审核建议 <span class="st ${advice.style}">${advice.label}</span></h3>
+   <p class="claims-advice-summary">${esc(advice.summary)}</p>
+   <div class="claims-advice-copy">
+    <h4>送审原文 ${legend}</h4>
+    <p>${claimsMarkedCopy(reviewedCopy,findings)}</p>
+   </div>
+   <div class="claims-advice-copy"><h4>改写建议</h4><p>${advice.text?esc(advice.text):'暂无完整建议文案，请结合下方审核结果人工确认。'}</p></div>
+  </section>
+  ${!locked?'':`<p class="crm-context">批准人 ${esc(c.approvedBy)} · ${esc(kbHistoryTime(c.approvedAt))}</p>`}
+  <section class="claims-review" id="claims-review">${claimsReviewHTML(c,valid,passed)}</section>
+ </section>`;
 }
 function claimsOpenReport(preserve=false){
  if(!claimsAllowed())return;const c=claimsTask().claims;if(!['review','done'].includes(c.stage))return;

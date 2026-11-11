@@ -1,6 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const callbacks=[],elements={mod:{innerHTML:'',classList:{add(){}}}},task={id:'t16',t:'New product',ag:'gen',st:'run',answered:['channel config'],answeredChannels:[{platform:'x',qty:'1',products:['p']}],arts:[{id:'existing',v:1}],live:{t:'Planning',p:42,sub:['working']}};
-const ctx=vm.createContext({T:[task],S:{tid:'t16',liveT:1},U:{du:{n:'dudu'}},currentUser:()=>'du',esc:String,$:id=>elements[id],closeMod(){},render(){},toast(){},clearInterval(){},setTimeout(fn){callbacks.push(fn);},Date});
+const ctx=vm.createContext({T:[task],S:{tid:'t16',liveT:1},U:{du:{n:'Nova'}},currentUser:()=>'du',esc:String,$:id=>elements[id],closeMod(){},render(){},toast(){},clearInterval(){},setTimeout(fn){callbacks.push(fn);},Date});
 vm.runInContext(fs.readFileSync('js/23-agent-execution.js','utf8'),ctx);
 const original=JSON.stringify(task.answeredChannels),arts=JSON.stringify(task.arts);
 ctx.openExecutionStop('t16');assert.match(elements.mod.innerHTML,/confirmExecutionStop/);assert.equal(task.executionCancelled,undefined);
