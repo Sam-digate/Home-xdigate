@@ -171,6 +171,15 @@
 .pa-account-reconnect:hover{color:var(--ok-fg);background:var(--ok-bg)}
 .pa-account-reconnect:focus-visible{outline-color:var(--ok-fg)}
 .pa-channel-account .st::before{content:none}
+.pa-account-more{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:6px;border:0;border-radius:6px;color:var(--t3);background:transparent;cursor:pointer}
+.pa-account-more svg{width:18px;height:18px}
+.pa-account-more:hover,.pa-account-more[aria-expanded="true"]{color:var(--t1);background:var(--surface-tint)}
+.pa-account-more:focus-visible{outline:2px solid var(--primary-lt);outline-offset:2px}
+.pa-account-menu{position:fixed;inset:auto;margin:0;width:148px;padding:5px;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.pa-account-menu .pa-account-disconnect{display:block;width:100%;padding:9px 12px;text-align:left;border-radius:4px;color:var(--t1)}
+.pa-account-menu .pa-account-disconnect:hover{color:var(--t1);background:var(--surface-tint);text-decoration:none}
+.pa-account-menu .pa-account-disconnect:focus-visible{outline-color:var(--primary-lt)}
+.pa-account-menu .pa-account-disconnect+.pa-account-disconnect{border-top:1px solid var(--hairline)}
 .pa-account-delete{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:6px}
 .pa-account-delete svg{width:15px;height:15px}
 .pa-channel-multi{display:block}

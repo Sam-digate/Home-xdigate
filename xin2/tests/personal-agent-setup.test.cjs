@@ -90,8 +90,8 @@ c.personalAgentAddChannelPrompt(own.id);$('pa-custom-name').value='Project Tool'
 const projectTool=own.customChannels.at(-1);assert.equal(projectTool.projectId,undefined);
 c.cancelPersonalAgentLogin();
 c.personalAgentChannelFilter(own.id,'project','a80',true);assert.doesNotMatch($('dw').innerHTML,/Project Tool/);
-c.personalAgentChannelFilter(own.id,'public','',true);assert.match($('dw').innerHTML,/>Slack</);assert.doesNotMatch($('dw').innerHTML,/天猫旗舰店|Project Tool/);
-c.personalAgentChannelFilter(own.id,'other','',true);assert.match($('dw').innerHTML,/Project Tool/);assert.doesNotMatch($('dw').innerHTML,/>Slack<|选择项目/);
+c.personalAgentChannelFilter(own.id,'public','',true);assert.match($('dw').innerHTML,/>Slack</);assert.doesNotMatch($('dw').innerHTML,/天猫旗舰店/);
+assert.match($('dw').innerHTML,/Project Tool/);assert.doesNotMatch($('dw').innerHTML,/其他渠道/);
 const legacy={connections:{tmall:[{id:'existing',name:'Legacy Store'}]}};
 assert.equal(c.personalAgentChannelAccounts(legacy,'project-a80-tmall')[0].name,'Legacy Store');assert.equal(legacy.connections.tmall,undefined);
 c.personalAgentConnectChannel(own.id,'project-evo11-tmall');
@@ -114,10 +114,10 @@ c.openPersonalAgentSetup(previewId);assert.match($('dw').innerHTML,/公共渠道
 c.personalAgentSetupRecord(previewId).status='pending';assert.equal(c.personalAgentDefaultDemo(),null);
 console.log('PASS default setup preview, stable demo identity and existing application protection');
 c.personalAgentSetupRecord(previewId).status='connecting';
-c.openPersonalAgentSetup(previewId);assert.match($('dw').innerHTML,/添加其他渠道/);assert.doesNotMatch($('dw').innerHTML,/添加公共渠道|添加项目渠道/);
-c.personalAgentAddChannelPrompt(previewId);assert.match($('mod').innerHTML,/添加其他渠道/);assert.doesNotMatch($('mod').innerHTML,/所属项目/);
+c.openPersonalAgentSetup(previewId);assert.match($('dw').innerHTML,/添加公共渠道/);assert.doesNotMatch($('dw').innerHTML,/添加其他渠道|添加项目渠道/);
+c.personalAgentAddChannelPrompt(previewId);assert.match($('mod').innerHTML,/添加公共渠道/);assert.doesNotMatch($('mod').innerHTML,/所属项目/);
 $('pa-custom-name').value='Store Portal';$('pa-custom-url').value='https://example.com/store';c.personalAgentSaveCustomChannel();
-const previewRecord=c.personalAgentSetupRecord(previewId),added=previewRecord.customChannels[0];assert.equal(added.projectId,undefined);assert.equal(c.S.paChannelFilter.group,'other');
+const previewRecord=c.personalAgentSetupRecord(previewId),added=previewRecord.customChannels[0];assert.equal(added.projectId,undefined);assert.equal(c.S.paChannelFilter.group,'public');
 while(timers.length)timers.shift()();c.finishPersonalAgentLogin();assert.equal(previewRecord.connections[added.id].length,1);
 c.personalAgentDeleteChannelPrompt(previewId,added.id);user='other';c.personalAgentDeleteChannel();assert.equal(previewRecord.customChannels.length,1);
 user='preview-user';c.personalAgentDeleteChannel();assert.equal(previewRecord.customChannels.length,0);assert.equal(previewRecord.connections[added.id],undefined);
