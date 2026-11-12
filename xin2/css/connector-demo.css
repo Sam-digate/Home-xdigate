@@ -46,6 +46,7 @@ html.embedded.shell-mounted body.overlay-open .main-shell{overflow:hidden}
 .audit-item p.audit-description{margin-top:9px;color:var(--secondary);font-size:13px;line-height:1.85;overflow-wrap:anywhere}
 .audit-empty{padding:28px 0;text-align:center}
 @media(max-width:420px){.audit-heading{gap:8px}.audit-heading h3{font-size:13px}.audit-result{font-size:10px;padding:0 7px}.audit-item p.audit-description{font-size:12px}.audit-context{column-gap:8px}}
+.site-ranking-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.site-ranking-actions .btn{flex-shrink:0}
 /* Website workspace: give ranking data room without altering platform drawers. */
 .drawer.website-drawer{width:min(940px,100vw)}
 .website-drawer .drawer-header{padding:21px 28px 18px}.website-drawer .drawer-title-row h2{font-size:20px}.website-drawer .drawer-title-row .website-eyebrow{color:var(--primary);font-size:10px;margin:0 0 4px;letter-spacing:.7px}.website-header-status{margin-left:auto}.website-header-status+.close-drawer{margin-left:10px}.website-drawer .website-tabs{padding:0 28px;gap:27px;overflow-x:auto;flex-shrink:0}.website-tabs button{white-space:nowrap;padding:15px 0 13px;font-size:12px}.website-body{padding:24px 28px;background:#fdfcff}.website-body>.detail-section .detail-kv{display:grid;grid-template-columns:1fr 1fr;column-gap:24px;background:white}.website-body .kv-row{min-width:0}.website-body>.detail-section .kv-row>span:last-child{max-width:70%}.website-body>.detail-section .kv-row:last-child{border-bottom:1px solid #f3f0fa}

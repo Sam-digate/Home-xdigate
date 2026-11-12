@@ -33,9 +33,9 @@
       <div class="page-heading"><div><p class="eyebrow">SETTINGS · CONNECTORS</p><h1>连接与授权</h1><p class="page-description">把平台账号连在一起，让每一次访问都有明确的授权边界。</p></div><button class="btn primary" id="new-connection"><span data-icon="plus"></span>新建连接</button></div>
       <div class="demo-notice"><span data-icon="flask-conical"></span><p><b>仅演示连接与授权流程</b><span>所有账号、资源和日志均为示例。平台能力及授权方式待确认，不代表已支持接入。</span></p><a href="https://app.notion.com/p/3fbd855d0b2f813d9457d1d705e8e426" target="_blank" rel="noopener noreferrer">查看 PRD <span data-icon="arrow-up-right"></span></a></div>
       <section class="overview" aria-label="连接概览" id="overview"></section>
-      <div class="section-tools"><h2 class="list-heading">我的连接 <span id="connection-count">4</span></h2><button class="text-button" id="reset-demo"><span data-icon="rotate-ccw"></span>重置演示</button></div>
+      <div class="section-tools"><h2 class="list-heading">我的连接</h2><button class="text-button" id="reset-demo"><span data-icon="rotate-ccw"></span>重置演示</button></div>
       <section id="connections-view" aria-label="我的连接">
-        <div class="filterbar"><label class="search"><span data-icon="search"></span><input id="search" type="search" placeholder="搜索连接名称或账号" aria-label="搜索连接名称或账号"></label><select id="platform-filter" aria-label="筛选平台"><option value="all">全部平台</option></select><select id="status-filter" aria-label="筛选连接状态"><option value="all">全部状态</option><option value="connected">已连接</option><option value="reauth">需重新授权</option><option value="failed">连接失败</option><option value="disconnected">已断开</option></select><span id="result-count" class="result-count"></span></div>
+        <div class="filterbar"><label class="search"><span data-icon="search"></span><input id="search" type="search" placeholder="搜索连接名称或账号" aria-label="搜索连接名称或账号"></label><select id="platform-filter" aria-label="筛选平台"><option value="all">全部平台</option></select><select id="status-filter" aria-label="筛选连接状态"><option value="all">全部状态</option><option value="connected">已连接</option><option value="reauth">需重新授权</option><option value="failed">连接失败</option><option value="disconnected">已断开</option></select></div>
         <div id="connection-list" class="connection-table"></div>
         <p class="table-footnote"><span data-icon="info"></span>“已连接”仅表示示例授权范围可用，不代表已同步数据或所有业务功能可用。</p>
       </section>
