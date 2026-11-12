@@ -174,7 +174,7 @@
       footer+='<button type="button" class="btn primary" data-action="platform-auth-login">模拟登录并继续</button>';
     }
     if(f.authStage==='consent'){
-      content=`${kv([['连接名称',f.name]])}<div class="auth-account"><b>${esc(f.account)}</b><span>演示账号</span></div><div class="auth-consent"><h3>X-Digate 将获得以下模拟权限</h3><p>${icon('check')} 读取账号基本信息（示例）</p><small>仅用于连接流程展示。实际权限需按平台接入能力确认，不包含真实发布或数据同步。</small></div>${error}`;
+      content=`${kv([['连接名称',f.name]])}${kv([['演示账号',f.account]])}<div class="auth-consent"><h3>X-Digate 将获得以下模拟权限</h3><p>${icon('check')} 读取账号基本信息（示例）</p><small>仅用于连接流程展示。实际权限需按平台接入能力确认，不包含真实发布或数据同步。</small></div>${error}`;
       footer+='<button class="btn" data-action="authorization-denied">拒绝授权</button><button class="btn primary" data-action="authorize">同意并模拟授权</button>';
     }
     if(f.authStage==='progress')content=`<div class="flow-result"><h3>正在验证模拟授权</h3><p>等待 ${esc(p.name)} 授权结果（演示）</p><div class="progress" role="progressbar" aria-label="模拟授权验证中"><span></span></div></div><div class="split-actions"><button data-action="authorization-failed">模拟验证失败</button><button data-action="authorization-denied">模拟用户拒绝</button></div>`;
