@@ -134,7 +134,7 @@ function personalAgentChannelsHTML(r,employee=false){
   const accounts=personalAgentChannelAccounts(r,channel.id);
   const expanded=!!S.paExpandedAccounts?.[r.id+':'+channel.id];
   const visibleAccounts=expanded?accounts:accounts.slice(0,3);
-  return `<article class="pa-channel-card pa-channel-multi"><div class="pa-channel-heading"><span class="pa-review-avatar">${esc(channel.mark)}</span><div class="pa-review-info"><div class="pa-review-title"><b>${esc(channel.name)}</b>${channel.required?'<span class="chip mut">必需</span>':''}${employee&&r.customChannels?.some(item=>item.id===channel.id)?`<button type="button" class="pa-account-disconnect pa-account-delete" aria-label="删除渠道 ${esc(channel.name)}" title="删除渠道" onclick="personalAgentDeleteChannelPrompt('${r.id}','${channel.id}')"><i data-lucide="trash-2" aria-hidden="true"></i></button>`:''}</div><p class="${channel.loginUrl?'pa-channel-url':''}" ${channel.loginUrl?`title="${esc(channel.loginUrl)}"`:''}>${esc(channel.description)}</p></div>${employee&&ready?`<button class="btn ghost sm" onclick="personalAgentLoginPrompt('${r.id}','${channel.id}')">${accounts.length?'＋ 添加账号':'登录 '+esc(channel.name)}</button>`:''}</div>${accounts.length?`<div class="pa-account-list">${visibleAccounts.map(account=>personalAgentAccountHTML(r,channel.id,account,employee)).join('')}${accounts.length>3?`<button type="button" class="pa-accounts-expand" data-account-toggle="${channel.id}" aria-expanded="${expanded}" onclick="personalAgentToggleAccounts('${r.id}','${channel.id}',${employee})"><span>${expanded?'收起账号':'展开其余 '+(accounts.length-3)+' 个账号'}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>`:''}</div>`:''}</article>`;
+  return `<article class="pa-channel-card pa-channel-multi"><div class="pa-channel-heading"><span class="pa-review-avatar">${esc(channel.mark)}</span><div class="pa-review-info"><div class="pa-review-title"><b>${esc(channel.name)}</b>${channel.required?'<span class="chip mut">必需</span>':''}${employee&&r.customChannels?.some(item=>item.id===channel.id)?`<button type="button" class="pa-account-disconnect pa-account-delete" aria-label="删除渠道 ${esc(channel.name)}" title="删除渠道" onclick="personalAgentDeleteChannelPrompt('${r.id}','${channel.id}')"><i data-lucide="trash-2" aria-hidden="true"></i></button>`:''}</div><p class="${channel.loginUrl?'pa-channel-url':''}" ${channel.loginUrl?`title="${esc(channel.loginUrl)}"`:''}>${esc(channel.description)}</p></div>${employee&&ready&&(!accounts.length||channel.projectId||channel.id.startsWith('all-'))?`<button class="btn ghost sm" onclick="personalAgentLoginPrompt('${r.id}','${channel.id}')">${accounts.length?'＋ 添加账号':'登录 '+esc(channel.name)}</button>`:''}</div>${accounts.length?`<div class="pa-account-list">${visibleAccounts.map(account=>personalAgentAccountHTML(r,channel.id,account,employee)).join('')}${accounts.length>3?`<button type="button" class="pa-accounts-expand" data-account-toggle="${channel.id}" aria-expanded="${expanded}" onclick="personalAgentToggleAccounts('${r.id}','${channel.id}',${employee})"><span>${expanded?'收起账号':'展开其余 '+(accounts.length-3)+' 个账号'}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>`:''}</div>`:''}</article>`;
  }).join('')}<p class="crm-context">本页为第三方登录交互演示，展示的账号信息为模拟数据。</p>`;
 }
 function personalAgentAddChannelPrompt(id){
@@ -190,7 +190,9 @@ function personalAgentLoginPrompt(id,channel,accountId){
  }
  const record=personalAgentSetupRecord(id),info=record&&personalAgentChannelList(record).find(item=>item.id===channel);
  if(!record||record.owner!==currentUser()||!['connecting','live'].includes(record.status)||!info)return;
- const existing=accountId?personalAgentChannelAccounts(record,channel).find(account=>account.id===accountId):null;
+ const accounts=personalAgentChannelAccounts(record,channel);
+ if(!info.projectId&&accounts.length&&!accountId){toast('公共渠道每个平台只能登记一个账号');return;}
+ const existing=accountId?accounts.find(account=>account.id===accountId):null;
  if(accountId&&(!existing||existing.connected!==false))return;
  const account=existing||personalAgentDemoAccount(record,channel);
  const login={id,channel,owner:currentUser(),stage:'loading',account,reconnect:!!existing};
@@ -230,9 +232,10 @@ function finishPersonalAgentLogin(){
 function personalAgentConnectChannel(id,channel,account){
  const r=personalAgentSetupRecord(id);if(!r||r.owner!==currentUser()||!['connecting','live'].includes(r.status)||!personalAgentChannelList(r).some(c=>c.id===channel))return;
  const accounts=personalAgentChannelAccounts(r,channel);
+ const info=personalAgentChannelList(r).find(item=>item.id===channel);
+ if(!info.projectId&&accounts.length&&!accounts.some(item=>item.id===account?.id))return;
  if(account&&accounts.some(item=>item.id===account.id&&item.connected!==false))return;
  const identity=account||personalAgentDemoAccount(r,channel);
- const info=personalAgentChannelList(r).find(item=>item.id===channel);
  const connected={...identity,projectId:info.projectId,connected:true,connectedAt:new Date().toISOString(),owner:currentUser(),demo:true};
  r.connections=r.connections||{};r.connections[channel]=accounts.some(item=>item.id===identity.id)?accounts.map(item=>item.id===identity.id?connected:item):[...accounts,connected];
  if(r.status==='connecting'&&PA_CHANNELS.filter(c=>c.required).every(c=>personalAgentChannelConnected(r,c.id)))personalAgentActivate(id);

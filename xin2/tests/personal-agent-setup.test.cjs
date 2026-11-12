@@ -52,7 +52,14 @@ console.log('PASS simulated login progress, cancellation, explicit return and ac
 user=own.owner;
 own.connections.m365={owner:user,connectedAt:'2026-11-11'};
 assert.equal(c.personalAgentChannelAccounts(own,'m365').length,1);
-c.personalAgentConnectChannel(own.id,'m365');assert.equal(own.connections.m365.length,2);
+c.personalAgentConnectChannel(own.id,'m365');assert.equal(c.personalAgentChannelAccounts(own,'m365').length,1);
+c.cancelPersonalAgentLogin();c.personalAgentLoginPrompt(own.id,'m365');assert.equal(c.S.paLogin,null);
+assert.doesNotMatch(c.personalAgentChannelsHTML(own,true),/personalAgentLoginPrompt\('[^']+','m365'\)/);
+const publicAccount=c.personalAgentChannelAccounts(own,'m365')[0];
+c.personalAgentDisconnectPrompt(own.id,'m365',publicAccount.id);c.personalAgentConfirmDisconnect();
+c.personalAgentConnectChannel(own.id,'m365');assert.equal(c.personalAgentChannelAccounts(own,'m365').length,1);
+c.personalAgentLoginPrompt(own.id,'m365',publicAccount.id);while(timers.length)timers.shift()();c.finishPersonalAgentLogin();
+assert.equal(c.personalAgentChannelAccounts(own,'m365').length,1);assert.equal(c.personalAgentChannelAccounts(own,'m365')[0].connected,true);
 c.personalAgentLoginPrompt(own.id,'project-a80-tmall');while(timers.length)timers.shift()();c.finishPersonalAgentLogin();
 assert.equal(own.connections['project-a80-tmall'].length,2);assert.equal(own.connections['project-a80-tmall'][0].name,'A80Paris天猫旗舰店');assert.equal(own.connections['project-a80-tmall'][1].name,'A80Paris天猫旗舰店 2');
 c.personalAgentConnectChannel(own.id,'slack');c.personalAgentConnectChannel(own.id,'xdgate');assert.equal(own.status,'live');
@@ -74,6 +81,7 @@ $('pa-custom-url').value='https://www.figma.com/login';c.personalAgentSaveCustom
 assert.match($('mod').innerHTML,/https:\/\/www.figma.com\/login/);
 while(timers.length)timers.shift()();c.finishPersonalAgentLogin();
 const custom=own.customChannels[0];assert.equal(own.connections[custom.id].length,1);
+c.personalAgentConnectChannel(own.id,custom.id);assert.equal(own.connections[custom.id].length,1);
 assert.match(c.personalAgentChannelsHTML(own,true),/Figma/);
 user='other';c.personalAgentConnectChannel(own.id,custom.id);assert.equal(own.connections[custom.id].length,1);
 console.log('PASS multi-account login, legacy connections, per-account disconnect, required-channel state, custom links and owner guards');
