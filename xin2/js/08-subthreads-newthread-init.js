@@ -367,5 +367,11 @@ if(!location.hash&&permissionCanAccessView('agent')){
  S.hist=[];
  personalAgentDefaultDemo();
 }
+if(!location.hash&&permissionCanAccessView('work')&&crmTask()){
+ S.view='thread';
+ S.tid=crmTask().id;
+ S.hist=[];
+ crmDefaultPreview();
+}
 renderNav();render();
 if(defaultPersonalAgentId)openPersonalAgentSetup(defaultPersonalAgentId);

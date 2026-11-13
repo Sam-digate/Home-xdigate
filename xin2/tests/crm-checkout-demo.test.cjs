@@ -10,6 +10,11 @@ allowed=false;ctx.crmGenerate();assert.equal(t.st,'ask');allowed=true;
 ctx.crmGenerate();assert.equal(t.crm.product,'Sensifirm');assert.equal(t.st,'run');assert.ok(ctx.crmProductNode(t.crm).includes('Sensifirm'));assert.ok(ctx.crmRunningHTML(t.crm).includes('progressbar'));ctx.crmGenerate();assert.equal(timers.length,3);while(timers.length)timers.shift()();assert.equal(t.st,'review');assert.equal(t.outputCount,1);ctx.crmCompleteDelivery();assert.equal(t.st,'review');
 ctx.crmOpenBundle();assert.ok($('dw').innerHTML.includes('crm-mail-card'));ctx.crmDrawBundle(0);assert.ok($('dw').innerHTML.includes('crm-bundle-subject'));
 ctx.crmEditBundleField(0,'subject','Unsaved version check');
+ctx.crmSwitchBundleTab('audience');
+assert.match($('dw').innerHTML,/1,286/);assert.match($('dw').innerHTML,/https:\/\/www\.klaviyo\.com\/flows/);assert.match($('dw').innerHTML,/What someone has done \(or not done\)/);assert.match($('dw').innerHTML,/Placed Order/);assert.match($('dw').innerHTML,/over all time/);assert.match($('dw').innerHTML,/in the last/);assert.match($('dw').innerHTML,/>180</);
+assert.doesNotMatch($('dw').innerHTML,/id="crm-save-draft"|crm-bundle-subject/);
+assert.match($('dw').innerHTML,/id="crm-approve-all"[^>]*disabled[^>]*onclick="crmSaveBundle\(true\)">/);
+assert.equal(ctx.S.crmBundleDraft[0].subject,'Unsaved version check');assert.equal(ctx.S.crmBundleIndex,0);
 ctx.crmSwitchBundleTab('versions');
 assert.match($('dw').innerHTML, /当前版本 · 生成邮件方案/);
 assert.doesNotMatch($('dw').innerHTML, /crm-bundle-subject|crm-approve-all|Unsaved version check/);
@@ -55,7 +60,7 @@ ctx.crmSaveBundle(false);assert.equal(ctx.crmBundleDirty(),false);assert.ok($('d
 console.log('PASS claim detection, inline highlights, deferred review after save and approval requires saved changes');
 
 t.crm.stage='review';t.st='review';t.crm.mails.forEach(mail=>mail.approved=false);
-ctx.crmOpenBundle();assert.ok($('dw').innerHTML.includes('>批准全部</button>'));
+ctx.crmOpenBundle();assert.ok($('dw').innerHTML.includes('>批准并建草稿</button>'));
 ctx.crmDrawBundle(0);assert.ok($('dw').innerHTML.includes('>批准本封</button>'));
 allowed=false;ctx.crmApproveBundleMail(0);assert.equal(t.crm.mails[0].approved,false);allowed=true;
 ctx.crmApproveBundleMail(0);assert.equal(t.crm.mails[0].approved,true);assert.equal(t.st,'review');assert.equal(t.crm.mails[1].approved,false);
@@ -67,3 +72,28 @@ ctx.crmOpenBundle();ctx.crmDrawBundle(2);ctx.crmEditBundleField(2,'subject','Rev
 assert.equal(t.crm.mails[0].approved,true);assert.equal(t.crm.mails[1].approved,true);assert.equal(t.crm.mails[2].approved,false);
 ctx.crmApproveBundleMail(2);assert.equal(t.st,'done');assert.ok(t.crm.mails.every(mail=>mail.approved));
 console.log('PASS separate approval, approved mails read-only, mutation guard, unchanged approvals and delivery after all approvals');
+
+ctx.crmOpenBundle();ctx.crmSwitchBundleTab('audience');
+const audienceHTML=ctx.crmAudienceFlowHTML(t.crm);
+assert.match(audienceHTML,/Flow WBV5mK/);assert.match(audienceHTML,/https:\/\/www\.klaviyo\.com\/flow\/WBV5mK\/edit/);assert.match(audienceHTML,/XSaFVP/);assert.equal(t.crm.flowDraft.enabled,false);assert.equal(t.crm.flowDraft.sent,false);
+const firstDraftAt=t.crm.flowDraft.createdAt;ctx.crmCompleteDelivery();assert.equal(t.crm.flowDraft.createdAt,firstDraftAt);
+assert.match(audienceHTML,/Person has/);assert.match(audienceHTML,/Placed Order/);assert.match(audienceHTML,/zero times/);assert.match(audienceHTML,/over all time/);assert.match(audienceHTML,/in the last/);assert.match(audienceHTML,/>180</);assert.match(audienceHTML,/>AND</);
+assert.doesNotMatch(audienceHTML.split('<div class="crm-flow-groups">')[1],/<select|<input|<button|onchange|onclick|Add condition|trash-2|data-lucide="copy"/);
+assert.equal(typeof ctx.crmAudienceChange,'undefined');assert.equal(typeof ctx.crmAudienceAction,'undefined');assert.equal(typeof ctx.crmAudienceLogic,'undefined');
+assert.match(audienceHTML,/1,286/);assert.match(audienceHTML,/https:\/\/www\.klaviyo\.com\/flows/);
+console.log('PASS read-only audience rules retain English wording and relationship without editing controls or handlers');
+
+const deliveredMails=t.crm.mails;ctx.crmDefaultPreview();assert.equal(t.crm.mails,deliveredMails);assert.equal(t.st,'done');
+t.crm={stage:'todo',mails:[],records:[],brief:'Preview'};const pendingTimers=timers.length;ctx.crmDefaultPreview();
+assert.equal(t.crm.stage,'review');assert.equal(t.st,'review');assert.equal(t.outputCount,1);assert.equal(t.crm.product,'Sensilift');assert.equal(t.crm.mails.length,3);assert.ok(t.crm.mails.every(mail=>!mail.approved));assert.equal(timers.length,pendingTimers);
+assert.equal(t.crm.flowDraft,undefined);assert.equal(ctx.crmFlowDraftHTML(t.crm),'');
+const previewMails=t.crm.mails;ctx.crmDefaultPreview();assert.equal(t.crm.mails,previewMails);
+console.log('PASS initial preview opens generated unapproved output without timers or overwriting existing work');
+
+allowed=true;ctx.crmOpenBundle();ctx.crmSwitchBundleTab('audience');
+assert.match($('dw').innerHTML,/crmReloadAudience/);assert.ok(t.crm.audienceSyncedAt);
+t.crm.audienceSyncedAt='2020-01-01T00:00:00Z';const beforeMails=JSON.stringify(t.crm.mails),beforeGroups=JSON.stringify(t.crm.audienceGroups),queued=timers.length;
+ctx.crmReloadAudience();assert.equal(t.crm.audienceSyncing,true);assert.match($('dw').innerHTML,/disabled aria-busy="true"/);ctx.crmReloadAudience();assert.equal(timers.length,queued+1);
+ctx.crmSwitchBundleTab('mail');while(timers.length)timers.shift()();assert.equal(ctx.S.crmBundleTab,'mail');assert.equal(t.crm.audienceSyncing,false);assert.notEqual(t.crm.audienceSyncedAt,'2020-01-01T00:00:00Z');assert.equal(JSON.stringify(t.crm.mails),beforeMails);assert.equal(JSON.stringify(t.crm.audienceGroups),beforeGroups);
+allowed=false;ctx.crmReloadAudience();assert.equal(timers.length,0);
+console.log('PASS audience reread demo updates sync time, prevents duplicate requests and preserves mail edits and active tab');
