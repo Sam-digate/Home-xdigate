@@ -361,17 +361,24 @@ try{
 const drawerExpandObserver=new MutationObserver(()=>syncDrawerExpandControl());
 drawerExpandObserver.observe($('dw'),{childList:true});
 let defaultPersonalAgentId=null;
-if(!location.hash&&permissionCanAccessView('agent')){
+if(!location.hash&&permissionCanAccessView('agent')&&!permissionHasPage('know.src')){
  S.view='agent';
  S.tid=null;
  S.hist=[];
  personalAgentDefaultDemo();
 }
-if(!location.hash&&permissionCanAccessView('work')&&crmTask()){
+if(!location.hash&&permissionCanAccessView('work')&&crmTask()&&!permissionHasPage('know.src')){
  S.view='thread';
  S.tid=crmTask().id;
  S.hist=[];
  crmDefaultPreview();
+}
+if(!location.hash&&permissionHasPage('know.src')){
+ S.view='know';
+ S.kgrp='src';
+ S.ktab=KGRP.src.tabs.indexOf('品牌动态');
+ S.tid=null;
+ S.hist=[];
 }
 renderNav();render();
 if(defaultPersonalAgentId)openPersonalAgentSetup(defaultPersonalAgentId);

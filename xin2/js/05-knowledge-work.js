@@ -254,7 +254,7 @@ function openDSBulkTaskForm(){
  openNew(null,prefill,'');
 }
 
-const KGRP={src:{n:'来源',d:'Agent 读的东西',tabs:['品牌','产品','素材','品牌文件','达人','热点','数据源']},
+const KGRP={src:{n:'来源',d:'Agent 读的东西',tabs:['品牌','品牌动态','产品','素材','品牌文件','达人','热点','数据源']},
  out:{n:'产出',d:'Agent 写的东西',tabs:['已保存产出','在线文档','模板']}};
 function knowledgeActiveBrand(){
  if(!S.kbrand||!KNOWLEDGE_BRANDS.some(brand=>brand.id===S.kbrand))S.kbrand=KNOWLEDGE_BRANDS[0].id;
@@ -262,10 +262,12 @@ function knowledgeActiveBrand(){
 }
 function knowledgeBrandEntries(){return knowledgeActiveBrand().entries;}
 function setKnowledgeBrand(id){if(!KNOWLEDGE_BRANDS.some(brand=>brand.id===id))return;S.kbrand=id;S.kcat='全部';render();}
+const KNOWLEDGE_BRAND_SWITCHER_VISIBLE=false;
 function knowledgeBrandSwitcher(){
+ if(!KNOWLEDGE_BRAND_SWITCHER_VISIBLE)return '';
  const active=knowledgeActiveBrand(),main=KNOWLEDGE_BRANDS.find(brand=>brand.kind==='main'),children=KNOWLEDGE_BRANDS.filter(brand=>brand.kind==='sub'&&brand.parentId===main?.id);
  const brandButton=brand=>`<button type="button" class="${active.id===brand.id?'on':''}" aria-pressed="${active.id===brand.id}" title="${esc(brand.description||brand.name)}" onclick="setKnowledgeBrand('${brand.id}')">${esc(brand.name)}${brand.status==='disabled'?' · 已停用':''}</button>`;
- return `<div class="bar" style="margin:0 0 12px;gap:var(--sp-2);flex-wrap:wrap"><div class="seg" role="tablist" aria-label="选择品牌资料">${main?brandButton(main):''}${children.map(brandButton).join('')}</div><span class="spacer"></span><button type="button" class="btn sm" onclick="openKnowledgeSubBrand()"><i data-lucide="plus"></i>添加子品牌</button></div>`;
+ return `<div class="bar" style="margin:0 0 12px;gap:var(--sp-2);flex-wrap:wrap"><div class="seg" role="tablist" aria-label="选择品牌资料">${main?brandButton(main):''}${children.map(brandButton).join('')}${KNOWLEDGE_BRANDS.filter(brand=>!brand.parentId&&brand.id!==main?.id).map(brandButton).join('')}</div><span class="spacer"></span><button type="button" class="btn sm" onclick="openKnowledgeSubBrand()"><i data-lucide="plus"></i>添加子品牌</button></div>`;
 }
 function openKnowledgeSubBrand(){
  const main=KNOWLEDGE_BRANDS.find(brand=>brand.kind==='main');
@@ -286,14 +288,14 @@ function kComplete(){const entries=knowledgeBrandEntries(),f=entries.filter(x=>x
 function vKnow(){
  if(S.kgrp===undefined)S.kgrp='src';
  if(!permissionHasPage(`know.${S.kgrp}`))S.kgrp=permissionHasPage('know.src')?'src':'out';
- if(S.ktab===undefined)S.ktab=0;
+ if(S.ktab===undefined)S.ktab=S.kgrp==='src'?KGRP.src.tabs.indexOf('品牌动态'):0;
  if(S.kdom===undefined)S.kdom='全部';
  const G=KGRP[S.kgrp],entries=knowledgeBrandEntries(),activeBrand=knowledgeActiveBrand(),c=kComplete(),stale=entries.filter(x=>x.stale).length,dsAlerts=dsAttentionCount();
  return `<div class="wrap">
   <div class="eyebrow">平台 · 知识库</div><h1>知识库</h1>
   <div class="sub">Agent 读的（来源）和 Agent 写的（产出）分开放。保存后的产出可以在这里查看、检索和复用。</div>
   <div class="bar">
-    <div class="seg">${Object.keys(KGRP).filter(k=>permissionHasPage(`know.${k}`)).map(k=>`<button class="${S.kgrp===k?'on':''}" onclick="S.kgrp='${k}';S.ktab=0;S.kdom='全部';render()">${KGRP[k].n} · ${KGRP[k].d}</button>`).join('')}</div>
+    <div class="seg">${Object.keys(KGRP).filter(k=>permissionHasPage(`know.${k}`)).map(k=>`<button class="${S.kgrp===k?'on':''}" onclick="S.kgrp='${k}';S.ktab=${k==='src'?KGRP.src.tabs.indexOf('品牌动态'):0};S.kdom='全部';render()">${KGRP[k].n} · ${KGRP[k].d}</button>`).join('')}</div>
   </div>
   <div class="bar" style="margin:var(--sp-4) 0 14px;gap:var(--sp-2);flex-wrap:wrap">
     <div class="seg">${G.tabs.map((t,i)=>`<button class="${S.ktab===i?'on':''}" onclick="S.ktab=${i};render()">${t}${t==='数据源'&&dsAlerts?`<span class="kb-tab-alert num">${dsAlerts}</span>`:''}</button>`).join('')}</div>
@@ -318,6 +320,7 @@ function vKnow(){
 function kBody(){
  const t=KGRP[S.kgrp].tabs[S.ktab];
  if(t==='品牌')return kBrand();
+ if(t==='品牌动态')return kBrandUpdates();
  if(t==='产品')return kProductSources();
  if(t==='素材')return kAssets();
  if(t==='品牌文件')return kBrandFiles();

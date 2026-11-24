@@ -37,6 +37,7 @@ function goBack(){
  go(prev.view,prev.tid,{back:true});
 }
 function go(v,id,opt){closeSb();S.fopen=null;
+ if(v==='know'&&opt?.nav&&permissionHasPage('know.src')){S.kgrp='src';S.ktab=KGRP.src.tabs.indexOf('品牌动态');}
  if(v==='thread'&&T.find(t=>t.id===id)?.deletedAt){toast('来源任务已删除，可从「已删除任务」中恢复');return;}
  if(!permissionCanAccessView(v)){toast('你没有访问该页面的权限');const fallback=permissionFirstView();if(S.view!==fallback){S.view=fallback;S.tid=null;S.hist=[];renderNav();render();$('view').scrollTo(0,0);}return;}
  const from=navState(),to={view:v,tid:id||null};
