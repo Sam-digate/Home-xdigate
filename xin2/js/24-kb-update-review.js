@@ -35,7 +35,7 @@ function kbEnsureEntryVersions(entry){
 }
 function kbAppendEntryVersion(entry,at,by,kind){
  kbEnsureEntryVersions(entry);
- if(!entry.knowledgeVersions.some(v=>v.version===entry.version))entry.knowledgeVersions.push({version:entry.version,text:entry.tx,at,by,kind});
+ if(!entry.knowledgeVersions.some(v=>v.version===entry.version))entry.knowledgeVersions.push({version:entry.version,text:entry.tx,at,by,kind,...(entry.sections?{brandUpdateSupplement:entry.brandUpdateSupplement||''}:{})});
 }
 function kbRecordManualKnowledgeUpdate(entry,text){
  if(text===entry.tx)return;kbEnsureEntryVersions(entry);
@@ -80,7 +80,9 @@ function kbConfirmRestoreVersion(){
  if(!entry||!target||knowledgeActiveBrand().id!==draft.brand||entry.pendingUpdate||entry.sections?.some(s=>s.pendingUpdate)||entry.version!==draft.expectedVersion||entry.tx!==draft.expectedText){toast('内容或权限已变化，请重新核对后恢复');return;}
  const actor=U[currentUser()]?.n||currentUser(),at=new Date().toISOString(),version=entry.version+1;
  const record={baseVersion:entry.version,version,baseText:entry.tx,nextText:target.text,sourceLabel:'版本恢复 · v'+target.version,internalSource:true,agent:actor,generatedAt:at,detectedAt:at,approvedAt:at,decision:'approved',kind:'rollback',restoredFrom:target.version,reviewer:actor,changeSummary:'将历史 v'+target.version+' 的内容恢复为新版本 v'+version+'。',reason:'人工确认恢复历史内容。'};
- entry.updateReviews=entry.updateReviews||[];entry.updateReviews.push(record);entry.tx=target.text;entry.version=version;entry.by=actor;entry.at=new Date(at).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'}).replace(/-/g,'/');entry.filled=1;entry.stale=0;entry.gov='ok';kbAppendEntryVersion(entry,at,actor,'rollback');
+ entry.updateReviews=entry.updateReviews||[];entry.updateReviews.push(record);entry.tx=target.text;entry.version=version;entry.by=actor;entry.at=new Date(at).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'}).replace(/-/g,'/');entry.filled=1;entry.stale=0;entry.gov='ok';
+ if(entry.sections)entry.brandUpdateSupplement=target.brandUpdateSupplement||'';
+ kbAppendEntryVersion(entry,at,actor,'rollback');
  if(entry.sections&&target.sections){
   for(const section of entry.sections){const snapshot=target.sections.find(s=>s.id===section.id);if(snapshot){section.tx=snapshot.tx;section.by=actor;section.at=entry.at;}}
   entry.knowledgeVersions.at(-1).sections=typeof kbInsightSnapshot==='function'?kbInsightSnapshot(entry):target.sections.map(s=>({...s}));
@@ -88,7 +90,7 @@ function kbConfirmRestoreVersion(){
  if(typeof kbSyncInsightParent==='function')kbSyncInsightParent(entry);S.kbRestoreDraft=null;closeMod();render();kbShowBrandHistory(entry.id);toast('已恢复为 v'+version+'，历史记录已保留');
 }
 function kbBrandUpdateStatus(entry){
- if(entry.sections){const count=entry.sections.filter(s=>s.pendingUpdate).length;return count?`<span class="kb-update-badge">更新待审批</span>`:'';}
+ if(entry.sections&&!entry.pendingUpdate){const count=entry.sections.filter(s=>s.pendingUpdate).length;return count?`<span class="kb-update-badge">更新待审批</span>`:'';}
  return entry.pendingUpdate?`<span class="kb-update-badge">${entry.pendingUpdate.deferred?'更新暂缓':'更新待审批'}</span>`:'';
 }
 function kbBrandTabsHTML(id,active=0){
@@ -144,7 +146,9 @@ function kbApproveBrandUpdate(id,baseVersion){
  const actor=U[currentUser()]?.n||currentUser(),at=new Date().toISOString();
  entry.updateReviews=entry.updateReviews||[];entry.updateReviews.push({...u,beforeText:entry.tx,approvedAt:at,decision:'approved',reviewer:actor});
  entry.tx=u.nextText;entry.version=u.version;entry.filled=1;entry.gov='ok';entry.stale=0;entry.by=actor;entry.at=new Date(at).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'}).replace(/-/g,'/');entry.pendingUpdate=null;
+ if(entry.sections&&u.brandUpdateAddition)entry.brandUpdateSupplement=[entry.brandUpdateSupplement,u.brandUpdateAddition].filter(Boolean).join('\n\n');
  kbAppendEntryVersion(entry,at,actor,'approved');
+ if(entry.sections&&typeof kbInsightSnapshot==='function')entry.knowledgeVersions.at(-1).sections=kbInsightSnapshot(entry);
  if(typeof kbSyncInsightParent==='function')kbSyncInsightParent(entry);
  closeDw();render();toast('更新已确认通过，品牌知识已更新');
 }

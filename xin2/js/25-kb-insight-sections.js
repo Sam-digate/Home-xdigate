@@ -30,7 +30,9 @@ function kbRecordInsightDocument(parent,before,at,actor,kind,decisions=[]){
 function kbInsightParent(section){return knowledgeBrandEntries().find(e=>e.id===(section.parentId||section.id)&&e.sections);}
 function kbSyncInsightParent(section){
  const parent=kbInsightParent(section);if(!parent)return;
- parent.tx=parent.sections.map(s=>s.n+'\n'+s.tx).join('\n\n');
+ const text=parent.sections.map(s=>s.n+'\n'+s.tx);
+ if(parent.brandUpdateSupplement)text.push(parent.brandUpdateSupplement);
+ parent.tx=text.join('\n\n');
  if(section.parentId){parent.by=section.by;parent.at=section.at;}
 }
 function kbInsightBreadcrumbHTML(entry){return entry.parentId?`<button class="kb-insight-back" onclick="openKB('${entry.parentId}',0)">← 返回用户洞察</button>`:'';}
@@ -70,6 +72,7 @@ function kbOpenInsightRoute(id,tab){
   kbDrawInsightPage(entry,active===1?1:0);return true;
  }
  if(tab===3){kbShowBrandHistory(entry.id);return true;}
+ if(entry.pendingUpdate&&(tab===undefined||tab===2)){kbOpenBrandUpdate(entry.id);return true;}
  kbDrawInsightPage(entry,tab===undefined?(entry.sections.some(s=>s.pendingUpdate)?2:0):tab);return true;
 }
 function kbDrawInsightPage(entry,tab){
@@ -80,7 +83,10 @@ function kbDrawInsightPage(entry,tab){
  const drawer=$('dw');if(expanded)drawer.classList.add('expanded');
  let content='';
  if(tab===1)content=`<div class="ctx">${[['被读次数',entry.reads],['在用的 Agent',entry.ags.map(nick).join(' · ')],['最后更新',entry.at],['更新人',entry.by]].map(([k,v])=>`<div class="ctxr"><span class="k">${k}</span><span class="v">${esc(v)}</span></div>`).join('')}</div>`;
- else if(entry.sections)content=sections.map(kbInsightEditorHTML).join('');
+ else if(entry.sections){
+  content=sections.map(kbInsightEditorHTML).join('');
+  if(entry.brandUpdateSupplement)content+=`<section class="kb-insight-section"><h3>品牌动态补充</h3><p class="kb-insight-paragraph">${esc(entry.brandUpdateSupplement)}</p></section>`;
+ }
  else content=kbInsightEditorHTML(entry);
  drawer.innerHTML=`<section class="kb-update-drawer" role="dialog" aria-modal="true" aria-label="用户洞察"><header class="dw-h"><button class="ib" aria-label="关闭用户洞察" onclick="closeDw()"><i data-lucide="x"></i></button><div style="flex:1;min-width:0"><div class="ty">${esc(brand.name)} · ${entry.parentId?'用户洞察':esc(entry.cat)}</div><h3>${esc(entry.n)}</h3></div><span class="chip mut">v${parent.version}</span></header>${kbBrandTabsHTML(entry.id,tab)}<div class="dw-b">${kbInsightBreadcrumbHTML(entry)}${content}</div><footer class="dw-f">${tab===0?`<button class="btn" onclick="kbSaveInsightContent('${entry.id}')">保存</button><button class="btn ghost" onclick="kbDrawInsightPage(kbFindKnowledgeItem('${entry.id}'),0)">取消</button>`:'<button class="btn ghost" onclick="closeDw()">完成</button>'}</footer></section>`;
  drawer.classList.add('on');$('scrim').classList.add('on');kpIcons();if(typeof syncDrawerExpandControl==='function')syncDrawerExpandControl();

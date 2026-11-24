@@ -1,11 +1,11 @@
 /* Brand updates prototype: session-only records, no API writes. */
 const BU_DATE='2026-11-23';
+const BU_RECOMMEND_DURATION=1600;
 const BU_CATEGORIES=[['sales','销售','Sales'],['product','产品','Product'],['price','价格','Price'],['stock','库存','Inventory'],['demand','客户需求','Customer needs'],['issue','问题','Issues'],['campaign','活动','Campaigns'],['competitor','竞品','Competitors'],['people','人员','People'],['other','其他','Other']];
 const BU_RECORDS=[];
 const buText=(zh,en)=>typeof LANG!=='undefined'&&LANG==='en'?en:zh;
 const buLang=value=>typeof value==='object'?buText(value.zh,value.en):value;
 const buActor=()=>U[currentUser()]?.n||currentUser();
-function buSectionLabel(name){return buText(name,({'战略规划数据':'Brand strategy','竞争对手分析':'Competitor analysis','品牌生态位分析':'Brand positioning'})[name]||name);}
 function buCardLabel(entry){const key=entry.id.match(/k\d+$/)?.[0];return buText(entry.n,({k1:'Brand overview',k2:'Core positioning',k3:'Restricted terms',k4:'Audience insights',k5:'Brand expression',k6:'Competitor analysis',k7:'Product value',k8:'Brand positioning'})[key]||entry.n);}
 function buSlackDemoSources(brandId, index, date, speaker, text, extra){
  const baseUrl='https://example.com/brand-updates/'+brandId+'/';
@@ -76,6 +76,11 @@ function buStatus(record){
  }
  return record.suggested?'suggested':'';
 }
+function buPromotionBlock(records){
+ if(records.some(record=>record?.correctedBy))return buText('已被更正的动态不能存入知识库','Corrected updates cannot be saved to the knowledge base');
+ if(records.some(record=>record&&['pending','stored'].includes(buStatus(record))))return buText('所选动态中已有待审核或已入库的条目','Some selected updates are already pending review or in the knowledge base');
+ return '';
+}
 function buVisible(){
  const f=buState(),cutoff=new Date(BU_DATE+'T12:00:00Z');cutoff.setUTCDate(cutoff.getUTCDate()-Number(f.days));
  return buRows().filter(r=>(f.expired||!r.expires||r.expires>=BU_DATE)&&(f.days==='all'||r.date>=cutoff.toISOString().slice(0,10))&&f.categories.includes(r.category)&&(f.status==='all'||(f.status==='conflict'?buConflictRecords(r).length>1:buStatus(r)===f.status))&&(f.writer==='all'||r.writer===f.writer)&&(!f.query||[buRecordTitle(r),buLang(r.text),r.author,r.sponsor,...r.sources.map(x=>x.url)].join(' ').toLowerCase().includes(f.query.toLowerCase()))).sort((a,b)=>b.date.localeCompare(a.date));
@@ -109,12 +114,13 @@ function buSelectAll(selected){
 function buSelectionHTML(rows, selected){
  if(!rows.length||!selected.length)return '';
  const allSelected=rows.every(record=>selected.includes(record.id));
- const canDelete=selected.every(id=>buCanDelete(buFind(id)));
- const hasCorrected=buHasCorrectedUpdates(selected);
+ const records=selected.map(buFind);
+ const canDelete=records.every(buCanDelete);
+ const blocked=buPromotionBlock(records);
  return `<div class="bu-selection">
   <label class="bu-select-all"><input type="checkbox" ${allSelected?'checked':''} onchange="buSelectAll(this.checked)">${buText('全选','Select all')}</label>
   <b>${buText('已选','Selected')} ${selected.length}</b>
-  <button type="button" class="btn sm" onclick="buPromotePrompt()" ${hasCorrected?`disabled title="${buText('已被更正的动态不能存入知识库','Corrected updates cannot be saved to the knowledge base')}"`:''}>${buText('加入知识库','Add to knowledge')}</button>
+  <button type="button" class="btn sm bu-promote-btn" onclick="buPromotePrompt()" ${blocked?`disabled title="${esc(blocked)}"`:''}>${buText('加入知识库','Add to knowledge')}</button>
   <button type="button" class="btn ghost sm bu-delete-btn" onclick="buDeletePrompt()" ${canDelete?'':`disabled title="${buText('所选动态中包含无权删除的条目','Some selected updates cannot be deleted')}"`}>${buText('删除所选','Delete selected')}</button>
   <button type="button" class="btn ghost sm" onclick="buSelectAll(false)">${buText('取消选择','Clear selection')}</button>
  </div>`;
@@ -124,7 +130,7 @@ function buStatusHTML(record){
  const status=buStatus(record),labels={suggested:buText('Vera 建议入库','Vera recommends adding'),pending:buText('入库待审核','Pending knowledge review'),stored:buText('已入库','Added to knowledge')};
  const showProposal=status&&!(record.correctedBy&&status==='suggested');
  const conflictStatus=buConflictRecords(record).length>1?`<span class="chip bu-conflict">${buText('有冲突','Conflict')}</span>`:record.history.some(event=>event.action==='resolved')?`<span class="chip bu-stored">${buText('以此为准','Confirmed')}</span>`:'';
- return `${conflictStatus}${showProposal?`<button class="chip ${status==='pending'?'mut':'bu-stored'}" onclick="${status==='suggested'?`buPromotePrompt(['${record.id}'])`:`buOpenSuggestion('${record.id}')`}">${labels[status]}</button>`:''}`;
+ return `${conflictStatus}${showProposal?`<button class="${status==='pending'?'kb-update-badge':'chip bu-stored'}" onclick="${status==='suggested'?`buPromotePrompt(['${record.id}'])`:`buOpenSuggestion('${record.id}')`}">${labels[status]}</button>`:''}`;
 }
 function buSourceHTML(source,index,action=''){
  const slack=source.slack;
@@ -344,25 +350,72 @@ function buCorrectionHTML(original){
 }
 function buPromotePrompt(ids=buState().selected){
  if(!buAccess())return;const records=ids.map(buFind).filter(Boolean);if(!records.length||records.length!==ids.length)return;
- if(buHasCorrectedUpdates(ids)){toast(buText('已被更正的动态不能存入知识库。','Corrected updates cannot be saved to the knowledge base.'));return;}
- S.buPromotion={brandId:knowledgeActiveBrand().id,ids:[...ids],owner:currentUser()};
- const entries=knowledgeBrandEntries(),categories=[...new Set(entries.map(e=>e.cat))];
- kpDialog(buText('加入知识库','Add to knowledge'),`<div data-i18n-skip><p class="bu-caption">${buText('将选中动态生成一条待审核建议，批准前不会修改品牌卡片。','Create one review proposal from the selected updates. Brand cards remain unchanged until approval.')}</p><div class="fld"><label for="bu-target-section">${buText('目标板块','Target section')}</label><select id="bu-target-section" onchange="buTargetOptions(this.value)">${categories.map(c=>`<option value="${esc(c)}">${esc(buSectionLabel(c))}</option>`).join('')}</select></div><div class="fld"><label for="bu-target-card">${buText('目标卡片','Target card')}</label><select id="bu-target-card">${entries.filter(e=>e.cat===categories[0]).map(e=>`<option value="${e.id}">${esc(buCardLabel(e))}</option>`).join('')}</select></div><p id="bu-promote-error" class="bu-error" role="alert"></p></div>`,`<button class="btn ghost" onclick="closeMod()">${buText('取消','Cancel')}</button><button class="btn" onclick="buPromote()">${buText('提交待审核','Submit for review')}</button>`);
+ const blocked=buPromotionBlock(records);
+ if(blocked){toast(blocked);return;}
+ clearTimeout(S.buPromotion?.recommendRun?.timer);
+ kbBrandUpdatesEnsure();
+ const draft={brandId:knowledgeActiveBrand().id,ids:[...ids],owner:currentUser(),recommendRun:{}};
+ S.buPromotion=draft;
+ const title=buText('正在匹配知识库卡片','Finding a knowledge base card');
+ const modal=$('mod');
+ modal.classList.remove('asset-mode','plan-mode');
+ modal.innerHTML=`<section class="mbox bu-progress-dialog" role="dialog" aria-modal="true" aria-labelledby="bu-progress-title" aria-describedby="bu-progress-note" data-i18n-skip>
+  <div class="bu-progress-heading"><h3 id="bu-progress-title">${title}</h3><button id="bu-progress-cancel" type="button" class="btn ghost sm" onclick="closeMod()">${buText('取消','Cancel')}</button></div>
+  <p id="bu-progress-note" class="bu-caption">${buText('匹配完成后，将自动提交审核。','Once a card is matched, the update will be submitted for review automatically.')}</p>
+  <div class="bu-recommend-progress" role="progressbar" aria-labelledby="bu-progress-title" style="--bu-recommend-duration:${BU_RECOMMEND_DURATION}ms"><span></span></div>
+ </section>`;
+ modal.classList.add('on');
+ $('bu-progress-cancel')?.focus({preventScroll:true});
+ draft.recommendRun.timer=setTimeout(()=>buFinishRecommendation(draft),BU_RECOMMEND_DURATION);
 }
-function buTargetOptions(category){$('bu-target-card').innerHTML=knowledgeBrandEntries().filter(e=>e.cat===category).map(e=>`<option value="${e.id}">${esc(buCardLabel(e))}</option>`).join('');}
-function buPromote(){
+function buTargetBusy(entry){return Boolean(entry.pendingUpdate||entry.sections?.some(section=>section.pendingUpdate));}
+function buRecommendedTargets(record){
+ const byCategory={
+  sales:['k1','k2'],product:['k7','k2'],price:['k8','k2'],stock:['k7','k1'],
+  demand:['k4','k7'],issue:['k4','k7'],campaign:['k5','k2'],competitor:['k6','k8'],
+  people:['k1','k2'],other:['k1']
+ };
+ return byCategory[record.category]||byCategory.other;
+}
+function buFindRecommendedTarget(records,cards){
+ const matches=records.map(buRecommendedTargets);
+ const common=matches[0].filter(key=>matches.every(keys=>keys.includes(key)));
+ const ranked=[...new Set([...common,'k1','k2','k8','k5'])];
+ return ranked.map(key=>cards.find(card=>card.id.endsWith(key))).find(card=>card&&!buTargetBusy(card));
+}
+function buFinishRecommendation(draft){
+ if(S.buPromotion!==draft||!draft.recommendRun||!$('mod').classList.contains('on')||!$('mod').querySelector('.bu-recommend-progress'))return;
+ draft.recommendRun=null;
+ if(draft.owner!==currentUser()||draft.brandId!==knowledgeActiveBrand().id||!buAccess()){
+  closeMod();return;
+ }
+ const records=draft.ids.map(buFind);
+ if(records.some(record=>!record||record.correctedBy)){
+  buPromotionError(buText('所选动态已变化，请重新选择。','The selected updates have changed. Select them again.'));return;
+ }
+ const entry=buFindRecommendedTarget(records,knowledgeBrandEntries());
+ if(entry){buPromote(entry.id);return;}
+ buPromotionError(buText('推荐的卡片均有建议待审核，请处理后重试。','Recommended cards have pending reviews. Try again after they are reviewed.'));
+}
+function buPromotionError(message){closeMod();toast(message);}
+function buPromote(recommendedId){
  const draft=S.buPromotion;if(!draft||!buAccess()||draft.owner!==currentUser()||draft.brandId!==knowledgeActiveBrand().id)return;
- const records=draft.ids.map(buFind).filter(Boolean),entry=knowledgeBrandEntries().find(e=>e.id===$('bu-target-card').value&&e.cat===$('bu-target-section').value);
- if(!records.length||records.length!==draft.ids.length||!entry)return;
- if(buHasCorrectedUpdates(draft.ids)){$('bu-promote-error').textContent=buText('已被更正的动态不能存入知识库。','Corrected updates cannot be saved to the knowledge base.');return;}
- if(entry.pendingUpdate||records.some(r=>['pending','stored'].includes(buStatus(r)))){$('bu-promote-error').textContent=buText('已有待审核或已入库内容，请先查看对应建议。','A pending or approved proposal already exists. Review that proposal first.');return;}
+ const records=draft.ids.map(buFind).filter(Boolean);
+ const entry=knowledgeBrandEntries().find(e=>e.id===recommendedId);
+ if(!records.length||records.length!==draft.ids.length){buPromotionError(buText('所选动态已变化，请重新选择。','The selected updates have changed. Select them again.'));return;}
+ if(!entry){buPromotionError(buText('暂未找到合适的目标卡片。','No suitable target card was found.'));return;}
+ const blocked=buPromotionBlock(records);
+ if(blocked){buPromotionError(blocked);return;}
+ if(buTargetBusy(entry)){buPromotionError(buText('目标卡片已有待审核建议，请待处理后重试。','The target card has a pending review. Try again after it is reviewed.'));return;}
  kbEnsureEntryVersions(entry);const at=new Date().toISOString();
- entry.pendingUpdate={baseVersion:entry.version,version:entry.version+1,baseText:entry.tx,nextText:[entry.tx,...records.map(r=>r.date+' · '+buLang(r.text))].filter(Boolean).join('\n\n'),sourceLabel:buText('品牌动态','Brand updates'),internalSource:true,agent:'Vera',generatedAt:at,detectedAt:at,brandUpdateIds:records.map(r=>r.id),evidence:records.map(r=>({summary:buLang(r.text),quote:buLang(r.text),location:r.date+' · '+r.author})),changeSummary:buText('根据所选品牌动态补充知识内容。','Add knowledge from the selected brand updates.'),reason:buText('需人工核对来源与内容后批准。','Human approval is required after checking sources and content.')};
+ const addition=records.map(r=>r.date+' · '+buLang(r.text)).join('\n\n');
+ entry.pendingUpdate={baseVersion:entry.version,version:entry.version+1,baseText:entry.tx,nextText:[entry.tx,addition].filter(Boolean).join('\n\n'),brandUpdateAddition:addition,sourceLabel:buText('品牌动态','Brand updates'),internalSource:true,agent:'Vera',generatedAt:at,detectedAt:at,brandUpdateIds:records.map(r=>r.id),evidence:records.map(r=>({summary:buLang(r.text),quote:buLang(r.text),location:r.date+' · '+r.author})),changeSummary:buText('根据所选品牌动态补充知识内容。','Add knowledge from the selected brand updates.'),reason:buText('需人工核对来源与内容后批准。','Human approval is required after checking sources and content.')};
  records.forEach(record=>{record.suggestion={target:entry.id};buLog(record,'promoted');record.history.at(-1).target=entry.id;});
- buState().selected=[];S.buPromotion=null;closeMod();render();
+ buState().selected=[];clearTimeout(draft.recommendRun?.timer);S.buPromotion=null;closeMod();render();
  const detail=$('dw').querySelector('.bu-detail-drawer');
  if($('dw').classList.contains('on')&&detail&&draft.ids.includes(detail.dataset.recordId))buOpenDetails(detail.dataset.recordId,detail.dataset.tab);
- toast(buText('已生成一条待审核建议','Created one pending review proposal'));
+ const name=buCardLabel(entry);
+ toast(buText(`已提交审核 · ${name}`,`Submitted for review · ${name}`));
 }
 function buOpenSuggestion(id){const record=buFind(id);if(!record?.suggestion)return;kbOpenBrandUpdate(record.suggestion.target);}
 buInit();

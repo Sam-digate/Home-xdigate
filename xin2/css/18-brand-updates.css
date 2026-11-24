@@ -3,6 +3,15 @@
 .bu-brandbar{gap:var(--sp-3);flex-wrap:wrap;margin-bottom:var(--sp-3)}
 .bu-filters>select,.bu-category-filter>summary{height:34px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface);padding:0 10px;font-size:var(--fs-sm);color:var(--t2)}
 .bu-caption{font-size:var(--fs-sm);line-height:1.7;color:var(--t3)}
+#mod:has(.bu-progress-dialog){align-items:center;padding:var(--sp-4)}
+.bu-progress-dialog{width:min(380px,100%);padding:var(--sp-5);border:1px solid var(--border);background:var(--surface);border-radius:var(--r)}
+.bu-progress-heading{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3)}
+.bu-progress-heading h3{margin:0;font-size:var(--fs-lg);font-weight:600;color:var(--t1)}
+.bu-progress-dialog .bu-caption{margin:var(--sp-1) 0 var(--sp-3)}
+.bu-recommend-progress{height:8px;overflow:hidden;border-radius:999px;background:var(--primary-bg)}
+.bu-recommend-progress>span{display:block;width:100%;height:100%;border-radius:inherit;background:var(--primary);transform-origin:left;animation:bu-recommend-fill var(--bu-recommend-duration) cubic-bezier(.25,.7,.45,1) both}
+@keyframes bu-recommend-fill{from{transform:scaleX(.04)}to{transform:scaleX(1)}}
+@media(prefers-reduced-motion:reduce){.bu-recommend-progress>span{animation:none;transform:scaleX(.65)}}
 .bu-filters{gap:var(--sp-2);flex-wrap:wrap;align-items:center;margin-bottom:var(--sp-4)}
 .bu-filters .kc-search{min-width:180px;flex:1;max-width:300px;height:34px}
 .bu-filters .kc-search input{width:100%;min-width:0;font-size:var(--fs-sm)}
@@ -43,6 +52,7 @@
 .bu-selection>b{font-weight:500}
 .bu-select-all{display:inline-flex;align-items:center;gap:var(--sp-2);cursor:pointer}
 .bu-selection button:disabled{opacity:.55;cursor:not-allowed}
+.bu-selection .bu-promote-btn:disabled{opacity:1;background:var(--surface-tint);border-color:var(--border);color:var(--t3);box-shadow:none}
 .bu-date-group{margin-bottom:var(--sp-5)}
 .bu-date-group>h2{display:flex;align-items:center;gap:var(--sp-2);margin:0 0 var(--sp-2);font-size:var(--fs-sm);font-weight:500;color:var(--t2)}
 .bu-date-group>h2>span{font-size:var(--fs-xs);font-weight:400;color:var(--t3)}
