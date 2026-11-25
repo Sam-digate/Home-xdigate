@@ -142,6 +142,7 @@ function kbOpenBrandUpdate(id,mode='diff',recordIndex=null){
 function kbApproveBrandUpdate(id,baseVersion){
  const entry=kbBrandReviewEntry(id),u=entry?.pendingUpdate;if(!u){toast('此更新已处理或不可审批');return;}
  if(u.brandUpdateIds?.length&&typeof buHasCorrectedUpdates==='function'&&buHasCorrectedUpdates(u.brandUpdateIds)){toast('建议含有已被更正的动态。请忽略此建议，再用有效内容重新提交。');return;}
+ if(u.brandUpdateIds?.length&&typeof buHasBackgroundUpdates==='function'&&buHasBackgroundUpdates(u.brandUpdateIds)){toast('建议含有背景类动态，不能存入知识库。');return;}
  if(entry.version!==baseVersion||u.baseVersion!==baseVersion||entry.tx!==u.baseText){toast('当前内容已变化，请重新核对更新');return;}
  const actor=U[currentUser()]?.n||currentUser(),at=new Date().toISOString();
  entry.updateReviews=entry.updateReviews||[];entry.updateReviews.push({...u,beforeText:entry.tx,approvedAt:at,decision:'approved',reviewer:actor});

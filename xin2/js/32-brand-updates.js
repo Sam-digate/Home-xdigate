@@ -1,11 +1,15 @@
 /* Brand updates prototype: session-only records, no API writes. */
-const BU_DATE='2026-11-23';
 const BU_RECOMMEND_DURATION=1600;
 const BU_CATEGORIES=[['sales','销售','Sales'],['product','产品','Product'],['price','价格','Price'],['stock','库存','Inventory'],['demand','客户需求','Customer needs'],['issue','问题','Issues'],['campaign','活动','Campaigns'],['competitor','竞品','Competitors'],['people','人员','People'],['other','其他','Other']];
+const BU_TYPES=[['rule','规则','Rule'],['background','背景','Background'],['fact','事实','Fact']];
 const BU_RECORDS=[];
 const buText=(zh,en)=>typeof LANG!=='undefined'&&LANG==='en'?en:zh;
 const buLang=value=>typeof value==='object'?buText(value.zh,value.en):value;
 const buActor=()=>U[currentUser()]?.n||currentUser();
+function buToday(){return new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});}
+function buRecordType(record){return record.type||(record.expires?'background':'fact');}
+function buTypeLabel(record){const [,zh,en]=BU_TYPES.find(([key])=>key===buRecordType(record));return buText(zh,en);}
+function buIsExpired(record,today=buToday()){return buRecordType(record)==='background'&&Boolean(record.expires&&record.expires<today);}
 function buCardLabel(entry){const key=entry.id.match(/k\d+$/)?.[0];return buText(entry.n,({k1:'Brand overview',k2:'Core positioning',k3:'Restricted terms',k4:'Audience insights',k5:'Brand expression',k6:'Competitor analysis',k7:'Product value',k8:'Brand positioning'})[key]||entry.n);}
 function buSlackDemoSources(brandId, index, date, speaker, text, extra){
  const baseUrl='https://example.com/brand-updates/'+brandId+'/';
@@ -37,28 +41,28 @@ function buInit(){
   {zh:'活动折扣以新版简报为准',en:'Updated campaign brief replaces earlier discount wording'}
  ];
  const seeds=[
-  ['sales','2026-11-23','Kai','agent','direct','11 月渠道复盘已完成，后续将分店铺记录销售表现和退货变化，并结合退货原因核对异常波动。这些变化将作为下一轮渠道复盘的参考。','The November channel review is complete. Track sales and returns by store, and review the reasons behind unusual changes in returns. Use these findings in the next channel review.',{extra:true}],
+  ['sales','2026-11-23','Kai','agent','direct','11 月渠道复盘已完成，后续将分店铺记录销售表现和退货变化，并结合退货原因核对异常波动。这些变化将作为下一轮渠道复盘的参考。','The November channel review is complete. Track sales and returns by store, and review the reasons behind unusual changes in returns. Use these findings in the next channel review.',{extra:true,type:'background',expires:'2026-11-30'}],
   ['demand','2026-11-23','Vera','agent','direct','客户咨询中多次出现服用时间与产品规格问题，建议补充到常见问题资料。','Customers repeatedly asked about usage timing and pack sizes. Consider adding these topics to the FAQ.',{suggested:true}],
-  ['stock','2026-11-23','Dave','agent','hearsay','渠道团队转述：主推规格预计在 11 月 26 日补货，需等待仓库确认。','The channel team reports a restock on November 26, pending warehouse confirmation.',{conflictGroup:'november-restock'}],
-  ['stock','2026-11-21','Otis','agent','direct','仓库周报记录主推规格预计在 11 月 28 日补货，与渠道排期存在差异。','The warehouse report lists a November 28 restock, which differs from the channel schedule.',{conflictGroup:'november-restock'}],
+  ['stock','2026-11-23','Dave','agent','hearsay','渠道团队转述：主推规格预计在 11 月 26 日补货，需等待仓库确认。','The channel team reports a restock on November 26, pending warehouse confirmation.',{conflictGroup:'november-restock',type:'background',expires:'2026-11-30'}],
+  ['stock','2026-11-21','Otis','agent','direct','仓库周报记录主推规格预计在 11 月 28 日补货，与渠道排期存在差异。','The warehouse report lists a November 28 restock, which differs from the channel schedule.',{conflictGroup:'november-restock',type:'background',expires:'2026-11-30'}],
   ['competitor','2026-11-20','Neil','agent','speculation','竞品近期增加组合装露出，可能在测试新的促销组合，尚未得到官方确认。','A competitor is featuring more bundles and may be testing a promotion. This is not officially confirmed.',{}],
-  ['price','2026-11-19','Sophie','human','direct','本次活动不再使用早期拟定的折扣口径，以更新后的活动简报为准。','The earlier discount wording is superseded by the updated campaign brief.',{}],
+  ['price','2026-11-19','Sophie','human','direct','本次活动不再使用早期拟定的折扣口径，以更新后的活动简报为准。','The earlier discount wording is superseded by the updated campaign brief.',{type:'rule'}],
   ['price','2026-11-18','Ariel','human','hearsay','早期排期曾考虑增加折扣，具体优惠尚待确认。','An earlier plan considered an additional discount, pending confirmation.',{correctedIndex:5}],
-  ['campaign','2026-11-10','Kai','agent','direct','活动预热期间优先使用已审核的产品资料，背景安排有效至 11 月 15 日。','Use reviewed product materials during the warm-up campaign. This context expires on November 15.',{expires:'2026-11-15'}],
-  ['campaign','2026-11-22','Sophie','human','direct','11 月末活动期间，店铺首页和渠道推广优先展示节日礼盒，并使用已审核的礼盒素材。活动结束后恢复日常陈列。','During the end-of-November campaign, feature holiday gift sets on storefronts and in channel promotions using approved assets. Restore the standard display after the campaign.',{expires:'2026-11-30'}]
+  ['campaign','2026-11-10','Kai','agent','direct','活动预热期间优先使用已审核的产品资料，背景安排有效至 11 月 15 日。','Use reviewed product materials during the warm-up campaign. This context expires on November 15.',{type:'background',expires:'2026-11-15'}],
+  ['campaign','2026-11-22','Sophie','human','direct','11 月末活动期间，店铺首页和渠道推广优先展示节日礼盒，并使用已审核的礼盒素材。活动结束后恢复日常陈列。','During the end-of-November campaign, feature holiday gift sets on storefronts and in channel promotions using approved assets. Restore the standard display after the campaign.',{type:'background',expires:'2026-11-30'}]
  ];
  const [channelReview,customerNeeds,...otherSeeds]=seeds.entries();
  for(const brand of KNOWLEDGE_BRANDS.filter(b=>['tn','a8oparis'].includes(b.id))){
   for(const [index,[category,date,author,writer,confidence,zh,en,extra]] of [customerNeeds,channelReview,...otherSeeds]){
    const id='bu-'+brand.id+'-'+index;
-   BU_RECORDS.push({id,brandId:brand.id,date,category,title:titles[index],text:{zh,en},author,owner:writer==='human'?(author==='Sophie'?'so':'ar'):null,writer,sponsor:writer==='agent'?'Sophie':null,confidence,suggested:!!extra.suggested,expires:extra.expires,conflictGroup:extra.conflictGroup,correctedBy:extra.correctedIndex!==undefined?'bu-'+brand.id+'-'+extra.correctedIndex:null,sources:buSlackDemoSources(brand.id,index,date,writer==='agent'&&index===0?'Sophie':author,{zh,en},extra.extra),history:[{at:date,actor:author,action:'created'},...(extra.conflictGroup?[{at:date,actor:'Vera',action:'conflict'}]:[]),...(extra.correctedIndex!==undefined?[{at:'2026-11-19',actor:'Sophie',action:'corrected'}]:[])]});
+   BU_RECORDS.push({id,brandId:brand.id,date,category,title:titles[index],text:{zh,en},author,owner:writer==='human'?(author==='Sophie'?'so':'ar'):null,writer,sponsor:writer==='agent'?'Sophie':null,confidence,type:extra.type||'fact',suggested:!!extra.suggested,expires:extra.expires,conflictGroup:extra.conflictGroup,correctedBy:extra.correctedIndex!==undefined?'bu-'+brand.id+'-'+extra.correctedIndex:null,sources:buSlackDemoSources(brand.id,index,date,writer==='agent'&&index===0?'Sophie':author,{zh,en},extra.extra),history:[{at:date,actor:author,action:'created'},...(extra.conflictGroup?[{at:date,actor:'Vera',action:'conflict'}]:[]),...(extra.correctedIndex!==undefined?[{at:'2026-11-19',actor:'Sophie',action:'corrected'}]:[])]});
   }
  }
 }
 function buState(){
  S.brandUpdates=S.brandUpdates||{};
  const id=knowledgeActiveBrand().id;
- return S.brandUpdates[id]||(S.brandUpdates[id]={days:'30',categories:BU_CATEGORIES.map(([key])=>key),status:'all',writer:'all',query:'',expired:false,selected:[]});
+ return S.brandUpdates[id]||(S.brandUpdates[id]={days:'30',type:'all',categories:BU_CATEGORIES.map(([key])=>key),status:'all',writer:'all',query:'',expired:false,selected:[]});
 }
 function buAccess(){return permissionHasPage('know.src')&&knowledgeActiveBrand().status!=='disabled';}
 function buRows(){return BU_RECORDS.filter(r=>r.brandId===knowledgeActiveBrand().id&&!r.deletedAt);}
@@ -66,6 +70,7 @@ function buFind(id){return buAccess()?buRows().find(r=>r.id===id):null;}
 function buCanDelete(record){return !!record&&buAccess()&&((record.writer==='human'&&record.owner===currentUser())||permissionCurrentMember()?.role==='admin');}
 function buCanEdit(record){return buCanDelete(record)&&!record.correctedBy;}
 function buHasCorrectedUpdates(ids){return ids.some(id=>BU_RECORDS.some(record=>record.id===id&&record.correctedBy));}
+function buHasBackgroundUpdates(ids){return BU_RECORDS.some(record=>ids.includes(record.id)&&buRecordType(record)==='background');}
 function buOriginalText(record){const text=esc(buLang(record.text));return record.correctedBy?`<s>${text}</s>`:text;}
 function buLog(record,action,detail=''){record.history.push({at:new Date().toISOString(),actor:buActor(),action,detail});}
 function buStatus(record){
@@ -78,12 +83,13 @@ function buStatus(record){
 }
 function buPromotionBlock(records){
  if(records.some(record=>record?.correctedBy))return buText('已被更正的动态不能存入知识库','Corrected updates cannot be saved to the knowledge base');
+ if(records.some(record=>record&&buRecordType(record)==='background'))return buText('背景类动态不能存入知识库','Background updates cannot be saved to the knowledge base');
  if(records.some(record=>record&&['pending','stored'].includes(buStatus(record))))return buText('所选动态中已有待审核或已入库的条目','Some selected updates are already pending review or in the knowledge base');
  return '';
 }
 function buVisible(){
- const f=buState(),cutoff=new Date(BU_DATE+'T12:00:00Z');cutoff.setUTCDate(cutoff.getUTCDate()-Number(f.days));
- return buRows().filter(r=>(f.expired||!r.expires||r.expires>=BU_DATE)&&(f.days==='all'||r.date>=cutoff.toISOString().slice(0,10))&&f.categories.includes(r.category)&&(f.status==='all'||(f.status==='conflict'?buConflictRecords(r).length>1:buStatus(r)===f.status))&&(f.writer==='all'||r.writer===f.writer)&&(!f.query||[buRecordTitle(r),buLang(r.text),r.author,r.sponsor,...r.sources.map(x=>x.url)].join(' ').toLowerCase().includes(f.query.toLowerCase()))).sort((a,b)=>b.date.localeCompare(a.date));
+ const today=buToday(),f=buState(),cutoff=new Date(today+'T12:00:00Z');cutoff.setUTCDate(cutoff.getUTCDate()-Number(f.days));
+ return buRows().filter(r=>(f.expired||!buIsExpired(r,today))&&(f.type==='all'||buRecordType(r)===f.type)&&(f.days==='all'||r.date>=cutoff.toISOString().slice(0,10))&&f.categories.includes(r.category)&&(f.status==='all'||(f.status==='conflict'?buConflictRecords(r).length>1:buStatus(r)===f.status))&&(f.writer==='all'||r.writer===f.writer)&&(!f.query||[buRecordTitle(r),buLang(r.text),r.author,r.sponsor,...r.sources.map(x=>x.url)].join(' ').toLowerCase().includes(f.query.toLowerCase()))).sort((a,b)=>b.date.localeCompare(a.date));
 }
 function buFilter(key,value){if(!buAccess())return;buState()[key]=value;buState().selected=[];render();}
 function buCategory(value,on){const f=buState();f.categoryOpen=true;buFilter('categories',on?[...new Set([...f.categories,value])]:f.categories.filter(v=>v!==value));}
@@ -128,7 +134,7 @@ function buSelectionHTML(rows, selected){
 function buConfidence(record){return ({direct:buText('明确说过','Direct statement'),hearsay:buText('转述','Second-hand'),speculation:buText('推测 · 未核实','Inference · Unverified')})[record.confidence];}
 function buStatusHTML(record){
  const status=buStatus(record),labels={suggested:buText('Vera 建议入库','Vera recommends adding'),pending:buText('入库待审核','Pending knowledge review'),stored:buText('已入库','Added to knowledge')};
- const showProposal=status&&!(record.correctedBy&&status==='suggested');
+ const showProposal=status&&!(status==='suggested'&&(record.correctedBy||buRecordType(record)==='background'));
  const conflictStatus=buConflictRecords(record).length>1?`<span class="chip bu-conflict">${buText('有冲突','Conflict')}</span>`:record.history.some(event=>event.action==='resolved')?`<span class="chip bu-stored">${buText('以此为准','Confirmed')}</span>`:'';
  return `${conflictStatus}${showProposal?`<button class="${status==='pending'?'kb-update-badge':'chip bu-stored'}" onclick="${status==='suggested'?`buPromotePrompt(['${record.id}'])`:`buOpenSuggestion('${record.id}')`}">${labels[status]}</button>`:''}`;
 }
@@ -245,12 +251,13 @@ function buOpenDetails(id, tab='details'){
  const canResolve=group.length===2&&group.every(buCanEdit);
  const details=record.correctedBy?buCorrectionHTML(record):`<p class="bu-body bu-detail-body">${buOriginalText(record)}</p>${buReadonlyMetadata(record,canResolve?buConflictAction(record,group):'')}${group.length===2?buRelatedConflictHTML(record,group,canResolve):''}`;
  const hasProposal=['pending','stored'].includes(buStatus(record));
+ const isBackground=buRecordType(record)==='background';
  drawer.innerHTML=`<section class="bu-editor bu-detail-drawer" data-record-id="${esc(record.id)}" data-tab="${esc(tab)}" role="dialog" aria-modal="true" aria-labelledby="bu-detail-title" data-i18n-skip>
   <header class="dw-h"><button class="ib" aria-label="${buText('关闭','Close')}" onclick="closeDw()"><i data-lucide="x" aria-hidden="true"></i></button><div><div class="ty">${esc(knowledgeActiveBrand().name)}</div><h3 id="bu-detail-title">${esc(buRecordTitle(record))}</h3></div></header>
   <div class="dw-tabs" role="group" aria-label="${buText('动态视图','Update views')}">${tabs.map(([key,label])=>`<button type="button" class="${tab===key?'on':''}" aria-pressed="${tab===key}" onclick="buOpenDetails('${record.id}','${key}')">${label}</button>`).join('')}</div>
   <div class="dw-b">${tab==='versions'?buHistoryHTML(record):details}</div>
   <footer class="dw-f">
-   ${hasProposal?`<button type="button" class="btn ghost" onclick="buOpenSuggestion('${record.id}')">${buText('查看入库建议','View knowledge proposal')}</button>`:record.correctedBy?'':`<button type="button" class="btn" onclick="buPromotePrompt(['${record.id}'])">${buText('存入知识库','Save to knowledge base')}</button>`}
+   ${hasProposal?`<button type="button" class="btn ghost" onclick="buOpenSuggestion('${record.id}')">${buText('查看入库建议','View knowledge proposal')}</button>`:record.correctedBy?'':isBackground?`<button type="button" class="btn bu-promote-btn" disabled title="${esc(buPromotionBlock([record]))}">${buText('存入知识库','Save to knowledge base')}</button>`:`<button type="button" class="btn" onclick="buPromotePrompt(['${record.id}'])">${buText('存入知识库','Save to knowledge base')}</button>`}
    ${buCanEdit(record)?`<button type="button" class="btn ghost" onclick="buOpenEditor('${record.id}')">${buText('编辑','Edit')}</button>`:''}
    ${buCanDelete(record)?`<button type="button" class="btn ghost bu-delete-btn" onclick="buDeletePrompt('${record.id}')">${buText('删除','Delete')}</button>`:''}
   </footer>
@@ -267,29 +274,47 @@ function buRecordTitle(record){
  return characters.length>72?characters.slice(0,72).join('')+'…':firstSentence;
 }
 function buRecordHTML(record){
- const category=BU_CATEGORIES.find(c=>c[0]===record.category),expired=record.expires&&record.expires<BU_DATE;
+ const category=BU_CATEGORIES.find(c=>c[0]===record.category),expired=buIsExpired(record);
  const sourceCount=record.sources.length;
  const author=record.sponsor?`${record.author} · ${buText('代','for')} ${record.sponsor}`:record.author;
- const metadata=[author,buText(`${sourceCount} 个来源`,`${sourceCount} ${sourceCount===1?'source':'sources'}`)];
+ const metadata=[author,buConfidence(record),buText(`${sourceCount} 个来源`,`${sourceCount} ${sourceCount===1?'source':'sources'}`)];
  const validity=record.expires?`<time class="chip ${expired?'mut':'dom'}" datetime="${esc(record.expires)}">${buText('有效至','Valid until')} ${esc(record.expires)}</time>`:'';
  const body=`<p class="bu-body">${buOriginalText(record)}</p><div class="bu-meta">${esc(metadata.join(' · '))}</div>`;
- return `<article class="bu-record ${expired?'bu-expired':''}"><div class="bu-record-top"><label class="bu-select"><input type="checkbox" aria-label="${buText('选择动态','Select update')} ${record.date}" ${buState().selected.includes(record.id)?'checked':''} onchange="buSelect('${record.id}',this.checked)"></label><h3 class="bu-record-title"><button type="button" onclick="buOpenDetails('${record.id}')">${esc(buRecordTitle(record))}</button></h3>${category?`<span class="chip dom">${buText(category[1],category[2])}</span>`:''}<span class="chip ${record.confidence==='speculation'?'bu-inference':'mut'}">${buConfidence(record)}</span>${validity}<div class="bu-badges">${buStatusHTML(record)}</div></div>${record.correctedBy?`<details class="bu-corrected"><summary>${buText('已被更正 · 展开原记录','Corrected · Show original')}</summary>${body}</details>`:body}</article>`;
+ return `<article class="bu-record ${expired?'bu-expired':''}"><div class="bu-record-top"><label class="bu-select"><input type="checkbox" aria-label="${buText('选择动态','Select update')} ${record.date}" ${buState().selected.includes(record.id)?'checked':''} onchange="buSelect('${record.id}',this.checked)"></label><h3 class="bu-record-title"><button type="button" onclick="buOpenDetails('${record.id}')">${esc(buRecordTitle(record))}</button></h3>${category?`<span class="chip dom">${buText(category[1],category[2])}</span>`:''}<span class="chip mut">${buTypeLabel(record)}</span>${validity}<div class="bu-badges">${buStatusHTML(record)}</div></div>${record.correctedBy?`<details class="bu-corrected"><summary>${buText('已被更正 · 展开原记录','Corrected · Show original')}</summary>${body}</details>`:body}</article>`;
 }
 function kBrandUpdates(){
  buInit();const f=buState(),rows=buVisible(),dates=[...new Set(rows.map(r=>r.date))];
- return `<div class="brand-updates" data-i18n-skip><div class="bar bu-filters"><label class="kc-search"><i data-lucide="search" aria-hidden="true"></i><input id="bu-search" type="search" value="${esc(f.query)}" placeholder="${buText('搜索动态或来源','Search updates or sources')}" aria-label="${buText('搜索品牌动态','Search brand updates')}" oninput="if(!event.isComposing)buSearch(this)" oncompositionend="buSearch(this)"></label><select aria-label="${buText('时间范围','Date range')}" onchange="buFilter('days',this.value)">${[['7','近 7 天','Last 7 days'],['30','近 30 天','Last 30 days'],['90','近 90 天','Last 90 days'],['all','全部时间','All time']].map(([value,zh,en])=>`<option value="${value}" ${f.days===value?'selected':''}>${buText(zh,en)}</option>`).join('')}</select><details class="bu-category-filter" ${f.categoryOpen?'open':''} ontoggle="buCategoryMenuToggled(this)"><summary>${f.categories.length===BU_CATEGORIES.length?buText('全部分类','All categories'):buText('分类','Category')+' · '+f.categories.length}</summary><div><label class="bu-category-all"><input type="checkbox" ${f.categories.length===BU_CATEGORIES.length?'checked':''} onchange="buSetAllCategories(this.checked)">${buText('全部分类','All categories')}</label>${BU_CATEGORIES.map(([key,zh,en])=>`<label><input type="checkbox" ${f.categories.includes(key)?'checked':''} onchange="buCategory('${key}',this.checked)">${buText(zh,en)}</label>`).join('')}</div></details><select aria-label="${buText('动态状态','Update status')}" onchange="buFilter('status',this.value)">${[['all','全部状态','All statuses'],['conflict','有冲突','Conflicts'],['suggested','Vera 建议入库','Vera recommendations'],['pending','入库待审核','Pending knowledge review'],['stored','已入库','Added to knowledge']].map(([value,zh,en])=>`<option value="${value}" ${f.status===value?'selected':''}>${buText(zh,en)}</option>`).join('')}</select><select aria-label="${buText('写入者','Author type')}" onchange="buFilter('writer',this.value)">${[['all','全部写入者','All authors'],['agent','Agent','Agent'],['human','人','Human']].map(([value,zh,en])=>`<option value="${value}" ${f.writer===value?'selected':''}>${buText(zh,en)}</option>`).join('')}</select><label class="bu-expired-toggle"><input type="checkbox" ${f.expired?'checked':''} onchange="buFilter('expired',this.checked)">${buText('显示已到期','Show expired')}</label><span class="spacer"></span><button class="btn sm" onclick="buOpenEditor()"><i data-lucide="plus" aria-hidden="true"></i>${buText('新增一条','Add update')}</button></div>${buSelectionHTML(rows,f.selected)}${dates.map(date=>`<section class="bu-date-group"><h2>${date}<span>${rows.filter(r=>r.date===date).length} ${buText('条','updates')}</span></h2>${rows.filter(r=>r.date===date).map(buRecordHTML).join('')}</section>`).join('')||`<div class="allclear">${buText('没有符合条件的品牌动态。','No brand updates match these filters.')}</div>`}</div>`;
+ // TODO: Remove this demo notice before production launch.
+ const intakeNote=`<p class="note bu-intake-note">${buText('仅事实和规则可提交入库审核，背景仅供参考。','Only facts and rules can be submitted for knowledge base review. Background updates are for reference.')}</p>`;
+ return `<div class="brand-updates" data-i18n-skip><div class="bar bu-filters"><label class="kc-search"><i data-lucide="search" aria-hidden="true"></i><input id="bu-search" type="search" value="${esc(f.query)}" placeholder="${buText('搜索动态或来源','Search updates or sources')}" aria-label="${buText('搜索品牌动态','Search brand updates')}" oninput="if(!event.isComposing)buSearch(this)" oncompositionend="buSearch(this)"></label><select aria-label="${buText('时间范围','Date range')}" onchange="buFilter('days',this.value)">${[['7','近 7 天','Last 7 days'],['30','近 30 天','Last 30 days'],['90','近 90 天','Last 90 days'],['all','全部时间','All time']].map(([value,zh,en])=>`<option value="${value}" ${f.days===value?'selected':''}>${buText(zh,en)}</option>`).join('')}</select><select aria-label="${buText('动态类型','Update type')}" onchange="buFilter('type',this.value)"><option value="all">${buText('全部类型','All types')}</option>${BU_TYPES.map(([key,zh,en])=>`<option value="${key}" ${f.type===key?'selected':''}>${buText(zh,en)}</option>`).join('')}</select><details class="bu-category-filter" ${f.categoryOpen?'open':''} ontoggle="buCategoryMenuToggled(this)"><summary>${f.categories.length===BU_CATEGORIES.length?buText('全部分类','All categories'):buText('分类','Category')+' · '+f.categories.length}</summary><div><label class="bu-category-all"><input type="checkbox" ${f.categories.length===BU_CATEGORIES.length?'checked':''} onchange="buSetAllCategories(this.checked)">${buText('全部分类','All categories')}</label>${BU_CATEGORIES.map(([key,zh,en])=>`<label><input type="checkbox" ${f.categories.includes(key)?'checked':''} onchange="buCategory('${key}',this.checked)">${buText(zh,en)}</label>`).join('')}</div></details><select aria-label="${buText('动态状态','Update status')}" onchange="buFilter('status',this.value)">${[['all','全部状态','All statuses'],['conflict','有冲突','Conflicts'],['suggested','Vera 建议入库','Vera recommendations'],['pending','入库待审核','Pending knowledge review'],['stored','已入库','Added to knowledge']].map(([value,zh,en])=>`<option value="${value}" ${f.status===value?'selected':''}>${buText(zh,en)}</option>`).join('')}</select><select aria-label="${buText('写入者','Author type')}" onchange="buFilter('writer',this.value)">${[['all','全部写入者','All authors'],['agent','Agent','Agent'],['human','人','Human']].map(([value,zh,en])=>`<option value="${value}" ${f.writer===value?'selected':''}>${buText(zh,en)}</option>`).join('')}</select><label class="bu-expired-toggle"><input type="checkbox" ${f.expired?'checked':''} onchange="buFilter('expired',this.checked)">${buText('显示已到期','Show expired')}</label><span class="spacer"></span><button class="btn sm" onclick="buOpenEditor()"><i data-lucide="plus" aria-hidden="true"></i>${buText('新增一条','Add update')}</button></div>${intakeNote}${buSelectionHTML(rows,f.selected)}${dates.map(date=>`<section class="bu-date-group"><h2>${date}<span>${rows.filter(r=>r.date===date).length} ${buText('条','updates')}</span></h2>${rows.filter(r=>r.date===date).map(buRecordHTML).join('')}</section>`).join('')||`<div class="allclear">${buText('没有符合条件的品牌动态。','No brand updates match these filters.')}</div>`}</div>`;
 }
 function buReadonlyMetadata(record,sourceAction=''){
  const category=BU_CATEGORIES.find(c=>c[0]===record.category);
- return `<section class="bu-detail-meta">${[[buText('发生日期','Event date'),record.date],[buText('分类','Category'),category?buText(category[1],category[2]):record.category],[buText('信息性质','Statement type'),buConfidence(record)]].map(([label,value])=>`<div><span>${label}</span><span>${esc(value)}</span></div>`).join('')}</section><section class="bu-detail-sources"><b>${buText('来源','Sources')}</b>${record.sources.map((source,index)=>buSourceHTML(source,index,index===0?sourceAction:'')).join('')}</section>`;
+ const fields=[[buText('发生日期','Event date'),record.date],[buText('分类','Category'),category?buText(category[1],category[2]):record.category],[buText('类型','Type'),buTypeLabel(record)],[buText('信息性质','Statement type'),buConfidence(record)]];
+ if(record.expires)fields.push([buText('有效至','Valid until'),record.expires]);
+ return `<section class="bu-detail-meta">${fields.map(([label,value])=>`<div><span>${label}</span><span>${esc(value)}</span></div>`).join('')}</section><section class="bu-detail-sources"><b>${buText('来源','Sources')}</b>${record.sources.map((source,index)=>buSourceHTML(source,index,index===0?sourceAction:'')).join('')}</section>`;
+}
+function buEditorTypeFields(){
+ return `<div class="bu-editor-grid">
+  <div class="fld"><label for="bu-type">${buText('类型','Type')}</label><select id="bu-type" onchange="buSyncExpiryField()">${BU_TYPES.map(([key,zh,en])=>`<option value="${key}" ${key==='fact'?'selected':''}>${buText(zh,en)}</option>`).join('')}</select></div>
+  <div id="bu-expiry-field" class="fld" hidden><label for="bu-expiry">${buText('有效至','Valid until')}</label><input id="bu-expiry" type="date" disabled></div>
+ </div>`;
+}
+function buSyncExpiryField(){
+ const background=$('bu-type').value==='background',expiry=$('bu-expiry');
+ $('bu-expiry-field').hidden=!background;
+ expiry.disabled=!background;
+ expiry.required=background;
+ expiry.min=$('bu-date').value;
 }
 function buOpenEditor(id=null){
  if(!buAccess())return;const record=id?buFind(id):null;if(id&&!buCanEdit(record))return;
  if(S.buDraft){buCloseEditor();return;}
  const fromDetails=id&&$('dw').classList.contains('on')&&$('dw').querySelector('.bu-detail-drawer')?.dataset.recordId===id;
  if(!fromDetails)closeDw();
- S.buDraft={brandId:knowledgeActiveBrand().id,id,owner:currentUser(),fromDetails};
- $('dw').innerHTML=`<section class="bu-editor" data-i18n-skip role="dialog" aria-modal="true" aria-label="${buText('品牌动态','Brand update')}"><header class="dw-h"><button class="ib" aria-label="${buText('关闭','Close')}" onclick="buCloseEditor()"><i data-lucide="x" aria-hidden="true"></i></button><div><div class="ty">${esc(knowledgeActiveBrand().name)}</div><h3>${record?buText('编辑动态','Edit update'):buText('新增一条','Add update')}</h3></div></header><div class="dw-b"><div class="fld"><label for="bu-content">${buText('内容','Content')}</label><textarea id="bu-content" maxlength="500" rows="6" placeholder="${buText('记录发生的事，最多 500 字','Describe the event in up to 500 characters')}">${esc(record?buLang(record.text):'')}</textarea></div>${record?buReadonlyMetadata(record):`<div class="bu-editor-grid"><div class="fld"><label for="bu-date">${buText('发生日期','Event date')}</label><input id="bu-date" type="date" value="${record?.date||BU_DATE}"></div><div class="fld"><label for="bu-category">${buText('分类','Category')}</label><select id="bu-category">${BU_CATEGORIES.map(([key,zh,en])=>`<option value="${key}" ${record?.category===key?'selected':''}>${buText(zh,en)}</option>`).join('')}</select></div></div><div class="fld"><label for="bu-confidence">${buText('信息性质','Statement type')}</label><select id="bu-confidence">${[['direct','明确说过','Direct statement'],['hearsay','转述','Second-hand'],['speculation','推测','Inference']].map(([key,zh,en])=>`<option value="${key}" ${record?.confidence===key?'selected':''}>${buText(zh,en)}</option>`).join('')}</select></div><div class="fld"><label for="bu-links">${buText('来源链接','Source links')}</label><textarea id="bu-links" rows="3" placeholder="${buText('每行一个 http 或 https 链接','One http or https URL per line')}">${esc(record?record.sources.map(s=>s.url).join('\n'):'')}</textarea></div>`}<p id="bu-error" class="bu-error" role="alert"></p></div><footer class="dw-f"><button class="btn" onclick="buSave()">${buText('保存','Save')}</button><button class="btn ghost" onclick="buCloseEditor(true)">${buText('取消','Cancel')}</button></footer></section>`;
+ const defaultDate=buToday();
+ S.buDraft={brandId:knowledgeActiveBrand().id,id,owner:currentUser(),fromDetails,defaultDate};
+ $('dw').innerHTML=`<section class="bu-editor" data-i18n-skip role="dialog" aria-modal="true" aria-label="${buText('品牌动态','Brand update')}"><header class="dw-h"><button class="ib" aria-label="${buText('关闭','Close')}" onclick="buCloseEditor()"><i data-lucide="x" aria-hidden="true"></i></button><div><div class="ty">${esc(knowledgeActiveBrand().name)}</div><h3>${record?buText('编辑动态','Edit update'):buText('新增一条','Add update')}</h3></div></header><div class="dw-b"><div class="fld"><label for="bu-content">${buText('内容','Content')}</label><textarea id="bu-content" maxlength="500" rows="6" placeholder="${buText('记录发生的事，最多 500 字','Describe the event in up to 500 characters')}">${esc(record?buLang(record.text):'')}</textarea></div>${record?buReadonlyMetadata(record):`<div class="bu-editor-grid"><div class="fld"><label for="bu-date">${buText('发生日期','Event date')}</label><input id="bu-date" type="date" value="${defaultDate}" onchange="buSyncExpiryField()"></div><div class="fld"><label for="bu-category">${buText('分类','Category')}</label><select id="bu-category">${BU_CATEGORIES.map(([key,zh,en])=>`<option value="${key}" ${record?.category===key?'selected':''}>${buText(zh,en)}</option>`).join('')}</select></div></div>${buEditorTypeFields()}<div class="fld"><label for="bu-confidence">${buText('信息性质','Statement type')}</label><select id="bu-confidence">${[['direct','明确说过','Direct statement'],['hearsay','转述','Second-hand'],['speculation','推测','Inference']].map(([key,zh,en])=>`<option value="${key}" ${record?.confidence===key?'selected':''}>${buText(zh,en)}</option>`).join('')}</select></div><div class="fld"><label for="bu-links">${buText('来源链接','Source links')}</label><textarea id="bu-links" rows="3" placeholder="${buText('每行一个 http 或 https 链接','One http or https URL per line')}">${esc(record?record.sources.map(s=>s.url).join('\n'):'')}</textarea></div>`}<p id="bu-error" class="bu-error" role="alert"></p></div><footer class="dw-f"><button class="btn" onclick="buSave()">${buText('保存','Save')}</button><button class="btn ghost" onclick="buCloseEditor(true)">${buText('取消','Cancel')}</button></footer></section>`;
  $('dw').classList.add('on');$('scrim').classList.add('on');kpIcons();$('bu-content')?.focus();
 }
 function buHandleClose(){if(!S.buDraft||!$('dw').querySelector?.('.bu-editor'))return false;buCloseEditor();return true;}
@@ -302,20 +327,25 @@ function buFinishEditor(returnToDetails){
 function buCloseEditor(returnToDetails=false){
  const d=S.buDraft;if(!d){closeDw();return;}
  const old=d.id?buFind(d.id):null;
- const dirty=$('bu-content')&&($('bu-content').value!==(old?buLang(old.text):'')||(!old&&($('bu-date').value!==BU_DATE||$('bu-category').value!==(old?.category||'sales')||$('bu-confidence').value!==(old?.confidence||'direct')||$('bu-links').value!=='')));
+ const dirty=$('bu-content')&&($('bu-content').value!==(old?buLang(old.text):'')||(!d.id&&($('bu-date').value!==d.defaultDate||$('bu-category').value!=='sales'||$('bu-confidence').value!=='direct'||$('bu-type').value!=='fact'||$('bu-links').value!=='')));
  if(!dirty){buFinishEditor(returnToDetails);return;}
  kpDialog(buText('放弃未保存的修改？','Discard unsaved changes?'),buText('本次修改不会保存。','Your unsaved changes will be lost.'),`<button class="btn ghost" onclick="closeMod()">${buText('继续编辑','Continue editing')}</button><button class="btn" onclick="closeMod();buFinishEditor(${returnToDetails})">${buText('放弃修改','Discard changes')}</button>`);
 }
+function buValidDate(date){return /^\d{4}-\d{2}-\d{2}$/.test(date)&&!Number.isNaN(Date.parse(date))&&new Date(date).toISOString().slice(0,10)===date;}
 function buSave(){
  const d=S.buDraft;if(!d||d.owner!==currentUser()||d.brandId!==knowledgeActiveBrand().id||!buAccess())return;
  const old=d.id?buFind(d.id):null;if(d.id&&!buCanEdit(old))return;
  const content=$('bu-content').value.trim(),date=old?old.date:$('bu-date').value,category=old?old.category:$('bu-category').value,confidence=old?old.confidence:$('bu-confidence').value;
+ const type=old?buRecordType(old):$('bu-type').value;
+ const expires=type==='background'?(old?old.expires:$('bu-expiry').value):undefined;
+ if(!BU_TYPES.some(([key])=>key===type)){$('bu-error').textContent=buText('请选择动态类型。','Choose an update type.');return;}
+ if(!old&&type==='background'&&(!buValidDate(expires)||expires<date)){$('bu-error').textContent=buText('请选择有效期，日期不能早于发生日期。','Choose a valid expiry date on or after the event date.');return;}
  let links;try{links=old?old.sources.map(source=>({...source})):[...new Set($('bu-links').value.split('\n').map(x=>x.trim()).filter(Boolean))].map(value=>{const url=new URL(value);if(!['http:','https:'].includes(url.protocol)||url.username||url.password)throw new Error();return {url:url.href};});}catch{$('bu-error').textContent=buText('请输入有效的来源链接。','Enter valid source URLs.');return;}
- if(!content||Array.from(content).length>500||!/^\d{4}-\d{2}-\d{2}$/.test(date)||Number.isNaN(Date.parse(date))||new Date(date).toISOString().slice(0,10)!==date||!BU_CATEGORIES.some(c=>c[0]===category)||!['direct','hearsay','speculation'].includes(confidence)||!links.length||links.length>10){$('bu-error').textContent=buText('请填写内容、有效日期、分类及 1–10 个来源链接。','Provide content, a valid date, a category and 1–10 source URLs.');return;}
- const duplicate=!old&&buRows().find(r=>r.date===date&&buLang(r.text).replace(/\s/g,'')===content.replace(/\s/g,''));
+ if(!content||Array.from(content).length>500||!buValidDate(date)||!BU_CATEGORIES.some(c=>c[0]===category)||!['direct','hearsay','speculation'].includes(confidence)||!links.length||links.length>10){$('bu-error').textContent=buText('请填写内容、有效日期、分类及 1–10 个来源链接。','Provide content, a valid date, a category and 1–10 source URLs.');return;}
+ const duplicate=!old&&buRows().find(r=>r.date===date&&buRecordType(r)===type&&r.expires===expires&&buLang(r.text).replace(/\s/g,'')===content.replace(/\s/g,''));
  if(duplicate){duplicate.sources=[...new Map([...duplicate.sources,...links].map(s=>[s.url,s])).values()];buLog(duplicate,'merged');}
  else if(old){buLog(old,'edited',buLang(old.text));old.history.at(-1).before={text:old.text,date:old.date,category:old.category,confidence:old.confidence,sources:old.sources.map(source=>({...source}))};if(content!==buLang(old.text))delete old.title;Object.assign(old,{text:{zh:content,en:content},date,category,confidence,sources:links});}
- else BU_RECORDS.unshift({id:'bu-user-'+Date.now(),brandId:d.brandId,date,category,confidence,text:{zh:content,en:content},author:buActor(),owner:currentUser(),writer:'human',sources:links,history:[{at:new Date().toISOString(),actor:buActor(),action:'created'}]});
+ else BU_RECORDS.unshift({id:'bu-user-'+Date.now(),brandId:d.brandId,date,category,confidence,type,expires,text:{zh:content,en:content},author:buActor(),owner:currentUser(),writer:'human',sources:links,history:[{at:new Date().toISOString(),actor:buActor(),action:'created'}]});
  buFinishEditor(true);render();toast(buText('品牌动态已保存','Brand update saved'));
 }
 function buDeletePrompt(id){
